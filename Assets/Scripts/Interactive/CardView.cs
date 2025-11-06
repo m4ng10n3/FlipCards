@@ -52,8 +52,71 @@ public class CardView : MonoBehaviour
         le.preferredWidth = preferredSize.x;
         le.preferredHeight = preferredSize.y;
 
+        EnsureRuntimeUI();
         // Safe default: hide highlight
         SetHighlight(false);
+    }
+
+    void EnsureRuntimeUI()
+    {
+        // 1) Overlay di highlight se assente (figlio a pieno schermo semitrasparente)
+        if (highlight == null)
+        {
+            var hlGO = new GameObject("Highlight", typeof(RectTransform), typeof(Image));
+            hlGO.transform.SetParent(transform, false);
+            var rt = hlGO.GetComponent<RectTransform>();
+            rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one;
+            rt.offsetMin = Vector2.zero; rt.offsetMax = Vector2.zero;
+            var img = hlGO.GetComponent<Image>();
+            img.raycastTarget = false;
+            img.color = new Color(1f, 0.9f, 0.2f, 0.25f);
+            highlight = img;
+        }
+
+        // 2) Layout e testi base se non assegnati
+#if TMP_PRESENT
+    bool hasText = (nameTMP != null) || (nameText != null);
+#else
+        bool hasText = (nameText != null);
+#endif
+        if (!hasText)
+        {
+            // Contenitore per testi
+            var content = new GameObject("Content", typeof(RectTransform));
+            content.transform.SetParent(transform, false);
+            var crt = content.GetComponent<RectTransform>();
+            crt.anchorMin = new Vector2(0, 0);
+            crt.anchorMax = new Vector2(1, 1);
+            crt.offsetMin = new Vector2(8, 8);
+            crt.offsetMax = new Vector2(-8, -8);
+
+            // Vertical layout
+            var vlg = content.AddComponent<VerticalLayoutGroup>();
+            vlg.childAlignment = TextAnchor.UpperLeft;
+            vlg.childControlHeight = true;
+            vlg.childForceExpandHeight = false;
+            vlg.spacing = 4;
+
+            // Helper per creare un Text legacy
+            Text Make(string n, int size, FontStyle style = FontStyle.Normal)
+            {
+                var go = new GameObject(n, typeof(RectTransform), typeof(Text));
+                go.transform.SetParent(content.transform, false);
+                var t = go.GetComponent<Text>();
+                t.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+                t.fontSize = size;
+                t.fontStyle = style;
+                t.alignment = TextAnchor.UpperLeft;
+                t.horizontalOverflow = HorizontalWrapMode.Wrap;
+                t.verticalOverflow = VerticalWrapMode.Truncate;
+                t.raycastTarget = false;
+                return t;
+            }
+
+            nameText = Make("Name", 18, FontStyle.Bold);
+            sideText = Make("Side", 14);
+            hpText = Make("HP", 14);
+        }
     }
 
     // Called by GameManager after creating CardInstance

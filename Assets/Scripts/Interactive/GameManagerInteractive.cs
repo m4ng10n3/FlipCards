@@ -41,6 +41,11 @@ public class GameManagerInteractive : MonoBehaviour
 
     void Start()
     {
+
+        if (SelectionManager.Instance == null)
+        {
+            var sm = new GameObject("SelectionManager").AddComponent<SelectionManager>();
+        }
         rng = new System.Random(seed);
         player = new PlayerState("Player", playerBaseAP);
         ai = new PlayerState("AI", aiBaseAP);
