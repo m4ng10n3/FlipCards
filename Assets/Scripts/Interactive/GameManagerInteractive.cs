@@ -5,9 +5,25 @@ using System.Linq;
 
 public class GameManagerInteractive : MonoBehaviour
 {
-    [Header("Prefabs and Roots")]
-    public GameObject playerCardPrefab;
-    public GameObject aiCardPrefab;
+    // ====== PREFAB BINDINGS (fallback SOLO se non trovi carte in scena) ======
+    [System.Serializable]
+    public class PrefabCardBinding
+    {
+        [Tooltip("Prefab della carta (deve avere CardView + CardDefinitionHolder)")]
+        public GameObject prefab;
+
+        [Min(1), Tooltip("Quante copie istanziare di questo prefab")]
+        public int count = 1;
+    }
+
+    // ====== TEMPLATE DA SCENA ======
+    class SceneCardTemplate
+    {
+        public GameObject template;   // clone disattivato, usato come sorgente per Instantiate
+        public CardDefinition def;
+    }
+
+    [Header("Roots")]
     public Transform playerBoardRoot;
     public Transform aiBoardRoot;
 
@@ -16,100 +32,192 @@ public class GameManagerInteractive : MonoBehaviour
     public Button btnForceFlip;
     public Button btnAttack;
     public Button btnEndTurn;
-    public Text logText; // if you use TMP, change to TMP_Text
+    public Text logText; // se usi TMP, cambia in TMP_Text
 
     [Header("Match parameters")]
     public int turns = 10;
     public int playerBaseAP = 3;
-    public int aiBaseAP = 3; // AI gets +1 AP inside its turn
-    public int initialBoardCount = 3;
+    public int aiBaseAP = 3; // bonus AI gestito in GameRules se previsto
     public int seed = 12345;
 
-    [Header("Decks")]
-    public bool useDemoDecks = false;
-    public List<CardDefinition> playerDeck;
-    public List<CardDefinition> aiDeck;
+    [Header("Start Constraints")]
+    [Min(1)] public int minCardsPerSide = 3;
 
+    [Header("Prefab Bindings (usati solo se NON troviamo carte in scena)")]
+    public List<PrefabCardBinding> playerCards = new List<PrefabCardBinding>();
+    public List<PrefabCardBinding> aiCards = new List<PrefabCardBinding>();
+
+    // ====== RUNTIME ======
     System.Random rng;
     PlayerState player, ai;
     int currentTurn = 1;
     bool playerPhase = true;
     bool matchEnded = false;
 
+    // mapping vista <-> istanza di gioco
     Dictionary<CardInstance, CardView> viewByInstance = new Dictionary<CardInstance, CardView>();
     Dictionary<CardView, CardInstance> instanceByView = new Dictionary<CardView, CardInstance>();
 
+    // liste locali
+    List<CardView> playerViews = new List<CardView>();
+    List<CardView> aiViews = new List<CardView>();
+
     void Start()
     {
-
+        // Singleton SelectionManager
         if (SelectionManager.Instance == null)
+            new GameObject("SelectionManager").AddComponent<SelectionManager>();
+
+        // Validazioni base
+        if (playerBoardRoot == null || aiBoardRoot == null)
         {
-            var sm = new GameObject("SelectionManager").AddComponent<SelectionManager>();
+            Debug.LogError("Assegna playerBoardRoot e aiBoardRoot nell'Inspector.");
+            enabled = false; return;
         }
+
         rng = new System.Random(seed);
         player = new PlayerState("Player", playerBaseAP);
         ai = new PlayerState("AI", aiBaseAP);
 
-        // Validate inputs
-        if (!useDemoDecks)
+        // 1) Prova a costruire dai TEMPLATE in SCENA (con CardDefinitionHolder)
+        BuildSideFromSceneOrBindings(player, playerBoardRoot, playerViews, playerCards, "PLAYER");
+        BuildSideFromSceneOrBindings(ai, aiBoardRoot, aiViews, aiCards, "AI");
+
+        // 2) Controllo minimo per lato
+        if (playerViews.Count < minCardsPerSide || aiViews.Count < minCardsPerSide)
         {
-            if (playerCardPrefab == null || aiCardPrefab == null)
-            {
-                Debug.LogError("Assign playerCardPrefab and aiCardPrefab in Inspector.");
-                enabled = false; return;
-            }
-            if (playerDeck == null || playerDeck.Count == 0 || aiDeck == null || aiDeck.Count == 0)
-            {
-                Debug.LogError("Assign playerDeck and aiDeck with CardDefinition assets, or enable useDemoDecks.");
-                enabled = false; return;
-            }
-        }
-        else
-        {
-            CreateDemoDecksIfEmpty();
-            if (playerCardPrefab == null) playerCardPrefab = CreateFallbackPrefab("Player Card");
-            if (aiCardPrefab == null) aiCardPrefab = playerCardPrefab;
+            Debug.LogError($"Not enough cards to start. Player:{playerViews.Count} / AI:{aiViews.Count} (min {minCardsPerSide})");
+            matchEnded = true; // blocco il match
+            return;
         }
 
-        // Spawn initial boards from assigned decks
-        SpawnInitial(player, playerDeck, playerCardPrefab, playerBoardRoot);
-        SpawnInitial(ai, aiDeck, aiCardPrefab, aiBoardRoot);
+        // UI binding
+        if (btnFlipRandom) btnFlipRandom.onClick.AddListener(OnFlipRandom);
+        if (btnForceFlip) btnForceFlip.onClick.AddListener(OnForceFlip);
+        if (btnAttack) btnAttack.onClick.AddListener(OnAttack);
+        if (btnEndTurn) btnEndTurn.onClick.AddListener(OnEndTurn);
 
-        // Bind UI
-        btnFlipRandom.onClick.AddListener(OnFlipRandom);
-        btnForceFlip.onClick.AddListener(OnForceFlip);
-        btnAttack.onClick.AddListener(OnAttack);
-        btnEndTurn.onClick.AddListener(OnEndTurn);
-
-        AppendLog("=== MATCH START ===");
-        AppendLog("Player deck: " + playerDeck.Count + " | AI deck: " + aiDeck.Count);
+        AppendLog("=== MATCH START (Scene templates -> runtime instances) ===");
         UpdateAllViews();
         UpdateHUD();
     }
 
-    void SpawnInitial(PlayerState owner, List<CardDefinition> deck, GameObject prefab, Transform root)
+    // ====== COSTRUZIONE LATO ======
+
+    void BuildSideFromSceneOrBindings(PlayerState owner,
+                                      Transform root,
+                                      List<CardView> outViews,
+                                      List<PrefabCardBinding> fallbackBindings,
+                                      string label)
     {
-        int n = Mathf.Min(initialBoardCount, deck.Count);
-        for (int i = 0; i < n; i++)
-            AddCardToBoard(owner, deck[i], prefab, root);
+        // A) prova da scena
+        var templates = CaptureTemplatesAndClear(root, label);
+        if (templates.Count > 0)
+        {
+            SpawnFromTemplates(owner, templates, root, outViews);
+            // pulizia template clonati
+            foreach (var t in templates)
+                if (t.template != null) Destroy(t.template);
+            return;
+        }
+
+        // B) fallback da bindings Inspector (usa SEMPRE il CardDefinitionHolder del prefab)
+        SpawnFromBindings(owner, fallbackBindings, root, outViews);
     }
 
-    void AddCardToBoard(PlayerState owner, CardDefinition def, GameObject prefab, Transform root)
+    // Trova i figli con CardView + CardDefinitionHolder, crea un CLONE disattivato come template e distrugge l’originale
+    List<SceneCardTemplate> CaptureTemplatesAndClear(Transform root, string label)
+    {
+        var list = new List<SceneCardTemplate>();
+        if (root == null) return list;
+
+        var toProcess = new List<Transform>();
+        foreach (Transform t in root) toProcess.Add(t);
+
+        foreach (var t in toProcess)
+        {
+            var view = t.GetComponent<CardView>();
+            var holder = t.GetComponent<CardDefinitionHolder>();
+            if (view == null || holder == null || holder.definition == null)
+            {
+                // ignora elementi non-carta
+                continue;
+            }
+
+            // crea un clone disattivato da usare come template di instanziazione
+            var template = Instantiate(t.gameObject);
+            template.name = t.gameObject.name + " (TEMPLATE)";
+            template.SetActive(false);
+
+            list.Add(new SceneCardTemplate { template = template, def = holder.definition });
+
+            // rimuovi l'originale dalla scena (effetto "scompare all'avvio")
+            Destroy(t.gameObject);
+        }
+
+        if (list.Count > 0)
+            Debug.Log($"[{label}] Found {list.Count} scene card templates.");
+
+        return list;
+    }
+
+    void SpawnFromTemplates(PlayerState owner, List<SceneCardTemplate> templates, Transform root, List<CardView> outViews)
+    {
+        foreach (var t in templates)
+        {
+            if (t.template == null || t.def == null) continue;
+            AddCardFromTemplate(owner, t.def, t.template, root, outViews);
+        }
+    }
+
+    void AddCardFromTemplate(PlayerState owner, CardDefinition def, GameObject template, Transform root, List<CardView> outViews)
     {
         var ci = new CardInstance(def, rng);
         owner.board.Add(ci);
 
-        var go = Instantiate(prefab, root);
+        var go = Instantiate(template, root);
+        go.name = template.name.Replace(" (TEMPLATE)", "");
+        go.SetActive(true);
+
         var view = go.GetComponent<CardView>();
-        if (view == null)
-        {
-            Debug.LogError("CardPrefab must have CardView component.");
-            return;
-        }
+        if (view == null) { Debug.LogError("Template di carta senza CardView."); Destroy(go); return; }
+
         view.Init(this, owner, ci);
         viewByInstance[ci] = view;
         instanceByView[view] = ci;
+        outViews.Add(view);
     }
+
+    // ====== PREFAB BINDINGS (fallback se non ci sono carte in scena) ======
+
+    void SpawnFromBindings(PlayerState owner, List<PrefabCardBinding> bindings, Transform root, List<CardView> outViews)
+    {
+        if (bindings == null) return;
+
+        foreach (var b in bindings)
+        {
+            if (b == null || b.count <= 0 || b.prefab == null)
+            {
+                Debug.LogWarning("Binding non valido: assegna Prefab e Count >= 1.");
+                continue;
+            }
+
+            // la definizione VIENE SEMPRE dal CardDefinitionHolder del prefab
+            var holder = b.prefab.GetComponent<CardDefinitionHolder>();
+            if (holder == null || holder.definition == null)
+            {
+                Debug.LogError($"Il prefab '{b.prefab.name}' non ha CardDefinitionHolder o la definition è nulla.");
+                continue;
+            }
+
+            for (int i = 0; i < b.count; i++)
+            {
+                AddCardFromTemplate(owner, holder.definition, b.prefab, root, outViews);
+            }
+        }
+    }
+
+    // ====== REFRESH / HUD ======
 
     public void UpdateAllViews()
     {
@@ -124,6 +232,8 @@ public class GameManagerInteractive : MonoBehaviour
         string status = "Player HP:" + player.hp + " AP:" + player.actionPoints + "  ||  AI HP:" + ai.hp + " AP:" + ai.actionPoints;
         AppendLog(header + "  " + status);
     }
+
+    // ====== AZIONI UI ======
 
     void OnFlipRandom()
     {
@@ -227,8 +337,8 @@ public class GameManagerInteractive : MonoBehaviour
         {
             if (!ci.alive)
             {
-                var view = viewByInstance[ci];
-                view.Refresh();
+                if (viewByInstance.TryGetValue(ci, out var view))
+                    view.Refresh();
             }
         }
     }
@@ -253,57 +363,7 @@ public class GameManagerInteractive : MonoBehaviour
         AppendLog("Score: PlayerHP " + player.hp + " vs AIHP " + ai.hp + " | Diff (AI-Player) = " + diff + " -> " + result);
     }
 
-    // Optional: create demo decks at runtime if requested
-    void CreateDemoDecksIfEmpty()
-    {
-        if (playerDeck == null) playerDeck = new List<CardDefinition>();
-        if (aiDeck == null) aiDeck = new List<CardDefinition>();
-
-        if (playerDeck.Count > 0 && aiDeck.Count > 0) return;
-
-        CardDefinition Make(string name, Faction f, int hp, FrontType ft, int fDmg, int fBlk, int bDmg, int bBlk, int bPA)
-        {
-            var cd = ScriptableObject.CreateInstance<CardDefinition>();
-            cd.cardName = name; cd.faction = f; cd.maxHealth = hp;
-            cd.frontType = ft; cd.frontDamage = fDmg; cd.frontBlockValue = fBlk;
-            cd.backDamageBonusSameFaction = bDmg; cd.backBlockBonusSameFaction = bBlk; cd.backBonusPAIfTwoRetroSameFaction = bPA;
-            return cd;
-        }
-
-        if (playerDeck.Count == 0)
-        {
-            playerDeck.Add(Make("Lama del Culto", Faction.Sangue, 3, FrontType.Attacco, 3, 0, 1, 0, 0));
-            playerDeck.Add(Make("Cantico Profano", Faction.Sangue, 3, FrontType.Attacco, 2, 0, 1, 0, 0));
-            playerDeck.Add(Make("Scudo dell'Abisso", Faction.Ombra, 4, FrontType.Blocco, 0, 2, 0, 1, 0));
-            playerDeck.Add(Make("Simbolo dell'Eclissi", Faction.Ombra, 4, FrontType.Blocco, 0, 1, 0, 1, 0));
-            playerDeck.Add(Make("Spirale della Cenere", Faction.Fiamma, 3, FrontType.Attacco, 2, 0, 1, 0, 1));
-            playerDeck.Add(Make("Portale Vermiglio", Faction.Fiamma, 3, FrontType.Attacco, 2, 0, 1, 0, 1));
-        }
-
-        if (aiDeck.Count == 0)
-        {
-            aiDeck.Add(Make("Predatore Cremisi", Faction.Sangue, 3, FrontType.Attacco, 3, 0, 1, 0, 0));
-            aiDeck.Add(Make("Mano del Silenzio", Faction.Ombra, 3, FrontType.Blocco, 0, 2, 0, 1, 0));
-            aiDeck.Add(Make("Custode dell'Abisso", Faction.Ombra, 4, FrontType.Blocco, 0, 1, 0, 1, 0));
-            aiDeck.Add(Make("Eremita della Cenere", Faction.Fiamma, 2, FrontType.Attacco, 2, 0, 1, 0, 1));
-            aiDeck.Add(Make("Veggente del Nulla", Faction.Fiamma, 3, FrontType.Attacco, 2, 0, 1, 0, 1));
-        }
-    }
-
-    // Fallback visual if no prefab is assigned and useDemoDecks is true
-    GameObject CreateFallbackPrefab(string title)
-    {
-        var go = new GameObject(title);
-        var rt = go.AddComponent<RectTransform>();
-        rt.sizeDelta = new Vector2(160, 220);
-        var img = go.AddComponent<Image>();
-        img.color = new Color(0.9f, 0.9f, 0.9f, 1f);
-        var btn = go.AddComponent<Button>();
-        var cv = go.AddComponent<CardView>();
-        return go;
-    }
-
-    // Called by CardView on click
+    // Chiamato da CardView al click
     public void OnCardClicked(CardView view)
     {
         if (matchEnded) return;
