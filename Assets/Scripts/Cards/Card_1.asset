@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1dc984efeff4b7d4393fdf094296ca5d, type: 3}
-  m_Name: CardDefinition
+  m_Name: Card_1
   m_EditorClassIdentifier: Assembly-CSharp::CardDefinition
-  cardName: 
+  cardName: pippo
   faction: 0
   maxHealth: 3
   frontType: 0

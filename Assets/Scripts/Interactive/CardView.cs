@@ -1,132 +1,126 @@
 using UnityEngine;
 using UnityEngine.UI;
-#if TMP_PRESENT
-using TMPro;
-#endif
 using System.Collections;
 
 public class CardView : MonoBehaviour
 {
-    // ---- TEXT REFERENCES (support both TMP and Legacy) ----
-    // If you use TextMeshPro, assign these:
-#if TMP_PRESENT
-    public TMP_Text nameTMP;
-    public TMP_Text sideTMP;
-    public TMP_Text hpTMP;
-#endif
-    // If you use Legacy UI.Text, assign these:
+    // ---- LEGACY UI TEXT REFERENCES ----
+    [Header("Legacy Text (assign from prefab or will be auto-created)")]
     public Text nameText;
+    public Text factionText;
     public Text sideText;
     public Text hpText;
 
-    // Optional highlight overlay (Image enabled/disabled)
-    public Image highlight;
+    [Header("Legacy Text - Details")]
+    public Text frontTypeText;
+    public Text frontDamageText;
+    public Text frontBlockText;
+    public Text backBonusesText;
 
-    // Runtime wiring from GameManagerInteractive
+    // ---- RUNTIME WIRING ----
     [HideInInspector] public GameManagerInteractive gm;
     [HideInInspector] public PlayerState owner;
     [HideInInspector] public CardInstance instance;
 
     Button btn;
 
-    // Default card sizing (used for LayoutElement)
+    // Suggested size for layout groups
     [Header("Card Size")]
     public Vector2 preferredSize = new Vector2(160f, 220f);
 
     void Awake()
     {
-        // Ensure Button exists so we can click-select even in a lone scene card
+        // Ensure Button exists to handle clicks
         btn = GetComponent<Button>();
         if (btn == null) btn = gameObject.AddComponent<Button>();
-        btn.onClick.RemoveAllListeners();
-        btn.onClick.AddListener(OnClicked);
 
-        // Ensure a background Image exists (target graphic for Button)
+        // Ensure background Image used by Button
         var bg = GetComponent<Image>();
         if (bg == null) bg = gameObject.AddComponent<Image>();
         if (btn.targetGraphic == null) btn.targetGraphic = bg;
 
-        // Ensure LayoutElement exists for size control under LayoutGroups
+        // Ensure LayoutElement for layout groups
         var le = GetComponent<LayoutElement>();
         if (le == null) le = gameObject.AddComponent<LayoutElement>();
         le.preferredWidth = preferredSize.x;
         le.preferredHeight = preferredSize.y;
 
-        EnsureRuntimeUI();
-        // Safe default: hide highlight
-        SetHighlight(false);
+        // Create missing Text boxes if not assigned from prefab
+        EnsureTextBoxes();
     }
 
-    void EnsureRuntimeUI()
+    // Create basic Text components as children if missing
+    void EnsureTextBoxes()
     {
-        // 1) Overlay di highlight se assente (figlio a pieno schermo semitrasparente)
-        if (highlight == null)
+        Text Make(string label, int fontSize = 14, FontStyle style = FontStyle.Normal, TextAnchor anchor = TextAnchor.UpperLeft)
         {
-            var hlGO = new GameObject("Highlight", typeof(RectTransform), typeof(Image));
-            hlGO.transform.SetParent(transform, false);
-            var rt = hlGO.GetComponent<RectTransform>();
-            rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one;
-            rt.offsetMin = Vector2.zero; rt.offsetMax = Vector2.zero;
-            var img = hlGO.GetComponent<Image>();
-            img.raycastTarget = false;
-            img.color = new Color(1f, 0.9f, 0.2f, 0.25f);
-            highlight = img;
+            var go = new GameObject(label);
+            go.transform.SetParent(transform, false);
+
+            var rt = go.AddComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0f, 1f);
+            rt.anchorMax = new Vector2(1f, 1f);
+            rt.pivot = new Vector2(0.5f, 1f);
+            rt.sizeDelta = new Vector2(0f, 18f);
+
+            var t = go.AddComponent<Text>();
+            t.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+            t.fontSize = fontSize;
+            t.fontStyle = style;
+            t.alignment = anchor;
+            t.color = Color.black;
+            t.horizontalOverflow = HorizontalWrapMode.Wrap;
+            t.verticalOverflow = VerticalWrapMode.Truncate;
+            return t;
         }
 
-        // 2) Layout e testi base se non assegnati
-#if TMP_PRESENT
-    bool hasText = (nameTMP != null) || (nameText != null);
-#else
-        bool hasText = (nameText != null);
-#endif
-        if (!hasText)
+        // Rows: Name / Faction
+        if (nameText == null) nameText = Make("Name", 18, FontStyle.Bold);
+        if (factionText == null) factionText = Make("Faction", 14);
+
+        // Rows: Side / HP
+        if (sideText == null) sideText = Make("Side", 14);
+        if (hpText == null) hpText = Make("HP", 14);
+
+        // Rows: Front details
+        if (frontTypeText == null) frontTypeText = Make("FrontType", 14);
+        if (frontDamageText == null) frontDamageText = Make("FrontDamage", 14);
+        if (frontBlockText == null) frontBlockText = Make("FrontBlock", 14);
+
+        // Row: Back bonuses (multiline)
+        if (backBonusesText == null)
         {
-            // Contenitore per testi
-            var content = new GameObject("Content", typeof(RectTransform));
-            content.transform.SetParent(transform, false);
-            var crt = content.GetComponent<RectTransform>();
-            crt.anchorMin = new Vector2(0, 0);
-            crt.anchorMax = new Vector2(1, 1);
-            crt.offsetMin = new Vector2(8, 8);
-            crt.offsetMax = new Vector2(-8, -8);
+            backBonusesText = Make("BackBonuses", 12);
+            var rt = backBonusesText.rectTransform;
+            rt.sizeDelta = new Vector2(0f, 40f);
+        }
 
-            // Vertical layout
-            var vlg = content.AddComponent<VerticalLayoutGroup>();
-            vlg.childAlignment = TextAnchor.UpperLeft;
-            vlg.childControlHeight = true;
-            vlg.childForceExpandHeight = false;
-            vlg.spacing = 4;
+        // Simple vertical stacking from top
+        float y = -6f;
+        Text[] all = new Text[]
+        {
+            nameText, factionText, sideText, hpText,
+            frontTypeText, frontDamageText, frontBlockText, backBonusesText
+        };
 
-            // Helper per creare un Text legacy
-            Text Make(string n, int size, FontStyle style = FontStyle.Normal)
-            {
-                var go = new GameObject(n, typeof(RectTransform), typeof(Text));
-                go.transform.SetParent(content.transform, false);
-                var t = go.GetComponent<Text>();
-                t.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
-                t.fontSize = size;
-                t.fontStyle = style;
-                t.alignment = TextAnchor.UpperLeft;
-                t.horizontalOverflow = HorizontalWrapMode.Wrap;
-                t.verticalOverflow = VerticalWrapMode.Truncate;
-                t.raycastTarget = false;
-                return t;
-            }
-
-            nameText = Make("Name", 18, FontStyle.Bold);
-            sideText = Make("Side", 14);
-            hpText = Make("HP", 14);
+        for (int i = 0; i < all.Length; i++)
+        {
+            var t = all[i];
+            if (t == null) continue;
+            var rt = t.rectTransform;
+            rt.anchoredPosition = new Vector2(0f, y);
+            y -= rt.sizeDelta.y + 2f;
         }
     }
 
-    // Called by GameManager after creating CardInstance
+    // Called by GameManager when creating/assigning the instance
     public void Init(GameManagerInteractive gm, PlayerState owner, CardInstance instance)
     {
         this.gm = gm;
         this.owner = owner;
         this.instance = instance;
 
-        // Rebind click (so it routes to the manager when present)
+        // Route clicks to GameManager
         btn.onClick.RemoveAllListeners();
         btn.onClick.AddListener(OnClicked);
 
@@ -135,55 +129,60 @@ public class CardView : MonoBehaviour
 
     void OnClicked()
     {
-        // If a manager exists, send selection there.
         if (gm != null)
         {
             gm.OnCardClicked(this);
             return;
         }
-
-        // Standalone preview mode (no manager):
-        // Toggle highlight and just log the state so you can test the prefab in-scene.
+        // Standalone preview mode: toggle highlight
         SetHighlight(highlight == null ? false : !highlight.enabled);
-        Debug.Log("[CardView] Click: " + GetDisplayName());
     }
 
-    public void Refresh()
-    {
-        // Visual background tint if destroyed
-        var bg = GetComponent<Image>();
-        if (bg != null && instance != null)
-            bg.color = instance.alive ? Color.white : new Color(1f, 0.8f, 0.8f, 0.6f);
-
-        // Compose strings
-        string title = instance != null
-            ? instance.def.cardName + " (" + instance.def.faction + ")"
-            : gameObject.name;
-
-        string sideStr = instance != null
-            ? "Side: " + instance.side + (instance.def.frontType == FrontType.Attacco ? " [Atk]" :
-                                         instance.def.frontType == FrontType.Blocco ? " [Blk]" : "")
-            : "Side: -";
-
-        string hpStr = instance != null ? "HP: " + instance.health : "HP: -";
-
-        // Write to TMP if present/assigned, else to Legacy Text
-#if TMP_PRESENT
-        if (nameTMP != null) nameTMP.text = title;
-        if (sideTMP != null) sideTMP.text = sideStr;
-        if (hpTMP   != null) hpTMP.text   = hpStr;
-#endif
-
-        if (nameText != null) nameText.text = title;
-        if (sideText != null) sideText.text = sideStr;
-        if (hpText != null) hpText.text = hpStr;
-    }
-
+    // Simple highlight feedback (optional)
+    Outline highlight;
     public void SetHighlight(bool on)
     {
-        if (highlight != null) highlight.enabled = on;
+        if (highlight == null)
+            highlight = gameObject.GetComponent<Outline>() ?? gameObject.AddComponent<Outline>();
+
+        highlight.effectDistance = on ? new Vector2(4f, -4f) : Vector2.zero;
+        highlight.enabled = on;
     }
 
+    // Update all text fields from CardDefinition and runtime state
+    public void Refresh()
+    {
+        if (instance == null || instance.def == null) return;
+        var def = instance.def;
+
+        if (nameText != null) nameText.text = def.cardName;
+        if (factionText != null) factionText.text = "Faction: " + def.faction;
+        if (sideText != null) sideText.text = "Side: " + instance.side;
+        if (hpText != null) hpText.text = "HP: " + instance.health + "/" + def.maxHealth;
+
+        if (frontTypeText != null) frontTypeText.text = "Front: " + def.frontType;
+        if (frontDamageText != null) frontDamageText.text = "Front Dmg: " + def.frontDamage;
+        if (frontBlockText != null) frontBlockText.text = "Front Block: " + def.frontBlockValue;
+
+        if (backBonusesText != null)
+        {
+            backBonusesText.text =
+                "Back: +DMG same " + def.backDamageBonusSameFaction + "\n" +
+                "      +BLK same " + def.backBlockBonusSameFaction + "\n" +
+                "      +AP if 2 Back same: " + def.backBonusPAIfTwoRetroSameFaction;
+        }
+
+        // Simple background color by side
+        var bg = GetComponent<Image>();
+        if (bg != null)
+        {
+            bg.color = (instance.side == Side.Fronte)
+                ? new Color(0.90f, 0.98f, 1f, 1f)   // front
+                : new Color(1f, 0.95f, 0.90f, 1f); // back
+        }
+    }
+
+    // Small visual feedback
     public void Blink()
     {
         StartCoroutine(BlinkRoutine());
@@ -191,14 +190,12 @@ public class CardView : MonoBehaviour
 
     IEnumerator BlinkRoutine()
     {
-        SetHighlight(true);
-        yield return new WaitForSeconds(0.15f);
-        SetHighlight(false);
-    }
+        var img = GetComponent<Image>();
+        if (img == null) yield break;
 
-    string GetDisplayName()
-    {
-        if (instance == null || instance.def == null) return gameObject.name;
-        return instance.def.cardName + " [" + instance.def.faction + "]";
+        Color c = img.color;
+        img.color = Color.yellow;
+        yield return new WaitForSeconds(0.08f);
+        img.color = c;
     }
 }
