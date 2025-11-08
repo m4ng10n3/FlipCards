@@ -143,4 +143,60 @@ public static class GameRules
             });
         }
     }
+
+
+// === Helper methods for generic damage application (used by Rule actions) ===
+public static void DealDamageToPlayer(PlayerState owner, PlayerState opponent, CardInstance source, int amount, string phase = null)
+{
+    int final = Mathf.Max(0, amount);
+    opponent.hp -= final;
+    Logger.Info($"[{phase ?? "Damage"}] {owner.name} infligge {final} danni al Player {opponent.name}. HP: {opponent.hp}");
+
+    EventBus.Publish(GameEventType.DamageDealt, new EventContext
+    {
+        owner = owner,
+        opponent = opponent,
+        source = source,
+        target = null,
+        amount = final,
+        phase = phase ?? "Damage"
+    });
+
+    if (opponent.hp <= 0)
+    {
+        Logger.Info($"Player {opponent.name} sconfitto!");
+        EventBus.Publish(GameEventType.CardDestroyed, new EventContext { owner = owner, opponent = opponent, source = source, target = null, amount = 0, phase = phase ?? "Damage" });
+    }
+}
+
+public static void DealDamageToCard(PlayerState owner, PlayerState opponent, CardInstance source, CardInstance target, int amount, string phase = null)
+{
+    if (target == null || !target.alive) return;
+    int final = Mathf.Max(0, amount);
+    target.health -= final;
+    Logger.Info($"[{phase ?? "Damage"}] {owner.name} infligge {final} danni a {target.def.cardName}. HP carta: {target.health}");
+
+    EventBus.Publish(GameEventType.DamageDealt, new EventContext
+    {
+        owner = owner,
+        opponent = opponent,
+        source = source,
+        target = target,
+        amount = final,
+        phase = phase ?? "Damage"
+    });
+
+    if (!target.alive)
+    {
+        EventBus.Publish(GameEventType.CardDestroyed, new EventContext
+        {
+            owner = owner,
+            opponent = opponent,
+            source = source,
+            target = target,
+            amount = 0,
+            phase = phase ?? "Damage"
+        });
+    }
+}
 }

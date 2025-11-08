@@ -8,7 +8,6 @@ public class CardInstance
     public bool alive => health > 0;
     public readonly int id;
     static int _nextId = 1;
-    public CardView view; // opzionale, settato da CardView.Init
 
     public CardInstance(CardDefinitionInline.Spec def, System.Random rng)
     {

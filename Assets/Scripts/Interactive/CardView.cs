@@ -110,7 +110,6 @@ public class CardView : MonoBehaviour
         btn.onClick.RemoveAllListeners();
         btn.onClick.AddListener(OnClicked);
 
-        instance.view = this; // vedi patch F in CardInstance
         Refresh();
     }
 

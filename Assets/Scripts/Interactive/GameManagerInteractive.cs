@@ -132,8 +132,8 @@ public class GameManagerInteractive : MonoBehaviour
         while (steps++ < maxSteps && q.TryDequeue(out var it))
         {
             // qui potresti innescare VFX leggeri sulle carte coinvolte
-            if (it.ctx.source?.view != null) it.ctx.source.view.Blink();
-            if (it.ctx.target?.view != null) it.ctx.target.view.Blink();
+            if (it.ctx.source != null && viewByInstance.TryGetValue(it.ctx.source, out var v1)) v1.Blink();
+            if (it.ctx.target != null && viewByInstance.TryGetValue(it.ctx.target, out var v2)) v2.Blink();
         }
     }
 
