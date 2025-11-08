@@ -20,7 +20,7 @@ public class CardView : MonoBehaviour
     [Header("Runtime wiring")]
     [HideInInspector] public GameManagerInteractive gm;
     [HideInInspector] public PlayerState owner;
-    [HideInInspector] public CardInstance instance;
+    [HideInInspector] public CardInstance instance { get; private set; }
 
     Button btn;
 
@@ -110,6 +110,7 @@ public class CardView : MonoBehaviour
         btn.onClick.RemoveAllListeners();
         btn.onClick.AddListener(OnClicked);
 
+        instance.view = this; // vedi patch F in CardInstance
         Refresh();
     }
 

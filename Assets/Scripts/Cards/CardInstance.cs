@@ -6,6 +6,9 @@ public class CardInstance
     public int health;
     public Side side;
     public bool alive => health > 0;
+    public readonly int id;
+    static int _nextId = 1;
+    public CardView view; // opzionale, settato da CardView.Init
 
     public CardInstance(CardDefinitionInline.Spec def, System.Random rng)
     {
@@ -13,6 +16,7 @@ public class CardInstance
         this.health = def.maxHealth;
         // Flip casuale all'inizio: 50/50
         this.side = rng.NextDouble() < 0.5 ? Side.Fronte : Side.Retro;
+        this.id = _nextId++;
     }
 
     public void Flip()
@@ -20,8 +24,6 @@ public class CardInstance
         side = side == Side.Fronte ? Side.Retro : Side.Fronte;
     }
 
-    public override string ToString()
-    {
-        return $"{def.cardName} ({def.faction}) {side} HP:{health}";
-    }
+    public override string ToString() => $"#{id} {def.cardName} ({def.faction}) {side} HP:{health}";
+
 }

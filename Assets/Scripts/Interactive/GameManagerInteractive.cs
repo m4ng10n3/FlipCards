@@ -32,7 +32,7 @@ public class GameManagerInteractive : MonoBehaviour
     public Button btnForceFlip;
     public Button btnAttack;
     public Button btnEndTurn;
-    public Text logText; // use TMP_Text if preferisci TMP
+    public Text logText; // use TMP_Text se preferisci TMP
 
     [Header("Match parameters")]
     public int turns = 10;
@@ -47,9 +47,13 @@ public class GameManagerInteractive : MonoBehaviour
     public List<PrefabCardBinding> playerCards = new List<PrefabCardBinding>();
     public List<PrefabCardBinding> aiCards = new List<PrefabCardBinding>();
 
+    static GameManagerInteractive _instance;
+    public static GameManagerInteractive Instance => _instance;
+
     // ====== RUNTIME ======
     System.Random rng;
-    PlayerState player, ai;
+    public PlayerState player;
+    public PlayerState ai;
     int currentTurn = 1;
     bool playerPhase = true;
     bool matchEnded = false;
@@ -59,6 +63,9 @@ public class GameManagerInteractive : MonoBehaviour
 
     List<CardView> playerViews = new List<CardView>();
     List<CardView> aiViews = new List<CardView>();
+
+    // Nuovo: tieni traccia delle abilità attaccate per unbind sicuro
+    Dictionary<CardInstance, List<AbilityBase>> abilitiesByInstance = new Dictionary<CardInstance, List<AbilityBase>>();
 
     void Start()
     {
@@ -98,7 +105,42 @@ public class GameManagerInteractive : MonoBehaviour
         AppendLog("=== MATCH START (Scene templates -> runtime instances, inline defs) ===");
         UpdateAllViews();
         UpdateHUD();
+
+        // Pubblica inizio turno iniziale (player)
+        EventBus.Publish(GameEventType.TurnStart, new EventContext { owner = player, opponent = ai, phase = "TurnStart" });
     }
+
+    void Awake()
+    {
+        _instance = this;
+        // wiring bottoni
+        if (btnFlipRandom) btnFlipRandom.onClick.AddListener(OnFlipRandom);
+        if (btnForceFlip) btnForceFlip.onClick.AddListener(OnForceFlip);
+        if (btnAttack) btnAttack.onClick.AddListener(OnAttack);
+        if (btnEndTurn) btnEndTurn.onClick.AddListener(OnEndTurn);
+    }
+
+    // metodo statico chiamato da EventLogger
+    public static void TryAppendLogStatic(string line)
+    {
+        if (_instance != null) _instance.AppendLog(line);
+    }
+
+    // Elabora la coda (richiamalo dopo azioni importanti o su Update con throttling)
+    void PumpTurnQueue(int maxSteps = 64)
+    {
+        var q = EventLogger.Instance?.turnQueue;
+        if (q == null) return;
+        int steps = 0;
+        while (steps++ < maxSteps && q.TryDequeue(out var it))
+        {
+            // qui potresti innescare VFX leggeri sulle carte coinvolte
+            if (it.ctx.source?.view != null) it.ctx.source.view.Blink();
+            if (it.ctx.target?.view != null) it.ctx.target.view.Blink();
+        }
+    }
+
+
 
     // ====== BUILD SIDE ======
 
@@ -197,6 +239,15 @@ public class GameManagerInteractive : MonoBehaviour
         viewByInstance[ci] = view;
         instanceByView[view] = ci;
         outViews.Add(view);
+
+        // Bind automatico abilità presenti sul prefab/istanza
+        var opponent = (owner == player) ? ai : player;
+        var abilities = go.GetComponents<AbilityBase>()?.ToList() ?? new List<AbilityBase>();
+        foreach (var ab in abilities) ab.Bind(ci, owner, opponent);
+        abilitiesByInstance[ci] = abilities;
+
+        // Evento carta giocata sul board
+        EventBus.Publish(GameEventType.CardPlayed, new EventContext { owner = owner, opponent = opponent, source = ci, phase = "Main" });
     }
 
     // ====== PREFAB BINDINGS FALLBACK (inline-only) ======
@@ -246,83 +297,70 @@ public class GameManagerInteractive : MonoBehaviour
 
     void OnFlipRandom()
     {
-        if (matchEnded || !playerPhase) return;
-        int flips = 0;
-        foreach (var c in player.board)
-            if (c.alive && rng.NextDouble() < 0.5) { c.Flip(); flips++; }
-        AppendLog("Flip random: " + flips + " cards flipped.");
+        if (matchEnded) return;
+        var list = player.board.Where(c => c.alive).ToList();
+        if (list.Count == 0) return;
+        var c = list[rng.Next(list.Count)];
+        c.Flip();
+        EventBus.Publish(GameEventType.Flip, new EventContext { owner = player, opponent = ai, source = c });
         UpdateAllViews();
     }
 
     void OnForceFlip()
     {
-        if (matchEnded || !playerPhase) return;
-        var selected = SelectionManager.Instance.SelectedOwned;
-        if (selected == null) { AppendLog("Select one of YOUR cards to force flip."); return; }
-        var ci = instanceByView[selected];
-        if (!ci.alive) { AppendLog("Card is destroyed."); return; }
-        if (player.actionPoints <= 0) { AppendLog("No AP left to force flip."); return; }
-        ci.Flip();
-        player.actionPoints -= 1;
-        AppendLog("Forced flip: " + ci.def.cardName + " -> " + ci.side);
-        selected.Blink();
+        var sel = SelectionManager.Instance.SelectedOwned?.instance; // vedi patch E
+        if (sel == null) return;
+        sel.Flip();
+        EventBus.Publish(GameEventType.Flip, new EventContext { owner = player, opponent = ai, source = sel });
         UpdateAllViews();
-        UpdateHUD();
     }
 
     void OnAttack()
     {
-        if (matchEnded || !playerPhase) return;
-        if (player.actionPoints <= 0) { AppendLog("No AP left to attack."); return; }
+        var atk = SelectionManager.Instance.SelectedOwned?.instance;
+        var tgt = SelectionManager.Instance.SelectedEnemy?.instance;
+        if (atk == null || tgt == null) return;
 
-        var attackerView = SelectionManager.Instance.SelectedOwned;
-        var targetView = SelectionManager.Instance.SelectedEnemy;
+        // Deleghiamo tutta la risoluzione a GameRules, che pubblica anche gli eventi
+        GameRules.Attack(player, ai, atk, tgt);
 
-        if (attackerView == null) { AppendLog("Select YOUR attacker card (Front/Attack)."); return; }
-        if (targetView == null) { AppendLog("Select ENEMY target card."); return; }
-
-        var attacker = instanceByView[attackerView];
-        var target = instanceByView[targetView];
-
-        if (!attacker.alive) { AppendLog("Attacker is destroyed."); return; }
-        if (attacker.side != Side.Fronte || attacker.def.frontType != FrontType.Attacco)
-        { AppendLog("Selected attacker is not in Front/Attack."); return; }
-
-        GameRules.Attack(player, ai, attacker, target);
-        player.actionPoints -= 1;
-
-        CleanupDestroyed(ai);
+        // Pulizia eventuali carte distrutte e refresh UI
         CleanupDestroyed(player);
-
-        attackerView.Blink();
-        targetView.Blink();
-
+        CleanupDestroyed(ai);
         UpdateAllViews();
         UpdateHUD();
-        CheckEndImmediate();
     }
+    void SwapActive()
+    {
+        playerPhase = !playerPhase;
+    }
+
+
 
     void OnEndTurn()
     {
-        if (matchEnded || !playerPhase) return;
-
-        playerPhase = false;
-        RunAITurn();
-
-        currentTurn += 1;
-        if (currentTurn > turns || IsGameOver())
-        {
-            EndMatch(); return;
-        }
-
-        StartPlayerPhase();
+        EventBus.Publish(GameEventType.TurnEnd, new EventContext { owner = player, opponent = ai });
+        SwapActive(); // passa il turno
+        EventBus.Publish(GameEventType.TurnStart, new EventContext { owner = player, opponent = ai });
+        UpdateHUD();
     }
 
     void StartPlayerPhase()
     {
         playerPhase = true;
         player.ResetAP(playerBaseAP + GameRules.PassiveBonusPA(player));
-        foreach (var c in player.board) if (c.alive && rng.NextDouble() < 0.5) c.Flip();
+
+        // (Comportamento esistente) flip casuale a inizio fase player
+        foreach (var c in player.board)
+            if (c.alive && rng.NextDouble() < 0.5)
+            {
+                c.Flip();
+                EventBus.Publish(GameEventType.Flip, new EventContext { owner = player, opponent = ai, source = c, phase = "TurnStart" });
+            }
+
+        // Evento inizio turno Player
+        EventBus.Publish(GameEventType.TurnStart, new EventContext { owner = player, opponent = ai, phase = "TurnStart" });
+
         UpdateAllViews();
         UpdateHUD();
         AppendLog("Player phase started.");
@@ -330,6 +368,9 @@ public class GameManagerInteractive : MonoBehaviour
 
     void RunAITurn()
     {
+        // Evento inizio turno AI
+        EventBus.Publish(GameEventType.TurnStart, new EventContext { owner = ai, opponent = player, phase = "TurnStart" });
+
         ai.ResetAP(aiBaseAP + GameRules.PassiveBonusPA(ai));
         AIController.ExecuteTurn(rng, ai, player);
         CleanupDestroyed(ai);
@@ -337,6 +378,10 @@ public class GameManagerInteractive : MonoBehaviour
         UpdateAllViews();
         UpdateHUD();
         AppendLog("AI phase ended.");
+
+        // Evento fine turno AI
+        EventBus.Publish(GameEventType.TurnEnd, new EventContext { owner = ai, opponent = player, phase = "TurnEnd" });
+
         CheckEndImmediate();
     }
 
@@ -346,16 +391,24 @@ public class GameManagerInteractive : MonoBehaviour
         {
             if (!ci.alive)
             {
+                // Unbind abilità una sola volta quando la carta non è più viva
+                if (abilitiesByInstance.TryGetValue(ci, out var list) && list != null)
+                {
+                    foreach (var ab in list) { if (ab != null) ab.Unbind(); }
+                    abilitiesByInstance.Remove(ci);
+                }
+
                 if (viewByInstance.TryGetValue(ci, out var view))
                     view.Refresh();
             }
         }
     }
 
-    void AppendLog(string msg)
+    public void AppendLog(string line)
     {
-        if (logText != null) logText.text += "\n" + msg;
-        Debug.Log(msg);
+        if (logText == null) return;
+        if (!string.IsNullOrEmpty(logText.text)) logText.text += "\n";
+        logText.text += line;
     }
 
     bool IsGameOver() => player.hp <= 0 || ai.hp <= 0;
