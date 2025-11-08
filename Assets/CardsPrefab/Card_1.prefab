@@ -78,7 +78,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 
+  m_Text: Faction
 --- !u!1 &1871554170300454803
 GameObject:
   m_ObjectHideFlags: 0
@@ -487,7 +487,7 @@ MonoBehaviour:
   frontDamageText: {fileID: 1720971999451734619}
   frontBlockText: {fileID: 4272118136106218990}
   backBonusesText: {fileID: 2688270053116828679}
-  autoBindByName: 1
+  autoBindByName: 0
   gm: {fileID: 0}
   preferredSize: {x: 160, y: 220}
 --- !u!114 &5920996252199903113

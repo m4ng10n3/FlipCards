@@ -41,24 +41,59 @@ public class CardView : MonoBehaviour
         le.preferredWidth = preferredSize.x;
         le.preferredHeight = preferredSize.y;
 
-        if (autoBindByName)
-            TryAutoBindTexts();
+        if (autoBindByName) TryAutoBindTexts();
+
+        // NEW: preview immediato leggendo CardDefinitionInline quando la scena monta
+        PreviewFromInlineIfNoInstance();
     }
 
-    // Finds legacy Text components by child GameObject name (recursive).
+    // =========================================================
+    // PREVIEW: mostra i dati della CardDefinitionInline se non c'e' ancora un'istanza runtime
+    // =========================================================
+    void PreviewFromInlineIfNoInstance()
+    {
+        if (instance != null) return; // runtime already wired
+
+        var inline = GetComponent<CardDefinitionInline>();
+        if (inline == null) return;
+
+        // costruiamo una def temporanea e visualizziamo
+        var def = inline.BuildRuntimeDefinition();
+        if (def == null) return;
+
+        // lato e hp preview (non esiste ancora lo stato runtime)
+        string sidePreview = "Side";
+        int hpCur = def.maxHealth;
+
+        if (nameText != null) nameText.text = def.cardName;
+        if (factionText != null) factionText.text = "" + def.faction.ToString();
+        if (sideText != null) sideText.text = sidePreview;
+        if (hpText != null) hpText.text = hpCur + "/" + def.maxHealth;
+        if (frontTypeText != null) frontTypeText.text = "Front: " + def.frontType;
+        if (frontDamageText != null) frontDamageText.text = "Front Dmg: " + def.frontDamage;
+        if (frontBlockText != null) frontBlockText.text = "Front Block: " + def.frontBlockValue;
+
+        if (backBonusesText != null)
+        {
+            backBonusesText.text =
+                "Back: +DMG same " + def.backDamageBonusSameFaction + "\n" +
+                "      +BLK same " + def.backBlockBonusSameFaction + "\n" +
+                "      +AP if 2 Back same: " + def.backBonusPAIfTwoRetroSameFaction;
+        }
+    }
+
+    // =========================================================
+    // AUTOBIND
+    // =========================================================
     void TryAutoBindTexts()
     {
-        // local finder
         Text Find(string childName)
         {
             var t = transform.Find(childName);
             if (t != null) return t.GetComponent<Text>();
-            // recursive search if direct child not found
             var texts = GetComponentsInChildren<Text>(true);
             foreach (var tx in texts)
-            {
                 if (tx.gameObject.name == childName) return tx;
-            }
             return null;
         }
 
@@ -70,18 +105,11 @@ public class CardView : MonoBehaviour
         if (frontDamageText == null) frontDamageText = Find("FrontDamage");
         if (frontBlockText == null) frontBlockText = Find("FrontBlock");
         if (backBonusesText == null) backBonusesText = Find("BackBonuses");
-
-        // Debug: log missing to help setup
-        if (nameText == null) Debug.LogWarning($"{name}: 'Name' Text not found/assigned.");
-        if (factionText == null) Debug.LogWarning($"{name}: 'Faction' Text not found/assigned.");
-        if (sideText == null) Debug.LogWarning($"{name}: 'Side' Text not found/assigned.");
-        if (hpText == null) Debug.LogWarning($"{name}: 'HP' Text not found/assigned.");
-        if (frontTypeText == null) Debug.LogWarning($"{name}: 'FrontType' Text not found/assigned.");
-        if (frontDamageText == null) Debug.LogWarning($"{name}: 'FrontDamage' Text not found/assigned.");
-        if (frontBlockText == null) Debug.LogWarning($"{name}: 'FrontBlock' Text not found/assigned.");
-        if (backBonusesText == null) Debug.LogWarning($"{name}: 'BackBonuses' Text not found/assigned.");
     }
 
+    // =========================================================
+    // RUNTIME WIRING
+    // =========================================================
     public void Init(GameManagerInteractive gm, PlayerState owner, CardInstance instance)
     {
         this.gm = gm;
@@ -109,15 +137,19 @@ public class CardView : MonoBehaviour
         highlight.enabled = on;
     }
 
+    // =========================================================
+    // REFRESH RUNTIME
+    // =========================================================
     public void Refresh()
     {
         if (instance == null || instance.def == null) return;
         var def = instance.def;
 
         if (nameText != null) nameText.text = def.cardName;
+        if (factionText != null) factionText.text = "" + def.faction.ToString();
         if (sideText != null) sideText.text = "" + instance.side;
         if (hpText != null) hpText.text = instance.health + "/" + def.maxHealth;
-        if (frontTypeText != null) frontTypeText.text = "" + def.frontType;
+        if (frontTypeText != null) frontTypeText.text = "Front: " + def.frontType;
         if (frontDamageText != null) frontDamageText.text = "Front Dmg: " + def.frontDamage;
         if (frontBlockText != null) frontBlockText.text = "Front Block: " + def.frontBlockValue;
 
@@ -138,6 +170,7 @@ public class CardView : MonoBehaviour
         }
     }
 
+    // Small visual feedback
     public void Blink() { StartCoroutine(BlinkRoutine()); }
     IEnumerator BlinkRoutine()
     {
