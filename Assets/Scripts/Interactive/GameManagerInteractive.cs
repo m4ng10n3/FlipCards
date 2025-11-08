@@ -5,22 +5,22 @@ using System.Linq;
 
 public class GameManagerInteractive : MonoBehaviour
 {
-    // ====== PREFAB BINDINGS (fallback SOLO se non trovi carte in scena) ======
+    // ====== PREFAB BINDINGS (fallback ONLY if no scene cards are found) ======
     [System.Serializable]
     public class PrefabCardBinding
     {
-        [Tooltip("Prefab della carta (deve avere CardView + CardDefinitionHolder)")]
+        [Tooltip("Card prefab (must have CardView + CardDefinitionInline)")]
         public GameObject prefab;
 
-        [Min(1), Tooltip("Quante copie istanziare di questo prefab")]
+        [Min(1), Tooltip("How many copies of this prefab to spawn")]
         public int count = 1;
     }
 
-    // ====== TEMPLATE DA SCENA ======
+    // ====== SCENE TEMPLATE ======
     class SceneCardTemplate
     {
-        public GameObject template;   // clone disattivato, usato come sorgente per Instantiate
-        public CardDefinition def;
+        public GameObject template;   // disabled clone used as source for Instantiate
+        public CardDefinition def;    // built at runtime from CardDefinitionInline
     }
 
     [Header("Roots")]
@@ -32,18 +32,18 @@ public class GameManagerInteractive : MonoBehaviour
     public Button btnForceFlip;
     public Button btnAttack;
     public Button btnEndTurn;
-    public Text logText; // se usi TMP, cambia in TMP_Text
+    public Text logText; // use TMP_Text if you prefer TMP
 
     [Header("Match parameters")]
     public int turns = 10;
     public int playerBaseAP = 3;
-    public int aiBaseAP = 3; // bonus AI gestito in GameRules se previsto
+    public int aiBaseAP = 3; // AI may get extra AP via GameRules
     public int seed = 12345;
 
-    [Header("Start Constraints")]
+    [Header("Start constraints")]
     [Min(1)] public int minCardsPerSide = 3;
 
-    [Header("Prefab Bindings (usati solo se NON troviamo carte in scena)")]
+    [Header("Prefab bindings (used only if NO scene cards are found)")]
     public List<PrefabCardBinding> playerCards = new List<PrefabCardBinding>();
     public List<PrefabCardBinding> aiCards = new List<PrefabCardBinding>();
 
@@ -54,24 +54,22 @@ public class GameManagerInteractive : MonoBehaviour
     bool playerPhase = true;
     bool matchEnded = false;
 
-    // mapping vista <-> istanza di gioco
     Dictionary<CardInstance, CardView> viewByInstance = new Dictionary<CardInstance, CardView>();
     Dictionary<CardView, CardInstance> instanceByView = new Dictionary<CardView, CardInstance>();
 
-    // liste locali
     List<CardView> playerViews = new List<CardView>();
     List<CardView> aiViews = new List<CardView>();
 
     void Start()
     {
-        // Singleton SelectionManager
+        // Ensure SelectionManager singleton
         if (SelectionManager.Instance == null)
             new GameObject("SelectionManager").AddComponent<SelectionManager>();
 
-        // Validazioni base
+        // Basic validation
         if (playerBoardRoot == null || aiBoardRoot == null)
         {
-            Debug.LogError("Assegna playerBoardRoot e aiBoardRoot nell'Inspector.");
+            Debug.LogError("Assign playerBoardRoot and aiBoardRoot in the Inspector.");
             enabled = false; return;
         }
 
@@ -79,30 +77,30 @@ public class GameManagerInteractive : MonoBehaviour
         player = new PlayerState("Player", playerBaseAP);
         ai = new PlayerState("AI", aiBaseAP);
 
-        // 1) Prova a costruire dai TEMPLATE in SCENA (con CardDefinitionHolder)
+        // 1) Try to build from SCENE templates (CardDefinitionInline on each card)
         BuildSideFromSceneOrBindings(player, playerBoardRoot, playerViews, playerCards, "PLAYER");
         BuildSideFromSceneOrBindings(ai, aiBoardRoot, aiViews, aiCards, "AI");
 
-        // 2) Controllo minimo per lato
+        // 2) Enforce minimum per side
         if (playerViews.Count < minCardsPerSide || aiViews.Count < minCardsPerSide)
         {
-            Debug.LogError($"Not enough cards to start. Player:{playerViews.Count} / AI:{aiViews.Count} (min {minCardsPerSide})");
-            matchEnded = true; // blocco il match
+            Debug.LogError("Not enough cards to start. Player:" + playerViews.Count + " / AI:" + aiViews.Count + " (min " + minCardsPerSide + ")");
+            matchEnded = true;
             return;
         }
 
-        // UI binding
+        // Bind UI
         if (btnFlipRandom) btnFlipRandom.onClick.AddListener(OnFlipRandom);
         if (btnForceFlip) btnForceFlip.onClick.AddListener(OnForceFlip);
         if (btnAttack) btnAttack.onClick.AddListener(OnAttack);
         if (btnEndTurn) btnEndTurn.onClick.AddListener(OnEndTurn);
 
-        AppendLog("=== MATCH START (Scene templates -> runtime instances) ===");
+        AppendLog("=== MATCH START (Scene templates -> runtime instances, inline defs) ===");
         UpdateAllViews();
         UpdateHUD();
     }
 
-    // ====== COSTRUZIONE LATO ======
+    // ====== BUILD SIDE ======
 
     void BuildSideFromSceneOrBindings(PlayerState owner,
                                       Transform root,
@@ -110,22 +108,32 @@ public class GameManagerInteractive : MonoBehaviour
                                       List<PrefabCardBinding> fallbackBindings,
                                       string label)
     {
-        // A) prova da scena
+        // A) From scene
         var templates = CaptureTemplatesAndClear(root, label);
         if (templates.Count > 0)
         {
             SpawnFromTemplates(owner, templates, root, outViews);
-            // pulizia template clonati
+            // Cleanup temp clones
             foreach (var t in templates)
                 if (t.template != null) Destroy(t.template);
             return;
         }
 
-        // B) fallback da bindings Inspector (usa SEMPRE il CardDefinitionHolder del prefab)
+        // B) Fallback from prefab bindings (reads inline definition from prefab)
         SpawnFromBindings(owner, fallbackBindings, root, outViews);
     }
 
-    // Trova i figli con CardView + CardDefinitionHolder, crea un CLONE disattivato come template e distrugge l’originale
+    // Build CardDefinition from CardDefinitionInline on a GameObject
+    CardDefinition GetDefinitionFromInline(GameObject go)
+    {
+        if (go == null) return null;
+        var inline = go.GetComponent<CardDefinitionInline>();
+        if (inline != null) return inline.BuildRuntimeDefinition();
+        return null;
+    }
+
+    // Scan children under root, pick those with CardView + CardDefinitionInline,
+    // clone them as disabled templates, capture their built definition, then remove originals.
     List<SceneCardTemplate> CaptureTemplatesAndClear(Transform root, string label)
     {
         var list = new List<SceneCardTemplate>();
@@ -137,26 +145,26 @@ public class GameManagerInteractive : MonoBehaviour
         foreach (var t in toProcess)
         {
             var view = t.GetComponent<CardView>();
-            var holder = t.GetComponent<CardDefinitionHolder>();
-            if (view == null || holder == null || holder.definition == null)
+            var def = GetDefinitionFromInline(t.gameObject);
+            if (view == null || def == null)
             {
-                // ignora elementi non-carta
+                // Not a card template, skip
                 continue;
             }
 
-            // crea un clone disattivato da usare come template di instanziazione
+            // Create disabled clone as template
             var template = Instantiate(t.gameObject);
             template.name = t.gameObject.name + " (TEMPLATE)";
             template.SetActive(false);
 
-            list.Add(new SceneCardTemplate { template = template, def = holder.definition });
+            list.Add(new SceneCardTemplate { template = template, def = def });
 
-            // rimuovi l'originale dalla scena (effetto "scompare all'avvio")
+            // Remove original from scene (disappear at start)
             Destroy(t.gameObject);
         }
 
         if (list.Count > 0)
-            Debug.Log($"[{label}] Found {list.Count} scene card templates.");
+            Debug.Log("[" + label + "] Found " + list.Count + " scene card templates.");
 
         return list;
     }
@@ -180,7 +188,7 @@ public class GameManagerInteractive : MonoBehaviour
         go.SetActive(true);
 
         var view = go.GetComponent<CardView>();
-        if (view == null) { Debug.LogError("Template di carta senza CardView."); Destroy(go); return; }
+        if (view == null) { Debug.LogError("Card template has no CardView."); Destroy(go); return; }
 
         view.Init(this, owner, ci);
         viewByInstance[ci] = view;
@@ -188,7 +196,7 @@ public class GameManagerInteractive : MonoBehaviour
         outViews.Add(view);
     }
 
-    // ====== PREFAB BINDINGS (fallback se non ci sono carte in scena) ======
+    // ====== PREFAB BINDINGS FALLBACK (inline-only) ======
 
     void SpawnFromBindings(PlayerState owner, List<PrefabCardBinding> bindings, Transform root, List<CardView> outViews)
     {
@@ -198,21 +206,20 @@ public class GameManagerInteractive : MonoBehaviour
         {
             if (b == null || b.count <= 0 || b.prefab == null)
             {
-                Debug.LogWarning("Binding non valido: assegna Prefab e Count >= 1.");
+                Debug.LogWarning("Invalid binding: assign Prefab and Count >= 1.");
                 continue;
             }
 
-            // la definizione VIENE SEMPRE dal CardDefinitionHolder del prefab
-            var holder = b.prefab.GetComponent<CardDefinitionHolder>();
-            if (holder == null || holder.definition == null)
+            var def = GetDefinitionFromInline(b.prefab);
+            if (def == null)
             {
-                Debug.LogError($"Il prefab '{b.prefab.name}' non ha CardDefinitionHolder o la definition è nulla.");
+                Debug.LogError("Prefab '" + b.prefab.name + "' has no CardDefinitionInline.");
                 continue;
             }
 
             for (int i = 0; i < b.count; i++)
             {
-                AddCardFromTemplate(owner, holder.definition, b.prefab, root, outViews);
+                AddCardFromTemplate(owner, def, b.prefab, root, outViews);
             }
         }
     }
@@ -233,7 +240,7 @@ public class GameManagerInteractive : MonoBehaviour
         AppendLog(header + "  " + status);
     }
 
-    // ====== AZIONI UI ======
+    // ====== UI ACTIONS ======
 
     void OnFlipRandom()
     {
@@ -363,7 +370,7 @@ public class GameManagerInteractive : MonoBehaviour
         AppendLog("Score: PlayerHP " + player.hp + " vs AIHP " + ai.hp + " | Diff (AI-Player) = " + diff + " -> " + result);
     }
 
-    // Chiamato da CardView al click
+    // Called by CardView on click
     public void OnCardClicked(CardView view)
     {
         if (matchEnded) return;
