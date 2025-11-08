@@ -5,7 +5,7 @@ using UnityEngine;
 /// Regole centrali:
 /// - Bonus retro = moltiplicatori di fazione
 /// - Blocco = riduzione danni al player quando si colpisce una carta in retro
-/// + Hook eventi per abilità (AttackDeclared, DamageDealt, CardDestroyed)
+/// + Hook eventi per abilit (AttackDeclared, DamageDealt, CardDestroyed)
 /// </summary>
 public static class GameRules
 {
@@ -60,7 +60,7 @@ public static class GameRules
             int count = p.CountRetro(f);
             if (count >= 2)
             {
-                // prendi il bonus più alto disponibile per quella fazione tra le carte retro
+                // prendi il bonus pi alto disponibile per quella fazione tra le carte retro
                 int max = 0;
                 foreach (var ci in p.board)
                     if (ci.alive && ci.side == Side.Retro && ci.def.faction == f)
@@ -73,14 +73,14 @@ public static class GameRules
     }
 
     /// Effettua un attacco:
-    /// - se targetCard è in Fronte -> danneggia la carta
-    /// - se targetCard è in Retro  -> danneggia il Player avversario (ridotto dal blocco cumulativo)
+    /// - se targetCard  in Fronte -> danneggia la carta
+    /// - se targetCard  in Retro  -> danneggia il Player avversario (ridotto dal blocco cumulativo)
     /// + Publish: AttackDeclared, DamageDealt, CardDestroyed
     public static void Attack(PlayerState attacker, PlayerState defender, CardInstance attackerCard, CardInstance targetCard)
     {
         if (!attackerCard.alive) return;
 
-        // Event: dichiarazione attacco (utile per abilità che modificano il danno proposto)
+        // Event: dichiarazione attacco (utile per abilit che modificano il danno proposto)
         EventBus.Publish(GameEventType.AttackDeclared, new EventContext
         {
             owner = attacker,
@@ -96,7 +96,7 @@ public static class GameRules
         if (targetCard.side == Side.Fronte)
         {
             targetCard.health -= dmg;
-            Debug.Log($"{attacker.name} attacca {targetCard.def.cardName} per {dmg} (fronte). HP carta: {targetCard.health}");
+            Logger.Info($"{attacker.name} attacca {targetCard.def.cardName} per {dmg} (fronte). HP carta: {targetCard.health}");
 
             // Event: danno a carta
             EventBus.Publish(GameEventType.DamageDealt, new EventContext
@@ -111,7 +111,7 @@ public static class GameRules
 
             if (targetCard.health <= 0)
             {
-                Debug.Log($"{targetCard.def.cardName} è stata distrutta!");
+                Logger.Info($"{targetCard.def.cardName}  stata distrutta!");
                 targetCard.health = 0;
 
                 // Event: carta distrutta
@@ -129,7 +129,7 @@ public static class GameRules
             int block = TotalFrontBlock(defender);
             int final = Mathf.Max(0, dmg - block);
             defender.hp -= final;
-            Debug.Log($"{attacker.name} colpisce il PLAYER {defender.name} per {final} (dmg {dmg} - block {block}) bersagliando {targetCard.def.cardName} in retro.");
+            Logger.Info($"{attacker.name} colpisce il PLAYER {defender.name} per {final} (dmg {dmg} - block {block}) bersagliando {targetCard.def.cardName} in retro.");
 
             // Event: danno al player
             EventBus.Publish(GameEventType.DamageDealt, new EventContext

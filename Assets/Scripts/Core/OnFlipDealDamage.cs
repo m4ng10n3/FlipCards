@@ -13,7 +13,7 @@ public class OnFlipDealDamage : AbilityBase
         {
             if (ctx.source != Source) return;
 
-            // Il tipo evento è il parametro 't', non un campo di EventContext
+            // Il tipo evento  il parametro 't', non un campo di EventContext
             if (t == GameEventType.Flip)
             {
                 if (!onlyWhenToFront || Source.side == Side.Fronte)
@@ -21,7 +21,7 @@ public class OnFlipDealDamage : AbilityBase
                     // Applica danno diretto al player avversario
                     Opponent.hp -= damage;
 
-                    // Notifica che è stato inflitto danno
+                    // Notifica che  stato inflitto danno
                     EventBus.Publish(
                         GameEventType.DamageDealt,
                         new EventContext

@@ -5,7 +5,7 @@ public class CardDefinitionInline : MonoBehaviour
     [System.Serializable]
     public struct Spec
     {
-        // Identità
+        // Identit
         public string cardName;
         public Faction faction;
 

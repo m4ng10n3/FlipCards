@@ -64,7 +64,7 @@ public class GameManagerInteractive : MonoBehaviour
     List<CardView> playerViews = new List<CardView>();
     List<CardView> aiViews = new List<CardView>();
 
-    // Nuovo: tieni traccia delle abilità attaccate per unbind sicuro
+    // Nuovo: tieni traccia delle abilit attaccate per unbind sicuro
     Dictionary<CardInstance, List<AbilityBase>> abilitiesByInstance = new Dictionary<CardInstance, List<AbilityBase>>();
 
     void Start()
@@ -76,7 +76,7 @@ public class GameManagerInteractive : MonoBehaviour
         // Basic validation
         if (playerBoardRoot == null || aiBoardRoot == null)
         {
-            Debug.LogError("Assign playerBoardRoot and aiBoardRoot in the Inspector.");
+            Logger.Error("Assign playerBoardRoot and aiBoardRoot in the Inspector.");
             enabled = false; return;
         }
 
@@ -91,17 +91,12 @@ public class GameManagerInteractive : MonoBehaviour
         // 2) Enforce minimum per side
         if (playerViews.Count < minCardsPerSide || aiViews.Count < minCardsPerSide)
         {
-            Debug.LogError("Not enough cards to start. Player:" + playerViews.Count + " / AI:" + aiViews.Count + " (min " + minCardsPerSide + ")");
+            Logger.Error("Not enough cards to start. Player:" + playerViews.Count + " / AI:" + aiViews.Count + " (min " + minCardsPerSide + ")");
             matchEnded = true;
             return;
         }
 
         // Bind UI
-        if (btnFlipRandom) btnFlipRandom.onClick.AddListener(OnFlipRandom);
-        if (btnForceFlip) btnForceFlip.onClick.AddListener(OnForceFlip);
-        if (btnAttack) btnAttack.onClick.AddListener(OnAttack);
-        if (btnEndTurn) btnEndTurn.onClick.AddListener(OnEndTurn);
-
         AppendLog("=== MATCH START (Scene templates -> runtime instances, inline defs) ===");
         UpdateAllViews();
         UpdateHUD();
@@ -112,6 +107,8 @@ public class GameManagerInteractive : MonoBehaviour
 
     void Awake()
     {
+        Logger.Sink = AppendLog;
+
         _instance = this;
         // wiring bottoni
         if (btnFlipRandom) btnFlipRandom.onClick.AddListener(OnFlipRandom);
@@ -209,7 +206,7 @@ public class GameManagerInteractive : MonoBehaviour
         }
 
         if (list.Count > 0)
-            Debug.Log("[" + label + "] Found " + list.Count + " scene card templates.");
+            Logger.Info("[" + label + "] Found " + list.Count + " scene card templates.");
 
         return list;
     }
@@ -233,14 +230,14 @@ public class GameManagerInteractive : MonoBehaviour
         go.SetActive(true);
 
         var view = go.GetComponent<CardView>();
-        if (view == null) { Debug.LogError("Card template has no CardView."); Destroy(go); return; }
+        if (view == null) { Logger.Error("Card template has no CardView."); Destroy(go); return; }
 
         view.Init(this, owner, ci);
         viewByInstance[ci] = view;
         instanceByView[view] = ci;
         outViews.Add(view);
 
-        // Bind automatico abilità presenti sul prefab/istanza
+        // Bind automatico abilit presenti sul prefab/istanza
         var opponent = (owner == player) ? ai : player;
         var abilities = go.GetComponents<AbilityBase>()?.ToList() ?? new List<AbilityBase>();
         foreach (var ab in abilities) ab.Bind(ci, owner, opponent);
@@ -260,13 +257,13 @@ public class GameManagerInteractive : MonoBehaviour
         {
             if (b == null || b.count <= 0 || b.prefab == null)
             {
-                Debug.LogWarning("Invalid binding: assign Prefab and Count >= 1.");
+                Logger.Warn("Invalid binding: assign Prefab and Count >= 1.");
                 continue;
             }
 
             if (!TryGetSpec(b.prefab, out var def))
             {
-                Debug.LogError("Prefab '" + b.prefab.name + "' must have CardDefinitionInline.");
+                Logger.Error("Prefab '" + b.prefab.name + "' must have CardDefinitionInline.");
                 continue;
             }
 
@@ -391,7 +388,7 @@ public class GameManagerInteractive : MonoBehaviour
         {
             if (!ci.alive)
             {
-                // Unbind abilità una sola volta quando la carta non è più viva
+                // Unbind abilit una sola volta quando la carta non  pi viva
                 if (abilitiesByInstance.TryGetValue(ci, out var list) && list != null)
                 {
                     foreach (var ab in list) { if (ab != null) ab.Unbind(); }

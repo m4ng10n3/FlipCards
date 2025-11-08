@@ -34,7 +34,7 @@ public static class EventBus
     public static void Publish(GameEventType t, EventContext ctx)
     {
         if (_subs.TryGetValue(t, out var list))
-            // copia per sicurezza se le abilità modificano le sottoscrizioni
+            // copia per sicurezza se le abilit modificano le sottoscrizioni
             foreach (var h in list.ToArray()) h?.Invoke(t, ctx);
     }
 }

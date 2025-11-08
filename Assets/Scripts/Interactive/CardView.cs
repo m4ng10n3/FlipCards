@@ -47,7 +47,7 @@ public class CardView : MonoBehaviour
     }
 
     // =========================================================
-    // PREVIEW: mostra i dati della CardDefinitionInline se non c'è ancora un'istanza runtime
+    // PREVIEW: mostra i dati della CardDefinitionInline se non c' ancora un'istanza runtime
     // =========================================================
     void PreviewFromInlineIfNoInstance()
     {
@@ -134,7 +134,7 @@ public class CardView : MonoBehaviour
 
     public void Refresh()
     {
-        // instance può essere null; def è una struct quindi NON si confronta con null
+        // instance pu essere null; def  una struct quindi NON si confronta con null
         if (instance == null) return;
 
         var def = instance.def;

@@ -1,6 +1,5 @@
-// Assets/Scripts/Core/EventLogger.cs
+// EventLogger.cs
 using UnityEngine;
-using System;
 
 public class EventLogger : MonoBehaviour
 {
@@ -13,47 +12,47 @@ public class EventLogger : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
-        foreach (GameEventType t in Enum.GetValues(typeof(GameEventType)))
+        foreach (GameEventType t in System.Enum.GetValues(typeof(GameEventType)))
             EventBus.Subscribe(t, OnEvent);
     }
 
     void OnDestroy()
     {
-        foreach (GameEventType t in Enum.GetValues(typeof(GameEventType)))
-            EventBus.Unsubscribe(t, OnEvent);
+        if (Instance == this)
+            foreach (GameEventType t in System.Enum.GetValues(typeof(GameEventType)))
+                EventBus.Unsubscribe(t, OnEvent);
     }
 
     void OnEvent(GameEventType t, EventContext ctx)
     {
-        string msg = Format(t, ctx);
-        turnQueue.Enqueue(t, ctx, msg);
-        Debug.Log(msg);
-        GameManagerInteractive.TryAppendLogStatic(msg);
+        var msg = Format(t, ctx);
+        Logger.Info(msg); // logging Unity
+
+        // Esempio: su CardPlayed potresti enqueuare la risoluzione in coda
+        // turnQueue.Enqueue(t, ctx, "Resolve Card Played", producer: SafeName(ctx.source));
     }
 
-    // EventLogger.cs
-    string Name(CardInstance c)
-        => c == null
-            ? "-"
-            : $"#{c.id} {(!string.IsNullOrEmpty(c.def.cardName) ? c.def.cardName : "Card")} HP:{c.health}";
-
-
-    // Evitiamo proprietà ignote di PlayerState: mostriamo solo se è presente
-    string OwnerPresent(object p) => p == null ? "null" : "set";
+    string SafeName(CardInstance c) => c == null ? "null" : $"#{c.id} {c.def.cardName}";
 
     string Format(GameEventType t, EventContext ctx)
     {
         switch (t)
         {
-            case GameEventType.TurnStart: return $"[TURN START] owner:{OwnerPresent(ctx.owner)}";
-            case GameEventType.TurnEnd: return $"[TURN END] owner:{OwnerPresent(ctx.owner)}";
+            case GameEventType.TurnStart: return $"[TURN START] owner:{ctx.owner?.name}";
+            case GameEventType.TurnEnd: return $"[TURN END]   owner:{ctx.owner?.name}";
             case GameEventType.PhaseChanged: return $"[PHASE] {ctx.phase}";
-            case GameEventType.CardPlayed: return $"[PLAY] {Name(ctx.source)}";
-            case GameEventType.Flip: return $"[FLIP] {Name(ctx.source)}";
-            case GameEventType.AttackDeclared: return $"[ATTACK] {Name(ctx.source)} -> {Name(ctx.target)}";
-            case GameEventType.DamageDealt: return $"[DAMAGE] {Name(ctx.target)} -{ctx.amount}";
-            case GameEventType.CardDestroyed: return $"[DESTROY] {Name(ctx.source)}";
-            default: return $"[EVENT {t}]";
+            case GameEventType.CardPlayed: return $"[PLAY]  {SafeName(ctx.source)}";
+            case GameEventType.Flip: return $"[FLIP]  {SafeName(ctx.source)}";
+            case GameEventType.AttackDeclared: return $"[ATTACK] {SafeName(ctx.source)} -> {SafeName(ctx.target)}";
+            case GameEventType.DamageDealt:
+                return ctx.target != null
+                    ? $"[DAMAGE] {SafeName(ctx.target)} -{ctx.amount}"
+                    : $"[DAMAGE] Player {ctx.opponent?.name} -{ctx.amount}";
+            case GameEventType.CardDestroyed: return $"[DESTROY] {SafeName(ctx.target)}";
+            default: return $"[{t}]";
         }
     }
+
+    // Accessor comodo
+    public static TurnQueue Queue => Instance?.turnQueue;
 }

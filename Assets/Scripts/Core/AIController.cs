@@ -5,9 +5,9 @@ using System.Linq;
 public static class AIController
 {
     /// Semplice euristica:
-    /// 1) Se può, spende 1 PA per forzare il flip di una sua carta in modo da massimizzare sinergia retro
+    /// 1) Se pu, spende 1 PA per forzare il flip di una sua carta in modo da massimizzare sinergia retro
     /// 2) Attacca: preferisce bersagliare una carta in retro per danno al player,
-    ///    altrimenti elimina la carta fronte con HP più basso
+    ///    altrimenti elimina la carta fronte con HP pi basso
     public static void ExecuteTurn(System.Random rng, PlayerState ai, PlayerState player)
     {
         // IA avvantaggiata: +1 PA sempre
@@ -17,7 +17,7 @@ public static class AIController
         foreach (var c in ai.board)
             if (c.alive && rng.NextDouble() < 0.5) c.Flip();
 
-        // Tenta un flip mirato per ottenere più retro di una fazione
+        // Tenta un flip mirato per ottenere pi retro di una fazione
         if (ai.actionPoints > 0)
         {
             var bestFaction = ChooseBestRetroFaction(ai);
@@ -30,7 +30,7 @@ public static class AIController
             {
                 candidate.Flip();
                 ai.actionPoints -= 1;
-                Debug.Log($"IA forza flip su {candidate.def.cardName} -> {candidate.side}");
+                Logger.Info($"IA forza flip su {candidate.def.cardName} -> {candidate.side}");
             }
         }
 
@@ -46,7 +46,7 @@ public static class AIController
             CardInstance target = player.board.FirstOrDefault(c => c.alive && c.side == Side.Retro);
             if (target == null)
             {
-                // Altrimenti carta fronte più debole
+                // Altrimenti carta fronte pi debole
                 target = player.board
                     .Where(c => c.alive && c.side == Side.Fronte)
                     .OrderBy(c => c.health)
@@ -61,7 +61,7 @@ public static class AIController
 
     static Faction ChooseBestRetroFaction(PlayerState ai)
     {
-        // Seleziona la fazione con più carte già in retro (per massimizzare i moltiplicatori)
+        // Seleziona la fazione con pi carte gi in retro (per massimizzare i moltiplicatori)
         var groups = ai.board.Where(c => c.alive && c.side == Side.Retro)
             .GroupBy(c => c.def.faction)
             .OrderByDescending(g => g.Count());
