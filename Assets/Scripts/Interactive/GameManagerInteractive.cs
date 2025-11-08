@@ -20,7 +20,7 @@ public class GameManagerInteractive : MonoBehaviour
     class SceneCardTemplate
     {
         public GameObject template;   // disabled clone used as source for Instantiate
-        public CardDefinition def;    // built at runtime from CardDefinitionInline
+        public CardDefinitionInline.Spec def;    // built at runtime from CardDefinitionInline
     }
 
     [Header("Roots")]
@@ -32,7 +32,7 @@ public class GameManagerInteractive : MonoBehaviour
     public Button btnForceFlip;
     public Button btnAttack;
     public Button btnEndTurn;
-    public Text logText; // use TMP_Text if you prefer TMP
+    public Text logText; // use TMP_Text if preferisci TMP
 
     [Header("Match parameters")]
     public int turns = 10;
@@ -123,13 +123,15 @@ public class GameManagerInteractive : MonoBehaviour
         SpawnFromBindings(owner, fallbackBindings, root, outViews);
     }
 
-    // Build CardDefinition from CardDefinitionInline on a GameObject
-    CardDefinition GetDefinitionFromInline(GameObject go)
+    // Helper: try get spec from a GO that has CardDefinitionInline
+    bool TryGetSpec(GameObject go, out CardDefinitionInline.Spec spec)
     {
-        if (go == null) return null;
+        spec = default;
+        if (go == null) return false;
         var inline = go.GetComponent<CardDefinitionInline>();
-        if (inline != null) return inline.BuildRuntimeDefinition();
-        return null;
+        if (inline == null) return false;
+        spec = inline.BuildSpec();
+        return true;
     }
 
     // Scan children under root, pick those with CardView + CardDefinitionInline,
@@ -145,10 +147,11 @@ public class GameManagerInteractive : MonoBehaviour
         foreach (var t in toProcess)
         {
             var view = t.GetComponent<CardView>();
-            var def = GetDefinitionFromInline(t.gameObject);
-            if (view == null || def == null)
+            if (view == null) continue;
+
+            if (!TryGetSpec(t.gameObject, out var def))
             {
-                // Not a card template, skip
+                // Not a valid card (missing CardDefinitionInline)
                 continue;
             }
 
@@ -173,12 +176,12 @@ public class GameManagerInteractive : MonoBehaviour
     {
         foreach (var t in templates)
         {
-            if (t.template == null || t.def == null) continue;
+            if (t.template == null) continue;
             AddCardFromTemplate(owner, t.def, t.template, root, outViews);
         }
     }
 
-    void AddCardFromTemplate(PlayerState owner, CardDefinition def, GameObject template, Transform root, List<CardView> outViews)
+    void AddCardFromTemplate(PlayerState owner, CardDefinitionInline.Spec def, GameObject template, Transform root, List<CardView> outViews)
     {
         var ci = new CardInstance(def, rng);
         owner.board.Add(ci);
@@ -210,10 +213,9 @@ public class GameManagerInteractive : MonoBehaviour
                 continue;
             }
 
-            var def = GetDefinitionFromInline(b.prefab);
-            if (def == null)
+            if (!TryGetSpec(b.prefab, out var def))
             {
-                Debug.LogError("Prefab '" + b.prefab.name + "' has no CardDefinitionInline.");
+                Debug.LogError("Prefab '" + b.prefab.name + "' must have CardDefinitionInline.");
                 continue;
             }
 

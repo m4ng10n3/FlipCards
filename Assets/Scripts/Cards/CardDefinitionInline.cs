@@ -2,6 +2,29 @@ using UnityEngine;
 
 public class CardDefinitionInline : MonoBehaviour
 {
+    [System.Serializable]
+    public struct Spec
+    {
+        // Identità
+        public string cardName;
+        public Faction faction;
+
+        // Stats base
+        public int maxHealth;
+
+        // Fronte
+        public FrontType frontType;
+        public int frontDamage;
+        public int frontBlockValue;
+
+        // Retro (passivi)
+        public int backDamageBonusSameFaction;
+        public int backBlockBonusSameFaction;
+        public int backBonusPAIfTwoRetroSameFaction;
+
+        public override string ToString() => $"{cardName} [{faction}]";
+    }
+
     [Header("Identity")]
     public string cardName = "Card";
     public Faction faction = Faction.Sangue;
@@ -14,23 +37,25 @@ public class CardDefinitionInline : MonoBehaviour
     [Min(0)] public int frontDamage = 2;
     [Min(0)] public int frontBlockValue = 0;
 
-    [Header("Back Bonuses")]
+    [Header("Back (passive)")]
     [Min(0)] public int backDamageBonusSameFaction = 0;
     [Min(0)] public int backBlockBonusSameFaction = 0;
     [Min(0)] public int backBonusPAIfTwoRetroSameFaction = 0;
 
-    public CardDefinition BuildRuntimeDefinition()
+    // Ex-BuildRuntimeDefinition: ora ritorna la Spec senza creare ScriptableObject
+    public Spec BuildSpec()
     {
-        var cd = ScriptableObject.CreateInstance<CardDefinition>();
-        cd.cardName = cardName;
-        cd.faction = faction;
-        cd.maxHealth = maxHealth;
-        cd.frontType = frontType;
-        cd.frontDamage = frontDamage;
-        cd.frontBlockValue = frontBlockValue;
-        cd.backDamageBonusSameFaction = backDamageBonusSameFaction;
-        cd.backBlockBonusSameFaction = backBlockBonusSameFaction;
-        cd.backBonusPAIfTwoRetroSameFaction = backBonusPAIfTwoRetroSameFaction;
-        return cd;
+        return new Spec
+        {
+            cardName = cardName,
+            faction = faction,
+            maxHealth = maxHealth,
+            frontType = frontType,
+            frontDamage = frontDamage,
+            frontBlockValue = frontBlockValue,
+            backDamageBonusSameFaction = backDamageBonusSameFaction,
+            backBlockBonusSameFaction = backBlockBonusSameFaction,
+            backBonusPAIfTwoRetroSameFaction = backBonusPAIfTwoRetroSameFaction
+        };
     }
 }

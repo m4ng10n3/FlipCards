@@ -25,30 +25,29 @@ public class CardView : MonoBehaviour
     Button btn;
 
     [Header("Card Size (for Layout)")]
-    public Vector2 preferredSize = new Vector2(160f, 220f);
+    public Vector2 preferredSize = new Vector2(260, 160);
 
     void Awake()
     {
         btn = GetComponent<Button>();
-        if (btn == null) btn = gameObject.AddComponent<Button>();
-
         var bg = GetComponent<Image>();
+        var le = GetComponent<LayoutElement>();
+
+        if (btn == null) btn = gameObject.AddComponent<Button>();
         if (bg == null) bg = gameObject.AddComponent<Image>();
         if (btn.targetGraphic == null) btn.targetGraphic = bg;
-
-        var le = GetComponent<LayoutElement>();
         if (le == null) le = gameObject.AddComponent<LayoutElement>();
         le.preferredWidth = preferredSize.x;
         le.preferredHeight = preferredSize.y;
 
         if (autoBindByName) TryAutoBindTexts();
 
-        // NEW: preview immediato leggendo CardDefinitionInline quando la scena monta
+        // Preview immediato leggendo l'inline quando la scena monta
         PreviewFromInlineIfNoInstance();
     }
 
     // =========================================================
-    // PREVIEW: mostra i dati della CardDefinitionInline se non c'e' ancora un'istanza runtime
+    // PREVIEW: mostra i dati della CardDefinitionInline se non c'è ancora un'istanza runtime
     // =========================================================
     void PreviewFromInlineIfNoInstance()
     {
@@ -57,9 +56,8 @@ public class CardView : MonoBehaviour
         var inline = GetComponent<CardDefinitionInline>();
         if (inline == null) return;
 
-        // costruiamo una def temporanea e visualizziamo
-        var def = inline.BuildRuntimeDefinition();
-        if (def == null) return;
+        // costruiamo la spec temporanea e visualizziamo
+        var def = inline.BuildSpec(); // <--- era BuildRuntimeDefinition()
 
         // lato e hp preview (non esiste ancora lo stato runtime)
         string sidePreview = "Side";
@@ -78,23 +76,19 @@ public class CardView : MonoBehaviour
             backBonusesText.text =
                 "Back: +DMG same " + def.backDamageBonusSameFaction + "\n" +
                 "      +BLK same " + def.backBlockBonusSameFaction + "\n" +
-                "      +AP if 2 Back same: " + def.backBonusPAIfTwoRetroSameFaction;
+                "      +PA(2 retro same) " + def.backBonusPAIfTwoRetroSameFaction;
         }
     }
 
     // =========================================================
-    // AUTOBIND
+    // Autowire in base ai nomi figli (facoltativo)
     // =========================================================
     void TryAutoBindTexts()
     {
-        Text Find(string childName)
+        Text Find(string n)
         {
-            var t = transform.Find(childName);
-            if (t != null) return t.GetComponent<Text>();
-            var texts = GetComponentsInChildren<Text>(true);
-            foreach (var tx in texts)
-                if (tx.gameObject.name == childName) return tx;
-            return null;
+            var t = transform.Find(n);
+            return t != null ? t.GetComponent<Text>() : null;
         }
 
         if (nameText == null) nameText = Find("Name");
@@ -107,9 +101,6 @@ public class CardView : MonoBehaviour
         if (backBonusesText == null) backBonusesText = Find("BackBonuses");
     }
 
-    // =========================================================
-    // RUNTIME WIRING
-    // =========================================================
     public void Init(GameManagerInteractive gm, PlayerState owner, CardInstance instance)
     {
         this.gm = gm;
@@ -133,16 +124,18 @@ public class CardView : MonoBehaviour
     {
         if (highlight == null)
             highlight = gameObject.GetComponent<Outline>() ?? gameObject.AddComponent<Outline>();
-        highlight.effectDistance = on ? new Vector2(4f, -4f) : Vector2.zero;
+
+        highlight.effectColor = Color.yellow;
+        highlight.effectDistance = new Vector2(5, 5);
+        highlight.useGraphicAlpha = true;
         highlight.enabled = on;
     }
 
-    // =========================================================
-    // REFRESH RUNTIME
-    // =========================================================
     public void Refresh()
     {
-        if (instance == null || instance.def == null) return;
+        // instance può essere null; def è una struct quindi NON si confronta con null
+        if (instance == null) return;
+
         var def = instance.def;
 
         if (nameText != null) nameText.text = def.cardName;
@@ -158,15 +151,7 @@ public class CardView : MonoBehaviour
             backBonusesText.text =
                 "Back: +DMG same " + def.backDamageBonusSameFaction + "\n" +
                 "      +BLK same " + def.backBlockBonusSameFaction + "\n" +
-                "      +AP if 2 Back same: " + def.backBonusPAIfTwoRetroSameFaction;
-        }
-
-        var bg = GetComponent<Image>();
-        if (bg != null)
-        {
-            bg.color = (instance.side == Side.Fronte)
-                ? new Color(0.90f, 0.98f, 1f, 1f)
-                : new Color(1f, 0.95f, 0.90f, 1f);
+                "      +PA(2 retro same) " + def.backBonusPAIfTwoRetroSameFaction;
         }
     }
 
