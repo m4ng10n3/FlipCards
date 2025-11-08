@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -50,6 +51,45 @@ public class GameManagerInteractive : MonoBehaviour
     static GameManagerInteractive _instance;
     public static GameManagerInteractive Instance => _instance;
 
+
+// ====== SIMPLE RULE ENGINE (INLINE, NO EXTRA FILES) ======
+struct Rule
+{
+    public GameEventType trigger;
+    public Func<EventContext, bool> cond;
+    public Action<EventContext> act;
+    public bool enabled;
+}
+readonly List<Rule> _rules = new List<Rule>();
+readonly Queue<(GameEventType evt, EventContext ctx)> _pending = new Queue<(GameEventType, EventContext)>();
+public bool enableDefaultRules = true; // puoi spegnerle in Inspector
+
+void AddRule(GameEventType t, Func<EventContext,bool> cond, Action<EventContext> act, bool enabled = true)
+{
+    _rules.Add(new Rule{ trigger=t, cond=cond, act=act, enabled=enabled });
+}
+
+void ClearRules() => _rules.Clear();
+
+void OnEventCaptured(GameEventType t, EventContext ctx)
+{
+    _pending.Enqueue((t, ctx));
+}
+
+void ProcessPendingEvents()
+{
+    while (_pending.Count > 0)
+    {
+        var item = _pending.Dequeue();
+        foreach (var r in _rules)
+        {
+            if (!r.enabled || r.trigger != item.evt) continue;
+            var ok = r.cond == null ? true : r.cond(item.ctx);
+            if (!ok) continue;
+            r.act?.Invoke(item.ctx);
+        }
+    }
+}
     // ====== RUNTIME ======
     System.Random rng;
     public PlayerState player;
@@ -103,10 +143,35 @@ public class GameManagerInteractive : MonoBehaviour
 
         // Pubblica inizio turno iniziale (player)
         EventBus.Publish(GameEventType.TurnStart, new EventContext { owner = player, opponent = ai, phase = "TurnStart" });
+
+// Minimal default rules (all inline), disable by unchecking enableDefaultRules
+if (enableDefaultRules)
+{
+    // Esempio: se una carta in FRONTE infligge danno a un'altra carta, applica +1 danno extra
+    AddRule(GameEventType.DamageDealt,
+        ctx => ctx.target != null && ctx.source != null && ctx.source.side == Side.Fronte,
+        ctx => {
+            // Applica danno extra alla carta bersaglio
+            GameRules.DealDamageToCard(ctx.owner, ctx.opponent, ctx.source, ctx.target, 1, "Rule:+1 Front");
+        });
+
+    // Esempio: a inizio turno del player, se hai >=2 retro stessa fazione della fonte, +1 danno al player nemico (demo)
+    AddRule(GameEventType.TurnStart,
+        ctx => ctx.owner == player && player.CountRetro(Faction.Ombra) >= 2, // scegli una fazione a piacere per test
+        ctx => {
+            GameRules.DealDamageToPlayer(ctx.owner, ctx.opponent, null, 1, "Rule:Upkeep Ping");
+        });
+}
+
     }
 
     void Awake()
     {
+
+// Subscribe to all events to capture them into the pending queue
+foreach (GameEventType t in Enum.GetValues(typeof(GameEventType)))
+    EventBus.Subscribe(t, OnEventCaptured);
+
         Logger.Sink = AppendLog;
 
         _instance = this;
@@ -429,5 +494,11 @@ public class GameManagerInteractive : MonoBehaviour
         bool isPlayers = view.owner == player;
         if (isPlayers) SelectionManager.Instance.SelectOwned(view);
         else SelectionManager.Instance.SelectEnemy(view);
+    }
+
+
+    void Update()
+    {
+        ProcessPendingEvents();
     }
 }

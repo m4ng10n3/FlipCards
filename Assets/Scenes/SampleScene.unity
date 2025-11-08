@@ -527,6 +527,7 @@ MonoBehaviour:
   aiCards:
   - prefab: {fileID: 838385382}
     count: 3
+  enableDefaultRules: 1
 --- !u!1001 &271622282
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2901,7 +2902,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 93615925}
   m_HandleRect: {fileID: 93615924}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
