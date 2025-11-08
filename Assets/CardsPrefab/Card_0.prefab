@@ -502,9 +502,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ce414175bdb9c346b3737d0aac2f71f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CardDefinitionInline
-  cardName: PLUTO
-  faction: 1
-  maxHealth: 3
+  cardName: PIPPO
+  faction: 0
+  maxHealth: 10
   frontType: 0
   frontDamage: 2
   frontBlockValue: 0
