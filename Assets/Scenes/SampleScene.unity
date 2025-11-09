@@ -515,6 +515,9 @@ MonoBehaviour:
   btnForceFlip: {fileID: 395494137}
   btnAttack: {fileID: 635779137}
   btnEndTurn: {fileID: 2042722747}
+  enemyControlledByButtons: 1
+  btnEnemyAttack: {fileID: 635779137}
+  btnEnemyFlip: {fileID: 395494137}
   logText: {fileID: 692273231}
   turns: 10
   playerBaseAP: 3
@@ -1638,7 +1641,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -0.000061035156, y: 491.47498}
+  m_AnchoredPosition: {x: -0.000061035156, y: 491.475}
   m_SizeDelta: {x: 0, y: 978.8715}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &692273231

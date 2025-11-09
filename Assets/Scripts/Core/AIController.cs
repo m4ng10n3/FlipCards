@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 
+
+
 public static class AIController
 {
     /// Semplice euristica:
@@ -23,7 +25,7 @@ public static class AIController
         // Tenta un flip mirato per ottenere pi retro di una fazione
         if (ai.actionPoints > 0)
         {
-            var bestFaction = ChooseBestRetroFaction(ai);
+            var bestFaction = ChooseBestRetroFaction(ai, rng);
             var candidate = ai.board
                 .Where(c => c.alive && c.side == Side.Fronte && c.def.faction == bestFaction)
                 .OrderByDescending(c => c.def.backDamageBonusSameFaction + c.def.backBlockBonusSameFaction + c.def.backBonusPAIfTwoRetroSameFaction)
@@ -64,12 +66,14 @@ public static class AIController
         }
     }
 
-    static Faction ChooseBestRetroFaction(PlayerState ai)
+    static Faction ChooseBestRetroFaction(PlayerState ai, System.Random rng)
     {
-        // Seleziona la fazione con pi carte gi in retro (per massimizzare i moltiplicatori)
         var groups = ai.board.Where(c => c.alive && c.side == Side.Retro)
-            .GroupBy(c => c.def.faction)
-            .OrderByDescending(g => g.Count());
-        return groups.Any() ? groups.First().Key : (Faction)Random.Range(0, 3);
+                             .GroupBy(c => c.def.faction)
+                             .OrderByDescending(g => g.Count());
+        if (groups.Any()) return groups.First().Key;
+
+        var values = (Faction[])System.Enum.GetValues(typeof(Faction));
+        return values[rng.Next(values.Length)];
     }
 }

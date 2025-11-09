@@ -34,6 +34,12 @@ public class GameManagerInteractive : MonoBehaviour
     public Button btnForceFlip;
     public Button btnAttack;
     public Button btnEndTurn;
+    [Header("Control")]
+    public bool enemyControlledByButtons = true; // se true non auto-esegue l'IA: usi i bottoni Enemy
+    public Button btnEnemyAttack;
+    public Button btnEnemyFlip;
+
+    [Header("LOG")]
     public Text logText; // use TMP_Text se preferisci TMP
     private static StringBuilder _logBuf = new StringBuilder(4096);
 
@@ -170,6 +176,8 @@ public class GameManagerInteractive : MonoBehaviour
         if (btnForceFlip) btnForceFlip.onClick.AddListener(OnForceFlip);
         if (btnAttack) btnAttack.onClick.AddListener(OnAttack);
         if (btnEndTurn) btnEndTurn.onClick.AddListener(OnEndTurn);
+        if (btnEnemyAttack) btnEnemyAttack.onClick.AddListener(OnEnemyAttack);
+        if (btnEnemyFlip) btnEnemyFlip.onClick.AddListener(OnEnemyFlip);
     }
 
 
@@ -324,7 +332,7 @@ public class GameManagerInteractive : MonoBehaviour
     public void UpdateHUD()
     {
         if (matchEnded) return;
-        string header = "[TURN " + currentTurn + "] " + (playerPhase ? "PLAYER PHASE" : "AI PHASE");
+        string header = "[TURN " + currentTurn + "] " + (playerPhase ? "PLAYER PHASE" : "ENEMY PHASE");
         string status = "Player HP:" + player.hp + " AP:" + player.actionPoints + "  ||  AI HP:" + ai.hp + " AP:" + ai.actionPoints;
         Logger.Info(header + "  " + status);
     }
@@ -337,27 +345,53 @@ public class GameManagerInteractive : MonoBehaviour
         // reset AP (semplice: base fissa; se vuoi bonus passivi, calcolali qui)
         owner.actionPoints = (owner == player) ? playerBaseAP : aiBaseAP;
 
+        Logger.Info($"--- TURN {currentTurn} START [{(isPlayerPhase ? "PLAYER" : "ENEMY")}] ---");
         EventBus.Publish(GameEventType.TurnStart, new EventContext { owner = owner, opponent = opponent, phase = "TurnStart" });
         UpdateHUD();
 
         // se è turno IA, eseguila immediatamente e poi chiudi il turno
+        // se è turno IA…
         if (!playerPhase && !matchEnded)
         {
-            AIController.ExecuteTurn(rng, ai, player);    // vedi fix sotto per AIController
+            if (enemyControlledByButtons)
+            {
+                Logger.Info("[GM] Enemy manual phase: usa i bottoni Enemy per agire.");
+                // niente auto-IA: resta nel turno avversario
+                return;
+            }
+            else
+            {
+                AIController.ExecuteTurn(rng, ai, player);
+                CleanupDestroyed(player);
+                CleanupDestroyed(ai);
+                UpdateAllViews();
+                UpdateHUD();
+
+                EndTurnInternal(ai, player);
+                if (!matchEnded)
+                {
+                    currentTurn++;                            // <-- AGGIUNTA
+                    StartTurn(player, ai, true);
+                }
+            }
+
+                // IA automatica
+                AIController.ExecuteTurn(rng, ai, player);
             CleanupDestroyed(player);
             CleanupDestroyed(ai);
             UpdateAllViews();
             UpdateHUD();
 
-            // chiude turno IA e torna al player
             EndTurnInternal(ai, player);
             if (!matchEnded)
                 StartTurn(player, ai, true);
         }
+
     }
 
     void EndTurnInternal(PlayerState owner, PlayerState opponent)
     {
+        Logger.Info($"--- TURN {(playerPhase ? "PLAYER" : "ENEMY")} END ---");
         EventBus.Publish(GameEventType.TurnEnd, new EventContext { owner = owner, opponent = opponent, phase = "TurnEnd" });
         if (IsGameOver() || currentTurn >= turns) EndMatch();
     }
@@ -403,6 +437,41 @@ public class GameManagerInteractive : MonoBehaviour
         UpdateHUD();
     }
 
+    void OnEnemyAttack()
+    {
+        if (matchEnded || playerPhase) return;                    // deve essere fase AI
+        if (!enemyControlledByButtons) return;                    // controllo manuale attivo
+        if (ai.actionPoints <= 0) { Logger.Info("Enemy: no AP."); UpdateHUD(); return; }
+
+        var atk = SelectionManager.Instance.SelectedEnemy?.instance; // attaccante = carta nemica selezionata
+        var tgt = SelectionManager.Instance.SelectedOwned?.instance; // bersaglio = carta del player
+        if (atk == null || tgt == null) return;
+
+        atk.Attack(ai, player, tgt);
+        ai.actionPoints -= 1;
+
+        CleanupDestroyed(player);
+        CleanupDestroyed(ai);
+        UpdateAllViews();
+        UpdateHUD();
+    }
+
+    void OnEnemyFlip()
+    {
+        if (matchEnded || playerPhase) return;
+        if (!enemyControlledByButtons) return;
+        if (ai.actionPoints <= 0) { Logger.Info("Enemy: no AP."); UpdateHUD(); return; }
+
+        var sel = SelectionManager.Instance.SelectedEnemy?.instance;
+        if (sel == null) return;
+
+        sel.Flip();
+        ai.actionPoints -= 1;
+        EventBus.Publish(GameEventType.Flip, new EventContext { owner = ai, opponent = player, source = sel });
+
+        UpdateAllViews();
+        UpdateHUD();
+    }
 
     void OnEndTurn()
     {
@@ -412,17 +481,16 @@ public class GameManagerInteractive : MonoBehaviour
         {
             EndTurnInternal(player, ai);
             if (!matchEnded)
-            {
-                currentTurn++;
                 StartTurn(ai, player, false);
-            }
         }
         else
         {
-            // In pratica non ci arrivi, perché l’IA si auto-gestisce, ma per completezza:
             EndTurnInternal(ai, player);
             if (!matchEnded)
+            {
+                currentTurn++;                       // <-- incrementa quando torni al Player
                 StartTurn(player, ai, true);
+            }
         }
     }
     void CleanupDestroyed(PlayerState p)
