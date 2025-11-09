@@ -19,7 +19,7 @@ public class OnFlipDealDamage : AbilityBase
                 if (!onlyWhenToFront || Source.side == Side.Fronte)
                 {
 
-                    GameManagerInteractive.Logf("[Ability Flip] {0} deals {1} to PLAYER {2}", Source.def.cardName, damage, Opponent.name);
+                    //GameManagerInteractive.Logf("[Ability Flip] {0} deals {1} to PLAYER {2}", Source.def.cardName, damage, Opponent.name);
                     var view = Source != null ? GameManagerInteractive.Instance?.GetComponentInChildren<CardView>() : null; // se non hai un accessor diretto
                     // Applica danno diretto al player avversario
                     Opponent.hp -= damage;

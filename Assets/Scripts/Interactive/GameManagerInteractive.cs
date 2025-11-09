@@ -36,7 +36,6 @@ public class GameManagerInteractive : MonoBehaviour
     public Button btnEndTurn;
     public Text logText; // use TMP_Text se preferisci TMP
     private static StringBuilder _logBuf = new StringBuilder(4096);
-    public static Action<string> Log; // punto di ingresso globale
 
     [Header("Match parameters")]
     public int turns = 10;
@@ -132,13 +131,13 @@ public class GameManagerInteractive : MonoBehaviour
         // 2) Enforce minimum per side
         if (playerViews.Count < minCardsPerSide || aiViews.Count < minCardsPerSide)
         {
-            AppendLog("Not enough cards to start. Player:" + playerViews.Count + " / AI:" + aiViews.Count + " (min " + minCardsPerSide + ")");
+            Logger.Info("Not enough cards to start. Player:" + playerViews.Count + " / AI:" + aiViews.Count + " (min " + minCardsPerSide + ")");
             matchEnded = true;
             return;
         }
 
         // Bind UI
-        AppendLog("=== MATCH START (Scene templates -> runtime instances, inline defs) ===");
+        Logger.Info("=== MATCH START (Scene templates -> runtime instances, inline defs) ===");
         UpdateAllViews();
         UpdateHUD();
 
@@ -168,11 +167,8 @@ public class GameManagerInteractive : MonoBehaviour
 
     void Awake()
     {
-        Log = AppendLog; // collega lo sink globale
-        AppendLog("== GameManager ready ==");
-        // Subscribe to all events to capture them into the pending queue
-
-        Logger.Sink = AppendLog;
+        Logger.SetSink(AppendLog);     // <— questa è l’unica cosa indispensabile
+        Logger.Info("== GameManager ready ==");
 
         _instance = this;
         // wiring bottoni
@@ -184,7 +180,8 @@ public class GameManagerInteractive : MonoBehaviour
 
 
     public static void Logf(string fmt, params object[] args)
-        => Log?.Invoke(string.Format(fmt, args));
+    => Logger.Info(string.Format(fmt, args));
+
 
 
     // ====== BUILD SIDE ======
@@ -335,7 +332,7 @@ public class GameManagerInteractive : MonoBehaviour
         if (matchEnded) return;
         string header = "[TURN " + currentTurn + "] " + (playerPhase ? "PLAYER PHASE" : "AI PHASE");
         string status = "Player HP:" + player.hp + " AP:" + player.actionPoints + "  ||  AI HP:" + ai.hp + " AP:" + ai.actionPoints;
-        AppendLog(header + "  " + status);
+        Logger.Info(header + "  " + status);
     }
 
     // ====== UI ACTIONS ======
@@ -422,8 +419,8 @@ public class GameManagerInteractive : MonoBehaviour
         matchEnded = true;
         int diff = (ai.hp - player.hp);
         string result = diff > 0 ? "AI AHEAD" : diff < 0 ? "PLAYER AHEAD" : "TIE";
-        AppendLog("=== MATCH END ===");
-        AppendLog("Score: PlayerHP " + player.hp + " vs AIHP " + ai.hp + " | Diff (AI-Player) = " + diff + " -> " + result);
+        Logger.Info("=== MATCH END ===");
+        Logger.Info("Score: PlayerHP " + player.hp + " vs AIHP " + ai.hp + " | Diff (AI-Player) = " + diff + " -> " + result);
     }
 
     // Called by CardView on click

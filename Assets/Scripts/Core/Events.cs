@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using static Unity.Burst.Intrinsics.X86;
+using static UnityEngine.Rendering.GPUSort;
 
 public enum GameEventType { TurnStart, TurnEnd, Flip, AttackDeclared, DamageDealt, CardDestroyed, CardPlayed, PhaseChanged }
 
@@ -47,7 +49,7 @@ public static class EventBus
 
     public static void Publish(GameEventType t, EventContext ctx)
     {
-        GameManagerInteractive.Logf("[EVENT] {0} | {1}", t, ctx.ToString());
+        Logger.Info(EventLogger.Format(t, ctx));
         if (_subs.TryGetValue(t, out var list))
             foreach (var h in list.ToArray()) h?.Invoke(t, ctx);
     }

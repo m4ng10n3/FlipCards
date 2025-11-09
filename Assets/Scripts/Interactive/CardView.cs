@@ -184,7 +184,7 @@ public class CardView : MonoBehaviour
 
     public void Hint(string msg, float seconds = 1.2f)
     {
-        if (hintText == null) { GameManagerInteractive.Log?.Invoke("[Card] " + msg); return; }
+        if (hintText == null) { Logger.Info("[Card] " + msg); return; }
         StopAllCoroutines();
         StartCoroutine(FlashHint(msg, seconds));
     }

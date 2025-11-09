@@ -11,7 +11,8 @@ public static class AIController
     
     public static void ExecuteTurn(System.Random rng, PlayerState ai, PlayerState player)
     {
-        GameManagerInteractive.Log("[AI] Begin turn");
+        //GameManagerInteractive.Log("[AI] Begin turn");
+        Logger.Info("[AI] Begin turn");
         // IA avvantaggiata: +1 PA sempre
         ai.actionPoints += 1;
 
@@ -27,13 +28,13 @@ public static class AIController
                 .Where(c => c.alive && c.side == Side.Fronte && c.def.faction == bestFaction)
                 .OrderByDescending(c => c.def.backDamageBonusSameFaction + c.def.backBlockBonusSameFaction + c.def.backBonusPAIfTwoRetroSameFaction)
                 .FirstOrDefault();
-            GameManagerInteractive.Logf("[AI] Plan flip for faction {0}", bestFaction);
-
+            //Logger.Info("[AI] Plan flip for faction {0}", bestFaction);
+            Logger.Info("[AI] Plan flip for faction {0}", bestFaction);
             if (candidate != null)
             {
                 candidate.Flip();
                 ai.actionPoints -= 1;
-                GameManagerInteractive.Logf("[AI] Flip {0} -> {1}", candidate.def.cardName, candidate.side);
+                Logger.Info("[AI] Flip {0} -> {1}", candidate.def.cardName, candidate.side);
             }
         }
 
@@ -56,7 +57,7 @@ public static class AIController
                     .FirstOrDefault();
             }
             if (target == null) break; // niente da attaccare
-            GameManagerInteractive.Logf("[AI] Choose attack: {0} -> {1}", atk.def.cardName, target.def.cardName);
+            Logger.Info("[AI] Choose attack: {0} -> {1}", atk.def.cardName, target.def.cardName);
 
 
             GameRules.Attack(ai, player, atk, target);

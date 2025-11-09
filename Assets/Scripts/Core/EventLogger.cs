@@ -25,13 +25,12 @@ public class EventLogger : MonoBehaviour
     void OnEvent(GameEventType t, EventContext ctx)
     {
         var msg = Format(t, ctx);
-        // Esempio: su CardPlayed potresti enqueuare la risoluzione in coda
-        // turnQueue.Enqueue(t, ctx, "Resolve Card Played", producer: SafeName(ctx.source));
+        Logger.Info(msg); // passa sempre dal logger
     }
 
-    string SafeName(CardInstance c) => c == null ? "null" : $"#{c.id} {c.def.cardName}";
+    public static string SafeName(CardInstance c) => c == null ? "null" : $"#{c.id} {c.def.cardName}";
 
-    string Format(GameEventType t, EventContext ctx)
+    public static string Format(GameEventType t, EventContext ctx)
     {
         switch (t)
         {
