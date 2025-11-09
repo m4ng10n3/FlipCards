@@ -16,6 +16,7 @@ public class SelectionManager : MonoBehaviour
 
     public void SelectOwned(CardView view)
     {
+        GameManagerInteractive.Logf("[SEL] Owned={0} Enemy={1}", SelectedOwned, SelectedEnemy);
         if (SelectedOwned != null) SelectedOwned.SetHighlight(false);
         SelectedOwned = view;
         if (SelectedOwned != null) SelectedOwned.SetHighlight(true);
@@ -23,6 +24,7 @@ public class SelectionManager : MonoBehaviour
 
     public void SelectEnemy(CardView view)
     {
+        GameManagerInteractive.Logf("[SEL] Owned={0} Enemy={1}", SelectedOwned, SelectedEnemy);
         if (SelectedEnemy != null) SelectedEnemy.SetHighlight(false);
         SelectedEnemy = view;
         if (SelectedEnemy != null) SelectedEnemy.SetHighlight(true);
@@ -30,6 +32,7 @@ public class SelectionManager : MonoBehaviour
 
     public void ClearAll()
     {
+        GameManagerInteractive.Logf("[SEL] Owned={0} Enemy={1}", SelectedOwned, SelectedEnemy);
         if (SelectedOwned != null) SelectedOwned.SetHighlight(false);
         if (SelectedEnemy != null) SelectedEnemy.SetHighlight(false);
         SelectedOwned = null;

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using System.Diagnostics; // per Conditional
 
 /// <summary>
 /// Regole centrali:
@@ -7,6 +8,8 @@ using UnityEngine;
 /// - Blocco = riduzione danni al player quando si colpisce una carta in retro
 /// + Hook eventi per abilit (AttackDeclared, DamageDealt, CardDestroyed)
 /// </summary>
+/// 
+
 public static class GameRules
 {
     /// Calcola bonus danno per una carta in fronte derivante da carte retro alleate della stessa fazione.
@@ -19,6 +22,7 @@ public static class GameRules
             if (ci.side == Side.Retro && ci.def.faction == faction)
                 bonus += ci.def.backDamageBonusSameFaction;
         }
+        D($"DamageBonusFromRetro(owner:{owner.name}, faction:{faction}) = {bonus}");
         return bonus;
     }
 
@@ -36,6 +40,7 @@ public static class GameRules
                 total += ci.def.frontBlockValue + retroBonus;
             }
         }
+        D($"TotalFrontBlock(defender:{defender.name}) = {total}");
         return total;
     }
 
@@ -48,6 +53,7 @@ public static class GameRules
             if (ci.side == Side.Retro && ci.def.faction == faction)
                 b += ci.def.backBlockBonusSameFaction;
         }
+        D($"BlockBonusFromRetro(owner:{owner.name}, faction:{faction}) = {b}");
         return b;
     }
 
@@ -69,6 +75,7 @@ public static class GameRules
                 bonus += max;
             }
         }
+        D($"PassiveBonusPA({p.name}) = {bonus}");
         return bonus;
     }
 
@@ -91,12 +98,14 @@ public static class GameRules
         });
 
         int dmg = attackerCard.def.frontDamage + DamageBonusFromRetro(attacker, attackerCard.def.faction);
+        D($"Attack(proposed dmg) attacker:{attacker.name} card:{attackerCard.def.cardName} dmg:{dmg}");
+
         dmg = Mathf.Max(0, dmg);
 
         if (targetCard.side == Side.Fronte)
         {
             targetCard.health -= dmg;
-            Logger.Info($"{attacker.name} attacca {targetCard.def.cardName} per {dmg} (fronte). HP carta: {targetCard.health}");
+            D($"Attack->Card target:{targetCard.def.cardName} newHP:{targetCard.health}");
 
             // Event: danno a carta
             EventBus.Publish(GameEventType.DamageDealt, new EventContext
@@ -129,7 +138,7 @@ public static class GameRules
             int block = TotalFrontBlock(defender);
             int final = Mathf.Max(0, dmg - block);
             defender.hp -= final;
-            Logger.Info($"{attacker.name} colpisce il PLAYER {defender.name} per {final} (dmg {dmg} - block {block}) bersagliando {targetCard.def.cardName} in retro.");
+            D($"Attack->Player target:{defender.name} final:{final} (raw:{dmg} - block:{block}) newHP:{defender.hp}");
 
             // Event: danno al player
             EventBus.Publish(GameEventType.DamageDealt, new EventContext
@@ -145,14 +154,18 @@ public static class GameRules
     }
 
 
-// === Helper methods for generic damage application (used by Rule actions) ===
-public static void DealDamageToPlayer(PlayerState owner, PlayerState opponent, CardInstance source, int amount, string phase = null)
+    // === Helper methods for generic damage application (used by Rule actions) ===
+
+    [Conditional("DEBUG_LOGS")]
+    static void D(string m) => GameManagerInteractive.Log?.Invoke("[Rules] " + m);
+
+    public static void DealDamageToPlayer(PlayerState owner, PlayerState opponent, CardInstance source, int amount, string phase = null)
 {
     int final = Mathf.Max(0, amount);
     opponent.hp -= final;
-    Logger.Info($"[{phase ?? "Damage"}] {owner.name} infligge {final} danni al Player {opponent.name}. HP: {opponent.hp}");
+    D($"DealDamageToPlayer owner:{owner.name} -> {opponent.name} amount:{final} newHP:{opponent.hp} ({phase})");
 
-    EventBus.Publish(GameEventType.DamageDealt, new EventContext
+        EventBus.Publish(GameEventType.DamageDealt, new EventContext
     {
         owner = owner,
         opponent = opponent,
@@ -174,7 +187,7 @@ public static void DealDamageToCard(PlayerState owner, PlayerState opponent, Car
     if (target == null || !target.alive) return;
     int final = Mathf.Max(0, amount);
     target.health -= final;
-    Logger.Info($"[{phase ?? "Damage"}] {owner.name} infligge {final} danni a {target.def.cardName}. HP carta: {target.health}");
+    D($"DealDamageToCard owner:{owner.name} -> {target.def.cardName} amount:{final} newHP:{target.health} ({phase})");
 
     EventBus.Publish(GameEventType.DamageDealt, new EventContext
     {

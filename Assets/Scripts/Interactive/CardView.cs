@@ -27,6 +27,11 @@ public class CardView : MonoBehaviour
     [Header("Card Size (for Layout)")]
     public Vector2 preferredSize = new Vector2(260, 160);
 
+    [SerializeField] private Text hintText; // opzionale; se non assegnato, fa fallback al log
+    private int _lastHp = int.MinValue, _lastDmg = int.MinValue, _lastBlk = int.MinValue;
+
+
+
     void Awake()
     {
         btn = GetComponent<Button>();
@@ -153,6 +158,16 @@ public class CardView : MonoBehaviour
                 "      +BLK same " + def.backBlockBonusSameFaction + "\n" +
                 "      +PA(2 retro same) " + def.backBonusPAIfTwoRetroSameFaction;
         }
+
+        int newHp = instance.health;
+        int newDmg = instance.def.frontDamage;
+        int newBlk = instance.def.frontBlockValue;
+
+        if (_lastHp != int.MinValue && _lastHp != newHp) Hint($"HP: {_lastHp} : {newHp}");
+        if (_lastDmg != int.MinValue && _lastDmg != newDmg) Hint($"DMG: {_lastDmg} : {newDmg}");
+        if (_lastBlk != int.MinValue && _lastBlk != newBlk) Hint($"BLK: {_lastBlk} : {newBlk}");
+
+        _lastHp = newHp; _lastDmg = newDmg; _lastBlk = newBlk;
     }
 
     // Small visual feedback
@@ -165,5 +180,20 @@ public class CardView : MonoBehaviour
         img.color = Color.yellow;
         yield return new WaitForSeconds(0.08f);
         img.color = c;
+    }
+
+    public void Hint(string msg, float seconds = 1.2f)
+    {
+        if (hintText == null) { GameManagerInteractive.Log?.Invoke("[Card] " + msg); return; }
+        StopAllCoroutines();
+        StartCoroutine(FlashHint(msg, seconds));
+    }
+
+    private System.Collections.IEnumerator FlashHint(string msg, float seconds)
+    {
+        hintText.gameObject.SetActive(true);
+        hintText.text = msg;
+        yield return new WaitForSeconds(seconds);
+        hintText.gameObject.SetActive(false);
     }
 }

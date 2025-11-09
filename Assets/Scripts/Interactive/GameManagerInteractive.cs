@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Linq;
 
 public class GameManagerInteractive : MonoBehaviour
 {
@@ -34,6 +35,8 @@ public class GameManagerInteractive : MonoBehaviour
     public Button btnAttack;
     public Button btnEndTurn;
     public Text logText; // use TMP_Text se preferisci TMP
+    private static StringBuilder _logBuf = new StringBuilder(4096);
+    public static Action<string> Log; // punto di ingresso globale
 
     [Header("Match parameters")]
     public int turns = 10;
@@ -51,32 +54,35 @@ public class GameManagerInteractive : MonoBehaviour
     static GameManagerInteractive _instance;
     public static GameManagerInteractive Instance => _instance;
 
+    public bool TryGetView(CardInstance ci, out CardView v) => viewByInstance.TryGetValue(ci, out v);
 
-// ====== SIMPLE RULE ENGINE (INLINE, NO EXTRA FILES) ======
-struct Rule
+
+
+    // ====== SIMPLE RULE ENGINE (INLINE, NO EXTRA FILES) ======
+    struct Rule
 {
     public GameEventType trigger;
     public Func<EventContext, bool> cond;
     public Action<EventContext> act;
     public bool enabled;
 }
-readonly List<Rule> _rules = new List<Rule>();
-readonly Queue<(GameEventType evt, EventContext ctx)> _pending = new Queue<(GameEventType, EventContext)>();
-public bool enableDefaultRules = true; // puoi spegnerle in Inspector
+    readonly List<Rule> _rules = new List<Rule>();
+    readonly Queue<(GameEventType evt, EventContext ctx)> _pending = new Queue<(GameEventType, EventContext)>();
+    public bool enableDefaultRules = true; // puoi spegnerle in Inspector
 
-void AddRule(GameEventType t, Func<EventContext,bool> cond, Action<EventContext> act, bool enabled = true)
-{
-    _rules.Add(new Rule{ trigger=t, cond=cond, act=act, enabled=enabled });
-}
+    void AddRule(GameEventType t, Func<EventContext,bool> cond, Action<EventContext> act, bool enabled = true)
+    {
+        _rules.Add(new Rule{ trigger=t, cond=cond, act=act, enabled=enabled });
+    }
 
-void ClearRules() => _rules.Clear();
+    void ClearRules() => _rules.Clear();
 
-void OnEventCaptured(GameEventType t, EventContext ctx)
-{
-    _pending.Enqueue((t, ctx));
-}
+    void OnEventCaptured(GameEventType t, EventContext ctx)
+    {
+        _pending.Enqueue((t, ctx));
+    }
 
-void ProcessPendingEvents()
+    void ProcessPendingEvents()
 {
     while (_pending.Count > 0)
     {
@@ -144,33 +150,34 @@ void ProcessPendingEvents()
         // Pubblica inizio turno iniziale (player)
         EventBus.Publish(GameEventType.TurnStart, new EventContext { owner = player, opponent = ai, phase = "TurnStart" });
 
-// Minimal default rules (all inline), disable by unchecking enableDefaultRules
-if (enableDefaultRules)
-{
-    // Esempio: se una carta in FRONTE infligge danno a un'altra carta, applica +1 danno extra
-    AddRule(GameEventType.DamageDealt,
-        ctx => ctx.target != null && ctx.source != null && ctx.source.side == Side.Fronte,
-        ctx => {
-            // Applica danno extra alla carta bersaglio
-            GameRules.DealDamageToCard(ctx.owner, ctx.opponent, ctx.source, ctx.target, 1, "Rule:+1 Front");
-        });
+        // Minimal default rules (all inline), disable by unchecking enableDefaultRules
+        if (enableDefaultRules)
+        {
+            // Esempio: se una carta in FRONTE infligge danno a un'altra carta, applica +1 danno extra
+            AddRule(GameEventType.DamageDealt,
+                ctx => ctx.target != null && ctx.source != null && ctx.source.side == Side.Fronte,
+                ctx => {
+                    // Applica danno extra alla carta bersaglio
+                    GameRules.DealDamageToCard(ctx.owner, ctx.opponent, ctx.source, ctx.target, 1, "Rule:+1 Front");
+                });
 
-    // Esempio: a inizio turno del player, se hai >=2 retro stessa fazione della fonte, +1 danno al player nemico (demo)
-    AddRule(GameEventType.TurnStart,
-        ctx => ctx.owner == player && player.CountRetro(Faction.Ombra) >= 2, // scegli una fazione a piacere per test
-        ctx => {
-            GameRules.DealDamageToPlayer(ctx.owner, ctx.opponent, null, 1, "Rule:Upkeep Ping");
-        });
-}
+            // Esempio: a inizio turno del player, se hai >=2 retro stessa fazione della fonte, +1 danno al player nemico (demo)
+            AddRule(GameEventType.TurnStart,
+                ctx => ctx.owner == player && player.CountRetro(Faction.Ombra) >= 2, // scegli una fazione a piacere per test
+                ctx => {
+                    GameRules.DealDamageToPlayer(ctx.owner, ctx.opponent, null, 1, "Rule:Upkeep Ping");
+                });
+        }
 
     }
 
     void Awake()
     {
-
-// Subscribe to all events to capture them into the pending queue
-foreach (GameEventType t in Enum.GetValues(typeof(GameEventType)))
-    EventBus.Subscribe(t, OnEventCaptured);
+        Log = AppendLog; // collega lo sink globale
+        AppendLog("== GameManager ready ==");
+        // Subscribe to all events to capture them into the pending queue
+        foreach (GameEventType t in Enum.GetValues(typeof(GameEventType)))
+        EventBus.Subscribe(t, OnEventCaptured);
 
         Logger.Sink = AppendLog;
 
@@ -187,6 +194,9 @@ foreach (GameEventType t in Enum.GetValues(typeof(GameEventType)))
     {
         if (_instance != null) _instance.AppendLog(line);
     }
+
+    public static void Logf(string fmt, params object[] args)
+        => Log?.Invoke(string.Format(fmt, args));
 
     // Elabora la coda (richiamalo dopo azioni importanti o su Update con throttling)
     void PumpTurnQueue(int maxSteps = 64)
@@ -396,9 +406,6 @@ foreach (GameEventType t in Enum.GetValues(typeof(GameEventType)))
     {
         playerPhase = !playerPhase;
     }
-
-
-
     void OnEndTurn()
     {
         EventBus.Publish(GameEventType.TurnEnd, new EventContext { owner = player, opponent = ai });
@@ -466,12 +473,14 @@ foreach (GameEventType t in Enum.GetValues(typeof(GameEventType)))
         }
     }
 
-    public void AppendLog(string line)
+    public void AppendLog(string msg)
     {
-        if (logText == null) return;
-        if (!string.IsNullOrEmpty(logText.text)) logText.text += "\n";
-        logText.text += line;
+        // timestamp leggero: framecount
+        _logBuf.AppendLine($"[{Time.frameCount}] {msg}");
+        if (logText != null) logText.text = _logBuf.ToString();
     }
+    public void ClearLog() { _logBuf.Clear(); if (logText) logText.text = ""; }
+
 
     bool IsGameOver() => player.hp <= 0 || ai.hp <= 0;
 

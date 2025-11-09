@@ -7,12 +7,12 @@ public static class Logger
     public static Action<string> Sink;
 
     [RuntimeInitializeOnLoadMethod]
-    static void Boot() { Sink = DefaultSink; }
+    static void Boot() { Sink = DefaultSink;}
 
     static void DefaultSink(string msg)
     {
-        var gm = GameManagerInteractive.Instance;
-        if (gm != null) gm.AppendLog(msg);
+        Sink = s => GameManagerInteractive.Log?.Invoke(s);
+        GameManagerInteractive.Log?.Invoke(msg); // <-- AGGIUNGI QUESTA RIGA
         // NO Debug.Log: logs must go only to UI
     }
 

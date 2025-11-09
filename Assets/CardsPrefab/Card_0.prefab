@@ -331,6 +331,7 @@ GameObject:
   - component: {fileID: 8380466680754058379}
   - component: {fileID: 3849962477743496572}
   - component: {fileID: 2565232950433125074}
+  - component: {fileID: 8727470506572292250}
   m_Layer: 5
   m_Name: Card_0
   m_TagString: Untagged
@@ -511,6 +512,20 @@ MonoBehaviour:
   backDamageBonusSameFaction: 0
   backBlockBonusSameFaction: 0
   backBonusPAIfTwoRetroSameFaction: 0
+--- !u!114 &8727470506572292250
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4860462570295797339}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af1d69bfcc03be848b2c19e4816a556c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OnFlipDealDamage
+  damage: 1
+  onlyWhenToFront: 1
 --- !u!1 &5498676250848662441
 GameObject:
   m_ObjectHideFlags: 0

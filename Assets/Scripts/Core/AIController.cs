@@ -8,8 +8,10 @@ public static class AIController
     /// 1) Se pu, spende 1 PA per forzare il flip di una sua carta in modo da massimizzare sinergia retro
     /// 2) Attacca: preferisce bersagliare una carta in retro per danno al player,
     ///    altrimenti elimina la carta fronte con HP pi basso
+    
     public static void ExecuteTurn(System.Random rng, PlayerState ai, PlayerState player)
     {
+        GameManagerInteractive.Log("[AI] Begin turn");
         // IA avvantaggiata: +1 PA sempre
         ai.actionPoints += 1;
 
@@ -25,12 +27,13 @@ public static class AIController
                 .Where(c => c.alive && c.side == Side.Fronte && c.def.faction == bestFaction)
                 .OrderByDescending(c => c.def.backDamageBonusSameFaction + c.def.backBlockBonusSameFaction + c.def.backBonusPAIfTwoRetroSameFaction)
                 .FirstOrDefault();
+            GameManagerInteractive.Logf("[AI] Plan flip for faction {0}", bestFaction);
 
             if (candidate != null)
             {
                 candidate.Flip();
                 ai.actionPoints -= 1;
-                Logger.Info($"IA forza flip su {candidate.def.cardName} -> {candidate.side}");
+                GameManagerInteractive.Logf("[AI] Flip {0} -> {1}", candidate.def.cardName, candidate.side);
             }
         }
 
@@ -53,6 +56,8 @@ public static class AIController
                     .FirstOrDefault();
             }
             if (target == null) break; // niente da attaccare
+            GameManagerInteractive.Logf("[AI] Choose attack: {0} -> {1}", atk.def.cardName, target.def.cardName);
+
 
             GameRules.Attack(ai, player, atk, target);
             ai.actionPoints -= 1;
