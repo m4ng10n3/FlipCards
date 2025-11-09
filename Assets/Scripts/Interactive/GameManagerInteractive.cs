@@ -151,15 +151,17 @@ public class GameManagerInteractive : MonoBehaviour
             AddRule(GameEventType.DamageDealt,
                 ctx => ctx.target != null && ctx.source != null && ctx.source.side == Side.Fronte,
                 ctx => {
-                    // Applica danno extra alla carta bersaglio
-                    GameRules.DealDamageToCard(ctx.owner, ctx.opponent, ctx.source, ctx.target, 1, "Rule:+1 Front");
+                    // PRIMA: GameRules.DealDamageToCard(...)
+                    ctx.source.DealDamageToCard(ctx.owner, ctx.opponent, ctx.target, 1, "Rule:+1 Front");
                 });
 
-            // Esempio: a inizio turno del player, se hai >=2 retro stessa fazione della fonte, +1 danno al player nemico (demo)
+            // Esempio: all'inizio turno Player, se hai >=2 retro Ombra, ping di 1 al nemico
             AddRule(GameEventType.TurnStart,
-                ctx => ctx.owner == player && player.CountRetro(Faction.Ombra) >= 2, // scegli una fazione a piacere per test
+                ctx => ctx.owner == player && player.CountRetro(Faction.Ombra) >= 2,
                 ctx => {
-                    GameRules.DealDamageToPlayer(ctx.owner, ctx.opponent, null, 1, "Rule:Upkeep Ping");
+                    // scegli una carta retro come "sorgente" del ping (evitiamo metodi statici)
+                    var src = player.board.FirstOrDefault(c => c.alive && c.side == Side.Retro && c.def.faction == Faction.Ombra);
+                    if (src != null) src.DealDamageToPlayer(ctx.owner, ctx.opponent, 1, "Rule:Upkeep Ping");
                 });
         }
 
@@ -363,10 +365,10 @@ public class GameManagerInteractive : MonoBehaviour
         var tgt = SelectionManager.Instance.SelectedEnemy?.instance;
         if (atk == null || tgt == null) return;
 
-        // Deleghiamo tutta la risoluzione a GameRules, che pubblica anche gli eventi
-        GameRules.Attack(player, ai, atk, tgt);
+        // PRIMA: GameRules.Attack(player, ai, atk, tgt);
+        // DOPO: delega alla carta
+        atk.Attack(player, ai, tgt);
 
-        // Pulizia eventuali carte distrutte e refresh UI
         CleanupDestroyed(player);
         CleanupDestroyed(ai);
         UpdateAllViews();

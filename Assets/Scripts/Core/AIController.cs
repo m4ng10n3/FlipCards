@@ -59,8 +59,7 @@ public static class AIController
             if (target == null) break; // niente da attaccare
             Logger.Info("[AI] Choose attack: {0} -> {1}", atk.def.cardName, target.def.cardName);
 
-
-            GameRules.Attack(ai, player, atk, target);
+            atk.Attack(player, ai, target);
             ai.actionPoints -= 1;
         }
     }
