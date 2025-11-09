@@ -66,30 +66,21 @@ public class GameManagerInteractive : MonoBehaviour
     public bool enabled;
 }
     readonly List<Rule> _rules = new List<Rule>();
-    readonly Queue<(GameEventType evt, EventContext ctx)> _pending = new Queue<(GameEventType, EventContext)>();
     public bool enableDefaultRules = true; // puoi spegnerle in Inspector
 
-    void AddRule(GameEventType t, Func<EventContext,bool> cond, Action<EventContext> act, bool enabled = true)
+    void AddRule(GameEventType t, Func<EventContext, bool> cond, Action<EventContext> act, bool enabled = true)
     {
-        _rules.Add(new Rule{ trigger=t, cond=cond, act=act, enabled=enabled });
+        EventBus.Handler h = (evt, ctx) =>
+        {
+            if (!enabled || evt != t) return;
+            if (cond == null || cond(ctx)) act?.Invoke(ctx);
+        };
+        _rules.Add(new Rule { trigger = t, cond = cond, act = act, enabled = enabled });
+        EventBus.Subscribe(t, h);
     }
 
     void ClearRules() => _rules.Clear();
 
-    void ProcessPendingEvents()
-    {
-        while (_pending.Count > 0)
-        {
-            var item = _pending.Dequeue();
-            foreach (var r in _rules)
-            {
-                if (!r.enabled || r.trigger != item.evt) continue;
-                var ok = r.cond == null ? true : r.cond(item.ctx);
-                if (!ok) continue;
-                r.act?.Invoke(item.ctx);
-            }
-        }
-    }
     // ====== RUNTIME ======
     System.Random rng;
     public PlayerState player;
@@ -140,9 +131,10 @@ public class GameManagerInteractive : MonoBehaviour
         Logger.Info("=== MATCH START (Scene templates -> runtime instances, inline defs) ===");
         UpdateAllViews();
         UpdateHUD();
+        StartTurn(player, ai, true);
 
         // Pubblica inizio turno iniziale (player)
-        EventBus.Publish(GameEventType.TurnStart, new EventContext { owner = player, opponent = ai, phase = "TurnStart" });
+        //EventBus.Publish(GameEventType.TurnStart, new EventContext { owner = player, opponent = ai, phase = "TurnStart" });
 
         // Minimal default rules (all inline), disable by unchecking enableDefaultRules
         if (enableDefaultRules)
@@ -339,6 +331,37 @@ public class GameManagerInteractive : MonoBehaviour
 
     // ====== UI ACTIONS ======
 
+    void StartTurn(PlayerState owner, PlayerState opponent, bool isPlayerPhase)
+    {
+        playerPhase = isPlayerPhase;
+        // reset AP (semplice: base fissa; se vuoi bonus passivi, calcolali qui)
+        owner.actionPoints = (owner == player) ? playerBaseAP : aiBaseAP;
+
+        EventBus.Publish(GameEventType.TurnStart, new EventContext { owner = owner, opponent = opponent, phase = "TurnStart" });
+        UpdateHUD();
+
+        // se è turno IA, eseguila immediatamente e poi chiudi il turno
+        if (!playerPhase && !matchEnded)
+        {
+            AIController.ExecuteTurn(rng, ai, player);    // vedi fix sotto per AIController
+            CleanupDestroyed(player);
+            CleanupDestroyed(ai);
+            UpdateAllViews();
+            UpdateHUD();
+
+            // chiude turno IA e torna al player
+            EndTurnInternal(ai, player);
+            if (!matchEnded)
+                StartTurn(player, ai, true);
+        }
+    }
+
+    void EndTurnInternal(PlayerState owner, PlayerState opponent)
+    {
+        EventBus.Publish(GameEventType.TurnEnd, new EventContext { owner = owner, opponent = opponent, phase = "TurnEnd" });
+        if (IsGameOver() || currentTurn >= turns) EndMatch();
+    }
+
     void OnFlipRandom()
     {
         if (matchEnded) return;
@@ -352,38 +375,55 @@ public class GameManagerInteractive : MonoBehaviour
 
     void OnForceFlip()
     {
-        var sel = SelectionManager.Instance.SelectedOwned?.instance; // vedi patch E
+        if (matchEnded || !playerPhase) return;
+        if (player.actionPoints <= 0) { Logger.Info("Niente PA per flippare."); UpdateHUD(); return; }
+        var sel = SelectionManager.Instance.SelectedOwned?.instance;
         if (sel == null) return;
         sel.Flip();
+        player.actionPoints -= 1;
         EventBus.Publish(GameEventType.Flip, new EventContext { owner = player, opponent = ai, source = sel });
-        UpdateAllViews();
+        UpdateAllViews(); UpdateHUD();
     }
 
     void OnAttack()
     {
+        if (matchEnded || !playerPhase) return;
+        if (player.actionPoints <= 0) { Logger.Info("Niente PA per attaccare."); UpdateHUD(); return; }
+
         var atk = SelectionManager.Instance.SelectedOwned?.instance;
         var tgt = SelectionManager.Instance.SelectedEnemy?.instance;
         if (atk == null || tgt == null) return;
 
-        // PRIMA: GameRules.Attack(player, ai, atk, tgt);
-        // DOPO: delega alla carta
-        atk.Attack(player, ai, tgt);
+        atk.Attack(player, ai, tgt);  // già corretto
+        player.actionPoints -= 1;
 
         CleanupDestroyed(player);
         CleanupDestroyed(ai);
         UpdateAllViews();
         UpdateHUD();
     }
-    void SwapActive()
-    {
-        playerPhase = !playerPhase;
-    }
+
+
     void OnEndTurn()
     {
-        EventBus.Publish(GameEventType.TurnEnd, new EventContext { owner = player, opponent = ai });
-        SwapActive(); // passa il turno
-        EventBus.Publish(GameEventType.TurnStart, new EventContext { owner = player, opponent = ai });
-        UpdateHUD();
+        if (matchEnded) return;
+
+        if (playerPhase)
+        {
+            EndTurnInternal(player, ai);
+            if (!matchEnded)
+            {
+                currentTurn++;
+                StartTurn(ai, player, false);
+            }
+        }
+        else
+        {
+            // In pratica non ci arrivi, perché l’IA si auto-gestisce, ma per completezza:
+            EndTurnInternal(ai, player);
+            if (!matchEnded)
+                StartTurn(player, ai, true);
+        }
     }
     void CleanupDestroyed(PlayerState p)
     {
@@ -434,9 +474,4 @@ public class GameManagerInteractive : MonoBehaviour
         else SelectionManager.Instance.SelectEnemy(view);
     }
 
-
-    void Update()
-    {
-        ProcessPendingEvents();
-    }
 }

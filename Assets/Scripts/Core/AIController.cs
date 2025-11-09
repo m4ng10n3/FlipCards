@@ -29,12 +29,12 @@ public static class AIController
                 .OrderByDescending(c => c.def.backDamageBonusSameFaction + c.def.backBlockBonusSameFaction + c.def.backBonusPAIfTwoRetroSameFaction)
                 .FirstOrDefault();
             //Logger.Info("[AI] Plan flip for faction {0}", bestFaction);
-            Logger.Info("[AI] Plan flip for faction {0}", bestFaction);
+            Logger.Info("[AI] Plan flip for faction {bestFaction}");
             if (candidate != null)
             {
                 candidate.Flip();
                 ai.actionPoints -= 1;
-                Logger.Info("[AI] Flip {0} -> {1}", candidate.def.cardName, candidate.side);
+                Logger.Info($"[AI] Flip {candidate.def.cardName} -> {candidate.side}");
             }
         }
 
@@ -57,9 +57,9 @@ public static class AIController
                     .FirstOrDefault();
             }
             if (target == null) break; // niente da attaccare
-            Logger.Info("[AI] Choose attack: {0} -> {1}", atk.def.cardName, target.def.cardName);
+            Logger.Info($"[AI] Choose attack: {atk.def.cardName} -> {target.def.cardName}");
 
-            atk.Attack(player, ai, target);
+            atk.Attack(ai, player, target);
             ai.actionPoints -= 1;
         }
     }
