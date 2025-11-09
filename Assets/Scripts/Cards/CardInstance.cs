@@ -85,7 +85,7 @@ public class CardInstance
 
         int dmg = ComputeFrontDamage(owner);
 
-        if (target.side == Side.Fronte)
+        if (target.side == Side.Fronte || target.side == Side.Retro)
         {
             DealDamageToCard(owner, defender, target, dmg, "Combat");
         }
