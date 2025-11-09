@@ -4,7 +4,6 @@ using UnityEngine;
 public class EventLogger : MonoBehaviour
 {
     public static EventLogger Instance;
-    public TurnQueue turnQueue = new TurnQueue();
 
     void Awake()
     {
@@ -26,8 +25,6 @@ public class EventLogger : MonoBehaviour
     void OnEvent(GameEventType t, EventContext ctx)
     {
         var msg = Format(t, ctx);
-        Logger.Info(msg); // logging Unity
-
         // Esempio: su CardPlayed potresti enqueuare la risoluzione in coda
         // turnQueue.Enqueue(t, ctx, "Resolve Card Played", producer: SafeName(ctx.source));
     }
@@ -53,6 +50,4 @@ public class EventLogger : MonoBehaviour
         }
     }
 
-    // Accessor comodo
-    public static TurnQueue Queue => Instance?.turnQueue;
 }

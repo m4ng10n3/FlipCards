@@ -77,25 +77,20 @@ public class GameManagerInteractive : MonoBehaviour
 
     void ClearRules() => _rules.Clear();
 
-    void OnEventCaptured(GameEventType t, EventContext ctx)
-    {
-        _pending.Enqueue((t, ctx));
-    }
-
     void ProcessPendingEvents()
-{
-    while (_pending.Count > 0)
     {
-        var item = _pending.Dequeue();
-        foreach (var r in _rules)
+        while (_pending.Count > 0)
         {
-            if (!r.enabled || r.trigger != item.evt) continue;
-            var ok = r.cond == null ? true : r.cond(item.ctx);
-            if (!ok) continue;
-            r.act?.Invoke(item.ctx);
+            var item = _pending.Dequeue();
+            foreach (var r in _rules)
+            {
+                if (!r.enabled || r.trigger != item.evt) continue;
+                var ok = r.cond == null ? true : r.cond(item.ctx);
+                if (!ok) continue;
+                r.act?.Invoke(item.ctx);
+            }
         }
     }
-}
     // ====== RUNTIME ======
     System.Random rng;
     public PlayerState player;
@@ -137,7 +132,7 @@ public class GameManagerInteractive : MonoBehaviour
         // 2) Enforce minimum per side
         if (playerViews.Count < minCardsPerSide || aiViews.Count < minCardsPerSide)
         {
-            Logger.Error("Not enough cards to start. Player:" + playerViews.Count + " / AI:" + aiViews.Count + " (min " + minCardsPerSide + ")");
+            AppendLog("Not enough cards to start. Player:" + playerViews.Count + " / AI:" + aiViews.Count + " (min " + minCardsPerSide + ")");
             matchEnded = true;
             return;
         }
@@ -176,8 +171,6 @@ public class GameManagerInteractive : MonoBehaviour
         Log = AppendLog; // collega lo sink globale
         AppendLog("== GameManager ready ==");
         // Subscribe to all events to capture them into the pending queue
-        foreach (GameEventType t in Enum.GetValues(typeof(GameEventType)))
-        EventBus.Subscribe(t, OnEventCaptured);
 
         Logger.Sink = AppendLog;
 
@@ -189,29 +182,9 @@ public class GameManagerInteractive : MonoBehaviour
         if (btnEndTurn) btnEndTurn.onClick.AddListener(OnEndTurn);
     }
 
-    // metodo statico chiamato da EventLogger
-    public static void TryAppendLogStatic(string line)
-    {
-        if (_instance != null) _instance.AppendLog(line);
-    }
 
     public static void Logf(string fmt, params object[] args)
         => Log?.Invoke(string.Format(fmt, args));
-
-    // Elabora la coda (richiamalo dopo azioni importanti o su Update con throttling)
-    void PumpTurnQueue(int maxSteps = 64)
-    {
-        var q = EventLogger.Instance?.turnQueue;
-        if (q == null) return;
-        int steps = 0;
-        while (steps++ < maxSteps && q.TryDequeue(out var it))
-        {
-            // qui potresti innescare VFX leggeri sulle carte coinvolte
-            if (it.ctx.source != null && viewByInstance.TryGetValue(it.ctx.source, out var v1)) v1.Blink();
-            if (it.ctx.target != null && viewByInstance.TryGetValue(it.ctx.target, out var v2)) v2.Blink();
-        }
-    }
-
 
 
     // ====== BUILD SIDE ======
@@ -413,47 +386,6 @@ public class GameManagerInteractive : MonoBehaviour
         EventBus.Publish(GameEventType.TurnStart, new EventContext { owner = player, opponent = ai });
         UpdateHUD();
     }
-
-    void StartPlayerPhase()
-    {
-        playerPhase = true;
-        player.ResetAP(playerBaseAP + GameRules.PassiveBonusPA(player));
-
-        // (Comportamento esistente) flip casuale a inizio fase player
-        foreach (var c in player.board)
-            if (c.alive && rng.NextDouble() < 0.5)
-            {
-                c.Flip();
-                EventBus.Publish(GameEventType.Flip, new EventContext { owner = player, opponent = ai, source = c, phase = "TurnStart" });
-            }
-
-        // Evento inizio turno Player
-        EventBus.Publish(GameEventType.TurnStart, new EventContext { owner = player, opponent = ai, phase = "TurnStart" });
-
-        UpdateAllViews();
-        UpdateHUD();
-        AppendLog("Player phase started.");
-    }
-
-    void RunAITurn()
-    {
-        // Evento inizio turno AI
-        EventBus.Publish(GameEventType.TurnStart, new EventContext { owner = ai, opponent = player, phase = "TurnStart" });
-
-        ai.ResetAP(aiBaseAP + GameRules.PassiveBonusPA(ai));
-        AIController.ExecuteTurn(rng, ai, player);
-        CleanupDestroyed(ai);
-        CleanupDestroyed(player);
-        UpdateAllViews();
-        UpdateHUD();
-        AppendLog("AI phase ended.");
-
-        // Evento fine turno AI
-        EventBus.Publish(GameEventType.TurnEnd, new EventContext { owner = ai, opponent = player, phase = "TurnEnd" });
-
-        CheckEndImmediate();
-    }
-
     void CleanupDestroyed(PlayerState p)
     {
         foreach (var ci in p.board)
@@ -483,8 +415,6 @@ public class GameManagerInteractive : MonoBehaviour
 
 
     bool IsGameOver() => player.hp <= 0 || ai.hp <= 0;
-
-    void CheckEndImmediate() { if (IsGameOver()) EndMatch(); }
 
     void EndMatch()
     {

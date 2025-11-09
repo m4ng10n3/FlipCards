@@ -12,7 +12,7 @@ public static class Logger
     static void DefaultSink(string msg)
     {
         Sink = s => GameManagerInteractive.Log?.Invoke(s);
-        GameManagerInteractive.Log?.Invoke(msg); // <-- AGGIUNGI QUESTA RIGA
+        GameManagerInteractive.Log?.Invoke(msg); 
         // NO Debug.Log: logs must go only to UI
     }
 
