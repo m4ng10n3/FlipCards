@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class CardDefinitionInline : MonoBehaviour
+public class CardDefinition : MonoBehaviour
 {
     [System.Serializable]
     public struct Spec

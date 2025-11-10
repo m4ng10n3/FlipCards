@@ -11,7 +11,7 @@ public class GameManager : MonoBehaviour
     [System.Serializable]
     public class PrefabCardBinding
     {
-        [Tooltip("Card prefab (must have CardView + CardDefinitionInline)")]
+        [Tooltip("Card prefab (must have CardView + CardDefinition)")]
         public GameObject prefab;
 
         [Min(1), Tooltip("How many copies of this prefab to spawn")]
@@ -22,7 +22,7 @@ public class GameManager : MonoBehaviour
     class SceneCardTemplate
     {
         public GameObject template;                 // disabled clone used as source for Instantiate
-        public CardDefinitionInline.Spec def;       // built at runtime from CardDefinitionInline
+        public CardDefinition.Spec def;       // built at runtime from CardDefinition
     }
 
     [Header("Roots")]
@@ -194,11 +194,11 @@ public class GameManager : MonoBehaviour
         SpawnFromBindings(owner, fallbackBindings, root, outViews);
     }
 
-    bool TryGetSpec(GameObject go, out CardDefinitionInline.Spec spec)
+    bool TryGetSpec(GameObject go, out CardDefinition.Spec spec)
     {
         spec = default;
         if (go == null) return false;
-        var inline = go.GetComponent<CardDefinitionInline>();
+        var inline = go.GetComponent<CardDefinition>();
         if (inline == null) return false;
         spec = inline.BuildSpec();
         return true;
@@ -241,7 +241,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    void AddCardFromTemplate(PlayerState owner, CardDefinitionInline.Spec def, GameObject template, Transform root, List<CardView> outViews)
+    void AddCardFromTemplate(PlayerState owner, CardDefinition.Spec def, GameObject template, Transform root, List<CardView> outViews)
     {
         var ci = new CardInstance(def, rng);
         owner.board.Add(ci);
@@ -281,7 +281,7 @@ public class GameManager : MonoBehaviour
             }
             if (!TryGetSpec(b.prefab, out var def))
             {
-                Logger.Error("Prefab '" + b.prefab.name + "' must have CardDefinitionInline.");
+                Logger.Error("Prefab '" + b.prefab.name + "' must have CardDefinition.");
                 continue;
             }
             for (int i = 0; i < b.count; i++)

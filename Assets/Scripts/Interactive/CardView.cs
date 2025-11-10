@@ -52,13 +52,13 @@ public class CardView : MonoBehaviour
     }
 
     // =========================================================
-    // PREVIEW: mostra i dati della CardDefinitionInline se non c' ancora un'istanza runtime
+    // PREVIEW: mostra i dati della CardDefinition se non c' ancora un'istanza runtime
     // =========================================================
     void PreviewFromInlineIfNoInstance()
     {
         if (instance != null) return; // runtime already wired
 
-        var inline = GetComponent<CardDefinitionInline>();
+        var inline = GetComponent<CardDefinition>();
         if (inline == null) return;
 
         // costruiamo la spec temporanea e visualizziamo

@@ -4,14 +4,14 @@ using System.Linq;
 
 public class CardInstance
 {
-    public CardDefinitionInline.Spec def;
+    public CardDefinition.Spec def;
     public int health;
     public Side side;
     public bool alive => health > 0;
     public readonly int id;
     static int _nextId = 1;
 
-    public CardInstance(CardDefinitionInline.Spec def, System.Random rng)
+    public CardInstance(CardDefinition.Spec def, System.Random rng)
     {
         this.def = def;
         this.health = def.maxHealth;
