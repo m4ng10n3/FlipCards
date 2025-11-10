@@ -95,7 +95,7 @@ public class CardView : MonoBehaviour
 
         // Sottoscrizione agli eventi: solo l'Hint reagisce
         _evtHandler = OnGameEvent;
-        EventBus.Subscribe(GameEventType.DamageDealt, _evtHandler);
+        EventBus.Subscribe(GameEventType.CombatResolved, _evtHandler);
         EventBus.Subscribe(GameEventType.Flip, _evtHandler);
         EventBus.Subscribe(GameEventType.AttackDeclared, _evtHandler);
         EventBus.Subscribe(GameEventType.TurnEnd, _evtHandler);
@@ -106,7 +106,7 @@ public class CardView : MonoBehaviour
     {
         if (_evtHandler != null)
         {
-            EventBus.Unsubscribe(GameEventType.DamageDealt, _evtHandler);
+            EventBus.Unsubscribe(GameEventType.CombatResolved, _evtHandler);
             EventBus.Unsubscribe(GameEventType.Flip, _evtHandler);
             EventBus.Unsubscribe(GameEventType.AttackDeclared, _evtHandler);
             EventBus.Unsubscribe(GameEventType.TurnEnd, _evtHandler);
@@ -169,7 +169,7 @@ public class CardView : MonoBehaviour
 
         switch (t)
         {
-            case GameEventType.DamageDealt:
+            case GameEventType.CombatResolved:
                 if (ctx.target == instance && ctx.amount > 0)
                 {
                     ShowHint($"-{ctx.amount}HP");   // <--- persiste finché non arriva TurnEnd

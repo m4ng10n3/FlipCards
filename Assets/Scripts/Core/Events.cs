@@ -5,8 +5,9 @@ using UnityEngine;
 public enum GameEventType
 {
     TurnStart, TurnEnd, Flip, AttackDeclared,
-    ResolveIncomingDamage,                    // <--- NUOVO evento dedicato
-    DamageDealt, CardDestroyed, CardPlayed, PhaseChanged,
+    IncomingAttack,            // <-- rinomina da ResolveIncomingDamage
+    CombatResolved,            // <-- nuovo evento unico di esito
+    CardPlayed, /*PhaseChanged,*/ // (opzionale: se non lo usi, puoi rimuoverlo)
     Info
 }
 
@@ -75,21 +76,18 @@ public static class EventBus
     public static string Format(GameEventType t, EventContext ctx)
     {
         static string SafeName(CardInstance c) => c == null ? "null" : $"#{c.id} {c.def.cardName}";
-
         switch (t)
         {
             case GameEventType.TurnStart: return $"[TURN START] owner:{ctx.owner?.name}";
             case GameEventType.TurnEnd: return $"[TURN END]   owner:{ctx.owner?.name}";
-            case GameEventType.PhaseChanged: return $"[PHASE] {ctx.phase}";
+            // (se non usi più le fasi, rimuovi questo case)
             case GameEventType.CardPlayed: return $"[PLAY]  {SafeName(ctx.source)}";
             case GameEventType.Flip: return $"[FLIP]  {SafeName(ctx.source)}";
             case GameEventType.AttackDeclared: return $"[ATTACK] {SafeName(ctx.source)} -> {SafeName(ctx.target)} ({ctx.amount})";
-            case GameEventType.ResolveIncomingDamage: return $"[RESOLVE] {SafeName(ctx.source)} -> {SafeName(ctx.target)} ({ctx.amount})";
-            case GameEventType.DamageDealt:
-                return ctx.target != null
-                    ? $"[DAMAGE] {SafeName(ctx.target)} -{ctx.amount}"
-                    : $"[DAMAGE] Player {ctx.opponent?.name} -{ctx.amount}";
-            case GameEventType.CardDestroyed: return $"[DESTROY] {SafeName(ctx.target)}";
+            case GameEventType.IncomingAttack: return $"[INCOMING] {SafeName(ctx.source)} -> {SafeName(ctx.target)} ({ctx.amount})";
+            case GameEventType.CombatResolved:
+                // amount = danno finale applicato; stato morte ricavabile da ctx.target.alive
+                return $"[COMBAT] {SafeName(ctx.target)} took {ctx.amount} (HP:{ctx.target?.health})";
             case GameEventType.Info: return $"[INFO] {ctx.phase}";
             default: return $"[{t}] {ctx}";
         }
