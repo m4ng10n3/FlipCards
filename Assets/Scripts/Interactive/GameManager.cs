@@ -451,21 +451,52 @@ public class GameManager : MonoBehaviour
 
     void CleanupDestroyed(PlayerState p)
     {
-        foreach (var ci in p.board)
-        {
-            if (!ci.alive)
-            {
-                // Unbind abilità una sola volta quando la carta non è più viva
-                if (abilitiesByInstance.TryGetValue(ci, out var list) && list != null)
-                {
-                    foreach (var ab in list) { if (ab != null) ab.Unbind(); }
-                    abilitiesByInstance.Remove(ci);
-                }
+        // colleziona prima, poi rimuovi (evita modifiche durante foreach)
+        var dead = p.board.Where(ci => ci != null && !ci.alive).ToList();
+        foreach (var ci in dead)
+            RemoveCard(p, ci);
+    }
 
-                if (viewByInstance.TryGetValue(ci, out var view))
-                    view.Refresh();
-            }
+    void RemoveCard(PlayerState owner, CardInstance ci)
+    {
+        if (ci == null) return;
+
+        // 1) Unbind abilità una sola volta
+        if (abilitiesByInstance.TryGetValue(ci, out var list) && list != null)
+        {
+            foreach (var ab in list) { if (ab != null) ab.Unbind(); }
+            abilitiesByInstance.Remove(ci);
         }
+
+        // 2) Pulisci selezioni se puntavano a questa view
+        if (viewByInstance.TryGetValue(ci, out var view) && view != null)
+        {
+            // se selezionata, deseleziona in sicurezza
+            var sel = SelectionManager.Instance;
+            if (sel != null)
+            {
+                if (sel.SelectedOwned == view) sel.SelectOwned(null);
+                if (sel.SelectedEnemy == view) sel.SelectEnemy(null);
+            }
+
+            instanceByView.Remove(view);
+            viewByInstance.Remove(ci);
+
+            // distruggi la GO (aggiorna anche i sibling index delle corsie)
+            Destroy(view.gameObject);
+        }
+
+        // 3) Rimuovi dalla board logica del proprietario
+        owner.board.Remove(ci);
+
+        // 4) Log informativo
+        EventBus.Publish(GameEventType.Info, new EventContext
+        {
+            owner = owner,
+            opponent = (owner == player) ? ai : player,
+            source = ci,
+            phase = "[GM] Removed destroyed card"
+        });
     }
 
     public void AppendLog(string msg)
@@ -577,5 +608,21 @@ public class GameManager : MonoBehaviour
 
     public int GetDisplayIndex(CardView v) => v ? (v.transform.GetSiblingIndex() + 1) : -1;
     public char GetSideChar(CardView v) => (v != null && v.owner == player) ? 'P' : 'E';
+
+    public string GetDisplayId(CardInstance ci)
+    {
+        if (ci == null) return "null";
+        if (TryGetView(ci, out var v) && v != null)
+            return $"{GetSideChar(v)}#{GetDisplayIndex(v)}"; // es. P#1 / E#2
+        return $"#{ci.id}"; // fallback
+    }
+
+    public static string SafeCardLabel(CardInstance ci)
+    {
+        var gm = Instance;
+        if (gm != null) return $"{gm.GetDisplayId(ci)} {ci?.def.cardName}";
+        return ci == null ? "null" : $"#{ci.id} {ci.def.cardName}";
+    }
+
 
 }

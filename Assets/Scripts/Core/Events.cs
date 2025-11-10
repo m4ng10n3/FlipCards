@@ -28,8 +28,8 @@ public struct EventContext
     {
         var ownerName = owner?.name ?? "null";
         var oppName = opponent?.name ?? "null";
-        var src = SafeName(source);
-        var tgt = SafeName(target);
+        var src = GameManager.SafeCardLabel(source);
+        var tgt = GameManager.SafeCardLabel(target);
         var ph = string.IsNullOrEmpty(phase) ? "none" : phase;
         return $"owner:{ownerName} opponent:{oppName} source:{src} target:{tgt} amount:{amount} phase:{ph}";
     }
@@ -72,22 +72,18 @@ public static class EventBus
             }
         }
     }
-
     public static string Format(GameEventType t, EventContext ctx)
     {
-        static string SafeName(CardInstance c) => c == null ? "null" : $"#{c.id} {c.def.cardName}";
+        static string L(CardInstance c) => GameManager.SafeCardLabel(c);
         switch (t)
         {
             case GameEventType.TurnStart: return $"[TURN START] owner:{ctx.owner?.name}";
             case GameEventType.TurnEnd: return $"[TURN END]   owner:{ctx.owner?.name}";
-            // (se non usi più le fasi, rimuovi questo case)
-            case GameEventType.CardPlayed: return $"[PLAY]  {SafeName(ctx.source)}";
-            case GameEventType.Flip: return $"[FLIP]  {SafeName(ctx.source)}";
-            case GameEventType.AttackDeclared: return $"[ATTACK] {SafeName(ctx.source)} -> {SafeName(ctx.target)} ({ctx.amount})";
-            case GameEventType.IncomingAttack: return $"[INCOMING] {SafeName(ctx.source)} -> {SafeName(ctx.target)} ({ctx.amount})";
-            case GameEventType.CombatResolved:
-                // amount = danno finale applicato; stato morte ricavabile da ctx.target.alive
-                return $"[COMBAT] {SafeName(ctx.target)} took {ctx.amount} (HP:{ctx.target?.health})";
+            case GameEventType.CardPlayed: return $"[PLAY]  {L(ctx.source)}";
+            case GameEventType.Flip: return $"[FLIP]  {L(ctx.source)}";
+            case GameEventType.AttackDeclared: return $"[ATTACK] {L(ctx.source)} -> {L(ctx.target)} ({ctx.amount})";
+            case GameEventType.IncomingAttack: return $"[INCOMING] {L(ctx.source)} -> {L(ctx.target)} ({ctx.amount})";
+            case GameEventType.CombatResolved: return $"[COMBAT] {L(ctx.target)} took {ctx.amount} (HP:{ctx.target?.health})";
             case GameEventType.Info: return $"[INFO] {ctx.phase}";
             default: return $"[{t}] {ctx}";
         }
