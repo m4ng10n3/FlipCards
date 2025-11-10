@@ -157,10 +157,11 @@ public class GameManager : MonoBehaviour
         if (enableDefaultRules)
         {
             // Esempio: +1 danno extra se source è in Fronte
+            /*
             AddRule(GameEventType.DamageDealt,
                 ctx => ctx.target != null && ctx.source != null && ctx.source.side == Side.Fronte,
                 ctx => { ctx.source.DealDamageToCard(ctx.owner, ctx.opponent, ctx.target, 1, "Rule:+1 Front"); });
-
+            */
             // Esempio: upkeep ping se Player ha >=2 Retro Ombra
             AddRule(GameEventType.TurnStart,
                 ctx => ctx.owner == player && player.CountRetro(Faction.Ombra) >= 2,
