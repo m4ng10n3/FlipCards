@@ -18,7 +18,7 @@ public class CardView : MonoBehaviour
     public bool autoBindByName = true;
 
     [Header("Runtime wiring")]
-    [HideInInspector] public GameManagerInteractive gm;
+    [HideInInspector] public GameManager gm;
     [HideInInspector] public PlayerState owner;
     [HideInInspector] public CardInstance instance { get; private set; }
 
@@ -106,7 +106,7 @@ public class CardView : MonoBehaviour
         if (backBonusesText == null) backBonusesText = Find("BackBonuses");
     }
 
-    public void Init(GameManagerInteractive gm, PlayerState owner, CardInstance instance)
+    public void Init(GameManager gm, PlayerState owner, CardInstance instance)
     {
         this.gm = gm;
         this.owner = owner;

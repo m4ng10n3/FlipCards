@@ -13,36 +13,25 @@ public class OnFlipDealDamage : AbilityBase
         {
             if (ctx.source != Source) return;
 
-            // Il tipo evento  il parametro 't', non un campo di EventContext
             if (t == GameEventType.Flip)
             {
                 if (!onlyWhenToFront || Source.side == Side.Fronte)
                 {
-
-                    //GameManagerInteractive.Logf("[Ability Flip] {0} deals {1} to PLAYER {2}", Source.def.cardName, damage, Opponent.name);
-                    var view = Source != null ? GameManagerInteractive.Instance?.GetComponentInChildren<CardView>() : null; // se non hai un accessor diretto
-                    // Applica danno diretto al player avversario
-                    Opponent.hp -= damage;
-
-                    // Notifica che  stato inflitto danno
-                    EventBus.Publish(
-                        GameEventType.DamageDealt,
-                        new EventContext
-                        {
-                            owner = Owner,
-                            opponent = Opponent,
-                            source = Source,
-                            target = null,
-                            amount = damage,
-                            phase = ctx.phase
-                        }
-                    );
+                    var gm = GameManager.Instance;
+                    var target = gm.GetOpposingCardInstance(Source);
+                    if (target != null)
+                    {
+                        // Delego alla pipeline di Attack per log/eventi/chain corretti
+                        Source.Attack(ctx.owner, ctx.opponent, target);
+                    }
+                    // else: nessuno di fronte -> non fare nulla (o gestisci un fallback se lo vuoi)
                 }
             }
         };
 
         EventBus.Subscribe(GameEventType.Flip, _h);
     }
+
 
     protected override void Unregister()
     {

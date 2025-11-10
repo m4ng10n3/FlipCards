@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public static class Logger
 {
-    // ----- Sink assegnato dal GameManagerInteractive -----
+    // ----- Sink assegnato dal GameManager -----
     static Action<string> _sink;
 
     // Buffer di bootstrap: conserva i log emessi prima che il sink sia pronto (es. scene load)
@@ -12,7 +12,7 @@ public static class Logger
     // (Opzionale) anche in Console di Unity? utile in Editor
     public static bool MirrorToUnityConsole = false;
 
-    // Call una volta in GameManagerInteractive.Awake()
+    // Call una volta in GameManager.Awake()
     public static void SetSink(Action<string> sink)
     {
         _sink = sink;

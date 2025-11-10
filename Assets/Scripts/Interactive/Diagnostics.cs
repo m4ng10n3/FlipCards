@@ -4,7 +4,7 @@ using UnityEngine;
 
 public static class Diagnostics
 {
-    public static void Run(GameManagerInteractive gm)
+    public static void Run(GameManager gm)
     {
         if (gm == null) return;
 
