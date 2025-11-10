@@ -14,23 +14,24 @@ public class CardView : MonoBehaviour
     public Text frontBlockText;
     public Text backBonusesText;
 
-    [Header("Auto-bind by child names (optional)")]
-    public bool autoBindByName = true;
-
     [Header("Runtime wiring")]
     [HideInInspector] public GameManager gm;
     [HideInInspector] public PlayerState owner;
     [HideInInspector] public CardInstance instance { get; private set; }
 
-    Button btn;
-
     [Header("Card Size (for Layout)")]
     public Vector2 preferredSize = new Vector2(260, 160);
 
-    [SerializeField] private Text hintText; // opzionale; se non assegnato, fa fallback al log
-    private int _lastHp = int.MinValue, _lastDmg = int.MinValue, _lastBlk = int.MinValue;
+    [SerializeField] private Text hintText; // opzionale; se assente, fallback su Logger
 
+    Button btn;
+    Outline highlight;
 
+    // tracking solo HP, niente più hint automatici su DMG/BLK
+    private int _lastHp = int.MinValue;
+
+    // handler eventi
+    private EventBus.Handler _evtHandler;
 
     void Awake()
     {
@@ -45,33 +46,27 @@ public class CardView : MonoBehaviour
         le.preferredWidth = preferredSize.x;
         le.preferredHeight = preferredSize.y;
 
-        if (autoBindByName) TryAutoBindTexts();
-
-        // Preview immediato leggendo l'inline quando la scena monta
+        // Preview editor-only: se non c'è istanza runtime, mostra i dati dell'inline
         PreviewFromInlineIfNoInstance();
+        if (hintText != null) hintText.gameObject.SetActive(false);
     }
 
-    // =========================================================
-    // PREVIEW: mostra i dati della CardDefinition se non c' ancora un'istanza runtime
-    // =========================================================
+    /// <summary>
+    /// Anteprima: mostra i dati statici se la carta è presente in scena ma senza istanza runtime.
+    /// </summary>
     void PreviewFromInlineIfNoInstance()
     {
-        if (instance != null) return; // runtime already wired
+        if (instance != null) return;
 
         var inline = GetComponent<CardDefinition>();
         if (inline == null) return;
 
-        // costruiamo la spec temporanea e visualizziamo
-        var def = inline.BuildSpec(); // <--- era BuildRuntimeDefinition()
-
-        // lato e hp preview (non esiste ancora lo stato runtime)
-        string sidePreview = "Side";
-        int hpCur = def.maxHealth;
+        var def = inline.BuildSpec();
 
         if (nameText != null) nameText.text = def.cardName;
-        if (factionText != null) factionText.text = "" + def.faction.ToString();
-        if (sideText != null) sideText.text = sidePreview;
-        if (hpText != null) hpText.text = hpCur + "/" + def.maxHealth;
+        if (factionText != null) factionText.text = def.faction.ToString();
+        if (sideText != null) sideText.text = "Side";
+        if (hpText != null) hpText.text = def.maxHealth + "/" + def.maxHealth;
         if (frontTypeText != null) frontTypeText.text = "Front: " + def.frontType;
         if (frontDamageText != null) frontDamageText.text = "Front Dmg: " + def.frontDamage;
         if (frontBlockText != null) frontBlockText.text = "Front Block: " + def.frontBlockValue;
@@ -85,37 +80,37 @@ public class CardView : MonoBehaviour
         }
     }
 
-    // =========================================================
-    // Autowire in base ai nomi figli (facoltativo)
-    // =========================================================
-    void TryAutoBindTexts()
-    {
-        Text Find(string n)
-        {
-            var t = transform.Find(n);
-            return t != null ? t.GetComponent<Text>() : null;
-        }
-
-        if (nameText == null) nameText = Find("Name");
-        if (factionText == null) factionText = Find("Faction");
-        if (sideText == null) sideText = Find("Side");
-        if (hpText == null) hpText = Find("HP");
-        if (frontTypeText == null) frontTypeText = Find("FrontType");
-        if (frontDamageText == null) frontDamageText = Find("FrontDamage");
-        if (frontBlockText == null) frontBlockText = Find("FrontBlock");
-        if (backBonusesText == null) backBonusesText = Find("BackBonuses");
-    }
-
     public void Init(GameManager gm, PlayerState owner, CardInstance instance)
     {
         this.gm = gm;
         this.owner = owner;
         this.instance = instance;
 
+        if (btn == null) btn = GetComponent<Button>();
         btn.onClick.RemoveAllListeners();
         btn.onClick.AddListener(OnClicked);
 
         Refresh();
+        if (hintText != null) hintText.gameObject.SetActive(false);
+
+        // Sottoscrizione agli eventi: solo l'Hint reagisce
+        _evtHandler = OnGameEvent;
+        EventBus.Subscribe(GameEventType.DamageDealt, _evtHandler);
+        EventBus.Subscribe(GameEventType.Flip, _evtHandler);
+        EventBus.Subscribe(GameEventType.AttackDeclared, _evtHandler);
+        EventBus.Subscribe(GameEventType.TurnEnd, _evtHandler);
+    }
+
+    void OnDestroy()
+    {
+        if (_evtHandler != null)
+        {
+            EventBus.Unsubscribe(GameEventType.DamageDealt, _evtHandler);
+            EventBus.Unsubscribe(GameEventType.Flip, _evtHandler);
+            EventBus.Unsubscribe(GameEventType.AttackDeclared, _evtHandler);
+            EventBus.Unsubscribe(GameEventType.TurnEnd, _evtHandler);
+            _evtHandler = null;
+        }
     }
 
     void OnClicked()
@@ -124,7 +119,6 @@ public class CardView : MonoBehaviour
         SetHighlight(highlight == null ? false : !highlight.enabled);
     }
 
-    Outline highlight;
     public void SetHighlight(bool on)
     {
         if (highlight == null)
@@ -136,16 +130,19 @@ public class CardView : MonoBehaviour
         highlight.enabled = on;
     }
 
+    /// <summary>
+    /// Aggiorna tutti i testi statici della carta (restano sempre visibili).
+    /// Non mostra hint.
+    /// </summary>
     public void Refresh()
     {
-        // instance pu essere null; def  una struct quindi NON si confronta con null
         if (instance == null) return;
 
         var def = instance.def;
 
         if (nameText != null) nameText.text = def.cardName;
-        if (factionText != null) factionText.text = "" + def.faction.ToString();
-        if (sideText != null) sideText.text = "" + instance.side;
+        if (factionText != null) factionText.text = def.faction.ToString();
+        if (sideText != null) sideText.text = instance.side.ToString();
         if (hpText != null) hpText.text = instance.health + "/" + def.maxHealth;
         if (frontTypeText != null) frontTypeText.text = "Front: " + def.frontType;
         if (frontDamageText != null) frontDamageText.text = "Front Dmg: " + def.frontDamage;
@@ -159,15 +156,53 @@ public class CardView : MonoBehaviour
                 "      +PA(2 retro same) " + def.backBonusPAIfTwoRetroSameFaction;
         }
 
-        int newHp = instance.health;
-        int newDmg = instance.def.frontDamage;
-        int newBlk = instance.def.frontBlockValue;
+        _lastHp = instance.health; // tracking interno per eventuali usi futuri
+    }
 
-        if (_lastHp != int.MinValue && _lastHp != newHp) Hint($"HP: {_lastHp} : {newHp}");
-        if (_lastDmg != int.MinValue && _lastDmg != newDmg) Hint($"DMG: {_lastDmg} : {newDmg}");
-        if (_lastBlk != int.MinValue && _lastBlk != newBlk) Hint($"BLK: {_lastBlk} : {newBlk}");
+    // ======== Event handling: SOLO Hint + aggiornamento HP ========
 
-        _lastHp = newHp; _lastDmg = newDmg; _lastBlk = newBlk;
+    void OnGameEvent(GameEventType t, EventContext ctx)
+    {
+        if (instance == null) return;
+
+        switch (t)
+        {
+            case GameEventType.DamageDealt:
+                if (ctx.target == instance && ctx.amount > 0)
+                {
+                    ShowHint($"-{ctx.amount}HP");   // <--- persiste finché non arriva TurnEnd
+                    UpdateHpOnly();
+                    Blink();
+                }
+                break;
+
+            case GameEventType.Flip:
+                if (ctx.source == instance)
+                {
+                    bool hasOnFlip = GetComponent<OnFlipDealDamage>() != null;
+                    ShowHint(hasOnFlip ? "Damage On Flip activated" : "Flipped");
+                    Blink();
+                }
+                break;
+
+            case GameEventType.AttackDeclared:
+                if (ctx.source == instance) ShowHint("Attack!");
+                else if (ctx.target == instance) ShowHint("Under attack!");
+                break;
+
+            case GameEventType.TurnEnd:
+                // a fine turno l'hint viene nascosto
+                HideHint();
+                break;
+        }
+    }
+
+    private void UpdateHpOnly()
+    {
+        if (instance == null) return;
+        if (hpText != null)
+            hpText.text = instance.health + "/" + instance.def.maxHealth;
+        _lastHp = instance.health;
     }
 
     // Small visual feedback
@@ -182,18 +217,22 @@ public class CardView : MonoBehaviour
         img.color = c;
     }
 
-    public void Hint(string msg, float seconds = 1.2f)
+    public void ShowHint(string msg)
     {
-        if (hintText == null) { Logger.Info("[Card] " + msg); return; }
-        StopAllCoroutines();
-        StartCoroutine(FlashHint(msg, seconds));
-    }
-
-    private System.Collections.IEnumerator FlashHint(string msg, float seconds)
-    {
+        if (hintText == null)
+        {
+            Logger.Info("[Card] " + msg);
+            return;
+        }
+        // niente coroutine: sovrascrive subito e resta visibile
         hintText.gameObject.SetActive(true);
         hintText.text = msg;
-        yield return new WaitForSeconds(seconds);
-        hintText.gameObject.SetActive(false);
     }
+
+    public void HideHint()
+    {
+        if (hintText != null)
+            hintText.gameObject.SetActive(false);
+    }
+
 }

@@ -5,7 +5,8 @@ using UnityEngine;
 public enum GameEventType
 {
     TurnStart, TurnEnd, Flip, AttackDeclared,
-    DamageDealt, CardDestroyed, CardPlayed, PhaseChanged
+    DamageDealt, CardDestroyed, CardPlayed, PhaseChanged,
+    Info
 }
 
 [Serializable]
@@ -106,6 +107,7 @@ public static class EventBus
                     ? $"[DAMAGE] {SafeName(ctx.target)} -{ctx.amount}"
                     : $"[DAMAGE] Player {ctx.opponent?.name} -{ctx.amount}";
             case GameEventType.CardDestroyed: return $"[DESTROY] {SafeName(ctx.target)}";
+            case GameEventType.Info: return $"[INFO] {ctx.phase}";
             default: return $"[{t}] {ctx}";
         }
     }

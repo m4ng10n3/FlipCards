@@ -107,7 +107,7 @@ public class GameManager : MonoBehaviour
     void Awake()
     {
         Logger.SetSink(AppendLog);
-        Logger.Info("== GameManager ready ==");
+        EventBus.Publish(GameEventType.Info, new EventContext { phase = "GameManager ready" });
         _instance = this;
 
         // Wiring bottoni UI
@@ -149,7 +149,8 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        Logger.Info("=== MATCH START (Scene templates -> runtime instances, inline defs) ===");
+        EventBus.Publish(GameEventType.Info, new EventContext { phase = "=== MATCH START ===" });
+
         UpdateAllViews();
         UpdateHUD();
 
@@ -227,7 +228,7 @@ public class GameManager : MonoBehaviour
         }
 
         if (list.Count > 0)
-            Logger.Info("[" + label + "] Found " + list.Count + " scene card templates.");
+            EventBus.Publish(GameEventType.Info, new EventContext { phase = $"[{label}] Found {list.Count} scene card templates." });
 
         return list;
     }
@@ -299,9 +300,6 @@ public class GameManager : MonoBehaviour
     public void UpdateHUD()
     {
         if (matchEnded) return;
-        string header = $"[TURN {currentTurn}] {(playerPhase ? "PLAYER PHASE" : "ENEMY PHASE")}";
-        string status = $"Player HP:{player.hp} AP:{player.actionPoints}  ||  AI HP:{ai.hp} AP:{ai.actionPoints}";
-        Logger.Info(header + "  " + status);
     }
 
     // ====== TURN FLOW / UI ACTIONS ======
@@ -312,7 +310,6 @@ public class GameManager : MonoBehaviour
         // Reset AP (puoi aggiungere bonus passivi qui)
         owner.actionPoints = (owner == player) ? playerBaseAP : aiBaseAP;
 
-        Logger.Info($"--- TURN {currentTurn} START [{(isPlayerPhase ? "PLAYER" : "ENEMY")}] ---");
         EventBus.Publish(GameEventType.TurnStart, new EventContext { owner = owner, opponent = opponent, phase = "TurnStart" });
         UpdateHUD();
 
@@ -321,7 +318,7 @@ public class GameManager : MonoBehaviour
         {
             if (enemyControlledByButtons)
             {
-                Logger.Info("[GM] Enemy manual phase: usa i bottoni Enemy per agire.");
+                EventBus.Publish(GameEventType.Info, new EventContext { phase = "[GM] Enemy manual phase: usa i bottoni Enemy per agire." });
                 return; // restiamo nella fase Enemy in attesa input
             }
 
@@ -345,7 +342,6 @@ public class GameManager : MonoBehaviour
 
     void EndTurnInternal(PlayerState owner, PlayerState opponent)
     {
-        Logger.Info($"--- TURN {(playerPhase ? "PLAYER" : "ENEMY")} END ---");
         EventBus.Publish(GameEventType.TurnEnd, new EventContext { owner = owner, opponent = opponent, phase = "TurnEnd" });
         if (IsGameOver() || currentTurn >= turns) EndMatch();
     }
@@ -365,7 +361,7 @@ public class GameManager : MonoBehaviour
     void OnForceFlip()
     {
         if (matchEnded || !playerPhase) return;
-        if (player.actionPoints <= 0) { Logger.Info("Niente PA per flippare."); UpdateHUD(); return; }
+        if (player.actionPoints <= 0) { EventBus.Publish(GameEventType.Info, new EventContext { phase = "Not enough Player PA" }); UpdateHUD(); return; }
 
         var sel = SelectionManager.Instance.SelectedOwned?.instance;
         if (sel == null) return;
@@ -381,7 +377,7 @@ public class GameManager : MonoBehaviour
     void OnAttack()
     {
         if (matchEnded || !playerPhase) return;
-        if (player.actionPoints <= 0) { Logger.Info("Niente PA per attaccare."); UpdateHUD(); return; }
+        if (player.actionPoints <= 0) { EventBus.Publish(GameEventType.Info, new EventContext { phase = "Not enough Player PA" }); UpdateHUD(); return; }
 
         var atk = SelectionManager.Instance.SelectedOwned?.instance;
         var tgt = SelectionManager.Instance.SelectedEnemy?.instance;
@@ -400,7 +396,7 @@ public class GameManager : MonoBehaviour
     {
         if (matchEnded || playerPhase) return;          // deve essere fase AI
         if (!enemyControlledByButtons) return;          // controllo manuale attivo
-        if (ai.actionPoints <= 0) { Logger.Info("Enemy: no AP."); UpdateHUD(); return; }
+        if (ai.actionPoints <= 0) { EventBus.Publish(GameEventType.Info, new EventContext { phase = "Not enough Enemy PA" }); UpdateHUD(); return; }
 
         var atk = SelectionManager.Instance.SelectedEnemy?.instance;
         var tgt = SelectionManager.Instance.SelectedOwned?.instance;
@@ -475,7 +471,7 @@ public class GameManager : MonoBehaviour
     public void AppendLog(string msg)
     {
         // timestamp leggero: framecount
-        _logBuf.AppendLine($"[{Time.frameCount}] {msg}");
+        _logBuf.AppendLine(msg);
         if (logText != null) logText.text = _logBuf.ToString();
     }
 
@@ -494,8 +490,8 @@ public class GameManager : MonoBehaviour
 
         int diff = ai.hp - player.hp;
         string result = diff > 0 ? "AI AHEAD" : diff < 0 ? "PLAYER AHEAD" : "TIE";
-        Logger.Info("=== MATCH END ===");
-        Logger.Info($"Score: PlayerHP {player.hp} vs AIHP {ai.hp} | Diff (AI-Player) = {diff} -> {result}");
+        EventBus.Publish(GameEventType.Info, new EventContext { phase = "=== MATCH END ===" });
+        EventBus.Publish(GameEventType.Info, new EventContext { phase = $"Score: PlayerHP {player.hp} vs AIHP {ai.hp} | Diff (AI-Player) = {diff} -> {result}" });
     }
 
     // Called by CardView on click
@@ -578,4 +574,8 @@ public class GameManager : MonoBehaviour
         // fallback leggero
         return oppChild ? oppChild.GetComponentInChildren<CardView>(includeInactive: false) : null;
     }
+
+    public int GetDisplayIndex(CardView v) => v ? (v.transform.GetSiblingIndex() + 1) : -1;
+    public char GetSideChar(CardView v) => (v != null && v.owner == player) ? 'P' : 'E';
+
 }
