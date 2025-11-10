@@ -99,6 +99,7 @@ public class CardView : MonoBehaviour
         EventBus.Subscribe(GameEventType.Flip, _evtHandler);
         EventBus.Subscribe(GameEventType.AttackDeclared, _evtHandler);
         EventBus.Subscribe(GameEventType.TurnEnd, _evtHandler);
+        EventBus.Subscribe(GameEventType.Info, _evtHandler);
     }
 
     void OnDestroy()
@@ -109,6 +110,7 @@ public class CardView : MonoBehaviour
             EventBus.Unsubscribe(GameEventType.Flip, _evtHandler);
             EventBus.Unsubscribe(GameEventType.AttackDeclared, _evtHandler);
             EventBus.Unsubscribe(GameEventType.TurnEnd, _evtHandler);
+            EventBus.Unsubscribe(GameEventType.Info, _evtHandler);
             _evtHandler = null;
         }
     }
@@ -176,15 +178,6 @@ public class CardView : MonoBehaviour
                 }
                 break;
 
-            case GameEventType.Flip:
-                if (ctx.source == instance)
-                {
-                    bool hasOnFlip = GetComponent<OnFlipDealDamage>() != null;
-                    ShowHint(hasOnFlip ? "Damage On Flip activated" : "Flipped");
-                    Blink();
-                }
-                break;
-
             case GameEventType.AttackDeclared:
                 if (ctx.source == instance) ShowHint("Attack!");
                 else if (ctx.target == instance) ShowHint("Under attack!");
@@ -193,6 +186,15 @@ public class CardView : MonoBehaviour
             case GameEventType.TurnEnd:
                 // a fine turno l'hint viene nascosto
                 HideHint();
+                break;
+
+            case GameEventType.Info:
+                // HINT "diretto" per questa carta: phase = "HINT:messaggio"
+                if (ctx.source == instance && !string.IsNullOrEmpty(ctx.phase) && ctx.phase.StartsWith("HINT:"))
+                {
+                    ShowHint(ctx.phase.Substring("HINT:".Length).Trim());
+                    // niente Blink obbligatorio qui: lascialo a discrezione di chi invia l’hint
+                }
                 break;
         }
     }
