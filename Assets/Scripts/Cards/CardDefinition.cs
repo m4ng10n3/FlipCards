@@ -13,7 +13,6 @@ public class CardDefinition : MonoBehaviour
         public int maxHealth;
 
         // Fronte
-        public FrontType frontType;
         public int frontDamage;
         public int frontBlockValue;
 
@@ -35,7 +34,6 @@ public class CardDefinition : MonoBehaviour
     [Min(1)] public int maxHealth = 3;
 
     [Header("Front")]
-    public FrontType frontType = FrontType.Attacco;
     [Min(0)] public int frontDamage = 2;
     [Min(0)] public int frontBlockValue = 0;
 
@@ -55,7 +53,6 @@ public class CardDefinition : MonoBehaviour
             cardName = cardName,
             faction = faction,
             maxHealth = maxHealth,
-            frontType = frontType,
             frontDamage = frontDamage,
             frontBlockValue = frontBlockValue,
             backDamageBonusSameFaction = backDamageBonusSameFaction,

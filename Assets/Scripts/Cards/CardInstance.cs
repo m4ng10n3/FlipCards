@@ -53,14 +53,7 @@ public class CardInstance
     int ComputeSelfBlock(PlayerState myOwner)
     {
         int blk = 0;
-        if (side == Side.Fronte && def.frontType == FrontType.Blocco)
-            blk += def.frontBlockValue;
-
-        foreach (var ci in myOwner.board)
-            if (ci.alive && ci.side == Side.Retro && ci.def.faction == def.faction)
-                blk += ci.def.backBlockBonusSameFaction;
-
-        blk += Mathf.Max(0, tempBlockBonus);
+        
         return Mathf.Max(0, blk);
     }
 

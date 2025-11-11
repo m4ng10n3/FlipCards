@@ -2,69 +2,59 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 
+[RequireComponent(typeof(RectTransform))]
 public class CardView : MonoBehaviour
 {
-    [SerializeField] private Sprite frontSprite;      // assegna nel prefab
-    [SerializeField] private Sprite backSprite;       // assegna nel prefab
-    private Image img;
+    [Header("Image Handling")]
+    [Tooltip("Sprite del retro (assegnare come Source Image in Inspector)")]
+    [SerializeField] private Sprite backImage;
+    [SerializeField] private Image artworkMonster;
 
+    private Image img;
+    private Sprite frontImage;
 
     [Header("Legacy UI Text (assign in prefab)")]
     public Text nameText;
     public Text factionText;
     public Text sideText;
     public Text hpText;
-    public Text frontTypeText;
-    public Text frontDamageText;
-    public Text frontBlockText;
-    public Text backBonusesText;
+    public Text AttackPwrText;
+    public Text BlockPwrText;
 
     [Header("Runtime wiring")]
     [HideInInspector] public GameManager gm;
     [HideInInspector] public PlayerState owner;
     [HideInInspector] public CardInstance instance { get; private set; }
 
-    [Header("Card Size (for Layout)")]
-    public Vector2 preferredSize = new Vector2(260, 160);
+    [SerializeField] private Text hintText;
 
-    [SerializeField] private Text hintText; // opzionale; se assente, fallback su Logger
-
-    Button btn;
-    Outline highlight;
-
-    // tracking solo HP, niente più hint automatici su DMG/BLK
+    private Button btn;
+    private Outline highlight;
     private int _lastHp = int.MinValue;
-
-    // handler eventi
     private EventBus.Handler _evtHandler;
 
     void Awake()
     {
         btn = GetComponent<Button>();
         var bg = GetComponent<Image>();
-        var le = GetComponent<LayoutElement>();
 
         if (btn == null) btn = gameObject.AddComponent<Button>();
-        if (bg == null) bg = gameObject.AddComponent<Image>(); // <-- QUI: usa Image UI
+        if (bg == null) bg = gameObject.AddComponent<Image>();
         if (btn.targetGraphic == null) btn.targetGraphic = bg;
-        if (le == null) le = gameObject.AddComponent<LayoutElement>();
-        le.preferredWidth = preferredSize.x;
-        le.preferredHeight = preferredSize.y;
 
-        img = bg;                    // tieni un riferimento
-        img.preserveAspect = true;   // utile per carte
+        img = bg;
+        img.preserveAspect = false; // rispetta le proporzioni dentro al RectTransform
 
-        // sprite iniziale (prima dell'Init)
-        if (frontSprite != null) img.sprite = frontSprite;
+        // il fronte è l'immagine impostata nel componente Image (Source Image)
+        frontImage = img.sprite;
+
+        // mostra il fronte di default
+        if (frontImage != null) img.sprite = frontImage;
 
         PreviewFromInlineIfNoInstance();
         if (hintText != null) hintText.gameObject.SetActive(false);
     }
 
-
-    /// <summary>
-    /// Anteprima: mostra i dati statici se la carta è presente in scena ma senza istanza runtime.
-    /// </summary>
     void PreviewFromInlineIfNoInstance()
     {
         if (instance != null) return;
@@ -77,18 +67,9 @@ public class CardView : MonoBehaviour
         if (nameText != null) nameText.text = def.cardName;
         if (factionText != null) factionText.text = def.faction.ToString();
         if (sideText != null) sideText.text = "Side";
-        if (hpText != null) hpText.text = def.maxHealth + "/" + def.maxHealth;
-        if (frontTypeText != null) frontTypeText.text = "Front: " + def.frontType;
-        if (frontDamageText != null) frontDamageText.text = "Front Dmg: " + def.frontDamage;
-        if (frontBlockText != null) frontBlockText.text = "Front Block: " + def.frontBlockValue;
-
-        if (backBonusesText != null)
-        {
-            backBonusesText.text =
-                "Back: +DMG same " + def.backDamageBonusSameFaction + "\n" +
-                "      +BLK same " + def.backBlockBonusSameFaction + "\n" +
-                "      +PA(2 retro same) " + def.backBonusPAIfTwoRetroSameFaction;
-        }
+        if (hpText != null) hpText.text = def.maxHealth + "";
+        if (AttackPwrText != null) AttackPwrText.text = "" + def.frontDamage;
+        if (BlockPwrText != null) BlockPwrText.text = "" + def.frontBlockValue;
     }
 
     public void Init(GameManager gm, PlayerState owner, CardInstance instance)
@@ -104,14 +85,12 @@ public class CardView : MonoBehaviour
         Refresh();
         if (hintText != null) hintText.gameObject.SetActive(false);
 
-        // Sottoscrizione agli eventi: solo l'Hint reagisce
         _evtHandler = OnGameEvent;
         EventBus.Subscribe(GameEventType.AttackResolved, _evtHandler);
         EventBus.Subscribe(GameEventType.Flip, _evtHandler);
         EventBus.Subscribe(GameEventType.AttackDeclared, _evtHandler);
         EventBus.Subscribe(GameEventType.TurnEnd, _evtHandler);
         EventBus.Subscribe(GameEventType.Info, _evtHandler);
-
         EventBus.Subscribe(GameEventType.TurnStart, _evtHandler);
     }
 
@@ -124,9 +103,7 @@ public class CardView : MonoBehaviour
             EventBus.Unsubscribe(GameEventType.AttackDeclared, _evtHandler);
             EventBus.Unsubscribe(GameEventType.TurnEnd, _evtHandler);
             EventBus.Unsubscribe(GameEventType.Info, _evtHandler);
-
             EventBus.Unsubscribe(GameEventType.TurnStart, _evtHandler);
-
             _evtHandler = null;
         }
     }
@@ -148,10 +125,6 @@ public class CardView : MonoBehaviour
         highlight.enabled = on;
     }
 
-    /// <summary>
-    /// Aggiorna tutti i testi statici della carta (restano sempre visibili).
-    /// Non mostra hint.
-    /// </summary>
     public void Refresh()
     {
         if (instance == null) return;
@@ -161,33 +134,35 @@ public class CardView : MonoBehaviour
         if (nameText != null) nameText.text = def.cardName;
         if (factionText != null) factionText.text = def.faction.ToString();
         if (sideText != null) sideText.text = instance.side.ToString();
-        if (hpText != null) hpText.text = instance.health + "/" + def.maxHealth;
-        if (frontTypeText != null) frontTypeText.text = "Front: " + def.frontType;
-        if (frontDamageText != null) frontDamageText.text = "Front Dmg: " + def.frontDamage;
-        if (frontBlockText != null) frontBlockText.text = "Front Block: " + def.frontBlockValue;
+        if (hpText != null) hpText.text = instance.health + "";
+        if (AttackPwrText != null) AttackPwrText.text = "" + def.frontDamage;
+        if (BlockPwrText != null) BlockPwrText.text = "" + def.frontBlockValue;
 
-        if (backBonusesText != null)
-        {
-            backBonusesText.text =
-                "Back: +DMG same " + def.backDamageBonusSameFaction + "\n" +
-                "      +BLK same " + def.backBlockBonusSameFaction + "\n" +
-                "      +PA(2 retro same) " + def.backBonusPAIfTwoRetroSameFaction;
-        }
+        _lastHp = instance.health;
 
-        _lastHp = instance.health; // tracking interno per eventuali usi futuri
-        RefreshSpriteBySide();
-
+        FlipSide();
     }
 
-    private void RefreshSpriteBySide()
+    private void FlipSide()
     {
-        if (img == null || instance == null) return;
-        img.sprite = (instance.side == Side.Fronte) ? frontSprite : backSprite;
+        bool isFront = (instance != null && instance.side == Side.Fronte);
+
+        // Cambia solo lo sprite (niente SetNativeSize / scale)
+        var newSprite = isFront ? frontImage : (backImage != null ? backImage : frontImage);
+        img.type = Image.Type.Simple; // per sicurezza
+        img.preserveAspect = false;   // il RectTransform decide; cambia a true se vuoi letterboxing
+        img.sprite = newSprite;
+
+        // Mostra/nascondi i testi a seconda del lato
+
+        if (nameText) nameText.enabled = isFront;
+        if (hpText) hpText.enabled = isFront;
+        if (AttackPwrText) AttackPwrText.enabled = isFront;
+        if (BlockPwrText) BlockPwrText.enabled = isFront;
+        if (artworkMonster) artworkMonster.enabled = isFront;
+        if (hintText) hintText.enabled = isFront;
     }
 
-
-
-    // ======== Event handling: SOLO Hint + aggiornamento HP ========
 
     void OnGameEvent(GameEventType t, EventContext ctx)
     {
@@ -198,7 +173,7 @@ public class CardView : MonoBehaviour
             case GameEventType.AttackResolved:
                 if (ctx.target == instance && ctx.amount > 0)
                 {
-                    ShowHint($"-{ctx.amount}HP");   // <--- persiste finché non arriva TurnEnd
+                    ShowHint($"-{ctx.amount}HP");
                     UpdateHpOnly();
                     Blink();
                 }
@@ -214,31 +189,25 @@ public class CardView : MonoBehaviour
                 break;
 
             case GameEventType.TurnEnd:
-                // a fine turno l'hint viene nascosto
                 HideHint();
                 break;
 
             case GameEventType.Info:
-                // HINT "diretto" per questa carta: phase = "HINT:messaggio"
                 if (ctx.source == instance && !string.IsNullOrEmpty(ctx.phase) && ctx.phase.StartsWith("HINT:"))
-                {
                     ShowHint(ctx.phase.Substring("HINT:".Length).Trim());
-                    // niente Blink obbligatorio qui: lascialo a discrezione di chi invia l’hint
-                }
                 break;
 
             case GameEventType.TurnStart:
-                // Nuovo turno: rimuovi gli Hint del turno precedente prima che arrivino quelli nuovi
                 HideHint();
                 break;
+
             case GameEventType.Flip:
                 if (ctx.source == instance || ctx.target == instance)
                 {
-                    RefreshSpriteBySide();
-                    Blink(); // opzionale
+                    FlipSide();
+                    Blink();
                 }
                 break;
-
         }
     }
 
@@ -246,11 +215,10 @@ public class CardView : MonoBehaviour
     {
         if (instance == null) return;
         if (hpText != null)
-            hpText.text = instance.health + "/" + instance.def.maxHealth;
+            hpText.text = instance.health + "";
         _lastHp = instance.health;
     }
 
-    // Small visual feedback
     public void Blink() { StartCoroutine(BlinkRoutine()); }
     IEnumerator BlinkRoutine()
     {
@@ -261,7 +229,6 @@ public class CardView : MonoBehaviour
         img.color = c;
     }
 
-
     public void ShowHint(string msg)
     {
         if (hintText == null)
@@ -271,20 +238,15 @@ public class CardView : MonoBehaviour
         }
 
         hintText.gameObject.SetActive(true);
-
-        if (string.IsNullOrEmpty(hintText.text))
-            hintText.text = msg;
-        else
-            hintText.text += "\n" + msg;
+        hintText.text = string.IsNullOrEmpty(hintText.text) ? msg : hintText.text + "\n" + msg;
     }
 
     public void HideHint()
     {
         if (hintText != null)
         {
-            hintText.text = string.Empty;   // svuota coda messaggi
+            hintText.text = string.Empty;
             hintText.gameObject.SetActive(false);
         }
     }
-
 }
