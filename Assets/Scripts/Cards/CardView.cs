@@ -4,6 +4,11 @@ using System.Collections;
 
 public class CardView : MonoBehaviour
 {
+    [SerializeField] private Sprite frontSprite;      // assegna nel prefab
+    [SerializeField] private Sprite backSprite;       // assegna nel prefab
+    private Image img;
+
+
     [Header("Legacy UI Text (assign in prefab)")]
     public Text nameText;
     public Text factionText;
@@ -40,16 +45,22 @@ public class CardView : MonoBehaviour
         var le = GetComponent<LayoutElement>();
 
         if (btn == null) btn = gameObject.AddComponent<Button>();
-        if (bg == null) bg = gameObject.AddComponent<Image>();
+        if (bg == null) bg = gameObject.AddComponent<Image>(); // <-- QUI: usa Image UI
         if (btn.targetGraphic == null) btn.targetGraphic = bg;
         if (le == null) le = gameObject.AddComponent<LayoutElement>();
         le.preferredWidth = preferredSize.x;
         le.preferredHeight = preferredSize.y;
 
-        // Preview editor-only: se non c'è istanza runtime, mostra i dati dell'inline
+        img = bg;                    // tieni un riferimento
+        img.preserveAspect = true;   // utile per carte
+
+        // sprite iniziale (prima dell'Init)
+        if (frontSprite != null) img.sprite = frontSprite;
+
         PreviewFromInlineIfNoInstance();
         if (hintText != null) hintText.gameObject.SetActive(false);
     }
+
 
     /// <summary>
     /// Anteprima: mostra i dati statici se la carta è presente in scena ma senza istanza runtime.
@@ -164,7 +175,17 @@ public class CardView : MonoBehaviour
         }
 
         _lastHp = instance.health; // tracking interno per eventuali usi futuri
+        RefreshSpriteBySide();
+
     }
+
+    private void RefreshSpriteBySide()
+    {
+        if (img == null || instance == null) return;
+        img.sprite = (instance.side == Side.Fronte) ? frontSprite : backSprite;
+    }
+
+
 
     // ======== Event handling: SOLO Hint + aggiornamento HP ========
 
@@ -210,6 +231,14 @@ public class CardView : MonoBehaviour
                 // Nuovo turno: rimuovi gli Hint del turno precedente prima che arrivino quelli nuovi
                 HideHint();
                 break;
+            case GameEventType.Flip:
+                if (ctx.source == instance || ctx.target == instance)
+                {
+                    RefreshSpriteBySide();
+                    Blink(); // opzionale
+                }
+                break;
+
         }
     }
 
@@ -225,13 +254,13 @@ public class CardView : MonoBehaviour
     public void Blink() { StartCoroutine(BlinkRoutine()); }
     IEnumerator BlinkRoutine()
     {
-        var img = GetComponent<Image>();
         if (img == null) yield break;
-        Color c = img.color;
+        var c = img.color;
         img.color = Color.yellow;
         yield return new WaitForSeconds(0.08f);
         img.color = c;
     }
+
 
     public void ShowHint(string msg)
     {
