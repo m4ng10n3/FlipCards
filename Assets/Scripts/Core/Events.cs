@@ -4,11 +4,12 @@ using UnityEngine;
 
 public enum GameEventType
 {
-    TurnStart, TurnEnd, Flip, AttackDeclared,
-    IncomingAttack,            // <-- rinomina da ResolveIncomingDamage
-    CombatResolved,            // <-- nuovo evento unico di esito
-    CardPlayed, /*PhaseChanged,*/ // (opzionale: se non lo usi, puoi rimuoverlo)
-    Info
+    TurnStart, TurnEnd, Flip,
+    AttackDeclared,       // attaccante dichiara colpo e importo proposto
+    AttackResolved,       // il difensore ha calcolato e applicato il danno
+    CardPlayed,
+    Info,
+    Custom
 }
 
 [Serializable]
@@ -16,22 +17,30 @@ public struct EventContext
 {
     public PlayerState owner;
     public PlayerState opponent;
-    public CardInstance source;
-    public CardInstance target;
+
+    // ATTENZIONE: ora generici (CardInstance o SlotInstance o null)
+    public object source;
+    public object target;
+
     public int amount;
     public string phase;
 
-    static string SafeName(CardInstance c)
-        => c == null ? "null" : $"#{c.id} {c.def.cardName}";
-
     public override string ToString()
     {
-        var ownerName = owner?.name ?? "null";
-        var oppName = opponent?.name ?? "null";
-        var src = GameManager.SafeCardLabel(source);
-        var tgt = GameManager.SafeCardLabel(target);
-        var ph = string.IsNullOrEmpty(phase) ? "none" : phase;
+        string ownerName = owner?.name ?? "null";
+        string oppName = opponent?.name ?? "null";
+        string src = Label(source);
+        string tgt = Label(target);
+        string ph = string.IsNullOrEmpty(phase) ? "none" : phase;
         return $"owner:{ownerName} opponent:{oppName} source:{src} target:{tgt} amount:{amount} phase:{ph}";
+    }
+
+    static string Label(object o)
+    {
+        if (o == null) return "null";
+        if (o is CardInstance c) return $"Card#{c.id} {c.def.cardName}";
+        if (o is SlotInstance s) return $"Slot#{s.id} {s.def.SlotName}";
+        return o.ToString();
     }
 }
 
@@ -72,20 +81,36 @@ public static class EventBus
             }
         }
     }
+
     public static string Format(GameEventType t, EventContext ctx)
     {
-        static string L(CardInstance c) => GameManager.SafeCardLabel(c);
+        static string L(object o)
+        {
+            if (o == null) return "null";
+            if (o is CardInstance c) return $"#{c.id} {c.def.cardName}";
+            if (o is SlotInstance s) return $"Slot#{s.id} {s.def.SlotName}";
+            return o.ToString();
+        }
+
+        static string Hp(object o)
+        {
+            if (o is CardInstance c) return c.health.ToString();
+            if (o is SlotInstance s) return s.health.ToString();
+            return "-";
+        }
+
         switch (t)
         {
             case GameEventType.TurnStart: return $"[TURN START] owner:{ctx.owner?.name}";
             case GameEventType.TurnEnd: return $"[TURN END]   owner:{ctx.owner?.name}";
             case GameEventType.CardPlayed: return $"[PLAY]  {L(ctx.source)}";
             case GameEventType.Flip: return $"[FLIP]  {L(ctx.source)}";
-            case GameEventType.AttackDeclared: return $"[ATTACK] {L(ctx.source)} -> {L(ctx.target)} ({ctx.amount})";
-            case GameEventType.IncomingAttack: return $"[INCOMING] {L(ctx.source)} -> {L(ctx.target)} ({ctx.amount})";
-            case GameEventType.CombatResolved: return $"[COMBAT] {L(ctx.target)} took {ctx.amount} (HP:{ctx.target?.health})";
+            case GameEventType.AttackDeclared:
+                return $"[ATTACK] {L(ctx.source)} -> {L(ctx.target)} (proposed:{ctx.amount})";
+            case GameEventType.AttackResolved:
+                return $"[RESOLVED] {L(ctx.source)} -> {L(ctx.target)} (final:{ctx.amount}) HP:{Hp(ctx.target)}";
             case GameEventType.Info: return $"[INFO] {ctx.phase}";
-            default: return $"[{t}] {ctx}";
+            default: return $"[{t}] owner:{ctx.owner?.name} src:{L(ctx.source)} tgt:{L(ctx.target)} amount:{ctx.amount} phase:{ctx.phase}";
         }
     }
 }

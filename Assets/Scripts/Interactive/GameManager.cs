@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
-    // ====== PREFAB BINDINGS (fallback ONLY if no scene cards are found) ======
+    // ====== PREFAB BINDINGS ======
     [System.Serializable]
     public class PrefabCardBinding
     {
@@ -18,11 +18,14 @@ public class GameManager : MonoBehaviour
         public int count = 1;
     }
 
-    // ====== SCENE TEMPLATE ======
-    class SceneCardTemplate
+    [System.Serializable]
+    public class PrefabSlotBinding
     {
-        public GameObject template;                 // disabled clone used as source for Instantiate
-        public CardDefinition.Spec def;       // built at runtime from CardDefinition
+        [Tooltip("Slot prefab (must have SlotView + SlotDefinition)")]
+        public GameObject prefab;
+
+        [Min(1), Tooltip("How many copies of this prefab to spawn")]
+        public int count = 1;
     }
 
     [Header("Roots")]
@@ -30,39 +33,36 @@ public class GameManager : MonoBehaviour
     public Transform aiBoardRoot;
 
     [Header("UI")]
-    public Button btnFlipRandom;
     public Button btnForceFlip;
     public Button btnAttack;
     public Button btnEndTurn;
 
-    [Header("Control")]
-    public bool enemyControlledByButtons = true;   // se true non auto-esegue l'IA: usi i bottoni Enemy
-    public Button btnEnemyAttack;
-    public Button btnEnemyFlip;
-
     [Header("LOG")]
-    public Text logText; // usa TMP_Text se preferisci TMP
+    public Text logText;
     private static readonly StringBuilder _logBuf = new StringBuilder(4096);
 
     [Header("Match parameters")]
     public int turns = 10;
     public int playerBaseAP = 3;
-    public int aiBaseAP = 3; // AI may get extra AP via GameRules
     public int seed = 12345;
 
     [Header("Start constraints")]
     [Min(1)] public int minCardsPerSide = 3;
 
-    [Header("Prefab bindings (used only if NO scene cards are found)")]
+    [Header("Prefab bindings")]
     public List<PrefabCardBinding> playerCards = new List<PrefabCardBinding>();
-    public List<PrefabCardBinding> aiCards = new List<PrefabCardBinding>();
+
+    [Header("Enemy Slots (bindings only)")]
+    public List<PrefabSlotBinding> enemySlots = new List<PrefabSlotBinding>();
+
+    bool awaitingEndTurn = false; // se true, l’utente deve premere End Turn; nessuna altra azione permessa
 
     static GameManager _instance;
     public static GameManager Instance => _instance;
 
     public bool TryGetView(CardInstance ci, out CardView v) => viewByInstance.TryGetValue(ci, out v);
 
-    // ====== SIMPLE RULE ENGINE (INLINE, NO EXTRA FILES) ======
+    // ====== SIMPLE RULE ENGINE ======
     struct Rule
     {
         public GameEventType trigger;
@@ -72,7 +72,7 @@ public class GameManager : MonoBehaviour
     }
 
     readonly List<Rule> _rules = new List<Rule>();
-    public bool enableDefaultRules = true; // puoi spegnerle in Inspector
+    public bool enableDefaultRules = true;
 
     void AddRule(GameEventType t, Func<EventContext, bool> cond, Action<EventContext> act, bool enabled = true)
     {
@@ -99,10 +99,14 @@ public class GameManager : MonoBehaviour
     readonly Dictionary<CardView, CardInstance> instanceByView = new Dictionary<CardView, CardInstance>();
 
     readonly List<CardView> playerViews = new List<CardView>();
-    readonly List<CardView> aiViews = new List<CardView>();
 
-    // Traccia abilità attaccate per unbind sicuro
+    // Abilità per unbind sicuro
     readonly Dictionary<CardInstance, List<AbilityBase>> abilitiesByInstance = new Dictionary<CardInstance, List<AbilityBase>>();
+
+    // ====== SLOTS (nemico) ======
+    readonly Dictionary<SlotInstance, SlotView> slotViewByInstance = new Dictionary<SlotInstance, SlotView>();
+    readonly Dictionary<SlotView, SlotInstance> slotInstanceByView = new Dictionary<SlotView, SlotInstance>();
+    readonly List<SlotView> enemySlotViews = new List<SlotView>();
 
     void Awake()
     {
@@ -111,17 +115,14 @@ public class GameManager : MonoBehaviour
         _instance = this;
 
         // Wiring bottoni UI
-        if (btnFlipRandom) btnFlipRandom.onClick.AddListener(OnFlipRandom);
         if (btnForceFlip) btnForceFlip.onClick.AddListener(OnForceFlip);
         if (btnAttack) btnAttack.onClick.AddListener(OnAttack);
         if (btnEndTurn) btnEndTurn.onClick.AddListener(OnEndTurn);
-        if (btnEnemyAttack) btnEnemyAttack.onClick.AddListener(OnEnemyAttack);
-        if (btnEnemyFlip) btnEnemyFlip.onClick.AddListener(OnEnemyFlip);
     }
 
     void Start()
     {
-        // Ensure SelectionManager singleton
+        // Ensure SelectionManager singleton (per flip manuale)
         if (SelectionManager.Instance == null)
             new GameObject("SelectionManager").AddComponent<SelectionManager>();
 
@@ -135,16 +136,25 @@ public class GameManager : MonoBehaviour
 
         rng = new System.Random(seed);
         player = new PlayerState("Player", playerBaseAP);
-        ai = new PlayerState("AI", aiBaseAP);
+        ai = new PlayerState("AI", 0); // IA senza PA
 
-        // 1) Build da SCENA o da Prefab
-        BuildSideFromSceneOrBindings(player, playerBoardRoot, playerViews, playerCards, "PLAYER");
-        BuildSideFromSceneOrBindings(ai, aiBoardRoot, aiViews, aiCards, "AI");
+        // Pulisci sempre le root: bindings sono l'unica verità
+        ClearChildrenUnder(playerBoardRoot);
+        ClearChildrenUnder(aiBoardRoot);
 
-        // 2) Minimo carte
-        if (playerViews.Count < minCardsPerSide || aiViews.Count < minCardsPerSide)
+        // 1) Costruisci il lato Player (SOLO dai bindings)
+        SpawnCardsFromBindings(player, playerCards, playerBoardRoot, playerViews);
+
+        // 2) Costruisci gli SLOT del nemico (SOLO dai bindings)
+        SpawnSlotsFromBindings(ai, enemySlots, aiBoardRoot, enemySlotViews);
+
+        // 3) Allinea il numero di slot alle lane del player
+        EnsureSlotsMatchPlayerLanes();
+
+        // 4) Minimo carte Player
+        if (playerViews.Count < minCardsPerSide)
         {
-            Logger.Info($"Not enough cards to start. Player:{playerViews.Count} / AI:{aiViews.Count} (min {minCardsPerSide})");
+            Logger.Info($"Not enough Player cards to start. Player:{playerViews.Count} (min {minCardsPerSide})");
             matchEnded = true;
             return;
         }
@@ -154,15 +164,9 @@ public class GameManager : MonoBehaviour
         UpdateAllViews();
         UpdateHUD();
 
-        // 3) Regole di default (opzionali)
+        // 5) Regole di default (opzionali)
         if (enableDefaultRules)
         {
-            // Esempio: +1 danno extra se source è in Fronte
-            /*
-            AddRule(GameEventType.DamageDealt,
-                ctx => ctx.target != null && ctx.source != null && ctx.source.side == Side.Fronte,
-                ctx => { ctx.source.DealDamageToCard(ctx.owner, ctx.opponent, ctx.target, 1, "Rule:+1 Front"); });
-            */
             // Esempio: upkeep ping se Player ha >=2 Retro Ombra
             AddRule(GameEventType.TurnStart,
                 ctx => ctx.owner == player && player.CountRetro(Faction.Ombra) >= 2,
@@ -173,29 +177,12 @@ public class GameManager : MonoBehaviour
                 });
         }
 
-        // 4) Avvia turno Player
+        // 6) Avvia turno Player
         StartTurn(player, ai, true);
     }
 
-    // ====== BUILD SIDE ======
-    void BuildSideFromSceneOrBindings(PlayerState owner,
-                                      Transform root,
-                                      List<CardView> outViews,
-                                      List<PrefabCardBinding> fallbackBindings,
-                                      string label)
-    {
-        var templates = CaptureTemplatesAndClear(root, label);
-        if (templates.Count > 0)
-        {
-            SpawnFromTemplates(owner, templates, root, outViews);
-            foreach (var t in templates) if (t.template != null) Destroy(t.template);
-            return;
-        }
-
-        SpawnFromBindings(owner, fallbackBindings, root, outViews);
-    }
-
-    bool TryGetSpec(GameObject go, out CardDefinition.Spec spec)
+    // ====== BUILD (bindings ONLY) ======
+    bool TryGetCardSpec(GameObject go, out CardDefinition.Spec spec)
     {
         spec = default;
         if (go == null) return false;
@@ -205,71 +192,17 @@ public class GameManager : MonoBehaviour
         return true;
     }
 
-    List<SceneCardTemplate> CaptureTemplatesAndClear(Transform root, string label)
+    bool TryGetSlotSpec(GameObject go, out SlotDefinition.Spec spec)
     {
-        var list = new List<SceneCardTemplate>();
-        if (root == null) return list;
-
-        var toProcess = new List<Transform>();
-        foreach (Transform t in root) toProcess.Add(t);
-
-        foreach (var t in toProcess)
-        {
-            var view = t.GetComponent<CardView>();
-            if (view == null) continue;
-            if (!TryGetSpec(t.gameObject, out var def)) continue;
-
-            var template = Instantiate(t.gameObject);
-            template.name = t.gameObject.name + " (TEMPLATE)";
-            template.SetActive(false);
-
-            list.Add(new SceneCardTemplate { template = template, def = def });
-            Destroy(t.gameObject); // rimuovi originali
-        }
-
-        if (list.Count > 0)
-            EventBus.Publish(GameEventType.Info, new EventContext { phase = $"[{label}] Found {list.Count} scene card templates." });
-
-        return list;
+        spec = default;
+        if (go == null) return false;
+        var inline = go.GetComponent<SlotDefinition>();
+        if (inline == null) return false;
+        spec = inline.BuildSpec();
+        return true;
     }
 
-    void SpawnFromTemplates(PlayerState owner, List<SceneCardTemplate> templates, Transform root, List<CardView> outViews)
-    {
-        foreach (var t in templates)
-        {
-            if (t.template == null) continue;
-            AddCardFromTemplate(owner, t.def, t.template, root, outViews);
-        }
-    }
-
-    void AddCardFromTemplate(PlayerState owner, CardDefinition.Spec def, GameObject template, Transform root, List<CardView> outViews)
-    {
-        var ci = new CardInstance(def, rng);
-        owner.board.Add(ci);
-
-        var go = Instantiate(template, root);
-        go.name = template.name.Replace(" (TEMPLATE)", "");
-        go.SetActive(true);
-
-        var view = go.GetComponent<CardView>();
-        if (view == null) { Logger.Error("Card template has no CardView."); Destroy(go); return; }
-
-        view.Init(this, owner, ci);
-        viewByInstance[ci] = view;
-        instanceByView[view] = ci;
-        outViews.Add(view);
-
-        // Bind automatico abilità sul prefab
-        var opponent = (owner == player) ? ai : player;
-        var abilities = go.GetComponents<AbilityBase>()?.ToList() ?? new List<AbilityBase>();
-        foreach (var ab in abilities) ab.Bind(ci, owner, opponent);
-        abilitiesByInstance[ci] = abilities;
-
-        // Evento carta giocata
-        EventBus.Publish(GameEventType.CardPlayed, new EventContext { owner = owner, opponent = opponent, source = ci, phase = "Main" });
-    }
-
-    void SpawnFromBindings(PlayerState owner, List<PrefabCardBinding> bindings, Transform root, List<CardView> outViews)
+    void SpawnCardsFromBindings(PlayerState owner, List<PrefabCardBinding> bindings, Transform root, List<CardView> outViews)
     {
         if (bindings == null) return;
 
@@ -280,7 +213,7 @@ public class GameManager : MonoBehaviour
                 Logger.Warn("Invalid binding: assign Prefab and Count >= 1.");
                 continue;
             }
-            if (!TryGetSpec(b.prefab, out var def))
+            if (!TryGetCardSpec(b.prefab, out var def))
             {
                 Logger.Error("Prefab '" + b.prefab.name + "' must have CardDefinition.");
                 continue;
@@ -290,16 +223,150 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    void AddCardFromTemplate(PlayerState owner, CardDefinition.Spec def, GameObject prefab, Transform root, List<CardView> outViews)
+    {
+        var ci = new CardInstance(def, rng);
+        owner.board.Add(ci);
+
+        var go = Instantiate(prefab, root);
+        go.name = prefab.name;
+        go.SetActive(true);
+
+        var view = go.GetComponent<CardView>();
+        if (view == null) { Logger.Error("Card prefab has no CardView."); Destroy(go); return; }
+
+        view.Init(this, owner, ci);
+        viewByInstance[ci] = view;
+        instanceByView[view] = ci;
+        outViews.Add(view);
+
+        // Bind automatico abilità sul prefab
+        var opponent = ai;
+        var abilities = go.GetComponents<AbilityBase>()?.ToList() ?? new List<AbilityBase>();
+        foreach (var ab in abilities) ab.Bind(ci, owner, opponent);
+        abilitiesByInstance[ci] = abilities;
+
+        // Evento carta giocata
+        EventBus.Publish(GameEventType.CardPlayed, new EventContext { owner = owner, opponent = opponent, source = ci, phase = "Main" });
+    }
+
+    void SpawnSlotsFromBindings(PlayerState owner, List<PrefabSlotBinding> bindings, Transform root, List<SlotView> outViews)
+    {
+        if (bindings == null) return;
+
+        foreach (var b in bindings)
+        {
+            if (b == null || b.count <= 0 || b.prefab == null)
+            {
+                Logger.Warn("Invalid slot binding: assign Prefab and Count >= 1.");
+                continue;
+            }
+            if (!TryGetSlotSpec(b.prefab, out var def))
+            {
+                Logger.Error("Slot prefab '" + b.prefab.name + "' must have SlotDefinition.");
+                continue;
+            }
+            for (int i = 0; i < b.count; i++)
+                AddSlotFromTemplate(owner, def, b.prefab, root, outViews);
+        }
+    }
+
+    void AddSlotFromTemplate(PlayerState owner, SlotDefinition.Spec def, GameObject prefab, Transform root, List<SlotView> outViews)
+    {
+        var si = new SlotInstance(def);
+
+        var go = Instantiate(prefab, root);
+        go.name = prefab.name;
+        go.SetActive(true);
+
+        var view = go.GetComponent<SlotView>();
+        if (view == null) { Logger.Error("Slot prefab has no SlotView."); Destroy(go); return; }
+
+        view.Init(this, owner, si);
+        slotViewByInstance[si] = view;
+        slotInstanceByView[view] = si;
+        outViews.Add(view);
+
+        // Abilità su prefab (se presenti; source null per slot)
+        var abilities = go.GetComponents<AbilityBase>()?.ToList();
+        if (abilities != null)
+            foreach (var ab in abilities) ab.Bind(null, ai, player);
+    }
+
+    // Assicura che il numero degli slot corrisponda al numero delle lane del player
+    void EnsureSlotsMatchPlayerLanes()
+    {
+        int lanes = playerBoardRoot ? playerBoardRoot.childCount : 0;
+        if (lanes <= 0 || aiBoardRoot == null) return;
+
+        // Troppi slot? taglia
+        while (aiBoardRoot.childCount > lanes)
+        {
+            var last = aiBoardRoot.GetChild(aiBoardRoot.childCount - 1);
+            var sv = last.GetComponentInChildren<SlotView>(false);
+            if (sv != null)
+            {
+                enemySlotViews.Remove(sv);
+                if (slotInstanceByView.TryGetValue(sv, out var si))
+                {
+                    slotInstanceByView.Remove(sv);
+                    slotViewByInstance.Remove(si);
+                }
+            }
+            Destroy(last.gameObject);
+        }
+
+        // Pochi slot? duplica ciclicamente dai binding per riempire
+        if (aiBoardRoot.childCount < lanes)
+        {
+            var flat = new List<GameObject>();
+            foreach (var b in enemySlots)
+                for (int i = 0; i < Mathf.Max(0, b.count); i++)
+                    if (b.prefab != null) flat.Add(b.prefab);
+
+            if (flat.Count == 0) return; // nulla da cui pescare
+
+            while (aiBoardRoot.childCount < lanes)
+            {
+                var prefab = flat[(aiBoardRoot.childCount) % flat.Count];
+                if (!TryGetSlotSpec(prefab, out var spec)) { break; }
+                AddSlotFromTemplate(ai, spec, prefab, aiBoardRoot, enemySlotViews);
+            }
+        }
+
+        // Allinea gli indici
+        for (int i = 0; i < aiBoardRoot.childCount; i++)
+            aiBoardRoot.GetChild(i).SetSiblingIndex(i);
+    }
+
     // ====== REFRESH / HUD ======
     public void UpdateAllViews()
     {
         foreach (var kv in viewByInstance)
             kv.Value.Refresh();
+
+        foreach (var v in enemySlotViews)
+            if (v != null) v.Refresh();
     }
 
     public void UpdateHUD()
     {
         if (matchEnded) return;
+
+        if (playerPhase)
+        {
+            // Durante il turno del player:
+            // - se awaitingEndTurn == true => hai già attaccato -> niente altre azioni; solo EndTurn
+            if (btnAttack) btnAttack.interactable = !awaitingEndTurn;
+            if (btnForceFlip) btnForceFlip.interactable = !awaitingEndTurn && player.actionPoints > 0;
+        }
+        else
+        {
+            // Durante il turno IA: nessuna azione disponibile, ma si può SEMPRE chiudere il turno
+            if (btnAttack) btnAttack.interactable = false;
+            if (btnForceFlip) btnForceFlip.interactable = false;
+        }
+
     }
 
     // ====== TURN FLOW / UI ACTIONS ======
@@ -307,59 +374,104 @@ public class GameManager : MonoBehaviour
     {
         playerPhase = isPlayerPhase;
 
-        // Reset AP (puoi aggiungere bonus passivi qui)
-        owner.actionPoints = (owner == player) ? playerBaseAP : aiBaseAP;
+        // AZZERA il lock a inizio turno (sarà rimesso a true dopo l’attacco)
+        awaitingEndTurn = false;
+
+        // Reset AP
+        owner.actionPoints = (owner == player) ? playerBaseAP : 0;
 
         EventBus.Publish(GameEventType.TurnStart, new EventContext { owner = owner, opponent = opponent, phase = "TurnStart" });
         UpdateHUD();
 
-        // Se è turno IA: o manuale (bottoni) o auto-esecuzione
-        if (!playerPhase && !matchEnded)
+        if (playerPhase)
         {
-            if (enemyControlledByButtons)
-            {
-                EventBus.Publish(GameEventType.Info, new EventContext { phase = "[GM] Enemy manual phase: usa i bottoni Enemy per agire." });
-                return; // restiamo nella fase Enemy in attesa input
-            }
-
-            // IA automatica
-            AIController.ExecuteTurn(rng, ai, player);
-
-            CleanupDestroyed(player);
-            CleanupDestroyed(ai);
+            // Randomizza layout/verso carte; gli slot restano quelli da bindings
+            RandomizePlayerLayoutAndSides();
+            EnsureSlotsMatchPlayerLanes();
+            UpdateAllViews();
+            return; // attende input (Flip / Attack / EndTurn)
+        }
+        else
+        {
+            // Turno IA: esegue SUBITO le sue azioni automatiche (per vedere gli hint)
+            ExecuteAiTurnStartActions();
             UpdateAllViews();
             UpdateHUD();
-
-            // Chiudi turno IA e passa al Player
-            EndTurnInternal(ai, player);
-            if (!matchEnded)
-            {
-                currentTurn++; // incrementa quando torni al Player
-                StartTurn(player, ai, true);
-            }
+            return;
         }
+
     }
 
     void EndTurnInternal(PlayerState owner, PlayerState opponent)
     {
         EventBus.Publish(GameEventType.TurnEnd, new EventContext { owner = owner, opponent = opponent, phase = "TurnEnd" });
+
+        // A fine turno IA: flip probabilistico del player (gli slot NON vengono ricreati)
+        if (owner == ai)
+        {
+            foreach (var ci in player.board.Where(c => c.alive))
+            {
+                float p = Mathf.Clamp01(ci.def.endTurnFlipChance);
+                if (rng.NextDouble() < p)
+                {
+                    ci.Flip();
+                    EventBus.Publish(GameEventType.Flip, new EventContext { owner = player, opponent = ai, source = ci, phase = "EndTurnFlip" });
+                }
+            }
+
+            // 1) distruggi gli slot attuali e pulisci tracking
+            while (aiBoardRoot.childCount > 0)
+            {
+                var child = aiBoardRoot.GetChild(aiBoardRoot.childCount - 1);
+                var sv = child.GetComponentInChildren<SlotView>(false);
+                if (sv != null)
+                {
+                    enemySlotViews.Remove(sv);
+                    if (slotInstanceByView.TryGetValue(sv, out var si))
+                    {
+                        slotInstanceByView.Remove(sv);
+                        slotViewByInstance.Remove(si);
+                    }
+                }
+                Destroy(child.gameObject);
+            }
+
+            // 2) crea una lista "flat" di prefabs dagli enemySlots e **mescola**
+            var flat = new List<GameObject>();
+            foreach (var b in enemySlots)
+                for (int i = 0; i < Mathf.Max(0, b.count); i++)
+                    if (b.prefab != null) flat.Add(b.prefab);
+
+            // se non hai binding niente da fare
+            if (flat.Count > 0)
+            {
+                // Fisher–Yates
+                for (int i = flat.Count - 1; i > 0; i--)
+                {
+                    int j = rng.Next(i + 1);
+                    (flat[i], flat[j]) = (flat[j], flat[i]);
+                }
+
+                // 3) riempi le lane del player scegliendo dalla lista mescolata (ciclica)
+                int lanes = playerBoardRoot.childCount;
+                for (int i = 0; i < lanes; i++)
+                {
+                    var prefab = flat[i % flat.Count];
+                    if (!TryGetSlotSpec(prefab, out var spec)) continue;
+                    AddSlotFromTemplate(ai, spec, prefab, aiBoardRoot, enemySlotViews);
+                }
+            }
+
+            UpdateAllViews();
+        }
+
         if (IsGameOver() || currentTurn >= turns) EndMatch();
-    }
-
-    void OnFlipRandom()
-    {
-        if (matchEnded) return;
-        var list = player.board.Where(c => c.alive).ToList();
-        if (list.Count == 0) return;
-
-        var c = list[rng.Next(list.Count)];
-        c.Flip();
-        EventBus.Publish(GameEventType.Flip, new EventContext { owner = player, opponent = ai, source = c });
-        UpdateAllViews();
     }
 
     void OnForceFlip()
     {
+        if (awaitingEndTurn) { UpdateHUD(); return; } // già attaccato: solo End Turn
+
         if (matchEnded || !playerPhase) return;
         if (player.actionPoints <= 0) { EventBus.Publish(GameEventType.Info, new EventContext { phase = "Not enough Player PA" }); UpdateHUD(); return; }
 
@@ -376,56 +488,45 @@ public class GameManager : MonoBehaviour
 
     void OnAttack()
     {
+        if (awaitingEndTurn) { UpdateHUD(); return; } // già attaccato in questo turno
+
         if (matchEnded || !playerPhase) return;
-        if (player.actionPoints <= 0) { EventBus.Publish(GameEventType.Info, new EventContext { phase = "Not enough Player PA" }); UpdateHUD(); return; }
 
-        var atk = SelectionManager.Instance.SelectedOwned?.instance;
-        var tgt = SelectionManager.Instance.SelectedEnemy?.instance;
-        if (atk == null || tgt == null) return;
+        // Attacco di massa: tutte le carte Player in Fronte colpiscono lo slot opposto
+        int lanes = playerBoardRoot.childCount;
+        for (int lane = 0; lane < lanes; lane++)
+        {
+            // CardView nella lane (lato Player)
+            Transform pChild = playerBoardRoot.GetChild(lane);
+            var pView = pChild ? pChild.GetComponentInChildren<CardView>(includeInactive: false) : null;
+            var ci = pView ? pView.instance : null;
 
-        atk.Attack(player, ai, tgt);
-        player.actionPoints -= 1;
+            if (ci == null || !ci.alive || ci.side != Side.Fronte) continue;
 
+            // SlotView opposto (lato AI)
+            if (lane >= aiBoardRoot.childCount) break;
+            Transform aChild = aiBoardRoot.GetChild(lane);
+            var sView = aChild ? aChild.GetComponentInChildren<SlotView>(includeInactive: false) : null;
+            var si = sView ? sView.instance : null;
+
+            if (si == null || !si.alive) continue;
+
+            ci.Attack(player, ai, si);
+        }
+
+        // Pulizia, refresh
         CleanupDestroyed(player);
-        CleanupDestroyed(ai);
+        CleanupDestroyedSlots();
         UpdateAllViews();
         UpdateHUD();
-    }
 
-    void OnEnemyAttack()
-    {
-        if (matchEnded || playerPhase) return;          // deve essere fase AI
-        if (!enemyControlledByButtons) return;          // controllo manuale attivo
-        if (ai.actionPoints <= 0) { EventBus.Publish(GameEventType.Info, new EventContext { phase = "Not enough Enemy PA" }); UpdateHUD(); return; }
-
-        var atk = SelectionManager.Instance.SelectedEnemy?.instance;
-        var tgt = SelectionManager.Instance.SelectedOwned?.instance;
-        if (atk == null || tgt == null) return;
-
-        atk.Attack(ai, player, tgt);
-        ai.actionPoints -= 1;
-
-        CleanupDestroyed(player);
-        CleanupDestroyed(ai);
-        UpdateAllViews();
+        awaitingEndTurn = true;
         UpdateHUD();
-    }
 
-    void OnEnemyFlip()
-    {
-        if (matchEnded || playerPhase) return;
-        if (!enemyControlledByButtons) return;
-        if (ai.actionPoints <= 0) { Logger.Info("Enemy: no AP."); UpdateHUD(); return; }
+        // (opzionale) Pulisci eventuali selezioni per evitare confusioni UI
+        var sel = SelectionManager.Instance;
+        if (sel != null) { sel.SelectOwned(null); sel.SelectEnemy(null); }
 
-        var sel = SelectionManager.Instance.SelectedEnemy?.instance;
-        if (sel == null) return;
-
-        sel.Flip();
-        ai.actionPoints -= 1;
-
-        EventBus.Publish(GameEventType.Flip, new EventContext { owner = ai, opponent = player, source = sel });
-        UpdateAllViews();
-        UpdateHUD();
     }
 
     void OnEndTurn()
@@ -443,15 +544,35 @@ public class GameManager : MonoBehaviour
             EndTurnInternal(ai, player);
             if (!matchEnded)
             {
-                currentTurn++;                 // incrementa quando torni al Player
+                currentTurn++;
                 StartTurn(player, ai, true);
             }
         }
     }
 
+    void ApplyEnemySlotsEffectsLeftToRight()
+    {
+        int lanes = Mathf.Min(aiBoardRoot.childCount, playerBoardRoot.childCount);
+        for (int lane = 0; lane < lanes; lane++)
+        {
+            Transform ch = aiBoardRoot.GetChild(lane);
+            var sView = ch ? ch.GetComponentInChildren<SlotView>(false) : null;
+            if (sView == null || sView.instance == null || !sView.instance.alive) continue;
+
+            EventBus.Publish(GameEventType.Info, new EventContext { phase = $"[SlotEffect] Lane {lane + 1}" });
+
+            EventBus.Publish(GameEventType.Custom, new EventContext
+            {
+                owner = ai,
+                opponent = player,
+                source = sView.instance,
+                phase = "SlotEffect"
+            });
+        }
+    }
+
     void CleanupDestroyed(PlayerState p)
     {
-        // colleziona prima, poi rimuovi (evita modifiche durante foreach)
         var dead = p.board.Where(ci => ci != null && !ci.alive).ToList();
         foreach (var ci in dead)
             RemoveCard(p, ci);
@@ -461,17 +582,14 @@ public class GameManager : MonoBehaviour
     {
         if (ci == null) return;
 
-        // 1) Unbind abilità una sola volta
         if (abilitiesByInstance.TryGetValue(ci, out var list) && list != null)
         {
             foreach (var ab in list) { if (ab != null) ab.Unbind(); }
             abilitiesByInstance.Remove(ci);
         }
 
-        // 2) Pulisci selezioni se puntavano a questa view
         if (viewByInstance.TryGetValue(ci, out var view) && view != null)
         {
-            // se selezionata, deseleziona in sicurezza
             var sel = SelectionManager.Instance;
             if (sel != null)
             {
@@ -481,15 +599,11 @@ public class GameManager : MonoBehaviour
 
             instanceByView.Remove(view);
             viewByInstance.Remove(ci);
-
-            // distruggi la GO (aggiorna anche i sibling index delle corsie)
             Destroy(view.gameObject);
         }
 
-        // 3) Rimuovi dalla board logica del proprietario
         owner.board.Remove(ci);
 
-        // 4) Log informativo
         EventBus.Publish(GameEventType.Info, new EventContext
         {
             owner = owner,
@@ -501,7 +615,6 @@ public class GameManager : MonoBehaviour
 
     public void AppendLog(string msg)
     {
-        // timestamp leggero: framecount
         _logBuf.AppendLine(msg);
         if (logText != null) logText.text = _logBuf.ToString();
     }
@@ -525,7 +638,7 @@ public class GameManager : MonoBehaviour
         EventBus.Publish(GameEventType.Info, new EventContext { phase = $"Score: PlayerHP {player.hp} vs AIHP {ai.hp} | Diff (AI-Player) = {diff} -> {result}" });
     }
 
-    // Called by CardView on click
+    // ====== CLICK DELLE CARTE ======
     public void OnCardClicked(CardView view)
     {
         if (matchEnded) return;
@@ -534,19 +647,13 @@ public class GameManager : MonoBehaviour
         else SelectionManager.Instance.SelectEnemy(view);
     }
 
-    // ====== LANE / TARGETING (REALTIME) ======
-
-    /// <summary>
-    /// Restituisce la CardInstance avversaria "di fronte" all'attaccante, basandosi
-    /// sul SiblingIndex della CardView nella gerarchia (posizione LIVE in scena).
-    /// Robusta a placeholder/oggetti extra: se il child opposto non ha CardView,
-    /// cerca la prima CardView valida in quella lane.
-    /// </summary>
+    // ====== Utility ======
     public CardInstance GetOpposingCardInstance(CardInstance attacker)
     {
         if (attacker == null) return null;
         if (!TryGetView(attacker, out var atkView) || atkView == null) return null;
 
+        // Root del lato attaccante e del lato opposto
         Transform myRoot = (atkView.owner == player) ? playerBoardRoot : aiBoardRoot;
         Transform oppRoot = (atkView.owner == player) ? aiBoardRoot : playerBoardRoot;
         if (myRoot == null || oppRoot == null) return null;
@@ -554,75 +661,75 @@ public class GameManager : MonoBehaviour
         int lane = atkView.transform.GetSiblingIndex();
         if (lane < 0 || lane >= oppRoot.childCount) return null;
 
-        // 1) Child alla stessa lane
+        // Cerca una CardView nella stessa lane del lato opposto
         Transform oppChild = oppRoot.GetChild(lane);
-        CardView oppView = oppChild ? oppChild.GetComponent<CardView>() : null;
-
-        // 2) Fallback: se il child non ha CardView (placeholder, wrapper, ecc.),
-        // prova a cercare nel child una CardView discendente oppure
-        // scansiona i figli per la prima CardView con lo stesso siblingIndex logico.
-        if (oppView == null)
-        {
-            // tenta nel discendente diretto
-            oppView = oppChild ? oppChild.GetComponentInChildren<CardView>(includeInactive: false) : null;
-
-            // se ancora nulla, scandisci tutti i figli della root avversaria e prendi
-            // la prima CardView che abbia proprio quel sibling index (layout custom)
-            if (oppView == null)
-            {
-                for (int i = 0; i < oppRoot.childCount; i++)
-                {
-                    var ch = oppRoot.GetChild(i);
-                    var cv = ch ? ch.GetComponent<CardView>() : null;
-                    if (cv != null && ch.GetSiblingIndex() == lane) { oppView = cv; break; }
-                }
-            }
-        }
-
+        CardView oppView = oppChild ? oppChild.GetComponentInChildren<CardView>(includeInactive: false) : null;
         if (oppView == null) return null;
+
         if (!instanceByView.TryGetValue(oppView, out var target)) return null;
         if (target == null || !target.alive) return null;
 
         return target;
     }
 
-    // Helper opzionali (se utili altrove)
-    public int GetLaneIndex(CardInstance ci)
-        => (TryGetView(ci, out var v) && v != null) ? v.transform.GetSiblingIndex() : -1;
-
-    public CardView GetOpposingCardView(CardInstance attacker)
+    // Esegui le azioni automatiche dell'IA all'inizio del suo turno (debug friendly)
+    // NOTA: non chiude il turno e non passa la mano; serve solo a generare gli hint visibili.
+    void ExecuteAiTurnStartActions()
     {
-        if (!TryGetView(attacker, out var atkView) || atkView == null) return null;
-        Transform oppRoot = (atkView.owner == player) ? aiBoardRoot : playerBoardRoot;
 
-        int lane = atkView.transform.GetSiblingIndex();
-        if (lane < 0 || lane >= oppRoot.childCount) return null;
+        ApplyEnemySlotsEffectsLeftToRight();
 
-        var oppChild = oppRoot.GetChild(lane);
-        var oppView = oppChild ? oppChild.GetComponent<CardView>() : null;
-        if (oppView != null) return oppView;
-
-        // fallback leggero
-        return oppChild ? oppChild.GetComponentInChildren<CardView>(includeInactive: false) : null;
-    }
-
-    public int GetDisplayIndex(CardView v) => v ? (v.transform.GetSiblingIndex() + 1) : -1;
-    public char GetSideChar(CardView v) => (v != null && v.owner == player) ? 'P' : 'E';
-
-    public string GetDisplayId(CardInstance ci)
-    {
-        if (ci == null) return "null";
-        if (TryGetView(ci, out var v) && v != null)
-            return $"{GetSideChar(v)}#{GetDisplayIndex(v)}"; // es. P#1 / E#2
-        return $"#{ci.id}"; // fallback
-    }
-
-    public static string SafeCardLabel(CardInstance ci)
-    {
-        var gm = Instance;
-        if (gm != null) return $"{gm.GetDisplayId(ci)} {ci?.def.cardName}";
-        return ci == null ? "null" : $"#{ci.id} {ci.def.cardName}";
+        UpdateAllViews();
+        UpdateHUD();
     }
 
 
+    void RandomizePlayerLayoutAndSides()
+    {
+        // Random order (Fisher–Yates sugli indici visuali)
+        var children = new List<Transform>();
+        foreach (Transform t in playerBoardRoot) children.Add(t);
+        for (int i = children.Count - 1; i > 0; i--)
+        {
+            int j = rng.Next(i + 1);
+            if (i != j)
+            {
+                int iIdx = children[i].GetSiblingIndex();
+                int jIdx = children[j].GetSiblingIndex();
+                children[i].SetSiblingIndex(jIdx);
+                children[j].SetSiblingIndex(iIdx);
+            }
+        }
+
+        // Random side
+        foreach (var ci in player.board.Where(c => c.alive))
+        {
+            var newSide = (rng.NextDouble() < 0.5) ? Side.Fronte : Side.Retro;
+            if (ci.side != newSide)
+            {
+                ci.Flip();
+                EventBus.Publish(GameEventType.Flip, new EventContext { owner = player, opponent = ai, source = ci, phase = "TurnStartRandomize" });
+            }
+        }
+    }
+
+    void ClearChildrenUnder(Transform root)
+    {
+        if (root == null) return;
+        var toKill = new List<GameObject>();
+        foreach (Transform t in root) toKill.Add(t.gameObject);
+        foreach (var go in toKill) Destroy(go);
+    }
+
+    void CleanupDestroyedSlots()
+    {
+        var toRemove = enemySlotViews
+            .Where(v => v == null || v.instance == null || !v.instance.alive)
+            .ToList();
+        foreach (var v in toRemove)
+        {
+            if (v != null) Destroy(v.gameObject);
+            enemySlotViews.Remove(v);
+        }
+    }
 }

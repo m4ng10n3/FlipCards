@@ -21,6 +21,8 @@ public class CardDefinition : MonoBehaviour
         public int backDamageBonusSameFaction;
         public int backBlockBonusSameFaction;
         public int backBonusPAIfTwoRetroSameFaction;
+        // dentro Spec
+        public float endTurnFlipChance;
 
         public override string ToString() => $"{cardName} [{faction}]";
     }
@@ -42,6 +44,9 @@ public class CardDefinition : MonoBehaviour
     [Min(0)] public int backBlockBonusSameFaction = 0;
     [Min(0)] public int backBonusPAIfTwoRetroSameFaction = 0;
 
+    [Header("Behaviour")]
+    [Range(0, 1f)] public float endTurnFlipChance = 0.3f;
+
     // Ex-BuildRuntimeDefinition: ora ritorna la Spec senza creare ScriptableObject
     public Spec BuildSpec()
     {
@@ -55,7 +60,8 @@ public class CardDefinition : MonoBehaviour
             frontBlockValue = frontBlockValue,
             backDamageBonusSameFaction = backDamageBonusSameFaction,
             backBlockBonusSameFaction = backBlockBonusSameFaction,
-            backBonusPAIfTwoRetroSameFaction = backBonusPAIfTwoRetroSameFaction
+            backBonusPAIfTwoRetroSameFaction = backBonusPAIfTwoRetroSameFaction,
+            endTurnFlipChance = endTurnFlipChance
         };
     }
 }

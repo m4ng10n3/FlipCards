@@ -1,0 +1,81 @@
+using UnityEngine;
+
+/// <summary>
+/// Abilità per SLOT: quando arriva il suo turno di agire (fase "SlotEffect"),
+/// infligge 'damage' alla carta di fronte, se presente.
+/// </summary>
+public class SlotStrikeOnAct : AbilityBase
+{
+    [Min(1)] public int damage = 2;
+
+    private EventBus.Handler _h;
+    private SlotView _slotView;
+    private SlotInstance _slot;
+
+    protected override void Register()
+    {
+        // L’abilità è montata sul prefab dello slot: recupero SlotView/SlotInstance
+        _slotView = GetComponent<SlotView>();
+        _slot = _slotView ? _slotView.instance : null;
+
+        _h = (t, ctx) =>
+        {
+            if (t != GameEventType.Custom) return;
+            if (_slot == null || !_slot.alive) return;
+
+            // Agiamo solo nella fase dedicata agli slot
+            if (ctx.phase != "SlotEffect") return;
+
+            // E solo quando l'evento riguarda proprio questo slot
+            if (!ReferenceEquals(ctx.source, _slot)) return;
+
+            // Trova la carta di fronte nella stessa lane
+            var gm = GameManager.Instance;
+            if (gm == null || gm.playerBoardRoot == null || _slotView == null) return;
+
+            int lane = _slotView.transform.GetSiblingIndex();
+            if (lane < 0 || lane >= gm.playerBoardRoot.childCount) return;
+
+            var pChild = gm.playerBoardRoot.GetChild(lane);
+            var pView = pChild ? pChild.GetComponentInChildren<CardView>(includeInactive: false) : null;
+            var target = pView ? pView.instance : null;
+
+            if (target == null || !target.alive) return;
+
+            // Usa la pipeline eventi standard: AttackDeclared + IncomingAttack.
+            // owner = AI (Owner), opponent = Player (Opponent), source = questo SlotInstance
+            EventBus.Publish(GameEventType.AttackDeclared, new EventContext
+            {
+                owner = Owner,
+                opponent = Opponent,
+                source = _slot,
+                target = target,
+                amount = Mathf.Max(0, damage),
+                phase = "SlotStrikeOnAct"
+            });
+
+            EventBus.Publish(GameEventType.Info, new EventContext
+            {
+                owner = Owner,             // AI
+                opponent = Opponent,       // Player
+                source = _slot,            // SlotInstance locale
+                phase = "HINT: Strike!"
+            });
+
+        };
+
+        EventBus.Subscribe(GameEventType.Custom, _h);
+    }
+
+    protected override void Unregister()
+    {
+        if (_h != null)
+        {
+            EventBus.Unsubscribe(GameEventType.Custom, _h);
+            _h = null;
+        }
+
+        _slotView = null;
+        _slot = null;
+    }
+}

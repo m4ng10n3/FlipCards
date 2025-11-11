@@ -25,14 +25,14 @@ public class CardInstance
 
         // La vittima risolve i colpi che la riguardano
         _evtHandler = OnEvent;
-        EventBus.Subscribe(GameEventType.IncomingAttack, _evtHandler);
+        EventBus.Subscribe(GameEventType.AttackDeclared, _evtHandler);
     }
 
     public void Dispose()
     {
         if (_evtHandler != null)
         {
-            EventBus.Unsubscribe(GameEventType.IncomingAttack, _evtHandler);
+            EventBus.Unsubscribe(GameEventType.AttackDeclared, _evtHandler);
             _evtHandler = null;
         }
     }
@@ -70,7 +70,7 @@ public class CardInstance
     // ====== FLUSSO EVENT-DRIVEN ======
 
     // ATTACCANTE: pubblica proposta e poi chiede alla vittima di risolvere
-    public void Attack(PlayerState owner, PlayerState defender, CardInstance target)
+    public void Attack(PlayerState owner, PlayerState defender, object target)
     {
         if (!alive || target == null) return;
 
@@ -84,21 +84,13 @@ public class CardInstance
             target = target,
             amount = proposed
         });
-
-        EventBus.Publish(GameEventType.IncomingAttack, new EventContext
-        {
-            owner = owner,
-            opponent = defender,
-            source = this,
-            target = target,
-            amount = proposed
-        });
     }
+
 
     // VITTIMA: risolve solo se il bersaglio sono io
     void OnEvent(GameEventType t, EventContext ctx)
     {
-        if (t != GameEventType.IncomingAttack) return;
+        if (t != GameEventType.AttackDeclared) return;
         if (ctx.target != this || !alive) return;
 
         ResolveIncomingAttack(
@@ -111,7 +103,7 @@ public class CardInstance
 
 
     // Calcolo/applicazione del danno: niente logica abilità qui dentro
-    void ResolveIncomingAttack(PlayerState attackerOwner, PlayerState defenderOwner, CardInstance attacker, int proposedDamage)
+    void ResolveIncomingAttack(PlayerState attackerOwner, PlayerState defenderOwner, object attacker, int proposedDamage)
     {
         // Le abilità hanno avuto occasione di settare questi modificatori ascoltando IncomingAttack.
         int incoming = Mathf.Max(0, incomingDamageOverride ?? proposedDamage);
@@ -122,13 +114,13 @@ public class CardInstance
         else PushHint("No damage");
 
         // Evento unico di esito del combattimento
-        EventBus.Publish(GameEventType.CombatResolved, new EventContext
+        EventBus.Publish(GameEventType.AttackResolved, new EventContext
         {
-            owner = attackerOwner,     // chi ha iniziato il colpo
-            opponent = defenderOwner,  // proprietario della vittima
-            source = attacker,         // carta attaccante
-            target = this,             // carta difendente
-            amount = final             // danno effettivamente applicato
+            owner = attackerOwner,
+            opponent = defenderOwner,
+            source = attacker,
+            target = this,
+            amount = final
         });
 
         // reset modificatori per-colpo
@@ -144,12 +136,13 @@ public class CardInstance
     {
         int final = Mathf.Max(0, amount);
         opponent.hp -= final;
-        EventBus.Publish(GameEventType.IncomingAttack, new EventContext
+
+        EventBus.Publish(GameEventType.AttackResolved, new EventContext
         {
             owner = owner,
             opponent = opponent,
             source = this,
-            target = null,
+            target = null,             // danno diretto al player
             amount = final,
             phase = phase ?? "Damage"
         });

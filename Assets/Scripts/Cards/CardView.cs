@@ -95,22 +95,27 @@ public class CardView : MonoBehaviour
 
         // Sottoscrizione agli eventi: solo l'Hint reagisce
         _evtHandler = OnGameEvent;
-        EventBus.Subscribe(GameEventType.CombatResolved, _evtHandler);
+        EventBus.Subscribe(GameEventType.AttackResolved, _evtHandler);
         EventBus.Subscribe(GameEventType.Flip, _evtHandler);
         EventBus.Subscribe(GameEventType.AttackDeclared, _evtHandler);
         EventBus.Subscribe(GameEventType.TurnEnd, _evtHandler);
         EventBus.Subscribe(GameEventType.Info, _evtHandler);
+
+        EventBus.Subscribe(GameEventType.TurnStart, _evtHandler);
     }
 
     void OnDestroy()
     {
         if (_evtHandler != null)
         {
-            EventBus.Unsubscribe(GameEventType.CombatResolved, _evtHandler);
+            EventBus.Unsubscribe(GameEventType.AttackResolved, _evtHandler);
             EventBus.Unsubscribe(GameEventType.Flip, _evtHandler);
             EventBus.Unsubscribe(GameEventType.AttackDeclared, _evtHandler);
             EventBus.Unsubscribe(GameEventType.TurnEnd, _evtHandler);
             EventBus.Unsubscribe(GameEventType.Info, _evtHandler);
+
+            EventBus.Unsubscribe(GameEventType.TurnStart, _evtHandler);
+
             _evtHandler = null;
         }
     }
@@ -169,12 +174,16 @@ public class CardView : MonoBehaviour
 
         switch (t)
         {
-            case GameEventType.CombatResolved:
+            case GameEventType.AttackResolved:
                 if (ctx.target == instance && ctx.amount > 0)
                 {
                     ShowHint($"-{ctx.amount}HP");   // <--- persiste finché non arriva TurnEnd
                     UpdateHpOnly();
                     Blink();
+                }
+                if (ctx.source == instance && ctx.amount > 0)
+                {
+                    ShowHint($"Dealt {ctx.amount}");
                 }
                 break;
 
@@ -195,6 +204,11 @@ public class CardView : MonoBehaviour
                     ShowHint(ctx.phase.Substring("HINT:".Length).Trim());
                     // niente Blink obbligatorio qui: lascialo a discrezione di chi invia l’hint
                 }
+                break;
+
+            case GameEventType.TurnStart:
+                // Nuovo turno: rimuovi gli Hint del turno precedente prima che arrivino quelli nuovi
+                HideHint();
                 break;
         }
     }
@@ -226,15 +240,22 @@ public class CardView : MonoBehaviour
             Logger.Info("[Card] " + msg);
             return;
         }
-        // niente coroutine: sovrascrive subito e resta visibile
+
         hintText.gameObject.SetActive(true);
-        hintText.text = msg;
+
+        if (string.IsNullOrEmpty(hintText.text))
+            hintText.text = msg;
+        else
+            hintText.text += "\n" + msg;
     }
 
     public void HideHint()
     {
         if (hintText != null)
+        {
+            hintText.text = string.Empty;   // svuota coda messaggi
             hintText.gameObject.SetActive(false);
+        }
     }
 
 }

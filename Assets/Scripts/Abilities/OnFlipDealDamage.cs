@@ -17,17 +17,41 @@ public class OnFlipDealDamage : AbilityBase
             {
                 if (!onlyWhenToFront || Source.side == Side.Fronte)
                 {
-                    var gm = GameManager.Instance;
-                    var target = gm.GetOpposingCardInstance(Source);
-                    if (target != null)
+                    // Mostra SEMPRE l’hint quando l’abilità si attiva
+                    EventBus.Publish(GameEventType.Info, new EventContext
                     {
-                        // Delego alla pipeline di Attack per log/eventi/chain corretti
-                        Source.Attack(ctx.owner, ctx.opponent, target);
+                        owner = Owner,
+                        opponent = Opponent,
+                        source = Source,
+                        phase = "HINT: Flip Damage"
+                    });
+
+                    // Trova lo SLOT opposto nella stessa lane
+                    var gm = GameManager.Instance;
+                    if (gm == null || gm.aiBoardRoot == null) return;
+
+                    // Recupera la lane da CardView della Source
+                    if (!gm.TryGetView(Source, out var srcView) || srcView == null) return;
+                    int lane = srcView.transform.GetSiblingIndex();
+                    if (lane < 0 || lane >= gm.aiBoardRoot.childCount) return;
+
+                    var aChild = gm.aiBoardRoot.GetChild(lane);
+                    var sView = aChild ? aChild.GetComponentInChildren<SlotView>(includeInactive: false) : null;
+                    var slot = sView ? sView.instance : null;
+
+                    if (slot == null || !slot.alive)
+                    {
+                        // Nessun bersaglio -> opzionale: messaggio
+                        // Source.PushHint("No target");
+                        return;
                     }
-                    // else: nessuno di fronte -> non fare nulla (o gestisci un fallback se lo vuoi)
+
+                    // Attacca lo SLOT (Attack accetta object come target)
+                    Source.Attack(ctx.owner, ctx.opponent, slot);
                 }
             }
         };
+
 
         EventBus.Subscribe(GameEventType.Flip, _h);
     }
