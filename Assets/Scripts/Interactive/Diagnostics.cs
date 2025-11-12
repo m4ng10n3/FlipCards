@@ -28,13 +28,6 @@ public static class Diagnostics
             SelectionManager.Instance.SelectOwned(null);
         }
 
-        var se = SelectionManager.Instance?.SelectedEnemy?.instance;
-        if (se != null && !gm.ai.board.Contains(se))
-        {
-            gm.AppendLog("[FIX] SelectedEnemy fuori dal board -> clear");
-            SelectionManager.Instance.SelectEnemy(null);
-        }
-
         // 4) AP negativi / out-of-range
         if (gm.player.actionPoints < 0) { gm.AppendLog("[FIX] AP player < 0 -> 0"); gm.player.actionPoints = 0; }
         if (gm.ai.actionPoints < 0) { gm.AppendLog("[FIX] AP ai < 0 -> 0"); gm.ai.actionPoints = 0; }

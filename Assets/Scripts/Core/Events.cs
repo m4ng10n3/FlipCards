@@ -112,7 +112,7 @@ public static class EventBus
 
         switch (t)
         {
-            case GameEventType.TurnStart: return $"[TURN START] owner:{ctx.owner?.name}";
+            case GameEventType.TurnStart: return $"[TURN START] {ctx.phase} owner:{ctx.owner?.name}";
             case GameEventType.TurnEnd: return $"[TURN END]   owner:{ctx.owner?.name}";
             case GameEventType.CardPlayed: return $"[PLAY]  {L(ctx.source)}";
             case GameEventType.Flip: return $"[FLIP]  {L(ctx.source)}";

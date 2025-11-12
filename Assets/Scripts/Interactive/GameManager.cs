@@ -143,7 +143,7 @@ public class GameManager : MonoBehaviour
         playerPhase = isPlayerPhase; awaitingEndTurn = false;
         owner.actionPoints = (owner == player) ? playerBaseAP : 0;
 
-        EventBus.Publish(GameEventType.TurnStart, new EventContext { owner = owner, opponent = opponent, phase = "TurnStart" });
+        EventBus.Publish(GameEventType.TurnStart, new EventContext { owner = owner, opponent = opponent, phase = $"TURN {currentTurn}" });
         if (playerPhase) RandomizePlayerLayoutAndSides(); else ExecuteAiTurnStartActions();
         UpdateAllViews(); UpdateHUD();
     }
@@ -217,8 +217,6 @@ public class GameManager : MonoBehaviour
         CleanupDestroyed(player); CleanupDestroyedSlots();
         UpdateAllViews();
         awaitingEndTurn = true; UpdateHUD();
-
-        var sm = SelectionManager.Instance; sm.SelectOwned(null); sm.SelectEnemy(null);
     }
 
     void OnEndTurn()
@@ -271,7 +269,6 @@ public class GameManager : MonoBehaviour
         var view = viewByInstance[ci];
         var sel = SelectionManager.Instance;
         if (sel.SelectedOwned == view) sel.SelectOwned(null);
-        if (sel.SelectedEnemy == view) sel.SelectEnemy(null);
 
         viewByInstance.Remove(ci); Destroy(view.gameObject);
         owner.board.Remove(ci);
@@ -425,6 +422,5 @@ public class GameManager : MonoBehaviour
         if (matchEnded) return;
         bool isPlayers = view.owner == player;
         if (isPlayers) SelectionManager.Instance.SelectOwned(view);
-        else SelectionManager.Instance.SelectEnemy(view);
     }
 }

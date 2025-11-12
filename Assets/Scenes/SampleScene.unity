@@ -363,13 +363,18 @@ MonoBehaviour:
   minCardsPerSide: 3
   playerCards:
   - prefab: {fileID: 4860462570295797339, guid: f03c514f27a9ec84f84e2d4e8793c6fb, type: 3}
-    count: 2
-  - prefab: {fileID: 4860462570295797339, guid: f03c514f27a9ec84f84e2d4e8793c6fb, type: 3}
+    count: 1
+  - prefab: {fileID: 4860462570295797339, guid: 809c21f649518db4c9070985c6c42e72, type: 3}
+    count: 1
+  - prefab: {fileID: 4860462570295797339, guid: e1aa77a891d862c418484aaa9ee7ba23, type: 3}
     count: 1
   enemySlots:
   - prefab: {fileID: 1850844066}
-    count: 3
-  enableDefaultRules: 1
+    count: 1
+  - prefab: {fileID: 4860462570295797339, guid: 3e70b51ddac815b4cb04265150b058b0, type: 3}
+    count: 1
+  - prefab: {fileID: 4860462570295797339, guid: e66b7f657987e294a9585a94205c7b3f, type: 3}
+    count: 1
 --- !u!1 &364996641
 GameObject:
   m_ObjectHideFlags: 0
@@ -2345,6 +2350,10 @@ PrefabInstance:
       propertyPath: m_DrawMode
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3849962477743496572, guid: f03c514f27a9ec84f84e2d4e8793c6fb, type: 3}
+      propertyPath: artworkMonster
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 4860462570295797339, guid: f03c514f27a9ec84f84e2d4e8793c6fb, type: 3}
       propertyPath: m_Name
       value: Card_0
@@ -2549,11 +2558,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 269544598099478963, guid: c3212896a1230df4a8640dee7860d20c, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -786
+      value: -860
       objectReference: {fileID: 0}
     - target: {fileID: 269544598099478963, guid: c3212896a1230df4a8640dee7860d20c, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -150
+      value: -163
       objectReference: {fileID: 0}
     - target: {fileID: 269544598099478963, guid: c3212896a1230df4a8640dee7860d20c, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x

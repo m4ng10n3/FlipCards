@@ -35,30 +35,13 @@ public class CardView : MonoBehaviour
 
     void Awake()
     {
-        btn = GetComponent<Button>();
-        var bg = GetComponent<Image>();
-
-        if (btn == null) btn = gameObject.AddComponent<Button>();
-        if (bg == null) bg = gameObject.AddComponent<Image>();
-        if (btn.targetGraphic == null) btn.targetGraphic = bg;
-
-        img = bg;
-        img.preserveAspect = false; // rispetta le proporzioni dentro al RectTransform
-
-        // il fronte è l'immagine impostata nel componente Image (Source Image)
-        frontImage = img.sprite;
-
-        // mostra il fronte di default
-        if (frontImage != null) img.sprite = frontImage;
-
-        PreviewFromInlineIfNoInstance();
+        // UI di base sempre sicura da fare in preview/editor
         if (hintText != null) hintText.gameObject.SetActive(false);
-    }
 
-    void PreviewFromInlineIfNoInstance()
-    {
+        // Se questa CardView è già stata inizializzata a runtime, esci.
         if (instance != null) return;
 
+        // Modalità "preview" (prefab in editor o scene senza runtime CardInstance)
         var inline = GetComponent<CardDefinition>();
         if (inline == null) return;
 
@@ -67,24 +50,50 @@ public class CardView : MonoBehaviour
         if (nameText != null) nameText.text = def.cardName;
         if (factionText != null) factionText.text = def.faction.ToString();
         if (sideText != null) sideText.text = "Side";
-        if (hpText != null) hpText.text = def.maxHealth + "";
-        if (AttackPwrText != null) AttackPwrText.text = "" + def.frontDamage;
-        if (BlockPwrText != null) BlockPwrText.text = "" + def.frontBlockValue;
+        if (hpText != null) hpText.text = def.maxHealth.ToString();
+        if (AttackPwrText != null) AttackPwrText.text = def.frontDamage.ToString();
+        if (BlockPwrText != null) BlockPwrText.text = def.frontBlockValue.ToString();
     }
 
     public void Init(GameManager gm, PlayerState owner, CardInstance instance)
     {
+        // --- BIND RUNTIME ---
         this.gm = gm;
         this.owner = owner;
         this.instance = instance;
 
-        if (btn == null) btn = GetComponent<Button>();
+        // --- HIGHLIGHT (Outline) ---
+        if (highlight == null) highlight = gameObject.AddComponent<Outline>();
+        highlight.effectDistance = new Vector2(5, 5);
+        highlight.useGraphicAlpha = false;        // evita che l’alpha/texture influenzi l’outline
+        highlight.effectColor = Color.white;      // colore di default
+        highlight.enabled = false;
+
+        // --- BUTTON / CLICK ---
+        btn = GetComponent<Button>() ?? gameObject.AddComponent<Button>();
         btn.onClick.RemoveAllListeners();
         btn.onClick.AddListener(OnClicked);
 
-        Refresh();
+        // --- IMAGE DI SFONDO / SPRITE ---
+        var bg = GetComponent<Image>();
+        if (btn.targetGraphic == null && bg != null) btn.targetGraphic = bg;
+
+        img = bg;                                  // può restare null se il prefab non ha Image (coerente col codice originale)
+        if (img != null)
+        {
+            img.preserveAspect = false;            // rispetta il RectTransform
+            img.useSpriteMesh = false;
+            img.maskable = false;
+
+            // Il fronte è l'immagine impostata nel componente Image (Source Image)
+            frontImage = img.sprite;
+        }
+
+        // --- UI STATE ---
+        Refresh();                                  // mostra lo stato reale dell'istanza
         if (hintText != null) hintText.gameObject.SetActive(false);
 
+        // --- EVENTI ---
         _evtHandler = OnGameEvent;
         EventBus.Subscribe(GameEventType.AttackResolved, _evtHandler);
         EventBus.Subscribe(GameEventType.Flip, _evtHandler);
@@ -114,15 +123,10 @@ public class CardView : MonoBehaviour
         SetHighlight(highlight == null ? false : !highlight.enabled);
     }
 
-    public void SetHighlight(bool on)
+    public void SetHighlight(bool setting)
     {
-        if (highlight == null)
-            highlight = gameObject.GetComponent<Outline>() ?? gameObject.AddComponent<Outline>();
-
-        highlight.effectColor = Color.yellow;
-        highlight.effectDistance = new Vector2(5, 5);
-        highlight.useGraphicAlpha = true;
-        highlight.enabled = on;
+        if (highlight == null) return;
+            highlight.enabled = setting;
     }
 
     public void Refresh()
@@ -152,8 +156,11 @@ public class CardView : MonoBehaviour
         img.type = Image.Type.Simple; // per sicurezza
         img.preserveAspect = false;   // il RectTransform decide; cambia a true se vuoi letterboxing
         img.sprite = newSprite;
-
+        //img.useSpriteMesh = false;
         // Mostra/nascondi i testi a seconda del lato
+
+        if (highlight != null)
+            highlight.effectColor = isFront ? Color.white : Color.white; // retro nero => outline bianco
 
         if (nameText) nameText.enabled = isFront;
         if (hpText) hpText.enabled = isFront;
