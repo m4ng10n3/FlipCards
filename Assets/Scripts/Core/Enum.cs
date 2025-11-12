@@ -1,5 +1,5 @@
 using UnityEngine;
 
-public enum Faction { Sangue, Ombra, Fiamma }
+public enum Faction { A, B, C }
 public enum Side { Fronte, Retro }
 

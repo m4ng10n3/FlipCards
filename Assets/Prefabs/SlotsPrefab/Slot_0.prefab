@@ -494,8 +494,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da8524a587795234ab3fc4fc1078c704, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SlotDefinition
-  SlotName: Slotter
-  faction: 1
+  SlotName: Slot 0
+  faction: 0
   maxHealth: 3
 --- !u!114 &4981224964925516686
 MonoBehaviour:
@@ -509,4 +509,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69b556a09672ca44c88cf0f19ff9e2f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SlotStrikeOnAct
-  damage: 2
+  damage: 3

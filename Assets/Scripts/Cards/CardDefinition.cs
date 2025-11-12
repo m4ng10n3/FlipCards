@@ -28,7 +28,7 @@ public class CardDefinition : MonoBehaviour
 
     [Header("Identity")]
     public string cardName = "Card";
-    public Faction faction = Faction.Sangue;
+    public Faction faction = Faction.A;
 
     [Header("Stats")]
     [Min(1)] public int maxHealth = 3;

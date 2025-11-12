@@ -14,7 +14,7 @@ public class SlotDefinition : MonoBehaviour
 
     [Header("Identity")]
     public string SlotName = "Slot";
-    public Faction faction = Faction.Sangue;
+    public Faction faction = Faction.A;
 
     [Header("Stats")]
     [Min(1)] public int maxHealth = 3;

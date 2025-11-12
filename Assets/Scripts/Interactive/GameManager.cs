@@ -369,6 +369,7 @@ public class GameManager : MonoBehaviour
     void RandomizePlayerLayoutAndSides()
     {
         /*
+        */
         // Shuffle visuale dei figli (lasciato commentato: da attivare in futuro)
         var children = new List<Transform>();
         foreach (Transform t in playerBoardRoot) children.Add(t);
@@ -382,7 +383,7 @@ public class GameManager : MonoBehaviour
                 children[i].SetSiblingIndex(jIdx); children[j].SetSiblingIndex(iIdx);
             }
         }
-        */
+        
         // Random side su carte vive
         var cards = player.board.ToArray();
         for (int i = 0; i < cards.Length; i++)
