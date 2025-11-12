@@ -12,6 +12,12 @@ public enum GameEventType
     Custom
 }
 
+public static class GlobalId
+{
+    static int _next = 1;
+    public static int Next() => _next++;
+}
+
 [Serializable]
 public struct EventContext
 {
@@ -87,8 +93,13 @@ public static class EventBus
         static string L(object o)
         {
             if (o == null) return "null";
-            if (o is CardInstance c) return $"#{c.id} {c.def.cardName}";
-            if (o is SlotInstance s) return $"Slot#{s.id} {s.def.SlotName}";
+            int lane = -1;
+            var gm = GameManager.Instance;
+            if (gm) lane = gm.GetLaneIndexFor(o);
+            string laneTag = lane >= 0 ? $" [L{lane + 1}]" : "";
+
+            if (o is CardInstance c) return $"#{c.id} {c.def.cardName}{laneTag}";
+            if (o is SlotInstance s) return $"Slot#{s.id} {s.def.SlotName}{laneTag}";
             return o.ToString();
         }
 

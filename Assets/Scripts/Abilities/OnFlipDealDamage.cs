@@ -11,49 +11,57 @@ public class OnFlipDealDamage : AbilityBase
     {
         _h = (t, ctx) =>
         {
+            if (t != GameEventType.Flip) return;
             if (ctx.source != Source) return;
 
-            if (t == GameEventType.Flip)
+            if (!onlyWhenToFront || Source.side == Side.Fronte)
             {
-                if (!onlyWhenToFront || Source.side == Side.Fronte)
+                // Hint quando si attiva
+                EventBus.Publish(GameEventType.Info, new EventContext
                 {
-                    // Mostra SEMPRE l’hint quando l’abilità si attiva
-                    EventBus.Publish(GameEventType.Info, new EventContext
-                    {
-                        owner = Owner,
-                        opponent = Opponent,
-                        source = Source,
-                        phase = "HINT: Flip Damage"
-                    });
+                    owner = Owner,
+                    opponent = Opponent,
+                    source = Source,
+                    phase = "HINT: Flip Damage"
+                });
 
-                    // Trova lo SLOT opposto nella stessa lane
-                    var gm = GameManager.Instance;
-                    if (gm == null || gm.aiBoardRoot == null) return;
-
-                    // Recupera la lane da CardView della Source
-                    if (!gm.TryGetView(Source, out var srcView) || srcView == null) return;
-                    int lane = srcView.transform.GetSiblingIndex();
-                    if (lane < 0 || lane >= gm.aiBoardRoot.childCount) return;
-
-                    var aChild = gm.aiBoardRoot.GetChild(lane);
-                    var sView = aChild ? aChild.GetComponentInChildren<SlotView>(includeInactive: false) : null;
-                    var slot = sView ? sView.instance : null;
-
-                    if (slot == null || !slot.alive)
-                    {
-                        // Nessun bersaglio -> opzionale: messaggio
-                        // Source.PushHint("No target");
-                        return;
-                    }
-
-                    // Attacca lo SLOT (Attack accetta object come target)
-                    Source.Attack(ctx.owner, ctx.opponent, slot);
-                }
+                TryAttackImmediateOrNextFrame();
             }
         };
 
-
         EventBus.Subscribe(GameEventType.Flip, _h);
+    }
+
+    void TryAttackImmediateOrNextFrame()
+    {
+        var gm = GameManager.Instance;
+        if (gm == null) return;
+
+        var target = gm.GetOpponentObjInstance(Source);
+        if (target != null)
+        {
+            // Attack accetta object come target
+            Source.Attack(Owner, Opponent, target);
+        }
+        else
+        {
+            // Target non ancora disponibile (slot in rebuild): riprova al frame successivo
+            StartCoroutine(RetryNextFrame());
+        }
+    }
+
+    System.Collections.IEnumerator RetryNextFrame()
+    {
+        yield return null; // aspetta un frame (dopo RebuildEnemySlotsToMatchPlayer)
+        var gm = GameManager.Instance;
+        if (gm == null) yield break;
+
+        var target = gm.GetOpponentObjInstance(Source);
+        if (target != null)
+        {
+            Source.Attack(Owner, Opponent, target);
+        }
+        // se è ancora null, non insistere per evitare spam: sarà stato davvero assente
     }
 
 

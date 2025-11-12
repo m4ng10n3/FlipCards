@@ -6,7 +6,6 @@ public class SlotInstance
     public int health;
     public bool alive => health > 0;
     public readonly int id;
-    static int _nextId = 1;
 
     // Modificatori per-colpo che abilità di slot possono settare
     public int? incomingDamageOverride; // es. 0 = annulla il colpo
@@ -18,7 +17,7 @@ public class SlotInstance
     {
         this.def = def;
         health = def.maxHealth;
-        id = _nextId++;
+        id = GlobalId.Next();
 
         _evtHandler = OnEvent;
         EventBus.Subscribe(GameEventType.AttackDeclared, _evtHandler);

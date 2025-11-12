@@ -8,7 +8,6 @@ public class CardInstance
     public Side side;
     public bool alive => health > 0;
     public readonly int id;
-    static int _nextId = 1;
 
     // Modificatori temporanei che le abilità possono impostare reagendo agli eventi
     public int? incomingDamageOverride; // override puntuale del danno in arrivo (es. 0 per parata)
@@ -21,7 +20,7 @@ public class CardInstance
         this.def = def;
         health = def.maxHealth;
         side = rng.NextDouble() < 0.5 ? Side.Fronte : Side.Retro;
-        id = _nextId++;
+        id = GlobalId.Next();
 
         // La vittima risolve i colpi che la riguardano
         _evtHandler = OnEvent;
