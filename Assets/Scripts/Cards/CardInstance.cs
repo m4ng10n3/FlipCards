@@ -8,6 +8,11 @@ public class CardInstance
     public Side side;
     public bool alive => health > 0;
     public readonly int id;
+    private GameManager gm;
+    public void AssignGM(GameManager gameManager)
+    {
+        gm = gameManager;
+    }
 
     // Modificatori temporanei che le abilità possono impostare reagendo agli eventi
     public int? incomingDamageOverride; // override puntuale del danno in arrivo (es. 0 per parata)
@@ -102,18 +107,26 @@ public class CardInstance
         int block = ComputeSelfBlock(defenderOwner);
         int final = Mathf.Max(0, incoming - block);
 
-        if (final > 0) health = Mathf.Max(0, health - final);
-        else PushHint("No damage");
-
-        // Evento unico di esito del combattimento
-        EventBus.Publish(GameEventType.AttackResolved, new EventContext
+        if (side==Side.Retro)
         {
-            owner = attackerOwner,
-            opponent = defenderOwner,
-            source = attacker,
-            target = this,
-            amount = final
-        });
+            gm.player.hp -= final;
+            gm.UpdateHUD();
+        }
+        else
+        {
+            if (final > 0) health = Mathf.Max(0, health - final);
+            else PushHint("No damage");
+
+            // Evento unico di esito del combattimento
+            EventBus.Publish(GameEventType.AttackResolved, new EventContext
+            {
+                owner = attackerOwner,
+                opponent = defenderOwner,
+                source = attacker,
+                target = this,
+                amount = final
+            });
+        }
 
         // reset modificatori per-colpo
         incomingDamageOverride = null;

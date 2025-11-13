@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,6 +14,11 @@ public class GameManager : MonoBehaviour
     [Header("Roots")] public Transform playerBoardRoot; public Transform aiBoardRoot;
     [Header("UI")] public Button btnForceFlip; public Button btnAttack; public Button btnEndTurn;
     [Header("LOG")] public Text logText; static readonly StringBuilder _logBuf = new StringBuilder(4096);
+
+    [Header("HUD")]
+    public Text hpText;
+    public Text apText;
+
 
     [Header("Match parameters")] public int turns = 10; public int playerBaseAP = 3; public int seed = 12345;
     [Header("Start constraints")][Min(1)] public int minCardsPerSide = 3;
@@ -81,7 +87,7 @@ public class GameManager : MonoBehaviour
 
     void AddCardFromTemplate(PlayerState owner, CardDefinition.Spec def, GameObject prefab, Transform root, List<CardView> outViews)
     {
-        var ci = new CardInstance(def, rng); owner.board.Add(ci);
+        var ci = new CardInstance(def, rng); owner.board.Add(ci); ci.AssignGM(GameManager.Instance);
         var go = Instantiate(prefab, root); go.name = prefab.name; go.SetActive(true);
 
         var view = go.GetComponent<CardView>();
@@ -135,8 +141,15 @@ public class GameManager : MonoBehaviour
             btnAttack.interactable = false;
             btnForceFlip.interactable = false;
         }
-    }
 
+        // Aggiorno HUD giocatore (vita + punti abilità)
+        if (hpText != null)
+            hpText.text = $"{player.hp}";
+
+        if (apText != null)
+            apText.text = $"{player.actionPoints}/{playerBaseAP}";
+    }
+    
     // === TURN FLOW / UI ACTIONS ===
     void StartTurn(PlayerState owner, PlayerState opponent, bool isPlayerPhase)
     {
