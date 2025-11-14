@@ -18,6 +18,7 @@ public class GameManager : MonoBehaviour
     [Header("HUD")]
     public Text hpText;
     public Text apText;
+    public Text EnemyHptxt;
 
 
     [Header("Match parameters")] public int turns = 10; public int playerBaseAP = 3; public int seed = 12345;
@@ -148,6 +149,9 @@ public class GameManager : MonoBehaviour
 
         if (apText != null)
             apText.text = $"{player.actionPoints}/{playerBaseAP}";
+
+        if (EnemyHptxt != null)
+            EnemyHptxt.text = $"{ai.hp}";
     }
     
     // === TURN FLOW / UI ACTIONS ===
@@ -210,27 +214,47 @@ public class GameManager : MonoBehaviour
     }
 
     void OnAttack()
+{
+    if (awaitingEndTurn || matchEnded || !playerPhase) { UpdateHUD(); return; }
+
+    // Il numero di lane è guidato dal numero di carte del player
+    int lanes = playerBoardRoot.childCount;
+    for (int lane = 0; lane < lanes; lane++)
     {
-        if (awaitingEndTurn || matchEnded || !playerPhase) { UpdateHUD(); return; }
+        var pView = playerBoardRoot.GetChild(lane).GetComponentInChildren<CardView>(false);
+        if (pView == null) continue;
 
-        int lanes = Mathf.Min(playerBoardRoot.childCount, aiBoardRoot.childCount);
-        for (int lane = 0; lane < lanes; lane++)
+        var ci = pView.instance;
+        if (!ci.alive || ci.side != Side.Fronte) continue;
+
+        // Recupero lo slot nemico SOLO se esiste quel child
+        SlotView sView = null;
+        if (lane < aiBoardRoot.childCount)
+            sView = aiBoardRoot.GetChild(lane).GetComponentInChildren<SlotView>(false);
+
+        // Se non c'è uno slot attivo davanti (slot distrutto o proprio nessuno) -> danno diretto agli HP nemico
+        if (sView == null || !sView.instance.alive)
         {
-            var pView = playerBoardRoot.GetChild(lane).GetComponentInChildren<CardView>(false);
-            var ci = pView.instance;
-            if (!ci.alive || ci.side != Side.Fronte) continue;
-
-            var sView = aiBoardRoot.GetChild(lane).GetComponentInChildren<SlotView>(false);
+            int dmg = ci.ComputeFrontDamage(player);
+            ci.DealDamageToPlayer(player, ai, dmg, "DirectToEnemy");
+        }
+        else
+        {
+            // Slot ancora vivo -> attacco normale allo slot
             var si = sView.instance;
             if (!si.alive) continue;
 
             ci.Attack(player, ai, si);
         }
-
-        CleanupDestroyed(player); CleanupDestroyedSlots();
-        UpdateAllViews();
-        awaitingEndTurn = true; UpdateHUD();
     }
+
+    CleanupDestroyed(player); 
+    CleanupDestroyedSlots();
+    UpdateAllViews();
+    awaitingEndTurn = true; 
+    UpdateHUD();
+}
+
 
     void OnEndTurn()
     {

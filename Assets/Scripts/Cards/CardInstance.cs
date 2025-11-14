@@ -142,6 +142,8 @@ public class CardInstance
         int final = Mathf.Max(0, amount);
         opponent.hp -= final;
 
+        GameManager.Instance?.UpdateHUD();
+
         EventBus.Publish(GameEventType.AttackResolved, new EventContext
         {
             owner = owner,
