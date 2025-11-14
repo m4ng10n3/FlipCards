@@ -367,6 +367,9 @@ public class GameManager : MonoBehaviour
             Transform oppRoot = (atkView.owner == player) ? aiBoardRoot : playerBoardRoot;
             int lane = atkView.transform.GetSiblingIndex();
 
+            if (lane < 0 || lane >= oppRoot.childCount)
+                return null;
+
             if (atkView.owner == player)
             {
                 var sView = oppRoot.GetChild(lane).GetComponentInChildren<SlotView>(false);
@@ -385,6 +388,10 @@ public class GameManager : MonoBehaviour
         {
             var sView = slotViewByInstance[slot];
             int lane = sView.transform.GetSiblingIndex();
+
+            if (lane < 0 || lane >= playerBoardRoot.childCount)
+                return null;
+
             var cView = playerBoardRoot.GetChild(lane).GetComponentInChildren<CardView>(false);
             var ci = cView.instance;
             return ci.alive ? ci : null;
