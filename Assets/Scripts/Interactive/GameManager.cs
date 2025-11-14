@@ -276,7 +276,7 @@ public class GameManager : MonoBehaviour
 
         int idxA = tA.GetSiblingIndex();
         int idxB = tB.GetSiblingIndex();
-
+        player.actionPoints -= 1;
         tA.SetSiblingIndex(idxB);
         tB.SetSiblingIndex(idxA);
 

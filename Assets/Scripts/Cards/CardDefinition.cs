@@ -8,7 +8,7 @@ public class CardDefinition : MonoBehaviour
         // Identit
         public string cardName;
         public Faction faction;
-
+        public CardZone zone;
         // Stats base
         public int maxHealth;
 
@@ -29,6 +29,9 @@ public class CardDefinition : MonoBehaviour
     [Header("Identity")]
     public string cardName = "Card";
     public Faction faction = Faction.A;
+
+    public CardZone zone = CardZone.Board;
+
 
     [Header("Stats")]
     [Min(1)] public int maxHealth = 3;
@@ -58,7 +61,8 @@ public class CardDefinition : MonoBehaviour
             backDamageBonusSameFaction = backDamageBonusSameFaction,
             backBlockBonusSameFaction = backBlockBonusSameFaction,
             backBonusPAIfTwoRetroSameFaction = backBonusPAIfTwoRetroSameFaction,
-            endTurnFlipChance = endTurnFlipChance
+            endTurnFlipChance = endTurnFlipChance,
+            zone = zone
         };
     }
 }
