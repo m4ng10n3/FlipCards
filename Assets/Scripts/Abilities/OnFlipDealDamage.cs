@@ -14,59 +14,53 @@ public class OnFlipDealDamage : AbilityBase
             if (t != GameEventType.Flip) return;
             if (ctx.source != Source) return;
 
-            if (!onlyWhenToFront || Source.side == Side.Fronte)
-            {
-                // Hint quando si attiva
-                EventBus.Publish(GameEventType.Info, new EventContext
-                {
-                    owner = Owner,
-                    opponent = Opponent,
-                    source = Source,
-                    phase = "HINT: Flip Damage"
-                });
+            // Se richiesto solo quando passa al fronte, controlla il lato
+            if (onlyWhenToFront && Source.side != Side.Fronte) return;
 
-                TryAttackImmediateOrNextFrame();
-            }
+            // Hint quando si attiva
+            EventBus.Publish(GameEventType.Info, new EventContext
+            {
+                owner = Owner,
+                opponent = Opponent,
+                source = Source,
+                phase = "HINT: Flip Damage"
+            });
+
+            DoFlipAttack();
         };
 
         EventBus.Subscribe(GameEventType.Flip, _h);
     }
 
-    void TryAttackImmediateOrNextFrame()
+    /// <summary>
+    /// Esegue l'attacco al flip, usando il valore di damage come attacco temporaneo.
+    /// Se non c'è un target valido, si affida alla logica già presente in CardInstance / GameManager
+    /// per gestire il danno diretto agli HP.
+    /// </summary>
+    private void DoFlipAttack()
     {
         var gm = GameManager.Instance;
         if (gm == null) return;
 
         var target = gm.GetOpponentObjInstance(Source);
-        if (target != null)
-        {
-            // Attack accetta object come target
-            Source.Attack(Owner, Opponent, target);
-        }
-        else
-        {
-            // Target non ancora disponibile (slot in rebuild): riprova al frame successivo
-            StartCoroutine(RetryNextFrame());
-        }
+        if (target == null) return;
+
+        // Modifica temporaneamente la potenza d'attacco
+        int originalFrontDamage = Source.def.frontDamage;
+        Source.def.frontDamage = damage;
+
+        Source.Attack(Owner, Opponent, target);
+
+        // Ripristina il valore originale
+        Source.def.frontDamage = originalFrontDamage;
     }
-
-    System.Collections.IEnumerator RetryNextFrame()
-    {
-        yield return null; // aspetta un frame (dopo RebuildEnemySlotsToMatchPlayer)
-        var gm = GameManager.Instance;
-        if (gm == null) yield break;
-
-        var target = gm.GetOpponentObjInstance(Source);
-        if (target != null)
-        {
-            Source.Attack(Owner, Opponent, target);
-        }
-        // se è ancora null, non insistere per evitare spam: sarà stato davvero assente
-    }
-
 
     protected override void Unregister()
     {
-        if (_h != null) EventBus.Unsubscribe(GameEventType.Flip, _h);
+        if (_h != null)
+        {
+            EventBus.Unsubscribe(GameEventType.Flip, _h);
+            _h = null;
+        }
     }
 }
