@@ -12,7 +12,7 @@ public class GameManager : MonoBehaviour
     [Serializable] public class PrefabSlotBinding { public GameObject prefab; [Min(1)] public int count = 1; }
 
     [Header("Roots")] public Transform playerBoardRoot; public Transform aiBoardRoot;
-    [Header("UI")] public Button btnForceFlip; public Button btnAttack; public Button btnEndTurn;
+    [Header("UI")] public Button btnForceFlip; public Button btnAttack; public Button btnEndTurn; public Button btnSwap;
     [Header("LOG")] public Text logText; static readonly StringBuilder _logBuf = new StringBuilder(4096);
 
     [Header("HUD")]
@@ -50,6 +50,7 @@ public class GameManager : MonoBehaviour
         btnForceFlip.onClick.AddListener(OnForceFlip);
         btnAttack.onClick.AddListener(OnAttack);
         btnEndTurn.onClick.AddListener(OnEndTurn);
+        btnSwap.onClick.AddListener(OnSwap);
     }
 
     void Start()
@@ -214,46 +215,79 @@ public class GameManager : MonoBehaviour
     }
 
     void OnAttack()
-{
-    if (awaitingEndTurn || matchEnded || !playerPhase) { UpdateHUD(); return; }
-
-    // Il numero di lane è guidato dal numero di carte del player
-    int lanes = playerBoardRoot.childCount;
-    for (int lane = 0; lane < lanes; lane++)
     {
-        var pView = playerBoardRoot.GetChild(lane).GetComponentInChildren<CardView>(false);
-        if (pView == null) continue;
+        if (awaitingEndTurn || matchEnded || !playerPhase) { UpdateHUD(); return; }
 
-        var ci = pView.instance;
-        if (!ci.alive || ci.side != Side.Fronte) continue;
-
-        // Recupero lo slot nemico SOLO se esiste quel child
-        SlotView sView = null;
-        if (lane < aiBoardRoot.childCount)
-            sView = aiBoardRoot.GetChild(lane).GetComponentInChildren<SlotView>(false);
-
-        // Se non c'è uno slot attivo davanti (slot distrutto o proprio nessuno) -> danno diretto agli HP nemico
-        if (sView == null || !sView.instance.alive)
+        // Il numero di lane è guidato dal numero di carte del player
+        int lanes = playerBoardRoot.childCount;
+        for (int lane = 0; lane < lanes; lane++)
         {
-            int dmg = ci.ComputeFrontDamage(player);
-            ci.DealDamageToPlayer(player, ai, dmg, "DirectToEnemy");
-        }
-        else
-        {
-            // Slot ancora vivo -> attacco normale allo slot
-            var si = sView.instance;
-            if (!si.alive) continue;
+            var pView = playerBoardRoot.GetChild(lane).GetComponentInChildren<CardView>(false);
+            if (pView == null) continue;
 
-            ci.Attack(player, ai, si);
+            var ci = pView.instance;
+            if (!ci.alive || ci.side != Side.Fronte) continue;
+
+            // Recupero lo slot nemico SOLO se esiste quel child
+            SlotView sView = null;
+            if (lane < aiBoardRoot.childCount)
+                sView = aiBoardRoot.GetChild(lane).GetComponentInChildren<SlotView>(false);
+
+            // Se non c'è uno slot attivo davanti (slot distrutto o proprio nessuno) -> danno diretto agli HP nemico
+            if (sView == null || !sView.instance.alive)
+            {
+                int dmg = ci.ComputeFrontDamage(player);
+                ci.DealDamageToPlayer(player, ai, dmg, "DirectToEnemy");
+            }
+            else
+            {
+                // Slot ancora vivo -> attacco normale allo slot
+                var si = sView.instance;
+                if (!si.alive) continue;
+
+                ci.Attack(player, ai, si);
+            }
         }
+
+        CleanupDestroyed(player); 
+        CleanupDestroyedSlots();
+        UpdateAllViews();
+        awaitingEndTurn = true; 
+        UpdateHUD();
+    }
+    void OnSwap()
+    {
+        if (awaitingEndTurn || matchEnded || !playerPhase) { UpdateHUD(); return; }
+
+        // dice al SelectionManager: "arma lo swap con la carta attualmente selezionata"
+        SelectionManager.Instance.BeginSwap();
     }
 
-    CleanupDestroyed(player); 
-    CleanupDestroyedSlots();
-    UpdateAllViews();
-    awaitingEndTurn = true; 
-    UpdateHUD();
-}
+    public void SwapCardPositions(CardView a, CardView b)
+    {
+        if (a == null || b == null || a == b) return;
+
+        var tA = a.transform;
+        var tB = b.transform;
+
+        // tutte le carte sono del player -> devono essere figli di playerBoardRoot
+        if (tA.parent != playerBoardRoot || tB.parent != playerBoardRoot)
+            return;
+
+        int idxA = tA.GetSiblingIndex();
+        int idxB = tB.GetSiblingIndex();
+
+        tA.SetSiblingIndex(idxB);
+        tB.SetSiblingIndex(idxA);
+
+        EventBus.Publish(GameEventType.Info, new EventContext
+        {
+            phase = $"[Swap] L{idxA + 1} <-> L{idxB + 1}"
+        });
+
+        UpdateAllViews();
+        UpdateHUD();
+    }
 
 
     void OnEndTurn()
