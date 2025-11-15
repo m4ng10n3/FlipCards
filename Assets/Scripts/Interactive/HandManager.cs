@@ -10,7 +10,7 @@ public class HandManager : MonoBehaviour
     [SerializeField] private int maxHandSize = 5;
     [SerializeField] private GameObject cardPrefab;
 
-    [SerializeField] private Transform handManager;         // parent delle carte (RectTransform sotto Canvas)
+    [SerializeField] private Transform handRoot;         // parent delle carte (RectTransform sotto Canvas)
     [SerializeField] private SplineContainer splineContainer;
     [SerializeField] private Transform spawnPoint;       // punto da cui far apparire le carte
 
@@ -38,14 +38,14 @@ public class HandManager : MonoBehaviour
             return;
         }
 
-        if (handManager == null)
+        if (handRoot == null)
         {
-            Debug.LogError("[HandManager] handManager non assegnato!");
+            Debug.LogError("[HandManager] handRoot non assegnato!");
             return;
         }
 
-        // === ISTANZIA COME FIGLIO DI handManager ===
-        GameObject go = Instantiate(cardPrefab, handManager);
+        // === ISTANZIA COME FIGLIO DI handRoot ===
+        GameObject go = Instantiate(cardPrefab, handRoot);
         go.name = cardPrefab.name;
         go.SetActive(true);
 
@@ -73,11 +73,11 @@ public class HandManager : MonoBehaviour
             return;
         }
 
-        // IMPORTANTE: splineContainer.transform dovrebbe essere == handManager
+        // IMPORTANTE: splineContainer.transform dovrebbe essere == handRoot
         // così tutte le posizioni sono nello stesso local space.
-        if (splineContainer.transform != handManager)
+        if (splineContainer.transform != handRoot)
         {
-            Debug.LogWarning("[HandManager] Consigliato avere splineContainer sullo stesso GameObject di handManager.");
+            Debug.LogWarning("[HandManager] Consigliato avere splineContainer sullo stesso GameObject di handRoot.");
         }
 
         Spline spline = splineContainer.Spline;
@@ -90,7 +90,7 @@ public class HandManager : MonoBehaviour
             float t = firstCardPosition + i * cardSpacing;
             t = Mathf.Clamp01(t);
 
-            // POSIZIONE/ROT IN LOCAL SPACE DI handManager/splineContainer
+            // POSIZIONE/ROT IN LOCAL SPACE DI handRoot/splineContainer
             Vector3 splineLocalPos = spline.EvaluatePosition(t);
             Vector3 forwardLocal = spline.EvaluateTangent(t);
             Vector3 upLocal = spline.EvaluateUpVector(t);
