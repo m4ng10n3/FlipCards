@@ -364,14 +364,14 @@ MonoBehaviour:
   turns: 10
   playerBaseAP: 3
   seed: 12345
-  minCardsPerSide: 3
+  CardsPerSide: 3
   playerCards:
   - prefab: {fileID: 4860462570295797339, guid: f03c514f27a9ec84f84e2d4e8793c6fb, type: 3}
     count: 1
   - prefab: {fileID: 4860462570295797339, guid: 809c21f649518db4c9070985c6c42e72, type: 3}
     count: 1
   - prefab: {fileID: 4860462570295797339, guid: e1aa77a891d862c418484aaa9ee7ba23, type: 3}
-    count: 1
+    count: 5
   enemySlots:
   - prefab: {fileID: 1850844066}
     count: 1
@@ -1061,7 +1061,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HandManager
   maxHandSize: 5
-  cardPrefab: {fileID: 4860462570295797339, guid: f03c514f27a9ec84f84e2d4e8793c6fb, type: 3}
   handRoot: {fileID: 1696521693}
   splineContainer: {fileID: 1696521692}
   spawnPoint: {fileID: 751112720}

@@ -22,7 +22,7 @@ public class GameManager : MonoBehaviour
 
 
     [Header("Match parameters")] public int turns = 10; public int playerBaseAP = 3; public int seed = 12345;
-    [Header("Start constraints")][Min(1)] public int minCardsPerSide = 3;
+    [Header("Start constraints")][Min(1)] public int CardsPerSide = 3;
 
     [Header("Prefab bindings")] public List<PrefabCardBinding> playerCards = new List<PrefabCardBinding>();
     [Header("Enemy Slots (bindings only)")] public List<PrefabSlotBinding> enemySlots = new List<PrefabSlotBinding>();
@@ -65,7 +65,7 @@ public class GameManager : MonoBehaviour
         SpawnCardsFromBindings(player, playerCards, playerBoardRoot, playerViews);
         RebuildEnemySlotsToMatchPlayer();
 
-        if (playerViews.Count < minCardsPerSide) { matchEnded = true; return; }
+        if (playerViews.Count < CardsPerSide) { matchEnded = true; return; }
 
         EventBus.Publish(GameEventType.Info, new EventContext { phase = "=== MATCH START ===" });
 
@@ -80,12 +80,18 @@ public class GameManager : MonoBehaviour
         {
             for (int i = 0; i < b.count; i++)
             {
+                // Per il PLAYER fissiamo il numero di carte iniziali sul tabellone
+                // Non ne istanziamo più di CardsPerSide
+                if (owner == player && outViews.Count >= CardsPerSide)
+                    return;
+
                 var cd = b.prefab.GetComponent<CardDefinition>();
                 var def = cd.BuildSpec();
                 AddCardFromTemplate(owner, def, b.prefab, root, outViews);
             }
         }
     }
+
 
     void AddCardFromTemplate(PlayerState owner, CardDefinition.Spec def, GameObject prefab, Transform root, List<CardView> outViews)
     {
