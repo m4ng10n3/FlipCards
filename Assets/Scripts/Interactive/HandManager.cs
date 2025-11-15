@@ -13,6 +13,8 @@ public class HandManager : MonoBehaviour
     [SerializeField] private Transform handRoot;         // parent delle carte (RectTransform sotto Canvas)
     [SerializeField] private SplineContainer splineContainer;
     [SerializeField] private Transform spawnPoint;       // punto da cui far apparire le carte
+    [SerializeField] private float spawnScaleMultiplier = 1.5f;
+
 
     [Header("UI")]
     [SerializeField] private Button btnDraw;
@@ -48,6 +50,8 @@ public class HandManager : MonoBehaviour
         GameObject go = Instantiate(cardPrefab, handRoot);
         go.name = cardPrefab.name;
         go.SetActive(true);
+        go.transform.localScale = Vector3.one * spawnScaleMultiplier;
+
 
         // POSIZIONE INIZIALE = spawnPoint
         if (spawnPoint != null)
