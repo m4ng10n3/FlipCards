@@ -24,6 +24,13 @@ public class GameManager : MonoBehaviour
     [Header("Match parameters")] public int turns = 10; public int playerBaseAP = 3; public int seed = 12345;
     [Header("Start constraints")][Min(1)] public int CardsPerSide = 3;
 
+    [Header("Refs")]
+    [SerializeField] private HandManager handManager;
+
+    // Slot vuoto attualmente selezionato sul board del player
+    private CardView selectedEmptySlot;
+
+
     [Header("Prefab bindings")] public List<PrefabCardBinding> playerCards = new List<PrefabCardBinding>();
     [Header("Enemy Slots (bindings only)")] public List<PrefabSlotBinding> enemySlots = new List<PrefabSlotBinding>();
 
@@ -39,6 +46,7 @@ public class GameManager : MonoBehaviour
 
     readonly Dictionary<SlotInstance, SlotView> slotViewByInstance = new Dictionary<SlotInstance, SlotView>();
     readonly List<SlotView> enemySlotViews = new List<SlotView>();
+
 
     void Awake()
     {
@@ -125,14 +133,32 @@ public class GameManager : MonoBehaviour
     // === REFRESH / HUD ===
     public void UpdateAllViews()
     {
-        foreach (var v in viewByInstance.Values) v.Refresh();
+        // 1) Prima passo: rimuovo tutte le carte morte (di qualunque owner)
+        //    Uso uno snapshot perché RemoveCard modifica viewByInstance.
+        var viewsSnapshot = viewByInstance.Values.ToList();
+        foreach (var v in viewsSnapshot)
+        {
+            if (v.instance != null && !v.instance.alive)
+            {
+                // v.owner è settato in CardView.Init, quindi è il PlayerState giusto
+                RemoveCard(v.owner, v.instance);
+            }
+        }
 
-        // slot: se morto, rimuovi subito
+        // 2) Secondo passo: refresh di tutte le carte ancora vive
+        foreach (var v in viewByInstance.Values)
+            v.Refresh();
+
+        // 3) Slot nemici: come prima (già corretta la rimozione)
         for (int i = enemySlotViews.Count - 1; i >= 0; i--)
         {
-            var v = enemySlotViews[i];
-            if (!v.instance.alive) { RemoveSlotView(v); continue; }
-            v.Refresh();
+            var sv = enemySlotViews[i];
+            if (!sv.instance.alive)
+            {
+                RemoveSlotView(sv);
+                continue;
+            }
+            sv.Refresh();
         }
     }
 
@@ -229,7 +255,7 @@ public class GameManager : MonoBehaviour
         for (int lane = 0; lane < lanes; lane++)
         {
             var pView = playerBoardRoot.GetChild(lane).GetComponentInChildren<CardView>(false);
-            if (pView == null) continue;
+            if (pView == null || pView.instance == null) continue;
 
             var ci = pView.instance;
             if (!ci.alive || ci.side != Side.Fronte) continue;
@@ -255,7 +281,6 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        CleanupDestroyed(player); 
         CleanupDestroyedSlots();
         UpdateAllViews();
         awaitingEndTurn = true; 
@@ -331,27 +356,82 @@ public class GameManager : MonoBehaviour
     }
 
     // === CLEANUP ===
-    void CleanupDestroyed(PlayerState p)
-    {
-        var dead = p.board.Where(ci => !ci.alive).ToArray();
-        for (int i = 0; i < dead.Length; i++) RemoveCard(p, dead[i]);
-    }
 
     void RemoveCard(PlayerState owner, CardInstance ci)
     {
-        var list = abilitiesByInstance[ci];
-        for (int i = 0; i < list.Count; i++) list[i].Unbind();
-        abilitiesByInstance.Remove(ci);
+        // Unbind abilità
+        if (abilitiesByInstance.TryGetValue(ci, out var list))
+        {
+            for (int i = 0; i < list.Count; i++)
+                list[i].Unbind();
+            abilitiesByInstance.Remove(ci);
+        }
 
-        var view = viewByInstance[ci];
+        // Trovo il view associato
+        if (!viewByInstance.TryGetValue(ci, out var view))
+            return;
+
+        // Se era selezionata, deseleziona
         var sel = SelectionManager.Instance;
-        if (sel.SelectedOwned == view) sel.SelectOwned(null);
+        if (sel != null && sel.SelectedOwned == view)
+            sel.SelectOwned(null);
 
-        viewByInstance.Remove(ci); Destroy(view.gameObject);
+        // Rimuovo il modello dal dizionario e dalla board del player
+        viewByInstance.Remove(ci);
         owner.board.Remove(ci);
+        ci.Dispose();
 
-        EventBus.Publish(GameEventType.Info, new EventContext { owner = owner, opponent = (owner == player) ? ai : player, source = ci, phase = "[GM] Removed destroyed card" });
+        // NON distruggo il GameObject: lo trasformo in uno slot vuoto cliccabile
+        view.ClearAsEmptySlot();
+
+        EventBus.Publish(GameEventType.Info, new EventContext
+        {
+            owner = owner,
+            opponent = (owner == player) ? ai : player,
+            source = ci,
+            phase = "[GM] Removed destroyed card (slot left empty)"
+        });
     }
+
+    void PlayCardFromHand(CardView handCard, CardView slot)
+    {
+        if (handCard == null || slot == null) return;
+
+        var cd = handCard.GetComponent<CardDefinition>();
+        if (cd == null)
+        {
+            Debug.LogError("[GM] Card in hand senza CardDefinition!");
+            return;
+        }
+
+        // Creo una nuova istanza di carta per il board
+        var spec = cd.BuildSpec();
+        var ci = new CardInstance(spec, rng);
+        ci.AssignGM(this);
+        player.board.Add(ci);
+
+        // Reinizializzo lo slot con la nuova carta
+        slot.Init(this, player, ci);
+        viewByInstance[ci] = slot;
+
+        // Ricollego le abilità presenti sul GameObject dello slot
+        var opponent = ai;
+        var abilities = slot.GetComponents<AbilityBase>().ToList();
+        foreach (var ab in abilities) ab.Bind(ci, player, opponent);
+        abilitiesByInstance[ci] = abilities;
+
+        // Rimuovo la carta dalla mano
+        if (handManager != null)
+            handManager.RemoveFromHand(handCard.gameObject);
+
+        // Pulizia selezione
+        slot.SetHighlight(false);
+        selectedEmptySlot = null;
+
+        UpdateAllViews();
+        UpdateHUD();
+    }
+
 
     void CleanupDestroyedSlots()
     {
@@ -487,6 +567,7 @@ public class GameManager : MonoBehaviour
     }
 
     public void AppendLog(string msg) { _logBuf.AppendLine(msg); logText.text = _logBuf.ToString(); }
+
     public void ClearLog() { _logBuf.Clear(); logText.text = ""; }
 
     bool IsGameOver() => player.hp <= 0 || ai.hp <= 0;
@@ -504,7 +585,39 @@ public class GameManager : MonoBehaviour
     public void OnCardClicked(CardView view)
     {
         if (matchEnded) return;
-        bool isPlayers = view.owner == player;
-        if (isPlayers) SelectionManager.Instance.SelectOwned(view);
+
+        // 1) Click su slot vuoto del PLAYER:
+        //    CardView senza instance ma owner == player
+        if (view.instance == null && view.owner == player)
+        {
+            // deseleziona eventuale slot precedente
+            if (selectedEmptySlot != null && selectedEmptySlot != view)
+                selectedEmptySlot.SetHighlight(false);
+
+            selectedEmptySlot = view;
+            selectedEmptySlot.SetHighlight(true);
+
+            // togli eventuale selezione di carte sul board
+            SelectionManager.Instance.ClearAll();
+            return;
+        }
+
+        // 2) Click su carta in mano:
+        //    non ha owner e non ha instance
+        bool isHandCard = (view.owner == null && view.instance == null);
+        if (isHandCard)
+        {
+            if (selectedEmptySlot != null)
+            {
+                PlayCardFromHand(view, selectedEmptySlot);
+            }
+            return;
+        }
+
+        // 3) Carta del player già sul board
+        bool isPlayers = view.owner == player && view.instance != null;
+        if (isPlayers)
+            SelectionManager.Instance.SelectOwned(view);
     }
+
 }

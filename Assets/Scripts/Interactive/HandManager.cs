@@ -163,6 +163,19 @@ public class HandManager : MonoBehaviour
         go.SetActive(true);
         go.transform.localScale = Vector3.one * spawnScaleMultiplier;
 
+        var cv = go.GetComponent<CardView>();
+        if (cv != null)
+        {
+            cv.gm = GameManager.Instance;
+            cv.SetHighlight(false);
+
+            // Assicuro che la carta in mano sia cliccabile
+            var btn = go.GetComponent<Button>() ?? go.AddComponent<Button>();
+            btn.onClick.RemoveAllListeners();
+            btn.onClick.AddListener(cv.OnClicked);
+        }
+
+
         // Posizione iniziale = spawnPoint (o handRoot come fallback)
         if (spawnPoint != null)
         {
@@ -181,6 +194,16 @@ public class HandManager : MonoBehaviour
         UpdateCardsPosition();
     }
 
+    public void RemoveFromHand(GameObject cardGO)
+    {
+        if (cardGO == null) return;
+
+        if (handCards.Remove(cardGO))
+        {
+            Destroy(cardGO);
+            UpdateCardsPosition();
+        }
+    }
 
     private void UpdateCardsPosition()
     {

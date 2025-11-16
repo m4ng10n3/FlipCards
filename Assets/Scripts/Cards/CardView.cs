@@ -105,6 +105,11 @@ public class CardView : MonoBehaviour
 
     void OnDestroy()
     {
+        UnsubscribeAllEvents();
+    }
+
+    private void UnsubscribeAllEvents()
+    {
         if (_evtHandler != null)
         {
             EventBus.Unsubscribe(GameEventType.AttackResolved, _evtHandler);
@@ -117,7 +122,44 @@ public class CardView : MonoBehaviour
         }
     }
 
-    void OnClicked()
+    public void ClearAsEmptySlot()
+    {
+        // lo slot resta di proprietà del player, ma non rappresenta più una carta
+        instance = null;
+
+        // niente testi / valori
+        if (nameText) nameText.text = "";
+        if (factionText) factionText.text = "";
+        if (sideText) sideText.text = "";
+        if (hpText) hpText.text = "";
+        if (AttackPwrText) AttackPwrText.text = "";
+        if (BlockPwrText) BlockPwrText.text = "";
+
+        // niente artwork
+        if (artworkMonster) artworkMonster.enabled = false;
+
+        // sfondo neutro (facoltativo, puoi modificare a piacere)
+        if (img == null) img = GetComponent<Image>();
+        if (img != null)
+        {
+            img.color = Color.white;
+            // volendo puoi anche cambiare colore per far vedere che c'è uno slot
+            // img.color = new Color(0f, 0f, 0f, 0.15f);
+        }
+
+        HideHint();
+        SetHighlight(false);
+
+        // assicuro che il click passi al GameManager
+        if (btn == null)
+            btn = GetComponent<Button>() ?? gameObject.AddComponent<Button>();
+
+        btn.onClick.RemoveAllListeners();
+        btn.onClick.AddListener(OnClicked);
+    }
+
+
+    public void OnClicked()
     {
         if (gm != null) { gm.OnCardClicked(this); return; }
         SetHighlight(highlight == null ? false : !highlight.enabled);
