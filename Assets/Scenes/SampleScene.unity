@@ -369,11 +369,11 @@ MonoBehaviour:
   EmptySpot: {fileID: 4860462570295797339, guid: 49d34f2c16795bf4fa4ccf950ee27b2f, type: 3}
   playerCards:
   - prefab: {fileID: 4860462570295797339, guid: f03c514f27a9ec84f84e2d4e8793c6fb, type: 3}
-    count: 1
+    count: 3
   - prefab: {fileID: 4860462570295797339, guid: 809c21f649518db4c9070985c6c42e72, type: 3}
     count: 1
   - prefab: {fileID: 4860462570295797339, guid: e1aa77a891d862c418484aaa9ee7ba23, type: 3}
-    count: 5
+    count: 3
   enemySlots:
   - prefab: {fileID: 1850844066}
     count: 1

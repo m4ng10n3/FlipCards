@@ -549,8 +549,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CardDefinitionInline
   cardName: Kevin 2
   faction: 2
+  zone: 2
   maxHealth: 8
-  frontDamage: 3
+  frontDamage: 10
   frontBlockValue: 0
   backDamageBonusSameFaction: 0
   backBlockBonusSameFaction: 0

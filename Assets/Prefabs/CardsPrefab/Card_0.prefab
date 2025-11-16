@@ -407,6 +407,7 @@ GameObject:
   - component: {fileID: 2565232950433125074}
   - component: {fileID: 8727470506572292250}
   - component: {fileID: 6356200726662718340}
+  - component: {fileID: 4317153179959056156}
   m_Layer: 0
   m_Name: Card_0
   m_TagString: Untagged
@@ -548,10 +549,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CardDefinitionInline
   cardName: Kevin
-  faction: 0
+  faction: 2
   zone: 2
-  maxHealth: 3
-  frontDamage: 2
+  maxHealth: 10
+  frontDamage: 1
   frontBlockValue: 0
   backDamageBonusSameFaction: 0
   backBlockBonusSameFaction: 0
@@ -601,6 +602,18 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &4317153179959056156
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4860462570295797339}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 357b6b18eb598c6418270117073d78d8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GetBonusBack
 --- !u!1 &5498676250848662441
 GameObject:
   m_ObjectHideFlags: 0
