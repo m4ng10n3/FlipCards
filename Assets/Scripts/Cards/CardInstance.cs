@@ -45,24 +45,6 @@ public class CardInstance
     public override string ToString() => $"#{id} {def.cardName} ({def.faction}) {side} HP:{health}";
 
     // ====== UTIL ======
-    int DamageBonusFromAlliedRetro(PlayerState owner)
-    {
-        int bonus = 0;
-        foreach (var ci in owner.board)
-            if (ci.alive && ci.side == Side.Retro && ci.def.faction == def.faction)
-                bonus += ci.def.backDamageBonusSameFaction;
-        return bonus;
-    }
-
-    int ComputeSelfBlock(PlayerState myOwner)
-    {
-        int blk = 0;
-        
-        return Mathf.Max(0, blk);
-    }
-
-    public int ComputeFrontDamage(PlayerState owner)
-        => Mathf.Max(0, def.frontDamage + DamageBonusFromAlliedRetro(owner));
 
     // ====== FLUSSO EVENT-DRIVEN ======
 
@@ -71,15 +53,13 @@ public class CardInstance
     {
         if (!alive || target == null) return;
 
-        int proposed = ComputeFrontDamage(owner);
-
         EventBus.Publish(GameEventType.AttackDeclared, new EventContext
         {
             owner = owner,
             opponent = defender,
             source = this,
             target = target,
-            amount = proposed
+            amount = def.frontDamage
         });
     }
 
@@ -104,7 +84,7 @@ public class CardInstance
     {
         // Le abilità hanno avuto occasione di settare questi modificatori ascoltando IncomingAttack.
         int incoming = Mathf.Max(0, incomingDamageOverride ?? proposedDamage);
-        int block = ComputeSelfBlock(defenderOwner);
+        int block = def.frontBlockValue;
         int final = Mathf.Max(0, incoming - block);
 
         if (side==Side.Retro)

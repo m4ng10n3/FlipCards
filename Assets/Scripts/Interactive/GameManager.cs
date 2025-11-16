@@ -242,7 +242,7 @@ public class GameManager : MonoBehaviour
             // Se non c'è uno slot attivo davanti (slot distrutto o proprio nessuno) -> danno diretto agli HP nemico
             if (sView == null || !sView.instance.alive)
             {
-                int dmg = ci.ComputeFrontDamage(player);
+                int dmg = ci.def.frontDamage;
                 ci.DealDamageToPlayer(player, ai, dmg, "DirectToEnemy");
             }
             else
