@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -27,9 +26,7 @@ public class GameManager : MonoBehaviour
     [Header("Refs")]
     [SerializeField] private HandManager handManager;
 
-    // Slot vuoto attualmente selezionato sul board del player
-    private CardView selectedEmptySlot;
-
+    [Header("Empty Spot")] public GameObject EmptySpot;
 
     [Header("Prefab bindings")] public List<PrefabCardBinding> playerCards = new List<PrefabCardBinding>();
     [Header("Enemy Slots (bindings only)")] public List<PrefabSlotBinding> enemySlots = new List<PrefabSlotBinding>();
@@ -376,26 +373,59 @@ public class GameManager : MonoBehaviour
         if (sel != null && sel.SelectedOwned == view)
             sel.SelectOwned(null);
 
-        // Rimuovo il modello dal dizionario e dalla board del player
+        // Salvo parent e indice di lane PRIMA di distruggere la carta
+        Transform parent = view.transform.parent;
+        int laneIndex = view.transform.GetSiblingIndex();
+
+        // Rimuovo il modello dal dizionario e dalla board del player/ai
         viewByInstance.Remove(ci);
         owner.board.Remove(ci);
         ci.Dispose();
 
-        // NON distruggo il GameObject: lo trasformo in uno slot vuoto cliccabile
-        view.ClearAsEmptySlot();
+        // Distruggo il GameObject della carta
+        Destroy(view.gameObject);
+
+        // SOLO per il player: rimpiazzo lo slot con il prefab EmptySpot
+        if (owner == player && EmptySpot != null && parent != null)
+        {
+            var spotGO = Instantiate(EmptySpot, parent);
+            spotGO.name = EmptySpot.name;
+            spotGO.SetActive(true);
+            spotGO.transform.SetSiblingIndex(laneIndex);
+
+            // AGGIUNTA: assicuro che lo EmptySpot abbia un Outline come le carte
+            var outline = spotGO.GetComponent<Outline>();
+            if (outline == null)
+            {
+                outline = spotGO.AddComponent<Outline>();
+                outline.enabled = false;                    // parte spento
+                outline.effectDistance = new Vector2(5f, 5f); // usa gli stessi valori che usi sulle carte
+                outline.useGraphicAlpha = false;
+                outline.effectColor = Color.white;
+            }
+
+            // Assicuro che il bottone chiami GameManager.OnEmptySpotClicked
+            var btn = spotGO.GetComponent<Button>();
+            if (btn != null)
+            {
+                btn.onClick.RemoveAllListeners();
+                btn.onClick.AddListener(() => OnEmptySpotClicked(spotGO.transform));
+            }
+        }
 
         EventBus.Publish(GameEventType.Info, new EventContext
         {
             owner = owner,
             opponent = (owner == player) ? ai : player,
             source = ci,
-            phase = "[GM] Removed destroyed card (slot left empty)"
+            phase = "[GM] Removed destroyed card (replaced by EmptySpot if player)"
         });
     }
 
-    void PlayCardFromHand(CardView handCard, CardView slot)
+
+    void PlayCardFromHand(CardView handCard, Transform emptySpot)
     {
-        if (handCard == null || slot == null) return;
+        if (handCard == null || emptySpot == null) return;
 
         var cd = handCard.GetComponent<CardDefinition>();
         if (cd == null)
@@ -404,29 +434,72 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        // Creo una nuova istanza di carta per il board
+        // Parent e lane dello spot vuoto
+        Transform parent = emptySpot.parent != null ? emptySpot.parent : playerBoardRoot;
+        int laneIndex = emptySpot.GetSiblingIndex();
+
+        // Lo spot vuoto non serve più
+        Destroy(emptySpot.gameObject);
+
+        // --- MODELLO / LOGICA ---
         var spec = cd.BuildSpec();
         var ci = new CardInstance(spec, rng);
         ci.AssignGM(this);
         player.board.Add(ci);
 
-        // Reinizializzo lo slot con la nuova carta
-        slot.Init(this, player, ci);
-        viewByInstance[ci] = slot;
+        // --- VIEW: clono la carta dalla mano ma la "resetto" da board ---
+        GameObject go = Instantiate(handCard.gameObject, parent);
+        go.name = handCard.gameObject.name;
+        go.SetActive(true);
+        go.transform.SetSiblingIndex(laneIndex);
 
-        // Ricollego le abilità presenti sul GameObject dello slot
+        // Reset di scala/rotazione/posizione per farla sembrare come le altre sul tabellone
+        var rt = go.transform as RectTransform;
+        if (rt != null)
+        {
+            rt.anchorMin = new Vector2(0.5f, 0.5f);
+            rt.anchorMax = new Vector2(0.5f, 0.5f);
+            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.anchoredPosition = Vector2.zero;
+            rt.localRotation = Quaternion.identity;
+            rt.localScale = Vector3.one;
+        }
+        else
+        {
+            go.transform.localPosition = Vector3.zero;
+            go.transform.localRotation = Quaternion.identity;
+            go.transform.localScale = Vector3.one;
+        }
+
+        var view = go.GetComponent<CardView>();
+        if (view == null)
+        {
+            Debug.LogError("[GM] Il clone della carta non ha CardView!");
+            return;
+        }
+
+        // Inizializzo come una normale carta sul board
+        view.Init(this, player, ci);
+        view.SetHighlight(false);
+        viewByInstance[ci] = view;
+
+        // Bind delle abilità
         var opponent = ai;
-        var abilities = slot.GetComponents<AbilityBase>().ToList();
+        var abilities = go.GetComponents<AbilityBase>().ToList();
         foreach (var ab in abilities) ab.Bind(ci, player, opponent);
         abilitiesByInstance[ci] = abilities;
 
-        // Rimuovo la carta dalla mano
+        // Rimuovo la carta dalla mano (questa distrugge SOLO la carta in mano, non il clone sul board)
         if (handManager != null)
             handManager.RemoveFromHand(handCard.gameObject);
 
-        // Pulizia selezione
-        slot.SetHighlight(false);
-        selectedEmptySlot = null;
+        EventBus.Publish(GameEventType.CardPlayed, new EventContext
+        {
+            owner = player,
+            opponent = ai,
+            source = ci,
+            phase = "FromHandToEmptySpot"
+        });
 
         UpdateAllViews();
         UpdateHUD();
@@ -586,38 +659,45 @@ public class GameManager : MonoBehaviour
     {
         if (matchEnded) return;
 
-        // 1) Click su slot vuoto del PLAYER:
-        //    CardView senza instance ma owner == player
-        if (view.instance == null && view.owner == player)
-        {
-            // deseleziona eventuale slot precedente
-            if (selectedEmptySlot != null && selectedEmptySlot != view)
-                selectedEmptySlot.SetHighlight(false);
-
-            selectedEmptySlot = view;
-            selectedEmptySlot.SetHighlight(true);
-
-            // togli eventuale selezione di carte sul board
-            SelectionManager.Instance.ClearAll();
-            return;
-        }
-
-        // 2) Click su carta in mano:
-        //    non ha owner e non ha instance
+        // 1) Carta in mano
         bool isHandCard = (view.owner == null && view.instance == null);
         if (isHandCard)
         {
-            if (selectedEmptySlot != null)
+            Transform emptySpot = null;
+            if (SelectionManager.Instance != null)
+                emptySpot = SelectionManager.Instance.SelectedEmptySpot;
+
+            if (emptySpot != null)
             {
-                PlayCardFromHand(view, selectedEmptySlot);
+                PlayCardFromHand(view, emptySpot);
+
+                // dopo aver riempito lo spot, deseleziono lo spot (e quindi spengo l'outline)
+                if (SelectionManager.Instance != null)
+                    SelectionManager.Instance.SelectEmptySpot(null);
             }
+
             return;
         }
 
-        // 3) Carta del player già sul board
+        // 2) Carta del player sul board
         bool isPlayers = view.owner == player && view.instance != null;
         if (isPlayers)
+        {
+            // la selezione della carta gestisce già lo spegnimento di eventuali empty spot
             SelectionManager.Instance.SelectOwned(view);
+        }
     }
+
+
+
+    public void OnEmptySpotClicked(Transform emptySpot)
+    {
+        if (matchEnded || emptySpot == null) return;
+
+        if (SelectionManager.Instance != null)
+            SelectionManager.Instance.SelectEmptySpot(emptySpot);
+    }
+
+
 
 }

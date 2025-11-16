@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class SelectionManager : MonoBehaviour
 {
@@ -7,6 +8,8 @@ public class SelectionManager : MonoBehaviour
     public CardView SelectedOwned { get; private set; }
     public CardView SwapSource { get; private set; }
     public bool IsSwapArmed { get; private set; }
+    public Transform SelectedEmptySpot { get; private set; }
+
 
     void Awake()
     {
@@ -18,6 +21,13 @@ public class SelectionManager : MonoBehaviour
     public void SelectOwned(CardView view)
     {
         if (view == null) return;
+
+        if (SelectedEmptySpot != null)
+        {
+            var outline = SelectedEmptySpot.GetComponent<Outline>();
+            if (outline != null) outline.enabled = false;
+            SelectedEmptySpot = null;
+        }
 
         // --- SE SIAMO IN MODALITÀ SWAP ED È LA SECONDA CARTA ---
         if (IsSwapArmed && SwapSource != null && view != SwapSource)
@@ -51,6 +61,46 @@ public class SelectionManager : MonoBehaviour
         });
     }
 
+    public void SelectEmptySpot(Transform spot)
+    {
+        // se clicco lo stesso spot e vuoi il "toggle" puoi gestirlo qui,
+        // per ora semplicemente cambiamo selezione
+
+        // 1) spegni highlight sulla carta selezionata (se c'è)
+        if (SelectedOwned != null)
+        {
+            SelectedOwned.SetHighlight(false);
+            SelectedOwned = null;
+        }
+
+        // lo swap non ha più senso se sto scegliendo uno spot vuoto
+        SwapSource = null;
+        IsSwapArmed = false;
+
+        // 2) spegni highlight sul precedente empty spot
+        if (SelectedEmptySpot != null)
+        {
+            var oldOutline = SelectedEmptySpot.GetComponent<Outline>();
+            if (oldOutline != null) oldOutline.enabled = false;
+        }
+
+        // 3) aggiorna selezione
+        SelectedEmptySpot = spot;
+
+        // 4) accendi outline sul nuovo empty spot
+        if (SelectedEmptySpot != null)
+        {
+            var outline = SelectedEmptySpot.GetComponent<Outline>();
+            if (outline != null) outline.enabled = true;
+        }
+
+        EventBus.Publish(GameEventType.Info, new EventContext
+        {
+            phase = "[SEL] EmptySpot"
+        });
+    }
+
+
     public void BeginSwap()
     {
         // se non c'è nessuna carta già selezionata, non ha senso armare lo swap
@@ -77,6 +127,13 @@ public class SelectionManager : MonoBehaviour
     {
         if (SelectedOwned != null) SelectedOwned.SetHighlight(false);
         SelectedOwned = null;
+
+        if (SelectedEmptySpot != null)
+        {
+            var outline = SelectedEmptySpot.GetComponent<Outline>();
+            if (outline != null) outline.enabled = false;
+            SelectedEmptySpot = null;
+        }
 
         SwapSource = null;
         IsSwapArmed = false;
