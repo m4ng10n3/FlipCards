@@ -138,9 +138,11 @@ public class SlotView : MonoBehaviour
         switch (t)
         {
             case GameEventType.AttackResolved:
+                
                 // Difensore: mostra HP persi
                 if (ctx.target == instance && ctx.amount > 0)
                 {
+                    ClearHint();
                     ShowHint($"-{ctx.amount}HP");
                     UpdateHpOnly();
                     Blink();
@@ -148,6 +150,7 @@ public class SlotView : MonoBehaviour
                 // Attaccante: mostra il danno inflitto
                 if (ctx.source == instance && ctx.amount > 0)
                 {
+                    ClearHint();
                     ShowHint($"Dealt {ctx.amount}");
                 }
                 break;
@@ -160,7 +163,8 @@ public class SlotView : MonoBehaviour
 
             case GameEventType.TurnEnd:
                 // a fine turno l'hint viene nascosto
-                HideHint();
+                //HideHint();
+                //ClearHint();
                 break;
 
             case GameEventType.Info:
@@ -172,7 +176,7 @@ public class SlotView : MonoBehaviour
                 }
                 break;
             case GameEventType.TurnStart:
-                HideHint();
+                //HideHint();
                 break;
         }
     }
@@ -199,12 +203,6 @@ public class SlotView : MonoBehaviour
 
     public void ShowHint(string msg)
     {
-        if (hintText == null)
-        {
-            Logger.Info("[Slot] " + msg);
-            return;
-        }
-
         hintText.gameObject.SetActive(true);
 
         if (string.IsNullOrEmpty(hintText.text))
@@ -213,7 +211,13 @@ public class SlotView : MonoBehaviour
             hintText.text += "\n" + msg;
     }
 
-
+    public void ClearHint()
+    {
+        if (hintText != null)
+        {
+            hintText.text = string.Empty;   // svuota coda messaggi
+        }
+    }
     public void HideHint()
     {
         if (hintText != null)

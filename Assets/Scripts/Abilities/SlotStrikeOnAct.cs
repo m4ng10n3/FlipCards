@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using UnityEngine;
 
 /// <summary>
@@ -18,11 +19,19 @@ public class SlotStrikeOnAct : AbilityBase
         _slotView = GetComponent<SlotView>();
         _slot = _slotView ? _slotView.instance : null;
 
+        _slotView.ClearHint();
+        _slotView.ShowHint($"incoming damage {damage}");
+        var gm = GameManager.Instance;
+
         _h = (t, ctx) =>
         {
-            if (t != GameEventType.Custom) return;
             if (_slot == null || !_slot.alive) return;
-
+            if (t == GameEventType.TurnEnd && ReferenceEquals(ctx.owner, gm.ai))
+            {
+                _slotView.ClearHint();
+                _slotView.ShowHint($"incoming damage {damage}");
+                return;
+            }
             // Agiamo solo nella fase dedicata agli slot
             if (ctx.phase != "SlotEffect") return;
 
@@ -30,7 +39,6 @@ public class SlotStrikeOnAct : AbilityBase
             if (!ReferenceEquals(ctx.source, _slot)) return;
 
             // Trova la carta di fronte nella stessa lane
-            var gm = GameManager.Instance;
             if (gm == null || gm.playerBoardRoot == null || _slotView == null) return;
 
             int lane = _slotView.transform.GetSiblingIndex();
@@ -42,7 +50,15 @@ public class SlotStrikeOnAct : AbilityBase
 
             if (target == null || !target.alive)
             {
-                
+                EventBus.Publish(GameEventType.AttackResolved, new EventContext
+                {
+                    owner = Owner,
+                    opponent = Opponent,
+                    source = _slot,
+                    target = null,             // danno diretto al player
+                    amount = damage,
+                    phase = "Direct Damage"
+                });
                 DealDamageToPlayer(Owner, Opponent, damage);
                 return;
             }
@@ -73,6 +89,7 @@ public class SlotStrikeOnAct : AbilityBase
         };
 
         EventBus.Subscribe(GameEventType.Custom, _h);
+        EventBus.Subscribe(GameEventType.TurnEnd, _h);
     }
 
     public void DealDamageToPlayer(PlayerState owner, PlayerState opponent, int amount, string phase = null)
