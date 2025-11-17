@@ -40,19 +40,26 @@ public class SlotStrikeOnAct : AbilityBase
             var pView = pChild ? pChild.GetComponentInChildren<CardView>(includeInactive: false) : null;
             var target = pView ? pView.instance : null;
 
-            if (target == null || !target.alive) return;
-
-            // Usa la pipeline eventi standard: AttackDeclared + IncomingAttack.
-            // owner = AI (Owner), opponent = Player (Opponent), source = questo SlotInstance
-            EventBus.Publish(GameEventType.AttackDeclared, new EventContext
+            if (target == null || !target.alive)
             {
-                owner = Owner,
-                opponent = Opponent,
-                source = _slot,
-                target = target,
-                amount = Mathf.Max(0, damage),
-                phase = "SlotStrikeOnAct"
-            });
+                
+                DealDamageToPlayer(Owner, Opponent, damage);
+                return;
+            }
+            else
+            {
+                // Usa la pipeline eventi standard: AttackDeclared + IncomingAttack.
+                // owner = AI (Owner), opponent = Player (Opponent), source = questo SlotInstance
+                EventBus.Publish(GameEventType.AttackDeclared, new EventContext
+                {
+                    owner = Owner,
+                    opponent = Opponent,
+                    source = _slot,
+                    target = target,
+                    amount = Mathf.Max(0, damage),
+                    phase = "SlotStrikeOnAct"
+                });
+            }
 
             EventBus.Publish(GameEventType.Info, new EventContext
             {
@@ -62,9 +69,28 @@ public class SlotStrikeOnAct : AbilityBase
                 phase = "HINT: Strike!"
             });
 
+
         };
 
         EventBus.Subscribe(GameEventType.Custom, _h);
+    }
+
+    public void DealDamageToPlayer(PlayerState owner, PlayerState opponent, int amount, string phase = null)
+    {
+        int final = Mathf.Max(0, amount);
+        opponent.hp -= final;
+
+        GameManager.Instance?.UpdateHUD();
+
+        EventBus.Publish(GameEventType.AttackResolved, new EventContext
+        {
+            owner = owner,
+            opponent = opponent,
+            source = this,
+            target = null,             // danno diretto al player
+            amount = final,
+            phase = phase ?? "Damage"
+        });
     }
 
     protected override void Unregister()

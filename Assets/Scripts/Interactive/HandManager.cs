@@ -103,7 +103,7 @@ public class HandManager : MonoBehaviour
 
 
 
-    private void DrawCard()
+    public void DrawCard()
     {
         var gm = GameManager.Instance;
         if (gm == null)

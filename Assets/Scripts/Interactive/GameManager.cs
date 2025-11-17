@@ -69,54 +69,86 @@ public class GameManager : MonoBehaviour
 
         ClearChildrenUnder(playerBoardRoot);
 
-        SpawnPlayerCards(player, playerCards, playerBoardRoot, playerViews);
+        // 1) Riempio il board del player con degli EmptySpot invece delle carte
+        SpawnInitialEmptySpots();
 
+        // 2) Creo gli slot nemici davanti a ogni lane del player (come prima)
         SpawnEnemySlots();
 
-        if (playerViews.Count < CardsPerSide) { matchEnded = true; return; }
+        // 3) Creo la mano iniziale
+        SpawnStartingHand();
 
         EventBus.Publish(GameEventType.Info, new EventContext { phase = "=== MATCH START ===" });
 
-        UpdateAllViews(); UpdateHUD();
+        UpdateAllViews();
+        UpdateHUD();
         StartTurn(player, ai, true);
     }
 
     // === BUILD ===
-
-    void SpawnPlayerCards(PlayerState owner, List<PrefabCardBinding> bindings, Transform root, List<CardView> outViews)
+    void SpawnStartingHand()
     {
-        foreach (var b in bindings)
-        {
-            for (int i = 0; i < b.count; i++)
-            {
-                // Per il PLAYER fissiamo il numero di carte iniziali sul tabellone
-                // Non ne istanziamo più di CardsPerSide
-                if (owner == player && outViews.Count >= CardsPerSide)
-                    return;
+        if (handManager == null) return;
+        if (StartingHandSize <= 0) return;
 
-                var cd = b.prefab.GetComponent<CardDefinition>();
-                var def = cd.BuildSpec();
-                AddCardFromTemplate(owner, def, b.prefab, root, outViews);
-            }
+        // Costruisco un "mazzo" lineare dai bindings
+        var deck = new List<GameObject>();
+        foreach (var b in playerCards)
+            for (int i = 0; i < b.count; i++)
+                deck.Add(b.prefab);
+
+        if (deck.Count == 0) return;
+
+        // Shuffle semplice
+        for (int i = deck.Count - 1; i > 0; i--)
+        {
+            int j = rng.Next(i + 1);
+            (deck[i], deck[j]) = (deck[j], deck[i]);
         }
+
+        // Pesco StartingHandSize carte e le metto in mano
+        player.actionPoints = StartingHandSize;
+        for (int i = 0; i < StartingHandSize; i++)
+        {
+            handManager.DrawCard();
+        }
+        player.actionPoints = playerBaseAP;
     }
 
 
-    void AddCardFromTemplate(PlayerState owner, CardDefinition.Spec def, GameObject prefab, Transform root, List<CardView> outViews)
+    void SpawnInitialEmptySpots()
     {
-        var ci = new CardInstance(def, rng); owner.board.Add(ci); ci.AssignGM(GameManager.Instance);
-        var go = Instantiate(prefab, root); go.name = prefab.name; go.SetActive(true);
+        if (EmptySpot == null) return;
 
-        var view = go.GetComponent<CardView>();
-        view.Init(this, owner, ci);
-        viewByInstance[ci] = view; outViews.Add(view);
+        for (int i = 0; i < CardsPerSide; i++)
+        {
+            var spotGO = Instantiate(EmptySpot, playerBoardRoot);
+            spotGO.name = EmptySpot.name;
+            spotGO.SetActive(true);
+            spotGO.transform.SetSiblingIndex(i);
 
-        var opponent = (owner == player) ? ai : player;
-        var abilities = go.GetComponents<AbilityBase>().ToList();
-        foreach (var ab in abilities) ab.Bind(ci, owner, opponent);
-        abilitiesByInstance[ci] = abilities;
+            // Stesso comportamento degli EmptySpot creati quando muore una carta
 
-        EventBus.Publish(GameEventType.CardPlayed, new EventContext { owner = owner, opponent = opponent, source = ci, phase = "Main" });
+            // Outline
+            var outline = spotGO.GetComponent<Outline>();
+            if (outline == null)
+            {
+                outline = spotGO.AddComponent<Outline>();
+                outline.enabled = false;
+                outline.effectDistance = new Vector2(5f, 5f);
+                outline.useGraphicAlpha = false;
+                outline.effectColor = Color.white;
+            }
+
+            // Button -> OnEmptySpotClicked
+            var btn = spotGO.GetComponent<Button>();
+            if (btn != null)
+            {
+                var t = spotGO.transform; // catturo la transform
+                btn.onClick.RemoveAllListeners();
+                btn.onClick.AddListener(() => OnEmptySpotClicked(t));
+            }
+        }
     }
 
     void AddSlotFromTemplate(PlayerState owner, SlotDefinition.Spec def, GameObject prefab, Transform root, List<SlotView> outViews)
@@ -615,9 +647,13 @@ public class GameManager : MonoBehaviour
                 return null;
 
             var cView = playerBoardRoot.GetChild(lane).GetComponentInChildren<CardView>(false);
+            if (cView == null)          // <-- nessuna carta: lane con EmptySpot
+                return null;            // le abilità possono interpretare questo come "danno diretto al player"
+
             var ci = cView.instance;
             return ci.alive ? ci : null;
         }
+
 
         return null;
     }
