@@ -21,12 +21,15 @@ public class GameManager : MonoBehaviour
 
 
     [Header("Match parameters")] public int turns = 10; public int playerBaseAP = 3; public int seed = 12345;
-    [Header("Start constraints")][Min(1)] public int CardsPerSide = 3;
+    [Header("Start constraints")]
+    [Min(1)] public int CardsPerSide = 3;
+    [Min(1)] public int StartingHandSize = 3;
 
     [Header("Refs")]
     [SerializeField] private HandManager handManager;
 
     [Header("Empty Spot")] public GameObject EmptySpot;
+    [Header("Empty Slot")] public GameObject EmptySlot;
 
     [Header("Prefab bindings")] public List<PrefabCardBinding> playerCards = new List<PrefabCardBinding>();
     [Header("Enemy Slots (bindings only)")] public List<PrefabSlotBinding> enemySlots = new List<PrefabSlotBinding>();
@@ -65,10 +68,10 @@ public class GameManager : MonoBehaviour
         ai = new PlayerState("AI", 0);
 
         ClearChildrenUnder(playerBoardRoot);
-        ClearSlotsRoot();
 
-        SpawnCardsFromBindings(player, playerCards, playerBoardRoot, playerViews);
-        RebuildEnemySlotsToMatchPlayer();
+        SpawnPlayerCards(player, playerCards, playerBoardRoot, playerViews);
+
+        SpawnEnemySlots();
 
         if (playerViews.Count < CardsPerSide) { matchEnded = true; return; }
 
@@ -79,7 +82,8 @@ public class GameManager : MonoBehaviour
     }
 
     // === BUILD ===
-    void SpawnCardsFromBindings(PlayerState owner, List<PrefabCardBinding> bindings, Transform root, List<CardView> outViews)
+
+    void SpawnPlayerCards(PlayerState owner, List<PrefabCardBinding> bindings, Transform root, List<CardView> outViews)
     {
         foreach (var b in bindings)
         {
@@ -127,6 +131,31 @@ public class GameManager : MonoBehaviour
         foreach (var ab in go.GetComponents<AbilityBase>()) ab.Bind(null, ai, player);
     }
 
+    void SpawnEnemySlots()
+    {
+        enemySlotViews.Clear();
+        var toKill = new List<GameObject>();
+        foreach (Transform t in aiBoardRoot) toKill.Add(t.gameObject);
+        for (int i = 0; i < toKill.Count; i++) Destroy(toKill[i]);
+        slotViewByInstance.Clear();
+
+        var flat = new List<GameObject>();
+        for (int i = 0; i < enemySlots.Count; i++)
+            for (int k = 0; k < enemySlots[i].count; k++) flat.Add(enemySlots[i].prefab);
+
+        for (int i = flat.Count - 1; i > 0; i--) { int j = rng.Next(i + 1); (flat[i], flat[j]) = (flat[j], flat[i]); }
+
+        int lanes = playerBoardRoot.childCount;
+        for (int i = 0; i < lanes; i++)
+        {
+            var prefab = flat[i % flat.Count];
+            var sd = prefab.GetComponent<SlotDefinition>();
+            var spec = sd.BuildSpec();
+            AddSlotFromTemplate(ai, spec, prefab, aiBoardRoot, enemySlotViews);
+        }
+
+        for (int i = 0; i < aiBoardRoot.childCount; i++) aiBoardRoot.GetChild(i).SetSiblingIndex(i);
+    }
     // === REFRESH / HUD ===
     public void UpdateAllViews()
     {
@@ -291,6 +320,7 @@ public class GameManager : MonoBehaviour
         SelectionManager.Instance.BeginSwap();
     }
 
+
     public void SwapCardPositions(CardView a, CardView b)
     {
         if (a == null || b == null || a == b) return;
@@ -345,12 +375,20 @@ public class GameManager : MonoBehaviour
         for (int lane = 0; lane < lanes; lane++)
         {
             var sView = aiChildren[lane].GetComponentInChildren<SlotView>(false);
-            if (!sView.instance.alive) continue;
+            if (sView == null || !sView.instance.alive)    // <--- AGGIUNTO null check
+                continue;
 
             EventBus.Publish(GameEventType.Info, new EventContext { phase = $"[SlotEffect] Lane {lane + 1}" });
-            EventBus.Publish(GameEventType.Custom, new EventContext { owner = ai, opponent = player, source = sView.instance, phase = "SlotEffect" });
+            EventBus.Publish(GameEventType.Custom, new EventContext
+            {
+                owner = ai,
+                opponent = player,
+                source = sView.instance,
+                phase = "SlotEffect"
+            });
         }
     }
+
 
     // === CLEANUP ===
 
@@ -513,43 +551,31 @@ public class GameManager : MonoBehaviour
     }
 
     // === SLOTS REBUILD ===
-    void RebuildEnemySlotsToMatchPlayer()
-    {
-        ClearSlotsRoot();
-
-        var flat = new List<GameObject>();
-        for (int i = 0; i < enemySlots.Count; i++)
-            for (int k = 0; k < enemySlots[i].count; k++) flat.Add(enemySlots[i].prefab);
-
-        for (int i = flat.Count - 1; i > 0; i--) { int j = rng.Next(i + 1); (flat[i], flat[j]) = (flat[j], flat[i]); }
-
-        int lanes = playerBoardRoot.childCount;
-        for (int i = 0; i < lanes; i++)
-        {
-            var prefab = flat[i % flat.Count];
-            var sd = prefab.GetComponent<SlotDefinition>();
-            var spec = sd.BuildSpec();
-            AddSlotFromTemplate(ai, spec, prefab, aiBoardRoot, enemySlotViews);
-        }
-
-        for (int i = 0; i < aiBoardRoot.childCount; i++) aiBoardRoot.GetChild(i).SetSiblingIndex(i);
-    }
-
-    void ClearSlotsRoot()
-    {
-        enemySlotViews.Clear();
-        var toKill = new List<GameObject>();
-        foreach (Transform t in aiBoardRoot) toKill.Add(t.gameObject);
-        for (int i = 0; i < toKill.Count; i++) Destroy(toKill[i]);
-        slotViewByInstance.Clear();
-    }
+    
 
     void RemoveSlotView(SlotView v)
     {
+        // Salvo parent e lane PRIMA di distruggere
+        Transform parent = v.transform.parent;
+        int laneIndex = v.transform.GetSiblingIndex();
+
+        // Lo tolgo dalle strutture dati logiche
         enemySlotViews.Remove(v);
-        Destroy(v.gameObject);
         slotViewByInstance.Remove(v.instance);
+
+        // Distruggo lo slot attuale
+        Destroy(v.gameObject);
+
+        // Rimpiazzo il posto con il prefab EmptySlot, senza far "scalare" gli altri
+        if (EmptySlot != null && parent != null)
+        {
+            var empty = Instantiate(EmptySlot, parent);
+            empty.name = EmptySlot.name;
+            empty.SetActive(true);
+            empty.transform.SetSiblingIndex(laneIndex);
+        }
     }
+
 
     // === Utility ===
     public object GetOpponentObjInstance(object obj)
@@ -566,6 +592,9 @@ public class GameManager : MonoBehaviour
             if (atkView.owner == player)
             {
                 var sView = oppRoot.GetChild(lane).GetComponentInChildren<SlotView>(false);
+                if (sView == null)                    // <--- AGGIUNTO null check
+                    return null;
+
                 var si = sView.instance;
                 return si.alive ? si : null;
             }
