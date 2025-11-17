@@ -298,10 +298,26 @@ public class GameManager : MonoBehaviour
         if (awaitingEndTurn || matchEnded || !playerPhase) { UpdateHUD(); return; }
         if (player.actionPoints <= 0) { EventBus.Publish(GameEventType.Info, new EventContext { phase = "Not enough Player PA" }); UpdateHUD(); return; }
 
+        if (SelectionManager.Instance.SelectedOwned == null ||SelectionManager.Instance.SelectedOwned.instance == null)
+        {
+            // Nessuna carta selezionata -> non fare nulla
+            return;
+        }
+
         var sel = SelectionManager.Instance.SelectedOwned.instance;
-        sel.Flip(); player.actionPoints -= 1;
-        EventBus.Publish(GameEventType.Flip, new EventContext { owner = player, opponent = ai, source = sel });
-        UpdateAllViews(); UpdateHUD();
+
+        sel.Flip();
+        player.actionPoints -= 1;
+
+        EventBus.Publish(GameEventType.Flip, new EventContext
+        {
+            owner = player,
+            opponent = ai,
+            source = sel
+        });
+
+        UpdateAllViews();
+        UpdateHUD();
     }
 
     void OnAttack()

@@ -45,7 +45,17 @@ public class GetBonusBack : AbilityBase
 
         for (int i = 0; i < gm.playerBoardRoot.childCount; i++)
         {
-            var ci = gm.playerBoardRoot.GetChild(i).GetComponentInChildren<CardView>().instance;
+            var child = gm.playerBoardRoot.GetChild(i);
+
+            // Controlla se nel child esiste un CardView
+            var cardView = child.GetComponentInChildren<CardView>();
+            if (cardView == null)
+            {
+                // Non è una carta -> salta
+                continue;
+            }
+
+            var ci = cardView.instance;
             if (ci.side == Side.Retro && ci!=Source && ci.def.faction == Source.def.faction)
             {
                 damage += 1;

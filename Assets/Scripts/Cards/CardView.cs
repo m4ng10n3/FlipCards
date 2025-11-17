@@ -7,10 +7,10 @@ public class CardView : MonoBehaviour
 {
     [Header("Image Handling")]
     [Tooltip("Sprite del retro (assegnare come Source Image in Inspector)")]
+    [SerializeField] private GameObject Template; // child con grafica fronte
     [SerializeField] private Sprite backImage;
     [SerializeField] private Image artworkMonster;
 
-    private Image img;
     private Sprite frontImage;
 
     [Header("Legacy UI Text (assign in prefab)")]
@@ -75,18 +75,17 @@ public class CardView : MonoBehaviour
         btn.onClick.AddListener(OnClicked);
 
         // --- IMAGE DI SFONDO / SPRITE ---
-        var bg = GetComponent<Image>();
+        var bg = Template != null ? Template.GetComponent<Image>() : null;
         if (btn.targetGraphic == null && bg != null) btn.targetGraphic = bg;
 
-        img = bg;                                  // può restare null se il prefab non ha Image (coerente col codice originale)
-        if (img != null)
+        if (bg != null)
         {
-            img.preserveAspect = false;            // rispetta il RectTransform
-            img.useSpriteMesh = false;
-            img.maskable = false;
+            Template.GetComponent<Image>().preserveAspect = false;            // rispetta il RectTransform
+            Template.GetComponent<Image>().useSpriteMesh = false;
+            Template.GetComponent<Image>().maskable = false;
 
             // Il fronte è l'immagine impostata nel componente Image (Source Image)
-            frontImage = img.sprite;
+            frontImage = Template.GetComponent<Image>().sprite;
         }
 
         // --- UI STATE ---
@@ -158,9 +157,9 @@ public class CardView : MonoBehaviour
 
         // Cambia solo lo sprite (niente SetNativeSize / scale)
         var newSprite = isFront ? frontImage : (backImage != null ? backImage : frontImage);
-        img.type = Image.Type.Simple; // per sicurezza
-        img.preserveAspect = false;   // il RectTransform decide; cambia a true se vuoi letterboxing
-        img.sprite = newSprite;
+        Template.GetComponent<Image>().type = Image.Type.Simple; // per sicurezza
+        Template.GetComponent<Image>().preserveAspect = false;   // il RectTransform decide; cambia a true se vuoi letterboxing
+        Template.GetComponent<Image>().sprite = newSprite;
         //img.useSpriteMesh = false;
         // Mostra/nascondi i testi a seconda del lato
 
@@ -234,11 +233,11 @@ public class CardView : MonoBehaviour
     public void Blink() { StartCoroutine(BlinkRoutine()); }
     IEnumerator BlinkRoutine()
     {
-        if (img == null) yield break;
-        var c = img.color;
-        img.color = Color.yellow;
+        if (Template.GetComponent<Image>() == null) yield break;
+        var c = Template.GetComponent<Image>().color;
+        Template.GetComponent<Image>().color = Color.yellow;
         yield return new WaitForSeconds(0.08f);
-        img.color = c;
+        Template.GetComponent<Image>().color = c;
     }
 
     public void ShowHint(string msg)
