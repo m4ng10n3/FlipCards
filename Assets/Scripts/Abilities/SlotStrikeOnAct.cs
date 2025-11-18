@@ -28,6 +28,7 @@ public class SlotStrikeOnAct : AbilityBase
             if (_slot == null || !_slot.alive) return;
             if (t == GameEventType.TurnEnd && ReferenceEquals(ctx.owner, gm.ai))
             {
+                Logger.Info("pippo");
                 _slotView.ClearHint();
                 _slotView.ShowHint($"incoming damage {damage}");
                 return;

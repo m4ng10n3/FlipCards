@@ -142,7 +142,7 @@ public class SlotView : MonoBehaviour
                 // Difensore: mostra HP persi
                 if (ctx.target == instance && ctx.amount > 0)
                 {
-                    ClearHint();
+                    //ClearHint();
                     ShowHint($"-{ctx.amount}HP");
                     UpdateHpOnly();
                     Blink();
@@ -150,7 +150,7 @@ public class SlotView : MonoBehaviour
                 // Attaccante: mostra il danno inflitto
                 if (ctx.source == instance && ctx.amount > 0)
                 {
-                    ClearHint();
+                    //ClearHint();
                     ShowHint($"Dealt {ctx.amount}");
                 }
                 break;
