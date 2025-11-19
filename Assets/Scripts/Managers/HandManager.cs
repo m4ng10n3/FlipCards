@@ -16,7 +16,7 @@ public class HandManager : MonoBehaviour
 
 
     [Header("UI")]
-    [SerializeField] private Button btnDraw;
+    [SerializeField] public Button btnDraw;
 
     private readonly List<GameObject> handCards = new();
     private readonly List<GameObject> deck = new();

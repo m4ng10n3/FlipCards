@@ -232,6 +232,8 @@ public class GameManager : MonoBehaviour
         {
             btnAttack.interactable = false;
             btnForceFlip.interactable = false;
+            btnSwap.interactable = false;
+            handManager.btnDraw.interactable = false;
         }
 
         // Aggiorno HUD giocatore (vita + punti abilità)
