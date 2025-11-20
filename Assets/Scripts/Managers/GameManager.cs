@@ -254,8 +254,15 @@ public class GameManager : MonoBehaviour
         owner.actionPoints = (owner == player) ? playerBaseAP : 0;
 
         EventBus.Publish(GameEventType.TurnStart, new EventContext { owner = owner, opponent = opponent, phase = $"TURN {currentTurn}" });
-        if (playerPhase) RandomizePlayerLayoutAndSides(); else ExecuteAiTurnStartActions();
-        UpdateAllViews(); UpdateHUD();
+        if (playerPhase)
+        { 
+            RandomizePlayerLayoutAndSides(); btnSwap.interactable = true; handManager.btnDraw.interactable = true; 
+        }
+        else
+        {
+            ExecuteAiTurnStartActions();
+            UpdateAllViews(); UpdateHUD();
+        }
     }
 
     void EndTurnInternal(PlayerState owner, PlayerState opponent)

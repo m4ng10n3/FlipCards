@@ -65,7 +65,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 5411559465782708321, guid: 721851dde0f406f469ac39980d0f9212, type: 3}
+  m_Sprite: {fileID: -3030552051744535581, guid: 7dcf18da60756fb48802349ab92058fa, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -480,11 +480,11 @@ GameObject:
   - component: {fileID: 8380466680754058379}
   - component: {fileID: 3849962477743496572}
   - component: {fileID: 2565232950433125074}
-  - component: {fileID: 8727470506572292250}
   - component: {fileID: 6356200726662718340}
   - component: {fileID: 4317153179959056156}
+  - component: {fileID: 1986460151005530549}
   m_Layer: 0
-  m_Name: Card_0
+  m_Name: Card_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -625,30 +625,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ce414175bdb9c346b3737d0aac2f71f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CardDefinitionInline
-  cardName: Kevin
+  cardName: Skull
   faction: 2
   zone: 2
   maxHealth: 10
-  frontDamage: 20
+  frontDamage: 1
   frontBlockValue: 0
   backDamageBonusSameFaction: 0
   backBlockBonusSameFaction: 0
   backBonusPAIfTwoRetroSameFaction: 0
   endTurnFlipChance: 0.3
---- !u!114 &8727470506572292250
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4860462570295797339}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: af1d69bfcc03be848b2c19e4816a556c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::OnFlipDealDamage
-  damage: 1
-  onlyWhenToFront: 1
 --- !u!114 &6356200726662718340
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -691,6 +677,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 357b6b18eb598c6418270117073d78d8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GetBonusBack
+--- !u!114 &1986460151005530549
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4860462570295797339}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7bbdedf61c6a13f41a94f865155fd986, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OnEndTurnDealDamage
+  damage: 1
+  onlyWhenToFront: 1
 --- !u!1 &5498676250848662441
 GameObject:
   m_ObjectHideFlags: 0

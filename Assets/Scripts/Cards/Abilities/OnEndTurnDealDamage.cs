@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class OnFlipDealDamage : AbilityBase
+public class OnEndTurnDealDamage : AbilityBase
 {
     [Min(1)] public int damage = 1;
     public bool onlyWhenToFront = true;
@@ -11,9 +11,8 @@ public class OnFlipDealDamage : AbilityBase
     {
         _h = (t, ctx) =>
         {
-            if (t != GameEventType.Flip) return;
-            if (ctx.source != Source) return;
-
+            if (t != GameEventType.TurnEnd) return;
+            
             // Se richiesto solo quando passa al fronte, controlla il lato
             if (onlyWhenToFront && Source.side != Side.Fronte) return;
 
@@ -23,13 +22,13 @@ public class OnFlipDealDamage : AbilityBase
                 owner = Owner,
                 opponent = Opponent,
                 source = Source,
-                phase = "HINT: Flip Damage"
+                phase = "HINT: Turn End Damage"
             });
 
-            DoFlipAttack();
+            AttackAll();
         };
 
-        EventBus.Subscribe(GameEventType.Flip, _h);
+        EventBus.Subscribe(GameEventType.TurnEnd, _h);
     }
 
     /// <summary>
@@ -37,29 +36,31 @@ public class OnFlipDealDamage : AbilityBase
     /// Se non c'è un target valido, si affida alla logica già presente in CardInstance / GameManager
     /// per gestire il danno diretto agli HP.
     /// </summary>
-    private void DoFlipAttack()
+    private void AttackAll()
     {
         var gm = GameManager.Instance;
         if (gm == null) return;
-
-        var target = gm.GetOpponentObjInstance(Source);
-        if (target == null) return;
-
-        // Modifica temporaneamente la potenza d'attacco
-        int originalFrontDamage = Source.def.frontDamage;
-        Source.def.frontDamage = damage;
-
-        Source.Attack(Owner, Opponent, target);
-
-        // Ripristina il valore originale
-        Source.def.frontDamage = originalFrontDamage;
+        SlotView sView = null;
+        int slots = gm.aiBoardRoot.childCount;
+        for (int si = 0; si < slots; si++)
+        {
+            sView = gm.aiBoardRoot.GetChild(si).GetComponentInChildren<SlotView>(false);
+            if (sView == null)
+            {
+                gm.ai.hp -= damage;
+            }
+            else
+            {
+                sView.instance.health -= damage;
+            }
+        }
     }
 
     protected override void Unregister()
     {
         if (_h != null)
         {
-            EventBus.Unsubscribe(GameEventType.Flip, _h);
+            EventBus.Unsubscribe(GameEventType.TurnEnd, _h);
             _h = null;
         }
     }
