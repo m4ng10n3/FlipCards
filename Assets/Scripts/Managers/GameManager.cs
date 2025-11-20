@@ -227,6 +227,8 @@ public class GameManager : MonoBehaviour
         {
             btnAttack.interactable = !awaitingEndTurn;
             btnForceFlip.interactable = !awaitingEndTurn && player.actionPoints > 0;
+            btnSwap.interactable = !awaitingEndTurn; 
+            handManager.btnDraw.interactable = !awaitingEndTurn;
         }
         else
         {
@@ -256,7 +258,8 @@ public class GameManager : MonoBehaviour
         EventBus.Publish(GameEventType.TurnStart, new EventContext { owner = owner, opponent = opponent, phase = $"TURN {currentTurn}" });
         if (playerPhase)
         { 
-            RandomizePlayerLayoutAndSides(); btnSwap.interactable = true; handManager.btnDraw.interactable = true; 
+            RandomizePlayerLayoutAndSides();
+            UpdateAllViews(); UpdateHUD();
         }
         else
         {
