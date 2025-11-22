@@ -629,7 +629,7 @@ MonoBehaviour:
   faction: 2
   zone: 2
   maxHealth: 10
-  frontDamage: 20
+  frontDamage: 2
   frontBlockValue: 0
   backDamageBonusSameFaction: 0
   backBlockBonusSameFaction: 0
@@ -725,7 +725,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 85.2, y: 85.5}
+  m_AnchoredPosition: {x: 0, y: 85.5}
   m_SizeDelta: {x: 28.3384, y: 16.7452}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1499799747751393668

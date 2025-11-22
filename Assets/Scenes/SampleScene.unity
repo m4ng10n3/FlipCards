@@ -375,11 +375,11 @@ MonoBehaviour:
   - prefab: {fileID: 4860462570295797339, guid: ad58544dc459dc24f94599135a4ae854, type: 3}
     count: 1
   enemySlots:
-  - prefab: {fileID: 4860462570736836587}
+  - prefab: {fileID: 9094616095918957040, guid: 1905928e36017444dbe30489bacc9569, type: 3}
     count: 1
-  - prefab: {fileID: 9094616095918957040, guid: 09fd317fe66948c42b616491a6786cf3, type: 3}
+  - prefab: {fileID: 9094616095918957040, guid: da8a7fb119b3f3a4a926bc6da8dbdf55, type: 3}
     count: 1
-  - prefab: {fileID: 9094616095918957040, guid: 1013a567d243486419536a0683d65e49, type: 3}
+  - prefab: {fileID: 9094616095918957040, guid: 195ead3d344ed19478dfdf94503455db, type: 3}
     count: 1
 --- !u!1 &364996641
 GameObject:
@@ -1784,7 +1784,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 16, y: -16}
-  m_SizeDelta: {x: 100, y: 100}
+  m_SizeDelta: {x: 100, y: 150}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &925562377
 MonoBehaviour:
@@ -3647,11 +3647,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1905928e36017444dbe30489bacc9569, type: 3}
---- !u!1 &4860462570736836587 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 9094616095918957040, guid: 1905928e36017444dbe30489bacc9569, type: 3}
-  m_PrefabInstance: {fileID: 1317243625693005606}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
