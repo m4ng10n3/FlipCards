@@ -47,6 +47,7 @@ public class GameManager : MonoBehaviour
     readonly Dictionary<SlotInstance, SlotView> slotViewByInstance = new Dictionary<SlotInstance, SlotView>();
     readonly List<SlotView> enemySlotViews = new List<SlotView>();
 
+    Transform playerBoardRootClone;
 
     void Awake()
     {
@@ -71,7 +72,20 @@ public class GameManager : MonoBehaviour
         // 1) Riempio il board del player con degli EmptySpot invece delle carte
         SpawnInitialEmptySpots();
 
-        // 2) Creo gli slot nemici davanti a ogni lane del player (come prima)
+        var cloneGO = Instantiate(playerBoardRoot.gameObject, playerBoardRoot.parent);
+        cloneGO.name = $"{playerBoardRoot.name}_Clone";
+        playerBoardRootClone = cloneGO.transform;
+
+        if (EmptySpot != null)
+        {
+            for (int i = 0; i < playerBoardRootClone.childCount; i++)
+            {
+                var child = playerBoardRootClone.GetChild(i);
+                if (child.gameObject.name == EmptySpot.name)
+                    child.gameObject.SetActive(false);
+            }
+        }
+
         SpawnEnemySlots();
 
         // 3) Creo la mano iniziale
