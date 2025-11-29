@@ -46,6 +46,9 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     private Image _cloneEmptySpotImage;
     private int _dragOriginalSibling;
     private float _lastClickTime;
+    private bool _draggingHand;
+    private Vector3 _dragOriginalLocalScale;
+    private Quaternion _dragOriginalLocalRotation;
     private const float DoubleClickThreshold = 0.3f;
     private static readonly List<RaycastResult> _raycastBuffer = new List<RaycastResult>(8);
 
@@ -304,8 +307,20 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         if (IsHandCard())
         {
             _dragging = true;
+            _draggingHand = true;
             _draggingFromBoard = false;
             _dragStartPos = _rt.position;
+            _dragOriginalParent = _rt.parent;
+            _dragOriginalSibling = _rt.GetSiblingIndex();
+            _dragOriginalLocalScale = _rt.localScale;
+            _dragOriginalLocalRotation = _rt.localRotation;
+            _dragPlaceholder = CreateDragPlaceholder();
+            if (_rootCanvas != null)
+            {
+                _rt.SetParent(_rootCanvas.transform, true);
+                _rt.SetAsLastSibling();
+            }
+            gm?.HandManager?.OnHandCardBeginDrag(this, _dragPlaceholder != null ? _dragPlaceholder.transform : null);
             _canvasGroup.blocksRaycasts = false; // consente di colpire lo spot sottostante
             return;
         }
@@ -319,6 +334,8 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         _dragStartPos = _rt.position;
         _dragOriginalParent = _rt.parent;
         _dragOriginalSibling = _rt.GetSiblingIndex();
+        _dragOriginalLocalScale = _rt.localScale;
+        _dragOriginalLocalRotation = _rt.localRotation;
         _dragPlaceholder = CreateDragPlaceholder();
         ShowCloneEmptySpot();
         _rt.SetParent(_rootCanvas.transform, true);
@@ -332,6 +349,8 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         if (RectTransformUtility.ScreenPointToLocalPointInRectangle(_rootCanvas.transform as RectTransform, eventData.position, _rootCanvas.worldCamera, out var localPoint))
         {
             _rt.position = _rootCanvas.transform.TransformPoint(localPoint);
+            if (_draggingHand)
+                UpdateHandPlaceholderIndex();
         }
     }
 
@@ -356,13 +375,24 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         var spot = FindEmptySpotUnderPointer(eventData);
         if (spot != null && gm != null)
         {
+            ClearDragPlaceholder();
             gm.OnEmptySpotClicked(spot);
             gm.OnCardClicked(this);
             played = true;
         }
 
-        if (!played && _rt != null)
-            _rt.position = _dragStartPos;
+        if (!played)
+        {
+            RestoreDraggedBoardCard();
+            gm?.HandManager?.OnHandCardEndDrag(this);
+        }
+        else
+        {
+            _dragOriginalParent = null;
+            gm?.HandManager?.OnHandCardEndDrag(this);
+        }
+
+        _draggingHand = false;
     }
 
     private void HandleBoardDrop(PointerEventData eventData)
@@ -391,8 +421,8 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
             insertIndex = Mathf.Clamp(insertIndex, 0, _dragOriginalParent.childCount);
             _rt.SetParent(_dragOriginalParent, false);
             _rt.SetSiblingIndex(insertIndex);
-            _rt.localRotation = Quaternion.identity;
-            _rt.localScale = Vector3.one;
+            _rt.localRotation = _dragOriginalLocalRotation;
+            _rt.localScale = _dragOriginalLocalScale;
             var asRt = _rt as RectTransform;
             if (asRt != null) asRt.anchoredPosition = Vector2.zero;
         }
@@ -435,6 +465,23 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         }
 
         return go;
+    }
+
+    private void ClearDragPlaceholder()
+    {
+        if (_dragPlaceholder != null)
+        {
+            Destroy(_dragPlaceholder);
+            _dragPlaceholder = null;
+        }
+    }
+
+    private void UpdateHandPlaceholderIndex()
+    {
+        if (!_draggingHand || _dragPlaceholder == null || _dragOriginalParent == null || _rt == null)
+            return;
+
+        gm?.HandManager?.ReorderHandDuringDrag(_rt, _dragPlaceholder.transform);
     }
 
     private void ShowCloneEmptySpot()

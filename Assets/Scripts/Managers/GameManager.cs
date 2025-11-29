@@ -27,6 +27,7 @@ public class GameManager : MonoBehaviour
 
     [Header("Refs")]
     [SerializeField] private HandManager handManager;
+    public HandManager HandManager => handManager;
 
     [Header("Empty Spot")] public GameObject EmptySpot;
     [Header("Empty Slot")] public GameObject EmptySlot;

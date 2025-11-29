@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.Splines;
 using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine.UI;
@@ -9,18 +8,30 @@ public class HandManager : MonoBehaviour
     [Header("Hand settings")]
     [SerializeField] private int maxHandSize = 5;
 
+    [Header("Hierarchy")]
     [SerializeField] private Transform handRoot;         // parent delle carte (RectTransform sotto Canvas)
-    [SerializeField] private SplineContainer splineContainer;
     [SerializeField] private Transform spawnPoint;       // punto da cui far apparire le carte
     [SerializeField] private float spawnScaleMultiplier = 1.5f;
+
+    [Header("Curve layout")]
+    [SerializeField] private CurveParameters curveParameters;
+    [SerializeField] private float curveYOffsetMultiplier = 1f;
+    [SerializeField] private float curveRotationInfluence = 1f;
+    [SerializeField] private float handTweenDuration = 0.2f;
+    [SerializeField] private Ease handTweenEase = Ease.OutQuad;
 
 
     [Header("UI")]
     [SerializeField] public Button btnDraw;
 
-    private readonly List<GameObject> handCards = new();
+    private readonly List<CardView> handCards = new();
     private readonly List<GameObject> deck = new();
     private bool deckInitialized = false;
+    private RectTransform handRect;
+
+    // Stato runtime per gestione della mano reattiva
+    private CardView draggingCard;
+    private Transform activePlaceholder;
 
     private void Awake()
     {
@@ -28,9 +39,30 @@ public class HandManager : MonoBehaviour
             btnDraw.onClick.AddListener(DrawCard);
         else
             Debug.LogWarning("[HandManager] btnDraw non assegnato nell'Inspector.");
+
+        handRect = handRoot as RectTransform;
+    }
+
+    private void Start()
+    {
+        SyncHandCardsFromChildren();
+        UpdateCardsPosition();
     }
 
 
+    private void SyncHandCardsFromChildren()
+    {
+        if (handRoot == null)
+            return;
+
+        foreach (var cv in handRoot.GetComponentsInChildren<CardView>(false))
+        {
+            if (cv != null && !handCards.Contains(cv))
+                handCards.Add(cv);
+        }
+
+        handCards.RemoveAll(c => c == null);
+    }
 
 
     private void RebuildDeckFromBindings()
@@ -59,7 +91,7 @@ public class HandManager : MonoBehaviour
             remainingByName[name] += binding.count;
         }
 
-        // 2) Sottraggo le copie che sono già in gioco sul board del player
+        // 2) Sottraggo le copie che sono gia in gioco sul board del player
         if (gm.playerBoardRoot != null)
         {
             foreach (Transform child in gm.playerBoardRoot)
@@ -113,7 +145,7 @@ public class HandManager : MonoBehaviour
         }
 
         // Inizializzo il deck solo alla prima pesca,
-        // quando le carte iniziali sono già state messe in campo
+        // quando le carte iniziali sono gia state messe in campo
         if (!deckInitialized)
         {
             RebuildDeckFromBindings();
@@ -131,7 +163,7 @@ public class HandManager : MonoBehaviour
         if (handCards.Count >= maxHandSize)
             return;
 
-        // Pescare costa punti abilità
+        // Pescare costa punti abilita
         if (gm.player.actionPoints <= 0)
         {
             Debug.Log("[HandManager] Nessun PA disponibile per pescare.");
@@ -188,66 +220,137 @@ public class HandManager : MonoBehaviour
             go.transform.rotation = handRoot.rotation;
         }
 
-        handCards.Add(go);
+        RegisterHandCard(cv);
 
         // Gestisce la posizione in campo (mano) lungo la spline
         UpdateCardsPosition();
     }
 
+    private void RegisterHandCard(CardView cv)
+    {
+        if (cv == null)
+            return;
+
+        if (!handCards.Contains(cv))
+            handCards.Add(cv);
+
+        if (handRoot != null && cv.transform.parent != handRoot)
+        {
+            cv.transform.SetParent(handRoot, true);
+            cv.transform.SetAsLastSibling();
+        }
+    }
+
     public void RemoveFromHand(GameObject cardGO)
     {
-        if (cardGO == null) return;
+        RemoveFromHand(cardGO != null ? cardGO.GetComponent<CardView>() : null);
+    }
 
-        if (handCards.Remove(cardGO))
+    public void RemoveFromHand(CardView cv)
+    {
+        if (cv == null) return;
+
+        // se sto trascinando proprio questa carta, resetta lo stato di drag della mano
+        if (draggingCard == cv)
+            OnHandCardEndDrag(cv);
+
+        if (handCards.Remove(cv))
         {
-            Destroy(cardGO);
+            Destroy(cv.gameObject);
             UpdateCardsPosition();
         }
     }
 
-    private void UpdateCardsPosition()
+    public void UpdateCardsPosition()
     {
-        if (handCards.Count == 0)
+        UpdateCardsPosition(activePlaceholder);
+    }
+
+    private void UpdateCardsPosition(Transform placeholder)
+    {
+        SyncHandCardsFromChildren();
+
+        if (handRoot == null)
             return;
 
-        if (splineContainer == null || splineContainer.Spline == null)
-        {
-            Debug.LogWarning("[HandManager] splineContainer o Spline non assegnati.");
+        placeholder = placeholder != null && placeholder.parent == handRoot ? placeholder : null;
+        int slotCount = handRoot.childCount;
+        if (slotCount == 0)
             return;
-        }
 
-        // IMPORTANTE: splineContainer.transform dovrebbe essere == handRoot
-        // così tutte le posizioni sono nello stesso local space.
-        if (splineContainer.transform != handRoot)
+        handCards.RemoveAll(h => h == null);
+
+        float width = handRect != null ? handRect.rect.width : 600f;
+        float spacing = width / Mathf.Max(1, maxHandSize);
+        float startX = -spacing * (slotCount - 1) * 0.5f;
+
+        foreach (var card in handCards)
         {
-            Debug.LogWarning("[HandManager] Consigliato avere splineContainer sullo stesso GameObject di handRoot.");
+            if (card == null)
+                continue;
+
+            var cardTransform = card.transform;
+            if (cardTransform == null || cardTransform.parent != handRoot)
+                continue;
+
+            int slotIndex = cardTransform.GetSiblingIndex();
+
+            float normalized = slotCount <= 1 ? 0.5f : (float)slotIndex / (slotCount - 1);
+            Vector3 finalLocalPos = new Vector3(startX + slotIndex * spacing, 0f, 0f);
+            Quaternion finalRot = Quaternion.identity;
+
+            if (curveParameters != null)
+            {
+                float yOff = curveParameters.positioning.Evaluate(normalized) * curveParameters.positioningInfluence * slotCount * curveYOffsetMultiplier;
+                finalLocalPos += Vector3.up * yOff;
+
+                float rotZ = curveParameters.rotation.Evaluate(normalized) * curveParameters.rotationInfluence * curveRotationInfluence;
+                finalRot = Quaternion.Euler(0f, 0f, rotZ);
+            }
+
+            cardTransform.DOLocalMove(finalLocalPos, handTweenDuration).SetEase(handTweenEase);
+            cardTransform.DOLocalRotateQuaternion(finalRot, handTweenDuration).SetEase(handTweenEase);
         }
+    }
 
-        Spline spline = splineContainer.Spline;
+    // Gestisce lo swap basato sulla posizione orizzontale del drag (stile HorizontalCardHolder)
+    public void ReorderHandDuringDrag(Transform moving, Transform placeholder)
+    {
+        if (handRoot == null || moving == null || placeholder == null) return;
 
-        float cardSpacing = 1f / Mathf.Max(1, maxHandSize);
-        float firstCardPosition = 0.5f - (handCards.Count - 1f) * cardSpacing / 2f;
+        activePlaceholder = placeholder;
 
-        for (int i = 0; i < handCards.Count; i++)
+        int insertIndex = 0;
+        for (int i = 0; i < handRoot.childCount; i++)
         {
-            float t = firstCardPosition + i * cardSpacing;
-            t = Mathf.Clamp01(t);
-
-            // POSIZIONE/ROT IN LOCAL SPACE DI handRoot/splineContainer
-            Vector3 splineLocalPos = spline.EvaluatePosition(t);
-            Vector3 forwardLocal = spline.EvaluateTangent(t);
-            Vector3 upLocal = spline.EvaluateUpVector(t);
-
-            Quaternion rotationLocal = Quaternion.LookRotation(
-                upLocal,
-                Vector3.Cross(upLocal, forwardLocal).normalized
-            );
-
-            Transform cardTransform = handCards[i].transform;
-
-            // Usiamo DOLocalMove perché la spline è definita nello stesso spazio locale del parent
-            cardTransform.DOLocalMove(splineLocalPos, 0.25f);
-            cardTransform.DOLocalRotateQuaternion(rotationLocal, 0.25f);
+            var child = handRoot.GetChild(i);
+            if (child == placeholder) continue;
+            if (moving.position.x > child.position.x) insertIndex++;
         }
+
+        insertIndex = Mathf.Clamp(insertIndex, 0, Mathf.Max(0, handRoot.childCount - 1));
+        if (placeholder.GetSiblingIndex() != insertIndex)
+        {
+            placeholder.SetSiblingIndex(insertIndex);
+            UpdateCardsPosition(placeholder);
+        }
+    }
+
+    public void OnHandCardBeginDrag(CardView view, Transform placeholder)
+    {
+        draggingCard = view;
+        activePlaceholder = placeholder != null && placeholder.parent == handRoot ? placeholder : null;
+        UpdateCardsPosition(activePlaceholder);
+    }
+
+    public void OnHandCardEndDrag(CardView view = null)
+    {
+        // se un'altra carta sta ancora trascinando, non toccare
+        if (view != null && draggingCard != null && view != draggingCard && activePlaceholder != null)
+            return;
+
+        draggingCard = null;
+        activePlaceholder = null;
+        UpdateCardsPosition();
     }
 }
