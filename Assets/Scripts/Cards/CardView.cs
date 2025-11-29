@@ -39,6 +39,8 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     private RectTransform _rt;
     private Vector3 _dragStartPos;
     private bool _dragging;
+    private float _lastClickTime;
+    private const float DoubleClickThreshold = 0.3f;
 
     void Awake()
     {
@@ -135,7 +137,17 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
 
     public void OnClicked()
     {
-        if (gm != null) { gm.OnCardClicked(this); return; }
+        if (gm != null)
+        {
+            gm.OnCardClicked(this);
+
+            // doppio click per flippare le carte già sul board
+            if (IsBoardCard() && _lastClickTime > 0f && Time.time - _lastClickTime <= DoubleClickThreshold)
+                gm.OnCardDoubleClicked(this);
+
+            _lastClickTime = Time.time;
+            return;
+        }
         SetHighlight(highlight == null ? false : !highlight.enabled);
     }
 
@@ -275,6 +287,7 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
 
     // === Drag & Drop (mano -> tabellone) ===
     private bool IsHandCard() => owner == null && instance == null && gm != null;
+    private bool IsBoardCard() => owner != null && instance != null;
 
     public void OnBeginDrag(PointerEventData eventData)
     {
