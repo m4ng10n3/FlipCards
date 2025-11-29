@@ -11,7 +11,7 @@ public class GameManager : MonoBehaviour
     [Serializable] public class PrefabSlotBinding { public GameObject prefab; [Min(1)] public int count = 1; }
 
     [Header("Roots")] public Transform playerBoardRoot; public Transform aiBoardRoot;
-    [Header("UI")] public Button btnAttack; public Button btnEndTurn; public Button btnSwap;
+    [Header("UI")] public Button btnAttack; public Button btnEndTurn; 
     [Header("LOG")] public Text logText; static readonly StringBuilder _logBuf = new StringBuilder(4096);
 
     [Header("HUD")]
@@ -59,7 +59,6 @@ public class GameManager : MonoBehaviour
         // Listener: se non assegnati in Inspector -> NRE (voluto)
         btnAttack.onClick.AddListener(OnAttack);
         btnEndTurn.onClick.AddListener(OnEndTurn);
-        btnSwap.onClick.AddListener(OnSwap);
     }
 
     void Start()
@@ -244,7 +243,6 @@ public class GameManager : MonoBehaviour
         if (matchEnded) return;
         bool enable = playerPhase && !awaitingEndTurn;
         btnAttack.interactable = enable;
-        btnSwap.interactable = enable;
         handManager.btnDraw.interactable = enable;
 
         // Aggiorno HUD giocatore (vita + punti abilità)
@@ -381,18 +379,10 @@ public class GameManager : MonoBehaviour
         awaitingEndTurn = true; 
         UpdateHUD();
     }
-    void OnSwap()
-    {
-        if (awaitingEndTurn || matchEnded || !playerPhase) { UpdateHUD(); return; }
-
-        // dice al SelectionManager: "arma lo swap con la carta attualmente selezionata"
-        SelectionManager.Instance.BeginSwap();
-    }
-
 
     public void SwapCardPositions(CardView a, CardView b)
     {
-        if (a == null || b == null || a == b) return;
+        if (a == null || b == null || a == b || player.actionPoints <= 0) return;
 
         var tA = a.transform;
         var tB = b.transform;
