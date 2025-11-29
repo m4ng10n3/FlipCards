@@ -1,9 +1,11 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using System.Collections.Generic;
+using UnityEngine.EventSystems;
 
 [RequireComponent(typeof(RectTransform))]
-public class CardView : MonoBehaviour
+public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
     [Header("Image Handling")]
     [Tooltip("Sprite del retro (assegnare come Source Image in Inspector)")]
@@ -32,16 +34,26 @@ public class CardView : MonoBehaviour
     private Outline highlight;
     private int _lastHp = int.MinValue;
     private EventBus.Handler _evtHandler;
+    private Canvas _rootCanvas;
+    private CanvasGroup _canvasGroup;
+    private RectTransform _rt;
+    private Vector3 _dragStartPos;
+    private bool _dragging;
 
     void Awake()
     {
+        _rt = GetComponent<RectTransform>();
+        _rootCanvas = GetComponentInParent<Canvas>();
+        _canvasGroup = GetComponent<CanvasGroup>();
+        if (_canvasGroup == null) _canvasGroup = gameObject.AddComponent<CanvasGroup>();
+
         // UI di base sempre sicura da fare in preview/editor
         if (hintText != null) hintText.gameObject.SetActive(false);
 
-        // Se questa CardView è già stata inizializzata a runtime, esci.
+        // Se questa CardView Ã¨ giÃ  stata inizializzata a runtime, esci.
         if (instance != null) return;
 
-        // Modalità "preview" (prefab in editor o scene senza runtime CardInstance)
+        // ModalitÃ  "preview" (prefab in editor o scene senza runtime CardInstance)
         var inline = GetComponent<CardDefinition>();
         if (inline == null) return;
 
@@ -65,7 +77,7 @@ public class CardView : MonoBehaviour
         // --- HIGHLIGHT (Outline) ---
         if (highlight == null) highlight = gameObject.AddComponent<Outline>();
         highlight.effectDistance = new Vector2(5, 5);
-        highlight.useGraphicAlpha = false;        // evita che l’alpha/texture influenzi l’outline
+        highlight.useGraphicAlpha = false;        // evita che lÂ’alpha/texture influenzi lÂ’outline
         highlight.effectColor = Color.white;      // colore di default
         highlight.enabled = false;
 
@@ -84,7 +96,7 @@ public class CardView : MonoBehaviour
             Template.GetComponent<Image>().useSpriteMesh = false;
             Template.GetComponent<Image>().maskable = false;
 
-            // Il fronte è l'immagine impostata nel componente Image (Source Image)
+            // Il fronte Ã¨ l'immagine impostata nel componente Image (Source Image)
             frontImage = Template.GetComponent<Image>().sprite;
         }
 
@@ -259,5 +271,63 @@ public class CardView : MonoBehaviour
             hintText.text = string.Empty;
             hintText.gameObject.SetActive(false);
         }
+    }
+
+    // === Drag & Drop (mano -> tabellone) ===
+    private bool IsHandCard() => owner == null && instance == null && gm != null;
+
+    public void OnBeginDrag(PointerEventData eventData)
+    {
+        if (!IsHandCard() || _rt == null) return;
+        _dragging = true;
+        _dragStartPos = _rt.position;
+        _canvasGroup.blocksRaycasts = false; // consente di colpire lo spot sottostante
+    }
+
+    public void OnDrag(PointerEventData eventData)
+    {
+        if (!_dragging || _rt == null || _rootCanvas == null) return;
+        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(_rootCanvas.transform as RectTransform, eventData.position, _rootCanvas.worldCamera, out var localPoint))
+        {
+            _rt.position = _rootCanvas.transform.TransformPoint(localPoint);
+        }
+    }
+
+    public void OnEndDrag(PointerEventData eventData)
+    {
+        if (!_dragging) return;
+        _dragging = false;
+        _canvasGroup.blocksRaycasts = true;
+
+        bool played = false;
+        var spot = FindEmptySpotUnderPointer(eventData);
+        if (spot != null && gm != null)
+        {
+            gm.OnEmptySpotClicked(spot);
+            gm.OnCardClicked(this);
+            played = true;
+        }
+
+        if (!played && _rt != null)
+            _rt.position = _dragStartPos;
+    }
+
+    private Transform FindEmptySpotUnderPointer(PointerEventData eventData)
+    {
+        if (EventSystem.current == null || gm == null || gm.EmptySpot == null) return null;
+
+        var results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(eventData, results);
+        foreach (var res in results)
+        {
+            var t = res.gameObject.transform;
+            while (t != null)
+            {
+                if (t.gameObject.name == gm.EmptySpot.name)
+                    return t;
+                t = t.parent;
+            }
+        }
+        return null;
     }
 }
