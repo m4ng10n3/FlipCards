@@ -48,6 +48,7 @@ public class GameManager : MonoBehaviour
     readonly List<SlotView> enemySlotViews = new List<SlotView>();
 
     Transform playerBoardRootClone;
+    public Transform PlayerBoardRootClone => playerBoardRootClone;
 
     void Awake()
     {
@@ -71,7 +72,6 @@ public class GameManager : MonoBehaviour
 
         // 1) Riempio il board del player con degli EmptySpot invece delle carte
         SpawnInitialEmptySpots();
-
         var cloneGO = Instantiate(playerBoardRoot.gameObject, playerBoardRoot.parent);
         cloneGO.name = $"{playerBoardRoot.name}_Clone";
         playerBoardRootClone = cloneGO.transform;
@@ -82,7 +82,13 @@ public class GameManager : MonoBehaviour
             {
                 var child = playerBoardRootClone.GetChild(i);
                 if (child.gameObject.name == EmptySpot.name)
-                    child.gameObject.SetActive(false);
+                {
+                    var img = child.GetComponent<Image>();
+                    if (img != null)
+                        img.enabled = false;
+                    else
+                        child.gameObject.SetActive(false);
+                }
             }
         }
 

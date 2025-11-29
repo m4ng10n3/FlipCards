@@ -39,8 +39,15 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     private RectTransform _rt;
     private Vector3 _dragStartPos;
     private bool _dragging;
+    private bool _draggingFromBoard;
+    private Transform _dragOriginalParent;
+    private GameObject _dragPlaceholder;
+    private GameObject _cloneEmptySpotDuringDrag;
+    private Image _cloneEmptySpotImage;
+    private int _dragOriginalSibling;
     private float _lastClickTime;
     private const float DoubleClickThreshold = 0.3f;
+    private static readonly List<RaycastResult> _raycastBuffer = new List<RaycastResult>(8);
 
     void Awake()
     {
@@ -288,13 +295,35 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     // === Drag & Drop (mano -> tabellone) ===
     private bool IsHandCard() => owner == null && instance == null && gm != null;
     private bool IsBoardCard() => owner != null && instance != null;
+    private bool CanDragBoardCard() => gm != null && _rt != null && IsBoardCard() && _rt.parent == gm.playerBoardRoot;
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-        if (!IsHandCard() || _rt == null) return;
+        if (_rt == null) return;
+
+        if (IsHandCard())
+        {
+            _dragging = true;
+            _draggingFromBoard = false;
+            _dragStartPos = _rt.position;
+            _canvasGroup.blocksRaycasts = false; // consente di colpire lo spot sottostante
+            return;
+        }
+
+        if (!CanDragBoardCard()) return;
+
+        if (_rootCanvas == null) return;
+
         _dragging = true;
+        _draggingFromBoard = true;
         _dragStartPos = _rt.position;
-        _canvasGroup.blocksRaycasts = false; // consente di colpire lo spot sottostante
+        _dragOriginalParent = _rt.parent;
+        _dragOriginalSibling = _rt.GetSiblingIndex();
+        _dragPlaceholder = CreateDragPlaceholder();
+        ShowCloneEmptySpot();
+        _rt.SetParent(_rootCanvas.transform, true);
+        _rt.SetAsLastSibling();
+        _canvasGroup.blocksRaycasts = false;
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -312,6 +341,17 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         _dragging = false;
         _canvasGroup.blocksRaycasts = true;
 
+        if (_draggingFromBoard)
+        {
+            HandleBoardDrop(eventData);
+            return;
+        }
+
+        HandleHandDrop(eventData);
+    }
+
+    private void HandleHandDrop(PointerEventData eventData)
+    {
         bool played = false;
         var spot = FindEmptySpotUnderPointer(eventData);
         if (spot != null && gm != null)
@@ -325,22 +365,168 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
             _rt.position = _dragStartPos;
     }
 
+    private void HandleBoardDrop(PointerEventData eventData)
+    {
+        HideCloneEmptySpot();
+        var target = FindBoardCardUnderPointer(eventData);
+        RestoreDraggedBoardCard();
+
+        if (target != null && gm != null)
+        {
+            gm.SwapCardPositions(this, target);
+        }
+        else if (_rt != null)
+        {
+            _rt.position = _dragStartPos;
+        }
+
+        _draggingFromBoard = false;
+    }
+
+    private void RestoreDraggedBoardCard()
+    {
+        if (_rt != null && _dragOriginalParent != null)
+        {
+            int insertIndex = _dragPlaceholder != null ? _dragPlaceholder.transform.GetSiblingIndex() : _dragOriginalSibling;
+            insertIndex = Mathf.Clamp(insertIndex, 0, _dragOriginalParent.childCount);
+            _rt.SetParent(_dragOriginalParent, false);
+            _rt.SetSiblingIndex(insertIndex);
+            _rt.localRotation = Quaternion.identity;
+            _rt.localScale = Vector3.one;
+            var asRt = _rt as RectTransform;
+            if (asRt != null) asRt.anchoredPosition = Vector2.zero;
+        }
+
+        if (_dragPlaceholder != null)
+        {
+            Destroy(_dragPlaceholder);
+            _dragPlaceholder = null;
+        }
+
+        _dragOriginalParent = null;
+    }
+
+    private GameObject CreateDragPlaceholder()
+    {
+        if (_dragOriginalParent == null || _rt == null) return null;
+
+        var go = new GameObject("CardPlaceholder");
+        var rt = go.AddComponent<RectTransform>();
+        rt.SetParent(_dragOriginalParent, false);
+        rt.SetSiblingIndex(_dragOriginalSibling);
+        rt.sizeDelta = _rt.rect.size;
+
+        var srcLayout = _rt.GetComponent<LayoutElement>();
+        if (srcLayout != null)
+        {
+            var le = go.AddComponent<LayoutElement>();
+            le.preferredWidth = srcLayout.preferredWidth > 0 ? srcLayout.preferredWidth : rt.sizeDelta.x;
+            le.preferredHeight = srcLayout.preferredHeight > 0 ? srcLayout.preferredHeight : rt.sizeDelta.y;
+            le.flexibleWidth = srcLayout.flexibleWidth;
+            le.flexibleHeight = srcLayout.flexibleHeight;
+            le.minWidth = srcLayout.minWidth;
+            le.minHeight = srcLayout.minHeight;
+        }
+        else
+        {
+            var le = go.AddComponent<LayoutElement>();
+            le.preferredWidth = rt.sizeDelta.x;
+            le.preferredHeight = rt.sizeDelta.y;
+        }
+
+        return go;
+    }
+
+    private void ShowCloneEmptySpot()
+    {
+        if (gm == null) return;
+        var clone = gm.PlayerBoardRootClone;
+        if (clone == null) return;
+
+        int index = _dragOriginalSibling;
+        if (index < 0 || index >= clone.childCount) return;
+
+        var spot = clone.GetChild(index);
+        if (spot == null) return;
+
+        var spotGO = spot.gameObject;
+        if (gm.EmptySpot != null && spotGO.name != gm.EmptySpot.name) return;
+
+        var spotImage = spotGO.GetComponent<Image>();
+        if (spotImage == null) return;
+
+        _cloneEmptySpotDuringDrag = spotGO;
+        _cloneEmptySpotImage = spotImage;
+
+        if (!_cloneEmptySpotDuringDrag.activeSelf)
+            _cloneEmptySpotDuringDrag.SetActive(true);
+        _cloneEmptySpotImage.enabled = true;
+    }
+
+    private void HideCloneEmptySpot()
+    {
+        if (_cloneEmptySpotImage != null)
+            _cloneEmptySpotImage.enabled = false;
+        _cloneEmptySpotDuringDrag = null;
+        _cloneEmptySpotImage = null;
+    }
+
     private Transform FindEmptySpotUnderPointer(PointerEventData eventData)
     {
         if (EventSystem.current == null || gm == null || gm.EmptySpot == null) return null;
 
-        var results = new List<RaycastResult>();
-        EventSystem.current.RaycastAll(eventData, results);
-        foreach (var res in results)
+        var boardRoot = gm.playerBoardRoot;
+        var cloneRoot = gm.PlayerBoardRootClone;
+
+        _raycastBuffer.Clear();
+        EventSystem.current.RaycastAll(eventData, _raycastBuffer);
+        for (int i = 0; i < _raycastBuffer.Count; i++)
         {
-            var t = res.gameObject.transform;
+            var t = _raycastBuffer[i].gameObject.transform;
             while (t != null)
             {
-                if (t.gameObject.name == gm.EmptySpot.name)
+                if (t.gameObject.name != gm.EmptySpot.name)
+                {
+                    t = t.parent;
+                    continue;
+                }
+
+                if (cloneRoot != null && t.IsChildOf(cloneRoot))
+                {
+                    if (!t.gameObject.activeInHierarchy) break;
+
+                    int idx = t.GetSiblingIndex();
+                    if (boardRoot != null && idx < boardRoot.childCount)
+                    {
+                        var realSpot = boardRoot.GetChild(idx);
+                        if (realSpot != null && realSpot.gameObject.activeInHierarchy && realSpot.gameObject.name == gm.EmptySpot.name)
+                            return realSpot;
+                    }
+                }
+                else if (boardRoot == null || t.IsChildOf(boardRoot))
+                {
                     return t;
+                }
+
                 t = t.parent;
             }
         }
+        return null;
+    }
+
+    private CardView FindBoardCardUnderPointer(PointerEventData eventData)
+    {
+        if (EventSystem.current == null || gm == null || gm.playerBoardRoot == null) return null;
+
+        var results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(eventData, results);
+        for (int i = 0; i < results.Count; i++)
+        {
+            var view = results[i].gameObject.GetComponentInParent<CardView>();
+            if (view != null && view != this && view.transform.parent == gm.playerBoardRoot)
+                return view;
+        }
+
         return null;
     }
 }

@@ -1,0 +1,399 @@
+0001: using UnityEngine;
+0002: using UnityEngine.UI;
+0003: using System.Collections;
+0004: using System.Collections.Generic;
+0005: using UnityEngine.EventSystems;
+0006: 
+0007: [RequireComponent(typeof(RectTransform))]
+0008: public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
+0010:     [Header("Image Handling")]
+0011:     [Tooltip("Sprite del retro (assegnare come Source Image in Inspector)")]
+0012:     [SerializeField] private GameObject Template; // child con grafica fronte
+0013:     [SerializeField] private Sprite backImage;
+0014:     [SerializeField] private Image artworkMonster;
+0015: 
+0016:     private Sprite frontImage;
+0017: 
+0018:     [Header("Legacy UI Text (assign in prefab)")]
+0019:     public Text nameText;
+0020:     public Text factionText;
+0021:     public Text sideText;
+0022:     public Text hpText;
+0023:     public Text AttackPwrText;
+0024:     public Text BlockPwrText;
+0025: 
+0026:     [Header("Runtime wiring")]
+0027:     [HideInInspector] public GameManager gm;
+0028:     [HideInInspector] public PlayerState owner;
+0030: 
+0031:     [SerializeField] private Text hintText;
+0032: 
+0033:     private Button btn;
+0034:     private Outline highlight;
+0035:     private int _lastHp = int.MinValue;
+0036:     private EventBus.Handler _evtHandler;
+0037:     private Canvas _rootCanvas;
+0038:     private CanvasGroup _canvasGroup;
+0039:     private RectTransform _rt;
+0040:     private Vector3 _dragStartPos;
+0041:     private bool _dragging;
+0042:     private bool _draggingFromBoard;
+0043:     private Transform _dragOriginalParent;
+0044:     private GameObject _dragPlaceholder;
+0045:     private GameObject _cloneEmptySpotDuringDrag;
+0046:     private int _dragOriginalSibling;
+0047:     private float _lastClickTime;
+0048:     private const float DoubleClickThreshold = 0.3f;
+0049: 
+0050:     void Awake()
+0052:         _rt = GetComponent<RectTransform>();
+0053:         _rootCanvas = GetComponentInParent<Canvas>();
+0054:         _canvasGroup = GetComponent<CanvasGroup>();
+0055:         if (_canvasGroup == null) _canvasGroup = gameObject.AddComponent<CanvasGroup>();
+0056: 
+0057:         // UI di base sempre sicura da fare in preview/editor
+0058:         if (hintText != null) hintText.gameObject.SetActive(false);
+0059: 
+0060:         // Se questa CardView è già stata inizializzata a runtime, esci.
+0061:         if (instance != null) return;
+0062: 
+0063:         // Modalità "preview" (prefab in editor o scene senza runtime CardInstance)
+0064:         var inline = GetComponent<CardDefinition>();
+0065:         if (inline == null) return;
+0066: 
+0067:         var def = inline.BuildSpec();
+0068: 
+0069:         if (nameText != null) nameText.text = def.cardName;
+0070:         if (factionText != null) factionText.text = def.faction.ToString();
+0071:         if (sideText != null) sideText.text = "Side";
+0072:         if (hpText != null) hpText.text = def.maxHealth.ToString();
+0073:         if (AttackPwrText != null) AttackPwrText.text = def.frontDamage.ToString();
+0074:         if (BlockPwrText != null) BlockPwrText.text = def.frontBlockValue.ToString();
+0076: 
+0077:     public void Init(GameManager gm, PlayerState owner, CardInstance instance)
+0079:         // --- BIND RUNTIME ---
+0080:         this.gm = gm;
+0081:         this.owner = owner;
+0082:         this.instance = instance;
+0083: 
+0084:         // --- HIGHLIGHT (Outline) ---
+0085:         if (highlight == null) highlight = gameObject.AddComponent<Outline>();
+0086:         highlight.effectDistance = new Vector2(5, 5);
+0087:         highlight.useGraphicAlpha = false;        // evita che lalpha/texture influenzi loutline
+0088:         highlight.effectColor = Color.white;      // colore di default
+0089:         highlight.enabled = false;
+0090: 
+0091:         // --- BUTTON / CLICK ---
+0092:         btn = GetComponent<Button>() ?? gameObject.AddComponent<Button>();
+0093:         btn.onClick.RemoveAllListeners();
+0094:         btn.onClick.AddListener(OnClicked);
+0095: 
+0096:         // --- IMAGE DI SFONDO / SPRITE ---
+0097:         var bg = Template != null ? Template.GetComponent<Image>() : null;
+0098:         if (btn.targetGraphic == null && bg != null) btn.targetGraphic = bg;
+0099: 
+0100:         if (bg != null)
+0102:             Template.GetComponent<Image>().preserveAspect = false;            // rispetta il RectTransform
+0103:             Template.GetComponent<Image>().useSpriteMesh = false;
+0104:             Template.GetComponent<Image>().maskable = false;
+0105: 
+0106:             // Il fronte è l'immagine impostata nel componente Image (Source Image)
+0107:             frontImage = Template.GetComponent<Image>().sprite;
+0109: 
+0110:         // --- UI STATE ---
+0111:         Refresh();                                  // mostra lo stato reale dell'istanza
+0112:         if (hintText != null) hintText.gameObject.SetActive(false);
+0113: 
+0114:         // --- EVENTI ---
+0115:         _evtHandler = OnGameEvent;
+0116:         EventBus.Subscribe(GameEventType.AttackResolved, _evtHandler);
+0117:         EventBus.Subscribe(GameEventType.Flip, _evtHandler);
+0118:         EventBus.Subscribe(GameEventType.AttackDeclared, _evtHandler);
+0119:         EventBus.Subscribe(GameEventType.TurnEnd, _evtHandler);
+0120:         EventBus.Subscribe(GameEventType.Info, _evtHandler);
+0121:         EventBus.Subscribe(GameEventType.TurnStart, _evtHandler);
+0123: 
+0124:     void OnDestroy()
+0126:         UnsubscribeAllEvents();
+0128: 
+0129:     private void UnsubscribeAllEvents()
+0131:         if (_evtHandler != null)
+0133:             EventBus.Unsubscribe(GameEventType.AttackResolved, _evtHandler);
+0134:             EventBus.Unsubscribe(GameEventType.Flip, _evtHandler);
+0135:             EventBus.Unsubscribe(GameEventType.AttackDeclared, _evtHandler);
+0136:             EventBus.Unsubscribe(GameEventType.TurnEnd, _evtHandler);
+0137:             EventBus.Unsubscribe(GameEventType.Info, _evtHandler);
+0138:             EventBus.Unsubscribe(GameEventType.TurnStart, _evtHandler);
+0139:             _evtHandler = null;
+0142: 
+0143:     public void OnClicked()
+0145:         if (gm != null)
+0147:             gm.OnCardClicked(this);
+0148: 
+0149:             // doppio click per flippare le carte già sul board
+0150:             if (IsBoardCard() && _lastClickTime > 0f && Time.time - _lastClickTime <= DoubleClickThreshold)
+0151:                 gm.OnCardDoubleClicked(this);
+0152: 
+0153:             _lastClickTime = Time.time;
+0154:             return;
+0156:         SetHighlight(highlight == null ? false : !highlight.enabled);
+0158: 
+0159:     public void SetHighlight(bool setting)
+0161:         if (highlight == null) return;
+0162:             highlight.enabled = setting;
+0164: 
+0165:     public void Refresh()
+0167:         if (instance == null) return;
+0168: 
+0169:         var def = instance.def;
+0170: 
+0171:         if (nameText != null) nameText.text = def.cardName;
+0172:         if (factionText != null) factionText.text = def.faction.ToString();
+0173:         if (sideText != null) sideText.text = instance.side.ToString();
+0174:         if (hpText != null) hpText.text = instance.health + "";
+0175:         if (AttackPwrText != null) AttackPwrText.text = "" + def.frontDamage;
+0176:         if (BlockPwrText != null) BlockPwrText.text = "" + def.frontBlockValue;
+0177: 
+0178:         _lastHp = instance.health;
+0179: 
+0180:         FlipSide();
+0182: 
+0183:     private void FlipSide()
+0185:         bool isFront = (instance != null && instance.side == Side.Fronte);
+0186: 
+0187:         // Cambia solo lo sprite (niente SetNativeSize / scale)
+0188:         var newSprite = isFront ? frontImage : (backImage != null ? backImage : frontImage);
+0189:         Template.GetComponent<Image>().type = Image.Type.Simple; // per sicurezza
+0190:         Template.GetComponent<Image>().preserveAspect = false;   // il RectTransform decide; cambia a true se vuoi letterboxing
+0191:         Template.GetComponent<Image>().sprite = newSprite;
+0192:         //img.useSpriteMesh = false;
+0193:         // Mostra/nascondi i testi a seconda del lato
+0194: 
+0195:         if (highlight != null)
+0196:             highlight.effectColor = isFront ? Color.white : Color.white; // retro nero => outline bianco
+0197: 
+0198:         if (nameText) nameText.enabled = isFront;
+0199:         if (hpText) hpText.enabled = isFront;
+0200:         if (AttackPwrText) AttackPwrText.enabled = isFront;
+0201:         if (BlockPwrText) BlockPwrText.enabled = isFront;
+0202:         if (artworkMonster) artworkMonster.enabled = isFront;
+0203:         if (hintText) hintText.enabled = isFront;
+0205: 
+0206: 
+0207:     void OnGameEvent(GameEventType t, EventContext ctx)
+0209:         if (instance == null) return;
+0210: 
+0211:         switch (t)
+0213:             case GameEventType.AttackResolved:
+0214:                 if (ctx.target == instance && ctx.amount > 0)
+0217:                     UpdateHpOnly();
+0218:                     Blink();
+0220:                 if (ctx.source == instance && ctx.amount > 0)
+0224:                 break;
+0225: 
+0226:             case GameEventType.AttackDeclared:
+0227:                 if (ctx.source == instance) ShowHint("Attack!");
+0228:                 else if (ctx.target == instance) ShowHint("Under attack!");
+0229:                 break;
+0230: 
+0231:             case GameEventType.TurnEnd:
+0232:                 HideHint();
+0233:                 break;
+0234: 
+0235:             case GameEventType.Info:
+0236:                 if (ctx.source == instance && !string.IsNullOrEmpty(ctx.phase) && ctx.phase.StartsWith("HINT:"))
+0237:                     ShowHint(ctx.phase.Substring("HINT:".Length).Trim());
+0238:                 break;
+0239: 
+0240:             case GameEventType.TurnStart:
+0241:                 HideHint();
+0242:                 break;
+0243: 
+0244:             case GameEventType.Flip:
+0245:                 if (ctx.source == instance || ctx.target == instance)
+0247:                     FlipSide();
+0248:                     Blink();
+0250:                 break;
+0253: 
+0254:     private void UpdateHpOnly()
+0256:         if (instance == null) return;
+0257:         if (hpText != null)
+0258:             hpText.text = instance.health + "";
+0259:         _lastHp = instance.health;
+0261: 
+0263:     IEnumerator BlinkRoutine()
+0265:         if (Template.GetComponent<Image>() == null) yield break;
+0266:         var c = Template.GetComponent<Image>().color;
+0267:         Template.GetComponent<Image>().color = Color.yellow;
+0268:         yield return new WaitForSeconds(0.08f);
+0269:         Template.GetComponent<Image>().color = c;
+0271: 
+0272:     public void ShowHint(string msg)
+0274:         if (hintText == null)
+0276:             Logger.Info("[Card] " + msg);
+0277:             return;
+0279: 
+0280:         hintText.gameObject.SetActive(true);
+0281:         hintText.text = string.IsNullOrEmpty(hintText.text) ? msg : hintText.text + "\n" + msg;
+0283: 
+0284:     public void HideHint()
+0286:         if (hintText != null)
+0288:             hintText.text = string.Empty;
+0289:             hintText.gameObject.SetActive(false);
+0292: 
+0293:     // === Drag & Drop (mano -> tabellone) ===
+0294:     private bool IsHandCard() => owner == null && instance == null && gm != null;
+0295:     private bool IsBoardCard() => owner != null && instance != null;
+0296:     private bool CanDragBoardCard() => gm != null && _rt != null && IsBoardCard() && _rt.parent == gm.playerBoardRoot;
+0297: 
+0298:     public void OnBeginDrag(PointerEventData eventData)
+0300:         if (_rt == null) return;
+0301: 
+0302:         if (IsHandCard())
+0304:             _dragging = true;
+0305:             _draggingFromBoard = false;
+0306:             _dragStartPos = _rt.position;
+0307:             _canvasGroup.blocksRaycasts = false; // consente di colpire lo spot sottostante
+0308:             return;
+0310: 
+0311:         if (!CanDragBoardCard()) return;
+0312: 
+0313:         if (_rootCanvas == null) return;
+0314: 
+0315:         _dragging = true;
+0316:         _draggingFromBoard = true;
+0317:         _dragStartPos = _rt.position;
+0318:         _dragOriginalParent = _rt.parent;
+0319:         _dragOriginalSibling = _rt.GetSiblingIndex();
+0320:         _dragPlaceholder = CreateDragPlaceholder();
+0321:         ShowCloneEmptySpot();
+0322:         _rt.SetParent(_rootCanvas.transform, true);
+0323:         _rt.SetAsLastSibling();
+0324:         _canvasGroup.blocksRaycasts = false;
+0326: 
+0327:     public void OnDrag(PointerEventData eventData)
+0329:         if (!_dragging || _rt == null || _rootCanvas == null) return;
+0330:         if (RectTransformUtility.ScreenPointToLocalPointInRectangle(_rootCanvas.transform as RectTransform, eventData.position, _rootCanvas.worldCamera, out var localPoint))
+0332:             _rt.position = _rootCanvas.transform.TransformPoint(localPoint);
+0335: 
+0336:     public void OnEndDrag(PointerEventData eventData)
+0338:         if (!_dragging) return;
+0339:         _dragging = false;
+0340:         _canvasGroup.blocksRaycasts = true;
+0341: 
+0342:         if (_draggingFromBoard)
+0344:             HandleBoardDrop(eventData);
+0345:             return;
+0347: 
+0348:         HandleHandDrop(eventData);
+0350: 
+0351:     private void HandleHandDrop(PointerEventData eventData)
+0353:         bool played = false;
+0354:         var spot = FindEmptySpotUnderPointer(eventData);
+0355:         if (spot != null && gm != null)
+0357:             gm.OnEmptySpotClicked(spot);
+0358:             gm.OnCardClicked(this);
+0359:             played = true;
+0361: 
+0362:         if (!played && _rt != null)
+0363:             _rt.position = _dragStartPos;
+0365: 
+0366:     private void HandleBoardDrop(PointerEventData eventData)
+0368:         HideCloneEmptySpot();
+0369:         var target = FindBoardCardUnderPointer(eventData);
+0370:         RestoreDraggedBoardCard();
+0371: 
+0372:         if (target != null && gm != null)
+0374:             gm.SwapCardPositions(this, target);
+0376:         else if (_rt != null)
+0378:             _rt.position = _dragStartPos;
+0380: 
+0381:         _draggingFromBoard = false;
+0383: 
+0384:     private void RestoreDraggedBoardCard()
+0386:         if (_rt != null && _dragOriginalParent != null)
+0388:             int insertIndex = _dragPlaceholder != null ? _dragPlaceholder.transform.GetSiblingIndex() : _dragOriginalSibling;
+0389:             insertIndex = Mathf.Clamp(insertIndex, 0, _dragOriginalParent.childCount);
+0390:             _rt.SetParent(_dragOriginalParent, false);
+0391:             _rt.SetSiblingIndex(insertIndex);
+0392:             _rt.localRotation = Quaternion.identity;
+0393:             _rt.localScale = Vector3.one;
+0394:             var asRt = _rt as RectTransform;
+0395:             if (asRt != null) asRt.anchoredPosition = Vector2.zero;
+0397: 
+0398:         if (_dragPlaceholder != null)
+0400:             Destroy(_dragPlaceholder);
+0401:             _dragPlaceholder = null;
+0403: 
+0404:         _dragOriginalParent = null;
+0406: 
+0407:     private GameObject CreateDragPlaceholder()
+0409:         if (_dragOriginalParent == null || _rt == null) return null;
+0410: 
+0411:         var go = new GameObject("CardPlaceholder");
+0412:         var rt = go.AddComponent<RectTransform>();
+0413:         rt.SetParent(_dragOriginalParent, false);
+0414:         rt.SetSiblingIndex(_dragOriginalSibling);
+0415:         rt.sizeDelta = _rt.rect.size;
+0416: 
+0417:         var srcLayout = _rt.GetComponent<LayoutElement>();
+0418:         if (srcLayout != null)
+0420:             var le = go.AddComponent<LayoutElement>();
+0421:             le.preferredWidth = srcLayout.preferredWidth > 0 ? srcLayout.preferredWidth : rt.sizeDelta.x;
+0422:             le.preferredHeight = srcLayout.preferredHeight > 0 ? srcLayout.preferredHeight : rt.sizeDelta.y;
+0423:             le.flexibleWidth = srcLayout.flexibleWidth;
+0424:             le.flexibleHeight = srcLayout.flexibleHeight;
+0425:             le.minWidth = srcLayout.minWidth;
+0426:             le.minHeight = srcLayout.minHeight;
+0428:         else
+0430:             var le = go.AddComponent<LayoutElement>();
+0431:             le.preferredWidth = rt.sizeDelta.x;
+0432:             le.preferredHeight = rt.sizeDelta.y;
+0434: 
+0435:         return go;
+0437: 
+0438:     private void ShowCloneEmptySpot()
+0440:         if (gm == null) return;
+0441:         var clone = gm.PlayerBoardRootClone;
+0442:         if (clone == null) return;
+0443: 
+0444:         int index = _dragOriginalSibling;
+0445:         if (index < 0 || index >= clone.childCount) return;
+0446: 
+0447:         var spot = clone.GetChild(index);
+0448:         if (spot == null) return;
+0449: 
+0450:         if (gm.EmptySpot != null && spot.gameObject.name != gm.EmptySpot.name) return;
+0451: 
+0452:         _cloneEmptySpotDuringDrag = spot.gameObject;
+0453:         _cloneEmptySpotDuringDrag.SetActive(true);
+0455: 
+0456:     private void HideCloneEmptySpot()
+0458:         if (_cloneEmptySpotDuringDrag == null) return;
+0459:         _cloneEmptySpotDuringDrag.SetActive(false);
+0460:         _cloneEmptySpotDuringDrag = null;
+0462: 
+0463:     private Transform FindEmptySpotUnderPointer(PointerEventData eventData)
+0465:         if (EventSystem.current == null || gm == null || gm.EmptySpot == null) return null;
+0466: 
+0467:         var results = new List<RaycastResult>();
+0468:         EventSystem.current.RaycastAll(eventData, results);
+0469:         foreach (var res in results)
+0471:             var t = res.gameObject.transform;
+0472:             while (t != null)
+0474:                 if (t.gameObject.name == gm.EmptySpot.name)
+0475:                     return t;
+0476:                 t = t.parent;
+0479:         return null;
+0481: 
+0482:     private CardView FindBoardCardUnderPointer(PointerEventData eventData)
+0484:         if (EventSystem.current == null || gm == null || gm.playerBoardRoot == null) return null;
+0485: 
+0486:         var results = new List<RaycastResult>();
+0487:         EventSystem.current.RaycastAll(eventData, results);
+0488:         for (int i = 0; i < results.Count; i++)
+0490:             var view = results[i].gameObject.GetComponentInParent<CardView>();
+0491:             if (view != null && view != this && view.transform.parent == gm.playerBoardRoot)
+0492:                 return view;
+0494: 
+0495:         return null;
