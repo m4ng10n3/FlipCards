@@ -373,7 +373,7 @@ MonoBehaviour:
   - prefab: {fileID: 4860462570295797339, guid: f03c514f27a9ec84f84e2d4e8793c6fb, type: 3}
     count: 3
   - prefab: {fileID: 4860462570295797339, guid: ad58544dc459dc24f94599135a4ae854, type: 3}
-    count: 1
+    count: 3
   enemySlots:
   - prefab: {fileID: 9094616095918957040, guid: 1905928e36017444dbe30489bacc9569, type: 3}
     count: 1
@@ -3339,6 +3339,10 @@ PrefabInstance:
     - target: {fileID: 4860462570295797339, guid: f03c514f27a9ec84f84e2d4e8793c6fb, type: 3}
       propertyPath: m_Name
       value: Card_0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4860462570295797339, guid: f03c514f27a9ec84f84e2d4e8793c6fb, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
