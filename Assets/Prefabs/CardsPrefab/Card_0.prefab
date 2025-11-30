@@ -608,7 +608,7 @@ MonoBehaviour:
   curveParameters: {fileID: 11400000, guid: c231421d86771494ca4a976c6ad34486, type: 2}
   handFollowSpeed: 18
   handFollowRotationSpeed: 18
-  handTweenDuration: 0.2
+  handTweenDuration: 0.1
   handTweenEase: 9
   dragRotationMagnitude: 0.3
   dragMaxTilt: 30
