@@ -64,6 +64,9 @@ public class HandManager : MonoBehaviour
                 handCards.Add(cv);
         }
 
+        if (draggingCard != null && !handCards.Contains(draggingCard))
+            handCards.Add(draggingCard);
+
         handCards.RemoveAll(c => c == null);
     }
 
@@ -252,6 +255,8 @@ public class HandManager : MonoBehaviour
         {
             cv.EnsureHandContainer(handRoot);
         }
+
+        SortHandCardsBySlotIndex();
     }
 
     public void RemoveFromHand(GameObject cardGO)
@@ -269,6 +274,9 @@ public class HandManager : MonoBehaviour
 
         if (handCards.Remove(cv))
         {
+            var container = cv.HandContainer != null ? cv.HandContainer.transform : null;
+            if (container != null && container.parent == handRoot)
+                Destroy(container.gameObject);
             Destroy(cv.gameObject);
             UpdateCardsPosition();
         }
@@ -347,6 +355,7 @@ public class HandManager : MonoBehaviour
             return;
 
         handCards.RemoveAll(h => h == null);
+        SortHandCardsBySlotIndex();
 
         var indexByTransform = new Dictionary<Transform, int>(slotCount);
         for (int i = 0; i < slotCount; i++)
@@ -389,28 +398,77 @@ public class HandManager : MonoBehaviour
         }
     }
 
-    // Gestisce lo swap basato sulla posizione orizzontale del drag (stile HorizontalCardHolder)
-    public void ReorderHandDuringDrag(Transform moving, Transform placeholder)
+    private CardView FindCardByContainer(Transform container)
     {
-        placeholder = SanitizePlaceholder(placeholder);
-        if (handRoot == null || moving == null || placeholder == null) return;
+        if (container == null)
+            return null;
 
-        activePlaceholder = placeholder;
-
-        var layoutItems = BuildLayoutList(placeholder);
-
-        int insertIndex = 0;
-        for (int i = 0; i < layoutItems.Count; i++)
+        for (int i = 0; i < handCards.Count; i++)
         {
-            var child = layoutItems[i];
-            if (child == placeholder) continue;
-            if (moving.position.x > GetLayoutItemX(child)) insertIndex++;
+            var card = handCards[i];
+            if (card != null && card.HandContainer == container)
+                return card;
         }
 
-        int cardCount = Mathf.Max(0, layoutItems.Count - 1); // escludo il placeholder
-        insertIndex = Mathf.Clamp(insertIndex, 0, cardCount);
+        return null;
+    }
 
-        RepositionPlaceholder(placeholder, insertIndex);
+    private void SortHandCardsBySlotIndex()
+    {
+        handCards.RemoveAll(c => c == null);
+        handCards.Sort((a, b) =>
+        {
+            var ta = a != null ? a.HandContainer : null;
+            var tb = b != null ? b.HandContainer : null;
+            int ia = ta != null ? ta.GetSiblingIndex() : int.MaxValue;
+            int ib = tb != null ? tb.GetSiblingIndex() : int.MaxValue;
+            return ia.CompareTo(ib);
+        });
+    }
+
+    // Gestisce lo swap basato sulla posizione orizzontale del drag (stile HorizontalCardHolder)
+    public void ReorderHandDuringDrag(CardView movingCard, Vector3 dragPosition)
+    {
+        if (handRoot == null || movingCard == null)
+            return;
+
+        var reservedSlot = SanitizePlaceholder(movingCard.HandContainer);
+        if (reservedSlot == null)
+            return;
+
+        activePlaceholder = reservedSlot;
+
+        var layoutItems = BuildLayoutList(reservedSlot);
+        int currentIndex = layoutItems.IndexOf(reservedSlot);
+        if (currentIndex < 0)
+            return;
+
+        int targetIndex = currentIndex;
+        float bestDistance = float.MaxValue;
+        for (int i = 0; i < layoutItems.Count; i++)
+        {
+            var item = layoutItems[i];
+            float dist = Mathf.Abs(dragPosition.x - GetLayoutItemX(item));
+            if (dist < bestDistance)
+            {
+                bestDistance = dist;
+                targetIndex = i;
+            }
+        }
+
+        if (targetIndex == currentIndex)
+            return;
+
+        var targetSlot = layoutItems[targetIndex];
+        var targetCard = FindCardByContainer(targetSlot);
+
+        if (targetCard != null && targetCard != movingCard)
+            targetCard.SetHandContainer(reservedSlot as RectTransform, true);
+
+        movingCard.SetHandContainer(targetSlot as RectTransform, false);
+        activePlaceholder = movingCard.HandContainer;
+        SortHandCardsBySlotIndex();
+        UpdateCardsPosition(activePlaceholder);
     }
 
     private float GetLayoutItemX(Transform item)
@@ -423,33 +481,13 @@ public class HandManager : MonoBehaviour
         return container != null ? container.position.x : item.position.x;
     }
 
-    private void RepositionPlaceholder(Transform placeholder, int insertIndex)
-    {
-        if (handRoot == null || placeholder == null) return;
-
-        var layoutItems = BuildLayoutList(placeholder);
-        layoutItems.Remove(placeholder);
-
-        insertIndex = Mathf.Clamp(insertIndex, 0, layoutItems.Count);
-
-        int startIndex = layoutItems.Count > 0 ? layoutItems[0].GetSiblingIndex() : placeholder.GetSiblingIndex();
-        layoutItems.Insert(insertIndex, placeholder);
-
-        for (int i = 0; i < layoutItems.Count; i++)
-        {
-            int targetIndex = startIndex + i;
-            if (layoutItems[i].GetSiblingIndex() != targetIndex)
-                layoutItems[i].SetSiblingIndex(targetIndex);
-        }
-
-        UpdateCardsPosition(placeholder);
-    }
-
-    public void OnHandCardBeginDrag(CardView view, Transform placeholder)
+    public void OnHandCardBeginDrag(CardView view, Transform reservedSlot)
     {
         draggingCard = view;
         selectedCard = view;
-        activePlaceholder = SanitizePlaceholder(placeholder);
+        view?.EnsureHandContainer(handRoot);
+        activePlaceholder = SanitizePlaceholder(reservedSlot);
+        SortHandCardsBySlotIndex();
         UpdateCardsPosition(activePlaceholder);
     }
 
@@ -464,6 +502,7 @@ public class HandManager : MonoBehaviour
 
         draggingCard = null;
         activePlaceholder = null;
+        SortHandCardsBySlotIndex();
         UpdateCardsPosition();
     }
 
@@ -491,6 +530,7 @@ public class HandManager : MonoBehaviour
             hoveredCard = null;
 
         activePlaceholder = null;
+        SortHandCardsBySlotIndex();
         UpdateCardsPosition();
     }
 }
