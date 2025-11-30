@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using UnityEngine.EventSystems;
 using DG.Tweening;
 [RequireComponent(typeof(RectTransform))]
+
 public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler
 {
     [Header("Image Handling")]
@@ -18,6 +19,10 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     [SerializeField] private float handFollowRotationSpeed = 18f;
     [SerializeField] private float handTweenDuration = 0.2f;
     [SerializeField] private Ease handTweenEase = Ease.OutCubic;
+    [Header("Drag Motion")]
+    [SerializeField] private float dragRotationMagnitude = 6f;
+    [SerializeField] private float dragFollowLerp = 30f;
+    [SerializeField] private float dragMaxTilt = 60f;
 
     private Sprite frontImage;
 
@@ -63,6 +68,10 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     private Tween _handMoveTween;
     private Quaternion _targetHandRotation = Quaternion.identity;
     private Vector3 _dragOriginalScale = Vector3.one;
+    private RectTransform _dragContainer;
+    private float _currentDragShake;
+    private Vector3 _dragTargetWorld;
+    private bool _hasDragTarget;
 
     void Awake()
     {
@@ -353,6 +362,9 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     public void OnBeginDrag(PointerEventData eventData)
     {
         if (_rt == null) return;
+        _dragTargetWorld = _rt.position;
+        if (_rootCanvas != null && RectTransformUtility.ScreenPointToLocalPointInRectangle(_rootCanvas.transform as RectTransform, eventData.position, _rootCanvas.worldCamera, out var lp))
+            _dragTargetWorld = _rootCanvas.transform.TransformPoint(lp);
 
         if (IsHandCard())
         {
@@ -366,11 +378,10 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
             _dragOriginalLocalRotation = _rt.localRotation;
             _dragOriginalScale = _rt.localScale;
             _dragPlaceholder = null;
-            if (_rootCanvas != null)
-            {
-                _rt.SetParent(_rootCanvas.transform, true);
-                _rt.SetAsLastSibling();
-            }
+            SetupDragContainer();
+            _hasDragTarget = true;
+            if (_dragContainer != null)
+                _dragContainer.SetAsLastSibling();
             gm?.HandManager?.OnHandCardBeginDrag(this, _handContainer);
             _canvasGroup.blocksRaycasts = false; // consente di colpire lo spot sottostante
             return;
@@ -389,8 +400,10 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         _dragOriginalLocalRotation = _rt.localRotation;
         _dragPlaceholder = CreateDragPlaceholder();
         ShowCloneEmptySpot();
-        _rt.SetParent(_rootCanvas.transform, true);
-        _rt.SetAsLastSibling();
+        SetupDragContainer();
+        _hasDragTarget = true;
+        if (_dragContainer != null)
+            _dragContainer.SetAsLastSibling();
         _canvasGroup.blocksRaycasts = false;
     }
 
@@ -399,8 +412,10 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         if (!_dragging || _rt == null || _rootCanvas == null) return;
         if (RectTransformUtility.ScreenPointToLocalPointInRectangle(_rootCanvas.transform as RectTransform, eventData.position, _rootCanvas.worldCamera, out var localPoint))
         {
-            var dragTransform = _draggingHand ? (Transform)_rt : (_handContainer != null ? (Transform)_handContainer : _rt);
-            dragTransform.position = _rootCanvas.transform.TransformPoint(localPoint);
+            var worldPoint = _rootCanvas.transform.TransformPoint(localPoint);
+            _dragTargetWorld = worldPoint;
+            _hasDragTarget = true;
+            ApplyDragShake(worldPoint);
             if (_draggingHand)
                 UpdateHandPlaceholderIndex();
         }
@@ -415,10 +430,14 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         if (_draggingFromBoard)
         {
             HandleBoardDrop(eventData);
+            CleanupDragContainer();
+            _hasDragTarget = false;
             return;
         }
 
         HandleHandDrop(eventData);
+        CleanupDragContainer();
+        _hasDragTarget = false;
     }
 
     private void HandleHandDrop(PointerEventData eventData)
@@ -699,6 +718,8 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     private void LateUpdate()
     {
         FollowHandContainer();
+        if (_dragging && _hasDragTarget)
+            ApplyDragShake(_dragTargetWorld);
     }
 
     private void FollowHandContainer()
@@ -797,6 +818,63 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
             Destroy(_handContainer.gameObject);
             _handContainer = null;
         }
+    }
+
+    private void SetupDragContainer()
+    {
+        if (_rootCanvas == null || _rt == null) return;
+
+        if (_dragContainer == null)
+        {
+            var go = new GameObject($"{name}_DragContainer", typeof(RectTransform));
+            _dragContainer = go.GetComponent<RectTransform>();
+        }
+
+        _dragContainer.SetParent(_rootCanvas.transform, true);
+        _dragContainer.position = _dragTargetWorld;
+        _dragContainer.rotation = Quaternion.identity;
+        _dragContainer.localScale = Vector3.one;
+
+        if (_rt.parent != _rootCanvas.transform)
+            _rt.SetParent(_rootCanvas.transform, true);
+        _rt.localRotation = Quaternion.identity;
+
+        _currentDragShake = 0f;
+    }
+
+    private void CleanupDragContainer()
+    {
+        _currentDragShake = 0f;
+
+        if (_dragContainer != null)
+        {
+            Destroy(_dragContainer.gameObject);
+            _dragContainer = null;
+        }
+    }
+
+    private void ApplyDragShake(Vector3 worldTarget)
+    {
+        if (_rt == null) return;
+
+        if (_dragContainer != null)
+        {
+            _dragContainer.position = worldTarget; // container sticks to pointer
+            if (_dragContainer.rotation != Quaternion.identity)
+                _dragContainer.rotation = Quaternion.identity;
+        }
+
+        Vector3 targetPos = _dragContainer != null ? _dragContainer.position : worldTarget;
+        float syncLerp = Mathf.Clamp01(dragFollowLerp * Time.unscaledDeltaTime);
+        Vector3 displacement = targetPos - _rt.position;
+        Vector3 newPos = _rt.position + displacement * syncLerp; // card lags toward container
+
+        var newDisplacement = targetPos - newPos;
+        float targetAngle = Mathf.Clamp(newDisplacement.x * dragRotationMagnitude, -dragMaxTilt, dragMaxTilt);
+
+        _currentDragShake = Mathf.Lerp(_currentDragShake, targetAngle, syncLerp);
+        _rt.localRotation = Quaternion.Euler(0f, 0f, _currentDragShake);
+        _rt.position = newDisplacement.sqrMagnitude <= 0.000001f ? targetPos : newPos;
     }
 
     private void KillHandTweens()
