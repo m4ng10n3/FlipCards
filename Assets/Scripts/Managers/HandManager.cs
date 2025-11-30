@@ -296,64 +296,98 @@ public class HandManager : MonoBehaviour
         return placeholder != null && handRoot != null && placeholder.parent == handRoot ? placeholder : null;
     }
 
-    private void Update()
-    {
-        bool curveChanged = false;
-        for (int i = 0; i < handCards.Count; i++)
-        {
-            var card = handCards[i];
-            if (card != null && card.ConsumeCurveDirtyFlag())
-            {
-                curveChanged = true;
-            }
-        }
-
-        if (curveChanged || DetectHandRootChange())
-            UpdateCardsPosition(activePlaceholder);
-    }
-
-    private void CacheHandRootState()
-    {
-        lastHandSize = handRect != null ? handRect.rect.size : Vector2.zero;
-        lastHandParent = handRoot != null ? handRoot.parent : null;
-        lastHandScale = handRoot != null ? handRoot.lossyScale : Vector3.one;
-    }
-
-    private bool DetectHandRootChange()
-    {
-        bool changed = false;
-
-        var currentRect = handRoot as RectTransform;
-        if (currentRect != handRect)
-        {
-            handRect = currentRect;
-            changed = true;
-        }
-
-        var size = handRect != null ? handRect.rect.size : Vector2.zero;
-        if (size != lastHandSize)
-        {
-            lastHandSize = size;
-            changed = true;
-        }
-
-        var parent = handRoot != null ? handRoot.parent : null;
-        if (parent != lastHandParent)
-        {
-            lastHandParent = parent;
-            changed = true;
-        }
-
-        var scale = handRoot != null ? handRoot.lossyScale : Vector3.one;
-        if (scale != lastHandScale)
-        {
-            lastHandScale = scale;
-            changed = true;
-        }
-
-        return changed;
-    }
-
+    private void Update()
+
+    {
+        UpdateCardsPosition(activePlaceholder);
+    }
+
+
+
+    private void CacheHandRootState()
+
+    {
+
+        lastHandSize = handRect != null ? handRect.rect.size : Vector2.zero;
+
+        lastHandParent = handRoot != null ? handRoot.parent : null;
+
+        lastHandScale = handRoot != null ? handRoot.lossyScale : Vector3.one;
+
+    }
+
+
+
+    private bool DetectHandRootChange()
+
+    {
+
+        bool changed = false;
+
+
+
+        var currentRect = handRoot as RectTransform;
+
+        if (currentRect != handRect)
+
+        {
+
+            handRect = currentRect;
+
+            changed = true;
+
+        }
+
+
+
+        var size = handRect != null ? handRect.rect.size : Vector2.zero;
+
+        if (size != lastHandSize)
+
+        {
+
+            lastHandSize = size;
+
+            changed = true;
+
+        }
+
+
+
+        var parent = handRoot != null ? handRoot.parent : null;
+
+        if (parent != lastHandParent)
+
+        {
+
+            lastHandParent = parent;
+
+            changed = true;
+
+        }
+
+
+
+        var scale = handRoot != null ? handRoot.lossyScale : Vector3.one;
+
+        if (scale != lastHandScale)
+
+        {
+
+            lastHandScale = scale;
+
+            changed = true;
+
+        }
+
+
+
+        return changed;
+
+    }
+
+
+
     private List<Transform> BuildLayoutList(Transform placeholder)
     {
         layoutBuffer.Clear();
@@ -388,9 +422,31 @@ public class HandManager : MonoBehaviour
         if (handRoot == null)
             return;
 
+        handCards.RemoveAll(h => h == null);
+
         for (int i = 0; i < handCards.Count; i++)
         {
-            handCards[i]?.EnsureHandContainer(handRoot);
+            var card = handCards[i];
+            if (card == null)
+                continue;
+
+            var container = card.HandContainer;
+            var cardTransform = card.transform;
+            bool isDetached = container != null && cardTransform != null &&
+                              cardTransform.parent != handRoot && cardTransform.parent != container;
+
+            if (container == null)
+            {
+                container = card.EnsureHandContainer(handRoot);
+            }
+            else
+            {
+                if (container.parent != handRoot)
+                    container.SetParent(handRoot, true);
+
+                if (!isDetached)
+                    card.EnsureHandContainer(handRoot);
+            }
         }
 
         placeholder = SanitizePlaceholder(placeholder);
@@ -399,7 +455,6 @@ public class HandManager : MonoBehaviour
         if (slotCount == 0)
             return;
 
-        handCards.RemoveAll(h => h == null);
         SortHandCardsBySlotIndex();
 
         var indexByTransform = new Dictionary<Transform, int>(slotCount);
@@ -419,6 +474,9 @@ public class HandManager : MonoBehaviour
             if (containerTransform == null || containerTransform.parent != handRoot)
                 continue;
 
+            bool isDetached = card.transform != null && card.HandContainer != null &&
+                              card.transform.parent != card.HandContainer && card.transform.parent != handRoot;
+
             if (!indexByTransform.TryGetValue(containerTransform, out int slotIndex))
                 continue;
 
@@ -430,9 +488,22 @@ public class HandManager : MonoBehaviour
             finalLocalPos += posOffset;
             finalRot = rotOffset;
 
-            var container = card.EnsureHandContainer(handRoot);
+            var container = card.HandContainer;
+            if (container == null)
+                container = card.EnsureHandContainer(handRoot);
+
             if (container == null)
                 continue;
+
+            if (isDetached)
+            {
+                Vector3 targetWorld = handRoot.TransformPoint(finalLocalPos);
+                if ((container.position - targetWorld).sqrMagnitude > PositionThresholdSqr)
+                    container.position = targetWorld;
+
+                card.UpdateHandContainerTarget(finalLocalPos, finalRot);
+                continue;
+            }
 
             bool needsMove = (container.localPosition - finalLocalPos).sqrMagnitude > PositionThresholdSqr;
             bool needsRot = Quaternion.Angle(container.localRotation, finalRot) > RotationThreshold;
