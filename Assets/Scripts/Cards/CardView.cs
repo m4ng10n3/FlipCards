@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
@@ -22,6 +22,7 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     [Header("Drag Motion")]
     [SerializeField] private float dragRotationMagnitude = 6f;
     [SerializeField] private float dragMaxTilt = 60f;
+    [SerializeField] private float dragTiltDistanceThreshold = 0.1f;
 
     private Sprite frontImage;
 
@@ -81,10 +82,10 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         // UI di base sempre sicura da fare in preview/editor
         if (hintText != null) hintText.gameObject.SetActive(false);
 
-        // Se questa CardView Ã¨ giÃ  stata inizializzata a runtime, esci.
+        // Se questa CardView e gia stata inizializzata a runtime, esci.
         if (instance != null) return;
 
-        // ModalitÃ  "preview" (prefab in editor o scene senza runtime CardInstance)
+        // Modalita "preview" (prefab in editor o scene senza runtime CardInstance)
         var inline = GetComponent<CardDefinition>();
         if (inline == null) return;
 
@@ -108,7 +109,7 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         // --- HIGHLIGHT (Outline) ---
         if (highlight == null) highlight = gameObject.AddComponent<Outline>();
         highlight.effectDistance = new Vector2(5, 5);
-        highlight.useGraphicAlpha = false;        // evita che lÂ’alpha/texture influenzi lÂ’outline
+        highlight.useGraphicAlpha = false;        // evita che l'alpha/texture influenzi l'outline
         highlight.effectColor = Color.white;      // colore di default
         highlight.enabled = false;
 
@@ -127,7 +128,7 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
             Template.GetComponent<Image>().useSpriteMesh = false;
             Template.GetComponent<Image>().maskable = false;
 
-            // Il fronte Ã¨ l'immagine impostata nel componente Image (Source Image)
+            // Il fronte e l'immagine impostata nel componente Image (Source Image)
             frontImage = Template.GetComponent<Image>().sprite;
         }
 
@@ -171,7 +172,7 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         {
             gm.OnCardClicked(this);
 
-            // doppio click per flippare le carte giÃ  sul board
+            // doppio click per flippare le carte gia sul board
             if (IsBoardCard() && _lastClickTime > 0f && Time.time - _lastClickTime <= DoubleClickThreshold)
                 gm.OnCardDoubleClicked(this);
 
@@ -738,10 +739,21 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
             _dragContainer.position = _dragTargetWorld;
 
         Vector3 targetPos = _dragContainer != null ? _dragContainer.position : _dragTargetWorld;
-        _rt.position = Vector3.Lerp(_rt.position, targetPos, handFollowSpeed * Time.deltaTime);
+        float moveT = Mathf.Clamp01(handFollowSpeed * Time.deltaTime);
+        _rt.position = Vector3.Lerp(_rt.position, targetPos, moveT);
 
-        Quaternion targetRot = _dragContainer != null ? _dragContainer.rotation : Quaternion.identity;
-        _rt.rotation = Quaternion.Lerp(_rt.rotation, targetRot, handFollowRotationSpeed * Time.deltaTime);
+        Vector3 remaining = targetPos - _rt.position;
+        float distance = remaining.magnitude;
+
+        if (distance > dragTiltDistanceThreshold)
+        {
+            ApplyDragPickupRotation();
+        }
+        else
+        {
+            Quaternion targetRot = _dragContainer != null ? _dragContainer.rotation : Quaternion.identity;
+            _rt.rotation = Quaternion.Lerp(_rt.rotation, targetRot, handFollowRotationSpeed * Time.deltaTime);
+        }
     }
 
     private void LateUpdate()
@@ -887,5 +899,4 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         }
     }
 }
-
 

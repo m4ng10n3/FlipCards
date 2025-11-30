@@ -610,8 +610,9 @@ MonoBehaviour:
   handFollowRotationSpeed: 18
   handTweenDuration: 0.2
   handTweenEase: 9
-  dragRotationMagnitude: 1
-  dragMaxTilt: 60
+  dragRotationMagnitude: 0.3
+  dragMaxTilt: 30
+  dragTiltDistanceThreshold: 2
   nameText: {fileID: 8530644132936236624}
   factionText: {fileID: 4206496386914259341}
   sideText: {fileID: 7532144197698887769}
