@@ -306,6 +306,7 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     }
     private bool IsBoardCard() => owner != null && instance != null;
     private bool CanDragBoardCard() => gm != null && _rt != null && IsBoardCard() && _rt.parent == gm.playerBoardRoot;
+
     public void EvaluateHandCurve(float normalized, int slotCount, out Vector3 positionOffset, out Quaternion rotation)
     {
         positionOffset = Vector3.zero;
@@ -314,8 +315,9 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         if (curveParameters == null)
             return;
 
-        float countScale = Mathf.Max(1, slotCount);
-        float yOff = curveParameters.positioning.Evaluate(normalized) * curveParameters.positioningInfluence * countScale;
+        int siblings = Mathf.Max(0, slotCount);
+        float yOff = curveParameters.positioning.Evaluate(normalized) * curveParameters.positioningInfluence * siblings;
+        if (siblings < 5) yOff = 0f;
         positionOffset = Vector3.up * yOff;
 
         float rotZ = curveParameters.rotation.Evaluate(normalized) * curveParameters.rotationInfluence;
