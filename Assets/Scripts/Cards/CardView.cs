@@ -722,12 +722,16 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         if (_rt == null) return;
 
         Vector3 target = _dragContainer != null ? _dragContainer.position : _dragTargetWorld;
-        float distance = Vector3.Distance(_rt.position, target);
-        float sign = Mathf.Sign(target.x - _rt.position.x);
-        if (Mathf.Approximately(sign, 0f))
-            sign = 1f;
+        Vector3 delta = target - _rt.position;
+        float distance = delta.magnitude;
+        if (distance <= 0.0001f)
+        {
+            _rt.localRotation = Quaternion.identity;
+            return;
+        }
 
-        float angle = Mathf.Clamp(distance * dragRotationMagnitude * sign, -dragMaxTilt, dragMaxTilt);
+        float direction = Vector3.Dot(delta.normalized, Vector3.right);
+        float angle = Mathf.Clamp(direction * distance * dragRotationMagnitude, -dragMaxTilt, dragMaxTilt);
         _rt.localRotation = Quaternion.Euler(0f, 0f, angle);
     }
 
