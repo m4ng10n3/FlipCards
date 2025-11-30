@@ -1,6 +1,5 @@
 using UnityEngine;
 using System.Collections.Generic;
-using DG.Tweening;
 using UnityEngine.UI;
 
 public class HandManager : MonoBehaviour
@@ -12,9 +11,6 @@ public class HandManager : MonoBehaviour
     [SerializeField] private Transform handRoot;         // parent delle carte (RectTransform sotto Canvas)
     [SerializeField] private Transform spawnPoint;       // punto da cui far apparire le carte
     [SerializeField] private float spawnScaleMultiplier = 1.5f;
-
-    [SerializeField] private float handTweenDuration = 0.2f;
-    [SerializeField] private Ease handTweenEase = Ease.OutQuad;
 
     [Header("UI")]
     [SerializeField] public Button btnDraw;
@@ -63,7 +59,7 @@ public class HandManager : MonoBehaviour
 
         foreach (Transform child in handRoot)
         {
-            var cv = child.GetComponent<CardView>();
+            var cv = child.GetComponentInChildren<CardView>();
             if (cv != null && !handCards.Contains(cv))
                 handCards.Add(cv);
         }
@@ -243,8 +239,18 @@ public class HandManager : MonoBehaviour
 
         if (handRoot != null && cv.transform.parent != handRoot)
         {
-            cv.transform.SetParent(handRoot, true);
-            cv.transform.SetAsLastSibling();
+            cv.EnsureHandContainer(handRoot);
+            var container = cv.HandContainer != null ? cv.HandContainer.transform : null;
+            if (container != null && container.parent != handRoot)
+            {
+                container.SetParent(handRoot, true);
+            }
+            if (container != null)
+                container.SetAsLastSibling();
+        }
+        else
+        {
+            cv.EnsureHandContainer(handRoot);
         }
     }
 
@@ -312,7 +318,7 @@ public class HandManager : MonoBehaviour
                 continue;
             }
 
-            if (child.GetComponent<CardView>() != null)
+            if (child.GetComponentInChildren<CardView>() != null)
                 layoutBuffer.Add(child);
         }
 
@@ -328,6 +334,11 @@ public class HandManager : MonoBehaviour
 
         if (handRoot == null)
             return;
+
+        for (int i = 0; i < handCards.Count; i++)
+        {
+            handCards[i]?.EnsureHandContainer(handRoot);
+        }
 
         placeholder = SanitizePlaceholder(placeholder);
         var layoutItems = BuildLayoutList(placeholder);
@@ -350,11 +361,11 @@ public class HandManager : MonoBehaviour
             if (card == null)
                 continue;
 
-            var cardTransform = card.transform;
-            if (cardTransform == null || cardTransform.parent != handRoot)
+            var containerTransform = card.HandContainer != null ? (Transform)card.HandContainer : card.transform;
+            if (containerTransform == null || containerTransform.parent != handRoot)
                 continue;
 
-            if (!indexByTransform.TryGetValue(cardTransform, out int slotIndex))
+            if (!indexByTransform.TryGetValue(containerTransform, out int slotIndex))
                 continue;
 
             float normalized = slotCount <= 1 ? 0.5f : (float)slotIndex / (slotCount - 1);
@@ -365,18 +376,16 @@ public class HandManager : MonoBehaviour
             finalLocalPos += posOffset;
             finalRot = rotOffset;
 
-            bool needsMove = (cardTransform.localPosition - finalLocalPos).sqrMagnitude > PositionThresholdSqr;
-            bool needsRot = Quaternion.Angle(cardTransform.localRotation, finalRot) > RotationThreshold;
+            var container = card.EnsureHandContainer(handRoot);
+            if (container == null)
+                continue;
+
+            bool needsMove = (container.localPosition - finalLocalPos).sqrMagnitude > PositionThresholdSqr;
+            bool needsRot = Quaternion.Angle(container.localRotation, finalRot) > RotationThreshold;
             if (!needsMove && !needsRot)
                 continue;
 
-            // Evita accumulo di tweens quando il layout viene aggiornato spesso (es. durante il drag).
-            cardTransform.DOKill(false);
-
-            if (needsMove)
-                cardTransform.DOLocalMove(finalLocalPos, handTweenDuration).SetEase(handTweenEase);
-            if (needsRot)
-                cardTransform.DOLocalRotateQuaternion(finalRot, handTweenDuration).SetEase(handTweenEase);
+            card.UpdateHandContainerTarget(finalLocalPos, finalRot);
         }
     }
 
@@ -395,13 +404,23 @@ public class HandManager : MonoBehaviour
         {
             var child = layoutItems[i];
             if (child == placeholder) continue;
-            if (moving.position.x > child.position.x) insertIndex++;
+            if (moving.position.x > GetLayoutItemX(child)) insertIndex++;
         }
 
         int cardCount = Mathf.Max(0, layoutItems.Count - 1); // escludo il placeholder
         insertIndex = Mathf.Clamp(insertIndex, 0, cardCount);
 
         RepositionPlaceholder(placeholder, insertIndex);
+    }
+
+    private float GetLayoutItemX(Transform item)
+    {
+        if (item == null)
+            return 0f;
+
+        var view = item.GetComponentInChildren<CardView>();
+        var container = view != null ? view.HandContainer : null;
+        return container != null ? container.position.x : item.position.x;
     }
 
     private void RepositionPlaceholder(Transform placeholder, int insertIndex)

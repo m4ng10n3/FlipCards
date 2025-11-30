@@ -3,7 +3,7 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
-
+using DG.Tweening;
 [RequireComponent(typeof(RectTransform))]
 public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler
 {
@@ -13,6 +13,11 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     [SerializeField] private Sprite backImage;
     [SerializeField] private Image artworkMonster;
     [SerializeField] private CurveParameters curveParameters;
+    [Header("Hand Follow")]
+    [SerializeField] private float handFollowSpeed = 18f;
+    [SerializeField] private float handFollowRotationSpeed = 18f;
+    [SerializeField] private float handTweenDuration = 0.2f;
+    [SerializeField] private Ease handTweenEase = Ease.OutCubic;
 
     private Sprite frontImage;
 
@@ -54,6 +59,9 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     private static readonly List<RaycastResult> _raycastBuffer = new List<RaycastResult>(8);
     private CurveParameters _lastCurveAsset;
     private int _lastCurveVersion = -1;
+    private RectTransform _handContainer;
+    private Tween _handMoveTween;
+    private Quaternion _targetHandRotation = Quaternion.identity;
 
     void Awake()
     {
@@ -132,6 +140,7 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     void OnDestroy()
     {
         UnsubscribeAllEvents();
+        ReleaseHandContainer();
     }
 
     private void UnsubscribeAllEvents()
@@ -302,12 +311,16 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     private bool IsHandCard()
     {
         var handRoot = gm != null ? gm.HandManager?.HandRoot : null;
-        return owner == null && instance == null && handRoot != null && _rt != null && _rt.parent == handRoot;
+        if (owner != null || instance != null || handRoot == null || _rt == null)
+            return false;
+
+        bool isDirectChild = _rt.parent == handRoot;
+        bool isContainerChild = _handContainer != null && _handContainer.parent == handRoot && _rt.parent == _handContainer;
+        return isDirectChild || isContainerChild;
     }
     private bool IsBoardCard() => owner != null && instance != null;
     private bool CanDragBoardCard() => gm != null && _rt != null && IsBoardCard() && _rt.parent == gm.playerBoardRoot;
 
-// "C:\Users\gianl\UnityProjects\balatro-feel\Assets\Scripts\CardVisual.cs"
     public void EvaluateHandCurve(float normalized, int slotCount, out Vector3 positionOffset, out Quaternion rotation)
     {
         positionOffset = Vector3.zero;
@@ -343,16 +356,17 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
             _dragging = true;
             _draggingHand = true;
             _draggingFromBoard = false;
-            _dragStartPos = _rt.position;
-            _dragOriginalParent = _rt.parent;
-            _dragOriginalSibling = _rt.GetSiblingIndex();
+            var dragTransform = _handContainer != null ? (Transform)_handContainer : _rt;
+            _dragStartPos = dragTransform.position;
+            _dragOriginalParent = dragTransform.parent;
+            _dragOriginalSibling = dragTransform.GetSiblingIndex();
             _dragOriginalLocalScale = _rt.localScale;
             _dragOriginalLocalRotation = _rt.localRotation;
             _dragPlaceholder = CreateDragPlaceholder();
             if (_rootCanvas != null)
             {
-                _rt.SetParent(_rootCanvas.transform, true);
-                _rt.SetAsLastSibling();
+                dragTransform.SetParent(_rootCanvas.transform, true);
+                dragTransform.SetAsLastSibling();
             }
             gm?.HandManager?.OnHandCardBeginDrag(this, _dragPlaceholder != null ? _dragPlaceholder.transform : null);
             _canvasGroup.blocksRaycasts = false; // consente di colpire lo spot sottostante
@@ -382,7 +396,8 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         if (!_dragging || _rt == null || _rootCanvas == null) return;
         if (RectTransformUtility.ScreenPointToLocalPointInRectangle(_rootCanvas.transform as RectTransform, eventData.position, _rootCanvas.worldCamera, out var localPoint))
         {
-            _rt.position = _rootCanvas.transform.TransformPoint(localPoint);
+            var dragTransform = _draggingHand && _handContainer != null ? (Transform)_handContainer : _rt;
+            dragTransform.position = _rootCanvas.transform.TransformPoint(localPoint);
             if (_draggingHand)
                 UpdateHandPlaceholderIndex();
         }
@@ -449,12 +464,19 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
 
     private void RestoreDraggedBoardCard()
     {
-        if (_rt != null && _dragOriginalParent != null)
+        var dragTransform = _draggingHand && _handContainer != null ? (Transform)_handContainer : _rt;
+
+        if (dragTransform != null && _dragOriginalParent != null)
         {
             int insertIndex = _dragPlaceholder != null ? _dragPlaceholder.transform.GetSiblingIndex() : _dragOriginalSibling;
             insertIndex = Mathf.Clamp(insertIndex, 0, _dragOriginalParent.childCount);
-            _rt.SetParent(_dragOriginalParent, false);
-            _rt.SetSiblingIndex(insertIndex);
+            dragTransform.SetParent(_dragOriginalParent, false);
+            dragTransform.SetSiblingIndex(insertIndex);
+            dragTransform.localRotation = _draggingHand && _handContainer != null ? Quaternion.identity : _dragOriginalLocalRotation;
+
+            if (_rt != null && _rt.parent != dragTransform)
+                _rt.SetParent(dragTransform, true);
+
             _rt.localRotation = _dragOriginalLocalRotation;
             _rt.localScale = _dragOriginalLocalScale;
             var asRt = _rt as RectTransform;
@@ -478,9 +500,10 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         var rt = go.AddComponent<RectTransform>();
         rt.SetParent(_dragOriginalParent, false);
         rt.SetSiblingIndex(_dragOriginalSibling);
-        rt.sizeDelta = _rt.rect.size;
+        var reference = _draggingHand && _handContainer != null ? _handContainer : _rt;
+        rt.sizeDelta = reference.rect.size;
 
-        var srcLayout = _rt.GetComponent<LayoutElement>();
+        var srcLayout = reference.GetComponent<LayoutElement>();
         if (srcLayout != null)
         {
             var le = go.AddComponent<LayoutElement>();
@@ -537,7 +560,8 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         if (!_draggingHand || _dragPlaceholder == null || _dragOriginalParent == null || _rt == null)
             return;
 
-        gm?.HandManager?.ReorderHandDuringDrag(_rt, _dragPlaceholder.transform);
+        var moving = _handContainer != null ? (Transform)_handContainer : _rt;
+        gm?.HandManager?.ReorderHandDuringDrag(moving, _dragPlaceholder.transform);
     }
 
     private void ShowCloneEmptySpot()
@@ -643,5 +667,97 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     {
         if (IsHandCard())
             gm?.HandManager?.ClearHoveredCard(this);
+    }
+
+    private void LateUpdate()
+    {
+        FollowHandContainer();
+    }
+
+    private void FollowHandContainer()
+    {
+        if (_handContainer == null || _rt == null)
+            return;
+
+        var targetPosLocal = Vector3.zero;
+        _rt.localPosition = Vector3.Lerp(_rt.localPosition, targetPosLocal, handFollowSpeed * Time.deltaTime);
+
+        var parentRot = _handContainer.parent != null ? _handContainer.parent.rotation : Quaternion.identity;
+        var targetRot = parentRot * _targetHandRotation;
+        _rt.rotation = Quaternion.Lerp(_rt.rotation, targetRot, handFollowRotationSpeed * Time.deltaTime);
+    }
+
+    public RectTransform HandContainer => _handContainer;
+
+    public RectTransform EnsureHandContainer(Transform parent)
+    {
+        if (_handContainer == null)
+        {
+            var go = new GameObject($"{name}_Container", typeof(RectTransform));
+            _handContainer = go.GetComponent<RectTransform>();
+            _handContainer.localScale = Vector3.one;
+            _handContainer.localRotation = Quaternion.identity;
+            if (_rt != null)
+                _handContainer.sizeDelta = _rt.rect.size;
+        }
+
+        if (parent != null && _handContainer.parent != parent)
+            _handContainer.SetParent(parent, false);
+
+        if (_rt != null)
+        {
+            _handContainer.position = _rt.position;
+            _handContainer.rotation = Quaternion.identity;
+
+            if (_rt.parent != _handContainer)
+            {
+                _rt.SetParent(_handContainer, true);
+                _rt.localPosition = Vector3.zero;
+            }
+        }
+
+        return _handContainer;
+    }
+
+    public void UpdateHandContainerTarget(Vector3 localPosition, Quaternion localRotation)
+    {
+        if (_handContainer == null)
+            return;
+
+        _targetHandRotation = localRotation;
+        KillHandTweens();
+
+        if (handTweenDuration <= 0f)
+        {
+            _handContainer.localPosition = localPosition;
+            _handContainer.localRotation = Quaternion.identity;
+            return;
+        }
+
+        _handMoveTween = _handContainer.DOLocalMove(localPosition, handTweenDuration)
+            .SetEase(handTweenEase)
+            .SetUpdate(true)
+            .SetLink(gameObject);
+
+        _handContainer.localRotation = Quaternion.identity;
+    }
+
+    public void ReleaseHandContainer()
+    {
+        if (_handContainer != null)
+        {
+            KillHandTweens();
+            Destroy(_handContainer.gameObject);
+            _handContainer = null;
+        }
+    }
+
+    private void KillHandTweens()
+    {
+        if (_handMoveTween != null)
+        {
+            _handMoveTween.Kill();
+            _handMoveTween = null;
+        }
     }
 }
