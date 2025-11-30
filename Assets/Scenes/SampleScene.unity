@@ -369,9 +369,9 @@ MonoBehaviour:
   EmptySlot: {fileID: 4860462570295797339, guid: 707c7cb99bd34c74b86ba2d6ace05165, type: 3}
   playerCards:
   - prefab: {fileID: 4860462570295797339, guid: f03c514f27a9ec84f84e2d4e8793c6fb, type: 3}
-    count: 3
+    count: 8
   - prefab: {fileID: 4860462570295797339, guid: ad58544dc459dc24f94599135a4ae854, type: 3}
-    count: 3
+    count: 8
   enemySlots:
   - prefab: {fileID: 9094616095918957040, guid: 1905928e36017444dbe30489bacc9569, type: 3}
     count: 1
@@ -1036,12 +1036,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8d192286eea97f4481dbbdf6d887f58, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HandManager
-  maxHandSize: 5
+  maxHandSize: 8
   handRoot: {fileID: 1696521693}
   spawnPoint: {fileID: 751112720}
   spawnScaleMultiplier: 1.5
-  handTweenDuration: 0.2
-  handTweenEase: 6
   btnDraw: {fileID: 980305386}
   selectedCard: {fileID: 0}
   hoveredCard: {fileID: 0}
@@ -2479,6 +2477,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1696521693}
+  - component: {fileID: 1696521694}
   m_Layer: 0
   m_Name: PlayerHand
   m_TagString: Untagged
@@ -2486,21 +2485,51 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &1696521693
-Transform:
+--- !u!224 &1696521693
+RectTransform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1696521691}
-  serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -423.9785, y: -375, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1507640787}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: -304.3622, y: -375}
+  m_SizeDelta: {x: 339.2326, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1696521694
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1696521691}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30649d3a9faa99c48a7b1166b86bf2a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.HorizontalLayoutGroup
+  m_Padding:
+    m_Left: 0
+    m_Right: 0
+    m_Top: 0
+    m_Bottom: 0
+  m_ChildAlignment: 0
+  m_Spacing: 0
+  m_ChildForceExpandWidth: 1
+  m_ChildForceExpandHeight: 0
+  m_ChildControlWidth: 1
+  m_ChildControlHeight: 0
+  m_ChildScaleWidth: 0
+  m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
 --- !u!224 &1956900280 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 269544598099478963, guid: f03c514f27a9ec84f84e2d4e8793c6fb, type: 3}

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using UnityEngine.EventSystems;
 using DG.Tweening;
 [RequireComponent(typeof(RectTransform))]
+
 public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler
 {
     [Header("Image Handling")]

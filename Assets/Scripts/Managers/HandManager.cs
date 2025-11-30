@@ -26,6 +26,9 @@ public class HandManager : MonoBehaviour
     private RectTransform handRect;
     private const float PositionThresholdSqr = 0.0001f;
     private const float RotationThreshold = 0.1f;
+    private Vector2 lastHandSize;
+    private Transform lastHandParent;
+    private Vector3 lastHandScale;
 
     public Transform HandRoot => handRoot;
 
@@ -41,6 +44,7 @@ public class HandManager : MonoBehaviour
             Debug.LogWarning("[HandManager] btnDraw non assegnato nell'Inspector.");
 
         handRect = handRoot as RectTransform;
+        CacheHandRootState();
     }
 
     private void Start()
@@ -292,23 +296,64 @@ public class HandManager : MonoBehaviour
         return placeholder != null && handRoot != null && placeholder.parent == handRoot ? placeholder : null;
     }
 
-    private void Update()
-    {
-        // Se il curve parameters di una o pi� carte cambia a runtime (play mode), riallinea la mano.
-        bool curveChanged = false;
-        for (int i = 0; i < handCards.Count; i++)
-        {
-            var card = handCards[i];
-            if (card != null && card.ConsumeCurveDirtyFlag())
-            {
-                curveChanged = true;
-            }
-        }
-
-        if (curveChanged)
-            UpdateCardsPosition(activePlaceholder);
-    }
-
+    private void Update()
+    {
+        bool curveChanged = false;
+        for (int i = 0; i < handCards.Count; i++)
+        {
+            var card = handCards[i];
+            if (card != null && card.ConsumeCurveDirtyFlag())
+            {
+                curveChanged = true;
+            }
+        }
+
+        if (curveChanged || DetectHandRootChange())
+            UpdateCardsPosition(activePlaceholder);
+    }
+
+    private void CacheHandRootState()
+    {
+        lastHandSize = handRect != null ? handRect.rect.size : Vector2.zero;
+        lastHandParent = handRoot != null ? handRoot.parent : null;
+        lastHandScale = handRoot != null ? handRoot.lossyScale : Vector3.one;
+    }
+
+    private bool DetectHandRootChange()
+    {
+        bool changed = false;
+
+        var currentRect = handRoot as RectTransform;
+        if (currentRect != handRect)
+        {
+            handRect = currentRect;
+            changed = true;
+        }
+
+        var size = handRect != null ? handRect.rect.size : Vector2.zero;
+        if (size != lastHandSize)
+        {
+            lastHandSize = size;
+            changed = true;
+        }
+
+        var parent = handRoot != null ? handRoot.parent : null;
+        if (parent != lastHandParent)
+        {
+            lastHandParent = parent;
+            changed = true;
+        }
+
+        var scale = handRoot != null ? handRoot.lossyScale : Vector3.one;
+        if (scale != lastHandScale)
+        {
+            lastHandScale = scale;
+            changed = true;
+        }
+
+        return changed;
+    }
+
     private List<Transform> BuildLayoutList(Transform placeholder)
     {
         layoutBuffer.Clear();
