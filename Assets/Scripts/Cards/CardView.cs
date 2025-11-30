@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using UnityEngine.EventSystems;
 
 [RequireComponent(typeof(RectTransform))]
-public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
+public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler
 {
     [Header("Image Handling")]
     [Tooltip("Sprite del retro (assegnare come Source Image in Inspector)")]
@@ -474,6 +474,28 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
             Destroy(_dragPlaceholder);
             _dragPlaceholder = null;
         }
+
+        if (_draggingHand && gm != null && gm.HandManager != null)
+            StartCoroutine(RemoveHandCardAfterDrop());
+    }
+
+    private IEnumerator RemoveHandCardAfterDrop()
+    {
+        // Let the play logic clone the dragged card before destroying the hand copy.
+        yield return null;
+
+        var hand = gm != null ? gm.HandManager : null;
+        if (hand == null || this == null)
+            yield break;
+
+        hand.OnHandCardDroppedToBoard(this);
+        hand.RemoveFromHand(gameObject);
+
+        if (this != null)
+        {
+            Destroy(gameObject);
+            hand.UpdateCardsPosition();
+        }
     }
 
     private void UpdateHandPlaceholderIndex()
@@ -575,5 +597,17 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         }
 
         return null;
+    }
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        if (IsHandCard())
+            gm?.HandManager?.SetHoveredCard(this);
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        if (IsHandCard())
+            gm?.HandManager?.ClearHoveredCard(this);
     }
 }

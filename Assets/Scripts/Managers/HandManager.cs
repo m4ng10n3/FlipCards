@@ -20,11 +20,12 @@ public class HandManager : MonoBehaviour
     [SerializeField] private float handTweenDuration = 0.2f;
     [SerializeField] private Ease handTweenEase = Ease.OutQuad;
 
-    [SerializeField] private Card selectedCard;
-    [SerializeReference] private Card hoveredCard;
-
     [Header("UI")]
     [SerializeField] public Button btnDraw;
+
+    [Header("Runtime debug")]
+    [SerializeField] private CardView selectedCard;
+    [SerializeField] private CardView hoveredCard;
 
     private readonly List<CardView> handCards = new();
     private readonly List<Transform> layoutBuffer = new();
@@ -406,6 +407,7 @@ public class HandManager : MonoBehaviour
     public void OnHandCardBeginDrag(CardView view, Transform placeholder)
     {
         draggingCard = view;
+        selectedCard = view;
         activePlaceholder = SanitizePlaceholder(placeholder);
         UpdateCardsPosition(activePlaceholder);
     }
@@ -416,7 +418,37 @@ public class HandManager : MonoBehaviour
         if (view != null && draggingCard != null && view != draggingCard && activePlaceholder != null)
             return;
 
+        if (view == selectedCard || view == null)
+            selectedCard = null;
+
         draggingCard = null;
+        activePlaceholder = null;
+        UpdateCardsPosition();
+    }
+
+    public void SetHoveredCard(CardView view)
+    {
+        hoveredCard = view;
+    }
+
+    public void ClearHoveredCard(CardView view)
+    {
+        if (hoveredCard == view)
+            hoveredCard = null;
+    }
+
+    public void OnHandCardDroppedToBoard(CardView view)
+    {
+        if (view == null)
+            return;
+
+        if (draggingCard == view)
+            draggingCard = null;
+        if (selectedCard == view)
+            selectedCard = null;
+        if (hoveredCard == view)
+            hoveredCard = null;
+
         activePlaceholder = null;
         UpdateCardsPosition();
     }

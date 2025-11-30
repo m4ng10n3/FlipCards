@@ -1038,10 +1038,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::HandManager
   maxHandSize: 5
   handRoot: {fileID: 1696521693}
-  splineContainer: {fileID: 1696521692}
   spawnPoint: {fileID: 751112720}
   spawnScaleMultiplier: 1.5
+  curveParameters: {fileID: 11400000, guid: c231421d86771494ca4a976c6ad34486, type: 2}
+  curveYOffsetMultiplier: 1
+  curveRotationInfluence: 1
+  handTweenDuration: 0.2
+  handTweenEase: 6
   btnDraw: {fileID: 980305386}
+  selectedCard: {fileID: 0}
+  hoveredCard: {fileID: 0}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -1582,11 +1588,11 @@ Transform:
   m_GameObject: {fileID: 751112719}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 472.00003, y: 236, z: 0}
+  m_LocalPosition: {x: 48.021484, y: -139, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1696521693}
+  m_Father: {fileID: 1507640787}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &912712892
 GameObject:
@@ -2286,6 +2292,7 @@ RectTransform:
   m_Children:
   - {fileID: 925562376}
   - {fileID: 395219085}
+  - {fileID: 751112720}
   - {fileID: 1696521693}
   m_Father: {fileID: 1536785259}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -2475,114 +2482,13 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1696521693}
-  - component: {fileID: 1696521692}
   m_Layer: 0
-  m_Name: PlayerHandSpline
+  m_Name: PlayerHand
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1696521692
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1696521691}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dab5c7d4c32e743048dfca98e2d5914f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.Splines::UnityEngine.Splines.SplineContainer
-  m_Spline:
-    m_EditModeType: 1
-    m_Knots: []
-    m_MetaData: []
-    m_Closed: 0
-    m_IntData:
-      m_Data: []
-    m_FloatData:
-      m_Data: []
-    m_Float4Data:
-      m_Data: []
-    m_ObjectData:
-      m_Data: []
-  m_Splines:
-  - m_EditModeType: 1
-    m_Knots:
-    - Position:
-        x: 0
-        y: 0
-        z: 0
-      TangentIn:
-        x: -0
-        y: -0
-        z: -31.917803
-      TangentOut:
-        x: 0
-        y: 0
-        z: 31.917803
-      Rotation:
-        value:
-          x: 0.43866876
-          y: 0.55458975
-          z: 0.55458975
-          w: 0.43866873
-    - Position:
-        x: 310.6
-        y: 73.5
-        z: 0
-      TangentIn:
-        x: 0
-        y: 0
-        z: -199.40567
-      TangentOut:
-        x: 0
-        y: 0
-        z: 199.40567
-      Rotation:
-        value:
-          x: 0.5018772
-          y: 0.4981158
-          z: 0.49811587
-          w: 0.501877
-    - Position:
-        x: 599.8
-        y: 0
-        z: 0
-      TangentIn:
-        x: -0
-        y: -0
-        z: -29.839384
-      TangentOut:
-        x: 0
-        y: 0
-        z: 29.839384
-      Rotation:
-        value:
-          x: 0.55819327
-          y: 0.43407407
-          z: 0.43407407
-          w: 0.55819327
-    m_MetaData:
-    - Mode: 0
-      Tension: 0.5
-    - Mode: 2
-      Tension: 0.5
-    - Mode: 0
-      Tension: 0.5
-    m_Closed: 0
-    m_IntData:
-      m_Data: []
-    m_FloatData:
-      m_Data: []
-    m_Float4Data:
-      m_Data: []
-    m_ObjectData:
-      m_Data: []
-  m_Knots:
-    m_KnotsLink: []
 --- !u!4 &1696521693
 Transform:
   m_ObjectHideFlags: 0
@@ -2595,8 +2501,7 @@ Transform:
   m_LocalPosition: {x: -423.9785, y: -375, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 0}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 751112720}
+  m_Children: []
   m_Father: {fileID: 1507640787}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!224 &1956900280 stripped

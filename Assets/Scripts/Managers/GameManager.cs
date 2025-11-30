@@ -589,7 +589,10 @@ public class GameManager : MonoBehaviour
 
         // Rimuovo la carta dalla mano (questa distrugge SOLO la carta in mano, non il clone sul board)
         if (handManager != null)
+        {
+            handManager.OnHandCardDroppedToBoard(handCard);
             handManager.RemoveFromHand(handCard.gameObject);
+        }
 
         EventBus.Publish(GameEventType.CardPlayed, new EventContext
         {
