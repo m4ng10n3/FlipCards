@@ -28,6 +28,8 @@ public class HandManager : MonoBehaviour
     private readonly List<GameObject> deck = new();
     private bool deckInitialized = false;
     private RectTransform handRect;
+    private const float PositionThresholdSqr = 0.0001f;
+    private const float RotationThreshold = 0.1f;
 
     public Transform HandRoot => handRoot;
 
@@ -363,8 +365,18 @@ public class HandManager : MonoBehaviour
             finalLocalPos += posOffset;
             finalRot = rotOffset;
 
-            cardTransform.DOLocalMove(finalLocalPos, handTweenDuration).SetEase(handTweenEase);
-            cardTransform.DOLocalRotateQuaternion(finalRot, handTweenDuration).SetEase(handTweenEase);
+            bool needsMove = (cardTransform.localPosition - finalLocalPos).sqrMagnitude > PositionThresholdSqr;
+            bool needsRot = Quaternion.Angle(cardTransform.localRotation, finalRot) > RotationThreshold;
+            if (!needsMove && !needsRot)
+                continue;
+
+            // Evita accumulo di tweens quando il layout viene aggiornato spesso (es. durante il drag).
+            cardTransform.DOKill(false);
+
+            if (needsMove)
+                cardTransform.DOLocalMove(finalLocalPos, handTweenDuration).SetEase(handTweenEase);
+            if (needsRot)
+                cardTransform.DOLocalRotateQuaternion(finalRot, handTweenDuration).SetEase(handTweenEase);
         }
     }
 
