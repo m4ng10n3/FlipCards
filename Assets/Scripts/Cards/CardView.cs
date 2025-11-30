@@ -71,6 +71,7 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     private RectTransform _dragContainer;
     private Vector3 _dragTargetWorld;
     private bool _hasDragTarget;
+    private bool _returningToHand;
 
     void Awake()
     {
@@ -522,7 +523,6 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
 
         _dragOriginalParent = null;
     }
-
     private void ReturnToHandSlot()
     {
         if (_rt == null) return;
@@ -530,15 +530,50 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         var target = _handContainer != null ? _handContainer : _dragOriginalParent as RectTransform;
         if (target == null) return;
 
-        _rt.SetParent(target, true);
-        _rt.localRotation = Quaternion.identity;
-        _rt.localScale = _dragOriginalScale;
+        _rt.DOKill();
 
+        float duration = Mathf.Max(0f, handTweenDuration);
         var asRt = _rt as RectTransform;
-        if (asRt != null)
-            asRt.anchoredPosition = Vector2.zero;
-        else
-            _rt.localPosition = Vector3.zero;
+        Vector3 targetWorldPos = target.position;
+        Quaternion targetWorldRot = target.rotation;
+
+        if (duration <= 0f)
+        {
+            _rt.position = targetWorldPos;
+            _rt.rotation = targetWorldRot;
+            _rt.SetParent(target, true);
+            _rt.localRotation = Quaternion.identity;
+            _rt.localScale = _dragOriginalScale;
+            if (asRt != null)
+                asRt.anchoredPosition = Vector2.zero;
+            else
+                _rt.localPosition = Vector3.zero;
+            _returningToHand = false;
+            return;
+        }
+
+        _returningToHand = true;
+
+        var seq = DOTween.Sequence().SetUpdate(true).SetLink(gameObject);
+        seq.Join(_rt.DOMove(targetWorldPos, duration).SetEase(handTweenEase));
+        seq.Join(_rt.DORotateQuaternion(targetWorldRot, duration).SetEase(handTweenEase));
+        seq.Join(_rt.DOScale(_dragOriginalScale, duration).SetEase(handTweenEase));
+
+        seq.OnKill(() => _returningToHand = false);
+        seq.OnComplete(() =>
+        {
+            if (_rt == null || target == null) return;
+
+            _rt.SetParent(target, true);
+            _rt.localRotation = Quaternion.identity;
+            _rt.localScale = _dragOriginalScale;
+            var rt = _rt as RectTransform;
+            if (rt != null)
+                rt.anchoredPosition = Vector2.zero;
+            else
+                _rt.localPosition = Vector3.zero;
+            _returningToHand = false;
+        });
     }
 
     private GameObject CreateDragPlaceholder()
@@ -769,7 +804,7 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
 
     private void FollowHandContainer()
     {
-        if (_handContainer == null || _rt == null || _draggingHand)
+        if (_handContainer == null || _rt == null || _draggingHand || _returningToHand)
             return;
 
         var targetPosLocal = Vector3.zero;
