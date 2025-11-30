@@ -20,11 +20,14 @@ public class HandManager : MonoBehaviour
     [SerializeField] private float handTweenDuration = 0.2f;
     [SerializeField] private Ease handTweenEase = Ease.OutQuad;
 
+    [SerializeField] private Card selectedCard;
+    [SerializeReference] private Card hoveredCard;
 
     [Header("UI")]
     [SerializeField] public Button btnDraw;
 
     private readonly List<CardView> handCards = new();
+    private readonly List<Transform> layoutBuffer = new();
     private readonly List<GameObject> deck = new();
     private bool deckInitialized = false;
     private RectTransform handRect;
@@ -52,11 +55,14 @@ public class HandManager : MonoBehaviour
 
     private void SyncHandCardsFromChildren()
     {
+        handCards.Clear();
+
         if (handRoot == null)
             return;
 
-        foreach (var cv in handRoot.GetComponentsInChildren<CardView>(false))
+        foreach (Transform child in handRoot)
         {
+            var cv = child.GetComponent<CardView>();
             if (cv != null && !handCards.Contains(cv))
                 handCards.Add(cv);
         }
@@ -266,6 +272,38 @@ public class HandManager : MonoBehaviour
         UpdateCardsPosition(activePlaceholder);
     }
 
+    private Transform SanitizePlaceholder(Transform placeholder)
+    {
+        return placeholder != null && handRoot != null && placeholder.parent == handRoot ? placeholder : null;
+    }
+
+    private List<Transform> BuildLayoutList(Transform placeholder)
+    {
+        layoutBuffer.Clear();
+
+        placeholder = SanitizePlaceholder(placeholder);
+
+        if (handRoot == null)
+            return layoutBuffer;
+
+        foreach (Transform child in handRoot)
+        {
+            if (child == placeholder)
+            {
+                layoutBuffer.Add(child);
+                continue;
+            }
+
+            if (child.GetComponent<CardView>() != null)
+                layoutBuffer.Add(child);
+        }
+
+        if (placeholder != null && !layoutBuffer.Contains(placeholder))
+            layoutBuffer.Add(placeholder);
+
+        return layoutBuffer;
+    }
+
     private void UpdateCardsPosition(Transform placeholder)
     {
         SyncHandCardsFromChildren();
@@ -273,12 +311,17 @@ public class HandManager : MonoBehaviour
         if (handRoot == null)
             return;
 
-        placeholder = placeholder != null && placeholder.parent == handRoot ? placeholder : null;
-        int slotCount = handRoot.childCount;
+        placeholder = SanitizePlaceholder(placeholder);
+        var layoutItems = BuildLayoutList(placeholder);
+        int slotCount = layoutItems.Count;
         if (slotCount == 0)
             return;
 
         handCards.RemoveAll(h => h == null);
+
+        var indexByTransform = new Dictionary<Transform, int>(slotCount);
+        for (int i = 0; i < slotCount; i++)
+            indexByTransform[layoutItems[i]] = i;
 
         float width = handRect != null ? handRect.rect.width : 600f;
         float spacing = width / Mathf.Max(1, maxHandSize);
@@ -293,7 +336,8 @@ public class HandManager : MonoBehaviour
             if (cardTransform == null || cardTransform.parent != handRoot)
                 continue;
 
-            int slotIndex = cardTransform.GetSiblingIndex();
+            if (!indexByTransform.TryGetValue(cardTransform, out int slotIndex))
+                continue;
 
             float normalized = slotCount <= 1 ? 0.5f : (float)slotIndex / (slotCount - 1);
             Vector3 finalLocalPos = new Vector3(startX + slotIndex * spacing, 0f, 0f);
@@ -316,30 +360,53 @@ public class HandManager : MonoBehaviour
     // Gestisce lo swap basato sulla posizione orizzontale del drag (stile HorizontalCardHolder)
     public void ReorderHandDuringDrag(Transform moving, Transform placeholder)
     {
+        placeholder = SanitizePlaceholder(placeholder);
         if (handRoot == null || moving == null || placeholder == null) return;
 
         activePlaceholder = placeholder;
 
+        var layoutItems = BuildLayoutList(placeholder);
+
         int insertIndex = 0;
-        for (int i = 0; i < handRoot.childCount; i++)
+        for (int i = 0; i < layoutItems.Count; i++)
         {
-            var child = handRoot.GetChild(i);
+            var child = layoutItems[i];
             if (child == placeholder) continue;
             if (moving.position.x > child.position.x) insertIndex++;
         }
 
-        insertIndex = Mathf.Clamp(insertIndex, 0, Mathf.Max(0, handRoot.childCount - 1));
-        if (placeholder.GetSiblingIndex() != insertIndex)
+        int cardCount = Mathf.Max(0, layoutItems.Count - 1); // escludo il placeholder
+        insertIndex = Mathf.Clamp(insertIndex, 0, cardCount);
+
+        RepositionPlaceholder(placeholder, insertIndex);
+    }
+
+    private void RepositionPlaceholder(Transform placeholder, int insertIndex)
+    {
+        if (handRoot == null || placeholder == null) return;
+
+        var layoutItems = BuildLayoutList(placeholder);
+        layoutItems.Remove(placeholder);
+
+        insertIndex = Mathf.Clamp(insertIndex, 0, layoutItems.Count);
+
+        int startIndex = layoutItems.Count > 0 ? layoutItems[0].GetSiblingIndex() : placeholder.GetSiblingIndex();
+        layoutItems.Insert(insertIndex, placeholder);
+
+        for (int i = 0; i < layoutItems.Count; i++)
         {
-            placeholder.SetSiblingIndex(insertIndex);
-            UpdateCardsPosition(placeholder);
+            int targetIndex = startIndex + i;
+            if (layoutItems[i].GetSiblingIndex() != targetIndex)
+                layoutItems[i].SetSiblingIndex(targetIndex);
         }
+
+        UpdateCardsPosition(placeholder);
     }
 
     public void OnHandCardBeginDrag(CardView view, Transform placeholder)
     {
         draggingCard = view;
-        activePlaceholder = placeholder != null && placeholder.parent == handRoot ? placeholder : null;
+        activePlaceholder = SanitizePlaceholder(placeholder);
         UpdateCardsPosition(activePlaceholder);
     }
 
