@@ -307,6 +307,7 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     private bool IsBoardCard() => owner != null && instance != null;
     private bool CanDragBoardCard() => gm != null && _rt != null && IsBoardCard() && _rt.parent == gm.playerBoardRoot;
 
+// "C:\Users\gianl\UnityProjects\balatro-feel\Assets\Scripts\CardVisual.cs"
     public void EvaluateHandCurve(float normalized, int slotCount, out Vector3 positionOffset, out Quaternion rotation)
     {
         positionOffset = Vector3.zero;
