@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using UnityEngine.EventSystems;
 using DG.Tweening;
 [RequireComponent(typeof(RectTransform))]
-
 public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler
 {
     [Header("Image Handling")]
@@ -336,7 +335,9 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         if (siblings < 5) yOff = 0f;
         positionOffset = Vector3.up * yOff;
 
-        float rotZ = curveParameters.rotation.Evaluate(normalized) * curveParameters.rotationInfluence;
+        float centered = normalized - 0.5f;
+        float symmetryT = Mathf.Clamp01(Mathf.Abs(centered) * 2f);
+        float rotZ = Mathf.Sign(centered) * curveParameters.rotation.Evaluate(symmetryT) * curveParameters.rotationInfluence;
         rotation = Quaternion.Euler(0f, 0f, rotZ);
     }
 

@@ -45,30 +45,30 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  positioningInfluence: 4.17
+  positioningInfluence: 7.01
   rotation:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
-      time: -0.040000916
-      value: 1.000946
-      inSlope: -0.9727228
-      outSlope: -0.9727228
-      tangentMode: 34
+      time: 0.0052855536
+      value: 0.015331507
+      inSlope: -0.2821117
+      outSlope: -0.2821117
+      tangentMode: 0
       weightedMode: 0
       inWeight: 0
-      outWeight: 0.33333334
+      outWeight: 0.38120484
     - serializedVersion: 3
-      time: 0.98999023
-      value: -0.0009498596
-      inSlope: -0.9727228
-      outSlope: -0.9727228
-      tangentMode: 34
+      time: 1.0041122
+      value: -0.9796805
+      inSlope: -0.79389596
+      outSlope: -0.79389596
+      tangentMode: 0
       weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0
+      inWeight: 0.15110305
+      outWeight: 0.74857944
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  rotationInfluence: 26.68
-  version: 2746
+  rotationInfluence: 8.83
+  version: 7771
