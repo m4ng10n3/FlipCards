@@ -13,10 +13,6 @@ public class HandManager : MonoBehaviour
     [SerializeField] private Transform spawnPoint;       // punto da cui far apparire le carte
     [SerializeField] private float spawnScaleMultiplier = 1.5f;
 
-    [Header("Curve layout")]
-    [SerializeField] private CurveParameters curveParameters;
-    [SerializeField] private float curveYOffsetMultiplier = 1f;
-    [SerializeField] private float curveRotationInfluence = 1f;
     [SerializeField] private float handTweenDuration = 0.2f;
     [SerializeField] private Ease handTweenEase = Ease.OutQuad;
 
@@ -32,6 +28,8 @@ public class HandManager : MonoBehaviour
     private readonly List<GameObject> deck = new();
     private bool deckInitialized = false;
     private RectTransform handRect;
+
+    public Transform HandRoot => handRoot;
 
     // Stato runtime per gestione della mano reattiva
     private CardView draggingCard;
@@ -278,6 +276,23 @@ public class HandManager : MonoBehaviour
         return placeholder != null && handRoot != null && placeholder.parent == handRoot ? placeholder : null;
     }
 
+    private void Update()
+    {
+        // Se il curve parameters di una o pi� carte cambia a runtime (play mode), riallinea la mano.
+        bool curveChanged = false;
+        for (int i = 0; i < handCards.Count; i++)
+        {
+            var card = handCards[i];
+            if (card != null && card.ConsumeCurveDirtyFlag())
+            {
+                curveChanged = true;
+            }
+        }
+
+        if (curveChanged)
+            UpdateCardsPosition(activePlaceholder);
+    }
+
     private List<Transform> BuildLayoutList(Transform placeholder)
     {
         layoutBuffer.Clear();
@@ -344,14 +359,9 @@ public class HandManager : MonoBehaviour
             Vector3 finalLocalPos = new Vector3(startX + slotIndex * spacing, 0f, 0f);
             Quaternion finalRot = Quaternion.identity;
 
-            if (curveParameters != null)
-            {
-                float yOff = curveParameters.positioning.Evaluate(normalized) * curveParameters.positioningInfluence * slotCount * curveYOffsetMultiplier;
-                finalLocalPos += Vector3.up * yOff;
-
-                float rotZ = curveParameters.rotation.Evaluate(normalized) * curveParameters.rotationInfluence * curveRotationInfluence;
-                finalRot = Quaternion.Euler(0f, 0f, rotZ);
-            }
+            card.EvaluateHandCurve(normalized, slotCount, out var posOffset, out var rotOffset);
+            finalLocalPos += posOffset;
+            finalRot = rotOffset;
 
             cardTransform.DOLocalMove(finalLocalPos, handTweenDuration).SetEase(handTweenEase);
             cardTransform.DOLocalRotateQuaternion(finalRot, handTweenDuration).SetEase(handTweenEase);

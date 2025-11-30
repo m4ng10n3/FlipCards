@@ -7,4 +7,8 @@ public class CurveParameters : ScriptableObject
     public float positioningInfluence = 0.1f;
     public AnimationCurve rotation;
     public float rotationInfluence = 10f;
+    [HideInInspector] public int version;
+#if UNITY_EDITOR
+    private void OnValidate() { version++; }
+#endif
 }

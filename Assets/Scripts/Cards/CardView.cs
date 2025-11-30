@@ -12,6 +12,7 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     [SerializeField] private GameObject Template; // child con grafica fronte
     [SerializeField] private Sprite backImage;
     [SerializeField] private Image artworkMonster;
+    [SerializeField] private CurveParameters curveParameters;
 
     private Sprite frontImage;
 
@@ -51,6 +52,8 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     private Quaternion _dragOriginalLocalRotation;
     private const float DoubleClickThreshold = 0.3f;
     private static readonly List<RaycastResult> _raycastBuffer = new List<RaycastResult>(8);
+    private CurveParameters _lastCurveAsset;
+    private int _lastCurveVersion = -1;
 
     void Awake()
     {
@@ -296,9 +299,37 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     }
 
     // === Drag & Drop (mano -> tabellone) ===
-    private bool IsHandCard() => owner == null && instance == null && gm != null;
+    private bool IsHandCard()
+    {
+        var handRoot = gm != null ? gm.HandManager?.HandRoot : null;
+        return owner == null && instance == null && handRoot != null && _rt != null && _rt.parent == handRoot;
+    }
     private bool IsBoardCard() => owner != null && instance != null;
     private bool CanDragBoardCard() => gm != null && _rt != null && IsBoardCard() && _rt.parent == gm.playerBoardRoot;
+    public void EvaluateHandCurve(float normalized, int slotCount, out Vector3 positionOffset, out Quaternion rotation)
+    {
+        positionOffset = Vector3.zero;
+        rotation = Quaternion.identity;
+
+        if (curveParameters == null)
+            return;
+
+        float countScale = Mathf.Max(1, slotCount);
+        float yOff = curveParameters.positioning.Evaluate(normalized) * curveParameters.positioningInfluence * countScale;
+        positionOffset = Vector3.up * yOff;
+
+        float rotZ = curveParameters.rotation.Evaluate(normalized) * curveParameters.rotationInfluence;
+        rotation = Quaternion.Euler(0f, 0f, rotZ);
+    }
+
+    public bool ConsumeCurveDirtyFlag()
+    {
+        int currentVersion = curveParameters != null ? curveParameters.version : -1;
+        bool changed = curveParameters != _lastCurveAsset || currentVersion != _lastCurveVersion;
+        _lastCurveAsset = curveParameters;
+        _lastCurveVersion = currentVersion;
+        return changed;
+    }
 
     public void OnBeginDrag(PointerEventData eventData)
     {

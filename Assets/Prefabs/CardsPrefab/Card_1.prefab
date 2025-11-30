@@ -605,6 +605,7 @@ MonoBehaviour:
   Template: {fileID: 2890478409514407099}
   backImage: {fileID: -4057992658679965160, guid: 8477333e7b27ac048bc2c37de69e5ed3, type: 3}
   artworkMonster: {fileID: 2489055945114031205}
+  curveParameters: {fileID: 11400000, guid: c231421d86771494ca4a976c6ad34486, type: 2}
   nameText: {fileID: 8530644132936236624}
   factionText: {fileID: 4206496386914259341}
   sideText: {fileID: 7532144197698887769}
