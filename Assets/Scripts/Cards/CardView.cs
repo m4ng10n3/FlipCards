@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
@@ -21,7 +21,6 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     [SerializeField] private Ease handTweenEase = Ease.OutCubic;
     [Header("Drag Motion")]
     [SerializeField] private float dragRotationMagnitude = 6f;
-    [SerializeField] private float dragFollowLerp = 30f;
     [SerializeField] private float dragMaxTilt = 60f;
 
     private Sprite frontImage;
@@ -69,7 +68,6 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     private Quaternion _targetHandRotation = Quaternion.identity;
     private Vector3 _dragOriginalScale = Vector3.one;
     private RectTransform _dragContainer;
-    private float _currentDragShake;
     private Vector3 _dragTargetWorld;
     private bool _hasDragTarget;
 
@@ -83,10 +81,10 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         // UI di base sempre sicura da fare in preview/editor
         if (hintText != null) hintText.gameObject.SetActive(false);
 
-        // Se questa CardView è già stata inizializzata a runtime, esci.
+        // Se questa CardView Ã¨ giÃ  stata inizializzata a runtime, esci.
         if (instance != null) return;
 
-        // Modalità "preview" (prefab in editor o scene senza runtime CardInstance)
+        // ModalitÃ  "preview" (prefab in editor o scene senza runtime CardInstance)
         var inline = GetComponent<CardDefinition>();
         if (inline == null) return;
 
@@ -110,7 +108,7 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         // --- HIGHLIGHT (Outline) ---
         if (highlight == null) highlight = gameObject.AddComponent<Outline>();
         highlight.effectDistance = new Vector2(5, 5);
-        highlight.useGraphicAlpha = false;        // evita che lalpha/texture influenzi loutline
+        highlight.useGraphicAlpha = false;        // evita che lÂ’alpha/texture influenzi lÂ’outline
         highlight.effectColor = Color.white;      // colore di default
         highlight.enabled = false;
 
@@ -129,7 +127,7 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
             Template.GetComponent<Image>().useSpriteMesh = false;
             Template.GetComponent<Image>().maskable = false;
 
-            // Il fronte è l'immagine impostata nel componente Image (Source Image)
+            // Il fronte Ã¨ l'immagine impostata nel componente Image (Source Image)
             frontImage = Template.GetComponent<Image>().sprite;
         }
 
@@ -173,7 +171,7 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         {
             gm.OnCardClicked(this);
 
-            // doppio click per flippare le carte già sul board
+            // doppio click per flippare le carte giÃ  sul board
             if (IsBoardCard() && _lastClickTime > 0f && Time.time - _lastClickTime <= DoubleClickThreshold)
                 gm.OnCardDoubleClicked(this);
 
@@ -382,6 +380,7 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
             _hasDragTarget = true;
             if (_dragContainer != null)
                 _dragContainer.SetAsLastSibling();
+            ApplyDragPickupRotation();
             gm?.HandManager?.OnHandCardBeginDrag(this, _handContainer);
             _canvasGroup.blocksRaycasts = false; // consente di colpire lo spot sottostante
             return;
@@ -404,6 +403,7 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         _hasDragTarget = true;
         if (_dragContainer != null)
             _dragContainer.SetAsLastSibling();
+        ApplyDragPickupRotation();
         _canvasGroup.blocksRaycasts = false;
     }
 
@@ -415,7 +415,8 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
             var worldPoint = _rootCanvas.transform.TransformPoint(localPoint);
             _dragTargetWorld = worldPoint;
             _hasDragTarget = true;
-            ApplyDragShake(worldPoint);
+            if (_dragContainer != null)
+                _dragContainer.position = _dragTargetWorld;
             if (_draggingHand)
                 UpdateHandPlaceholderIndex();
         }
@@ -715,11 +716,39 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
             gm?.HandManager?.ClearHoveredCard(this);
     }
 
+    private void ApplyDragPickupRotation()
+    {
+        if (_rt == null) return;
+
+        Vector3 target = _dragContainer != null ? _dragContainer.position : _dragTargetWorld;
+        float distance = Vector3.Distance(_rt.position, target);
+        float sign = Mathf.Sign(target.x - _rt.position.x);
+        if (Mathf.Approximately(sign, 0f))
+            sign = 1f;
+
+        float angle = Mathf.Clamp(distance * dragRotationMagnitude * sign, -dragMaxTilt, dragMaxTilt);
+        _rt.localRotation = Quaternion.Euler(0f, 0f, angle);
+    }
+
+    private void FollowDragContainer()
+    {
+        if (_rt == null) return;
+
+        if (_dragContainer != null)
+            _dragContainer.position = _dragTargetWorld;
+
+        Vector3 targetPos = _dragContainer != null ? _dragContainer.position : _dragTargetWorld;
+        _rt.position = Vector3.Lerp(_rt.position, targetPos, handFollowSpeed * Time.deltaTime);
+
+        Quaternion targetRot = _dragContainer != null ? _dragContainer.rotation : Quaternion.identity;
+        _rt.rotation = Quaternion.Lerp(_rt.rotation, targetRot, handFollowRotationSpeed * Time.deltaTime);
+    }
+
     private void LateUpdate()
     {
         FollowHandContainer();
         if (_dragging && _hasDragTarget)
-            ApplyDragShake(_dragTargetWorld);
+            FollowDragContainer();
     }
 
     private void FollowHandContainer()
@@ -838,43 +867,15 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         if (_rt.parent != _rootCanvas.transform)
             _rt.SetParent(_rootCanvas.transform, true);
         _rt.localRotation = Quaternion.identity;
-
-        _currentDragShake = 0f;
     }
 
     private void CleanupDragContainer()
     {
-        _currentDragShake = 0f;
-
         if (_dragContainer != null)
         {
             Destroy(_dragContainer.gameObject);
             _dragContainer = null;
         }
-    }
-
-    private void ApplyDragShake(Vector3 worldTarget)
-    {
-        if (_rt == null) return;
-
-        if (_dragContainer != null)
-        {
-            _dragContainer.position = worldTarget; // container sticks to pointer
-            if (_dragContainer.rotation != Quaternion.identity)
-                _dragContainer.rotation = Quaternion.identity;
-        }
-
-        Vector3 targetPos = _dragContainer != null ? _dragContainer.position : worldTarget;
-        float syncLerp = Mathf.Clamp01(dragFollowLerp * Time.unscaledDeltaTime);
-        Vector3 displacement = targetPos - _rt.position;
-        Vector3 newPos = _rt.position + displacement * syncLerp; // card lags toward container
-
-        var newDisplacement = targetPos - newPos;
-        float targetAngle = Mathf.Clamp(newDisplacement.x * dragRotationMagnitude, -dragMaxTilt, dragMaxTilt);
-
-        _currentDragShake = Mathf.Lerp(_currentDragShake, targetAngle, syncLerp);
-        _rt.localRotation = Quaternion.Euler(0f, 0f, _currentDragShake);
-        _rt.position = newDisplacement.sqrMagnitude <= 0.000001f ? targetPos : newPos;
     }
 
     private void KillHandTweens()
@@ -886,3 +887,5 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         }
     }
 }
+
+
