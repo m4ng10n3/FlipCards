@@ -25,7 +25,7 @@ public class ShaderCode : MonoBehaviour
         {
             image.material.DisableKeyword(image.material.enabledKeywords[i]);
         }
-        image.material.EnableKeyword("_EDITION_" + editions[Random.Range(0, editions.Length)]);
+        image.material.EnableKeyword("_EDITION_" + editions[3]);
     }
 
     // Update is called once per frame
@@ -39,16 +39,21 @@ public class ShaderCode : MonoBehaviour
         Vector3 eulerAngles = currentRotation.eulerAngles;
 
         // Get the X-axis angle
+        /*
         float xAngle = eulerAngles.x;
         float yAngle = eulerAngles.y;
 
         // Ensure the X-axis angle stays within the range of -90 to 90 degrees
         xAngle = ClampAngle(xAngle, -90f, 90f);
-        yAngle = ClampAngle(yAngle, -90f, 90);
+        yAngle = ClampAngle(yAngle, -90f, 90f);
 
+        m.SetVector("_Rotation", new Vector2(ExtensionMethods.Remap(xAngle, -20, 20, -.5f, .5f), ExtensionMethods.Remap(yAngle, -20, 20, -.5f, .5f)));
+        */
 
-        m.SetVector("_Rotation", new Vector2(ExtensionMethods.Remap(xAngle,-20,20,-.5f,.5f), ExtensionMethods.Remap(yAngle, -20, 20, -.5f, .5f)));
+        float zAngle = ClampAngle(eulerAngles.z, -90f, 90f);
 
+        //m.SetVector("_Rotation", new Vector2(xAngle, yAngle));
+        m.SetVector("_Rotation", new Vector2(ExtensionMethods.Remap(zAngle, -20, 20, -.5f, .5f), 0f));
     }
 
     // Method to clamp an angle between a minimum and maximum value
