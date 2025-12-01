@@ -383,20 +383,42 @@ public class GameManager : MonoBehaviour
 
     public void SwapCardPositions(CardView a, CardView b)
     {
-        if (a == null || b == null || a == b || player.actionPoints <= 0) return;
-
-        var tA = a.transform;
-        var tB = b.transform;
-
-        // tutte le carte sono del player -> devono essere figli di playerBoardRoot
-        if (tA.parent != playerBoardRoot || tB.parent != playerBoardRoot)
+        if (a == null || b == null || a == b || player.actionPoints <= 0)
             return;
 
-        int idxA = tA.GetSiblingIndex();
-        int idxB = tB.GetSiblingIndex();
+        // Container di board per entrambe le carte
+        var cA = a.PlayerBoardContainer != null
+            ? a.PlayerBoardContainer
+            : a.EnsurePlayerBoardContainer(playerBoardRoot);
+
+        var cB = b.PlayerBoardContainer != null
+            ? b.PlayerBoardContainer
+            : b.EnsurePlayerBoardContainer(playerBoardRoot);
+
+        if (cA == null || cB == null || cA == cB)
+            return;
+
+        if (cA.parent != playerBoardRoot || cB.parent != playerBoardRoot)
+            return;
+
+        int idxA = cA.GetSiblingIndex();
+        int idxB = cB.GetSiblingIndex();
+
+        // Salvo le posizioni/rotazioni locali correnti dei container
+        Vector3 posA = cA.localPosition;
+        Vector3 posB = cB.localPosition;
+        Quaternion rotA = cA.localRotation;
+        Quaternion rotB = cB.localRotation;
+
         player.actionPoints -= 1;
-        tA.SetSiblingIndex(idxB);
-        tB.SetSiblingIndex(idxA);
+
+        // Swap logico delle lane (indice dei figli sotto playerBoardRoot)
+        cA.SetSiblingIndex(idxB);
+        cB.SetSiblingIndex(idxA);
+
+        // Tween: ogni container va nella posizione dell'altro
+        a.UpdateBoardContainerTarget(posB, rotB);
+        b.UpdateBoardContainerTarget(posA, rotA);
 
         EventBus.Publish(GameEventType.Info, new EventContext
         {
@@ -475,6 +497,17 @@ public class GameManager : MonoBehaviour
         Transform parent = view.transform.parent;
         int laneIndex = view.transform.GetSiblingIndex();
 
+        // Se la carta era su un board container del player, uso quello
+        var boardContainer = view.PlayerBoardContainer;
+        if (boardContainer != null && boardContainer.parent == playerBoardRoot)
+        {
+            parent = boardContainer.parent;           // playerBoardRoot
+            laneIndex = boardContainer.GetSiblingIndex();
+
+            // distruggo il container di board (la carta viene distrutta sotto)
+            Destroy(boardContainer.gameObject);
+        }
+
         // Rimuovo il modello dal dizionario e dalla board del player/ai
         viewByInstance.Remove(ci);
         owner.board.Remove(ci);
@@ -549,7 +582,6 @@ public class GameManager : MonoBehaviour
         GameObject go = Instantiate(handCard.gameObject, parent);
         go.name = handCard.gameObject.name;
         go.SetActive(true);
-        go.transform.SetSiblingIndex(laneIndex);
 
         // Reset di scala/rotazione/posizione per farla sembrare come le altre sul tabellone
         var rt = go.transform as RectTransform;
@@ -578,6 +610,9 @@ public class GameManager : MonoBehaviour
 
         // Inizializzo come una normale carta sul board
         view.Init(this, player, ci);
+        view.EnsurePlayerBoardContainer(playerBoardRoot);
+        view.PlayerBoardContainer.SetSiblingIndex(laneIndex);
+
         view.SetHighlight(false);
         viewByInstance[ci] = view;
 

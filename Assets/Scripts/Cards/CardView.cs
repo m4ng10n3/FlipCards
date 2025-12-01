@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
 using DG.Tweening;
+using Unity.VisualScripting;
 [RequireComponent(typeof(RectTransform))]
 
 public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler
@@ -72,6 +73,12 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     private Vector3 _dragTargetWorld;
     private bool _hasDragTarget;
     private bool _returningToHand;
+
+    // === Board container (analogo all'hand container) ===
+    private RectTransform _playerBoardContainer;
+    private Tween _boardMoveTween;
+    private Quaternion _targetBoardRotation = Quaternion.identity;
+
 
     void Awake()
     {
@@ -151,6 +158,7 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     {
         UnsubscribeAllEvents();
         ReleaseHandContainer();
+        ReleaseBoardContainer();
     }
 
     private void UnsubscribeAllEvents()
@@ -329,7 +337,11 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         return isDirectChild || isContainerChild;
     }
     private bool IsBoardCard() => owner != null && instance != null;
-    private bool CanDragBoardCard() => gm != null && _rt != null && IsBoardCard() && _rt.parent == gm.playerBoardRoot;
+    private bool CanDragBoardCard() =>
+    gm != null &&
+    _rt != null &&
+    IsBoardCard() &&
+    _rt.IsChildOf(gm.playerBoardRoot);
 
     public void EvaluateHandCurve(float normalized, int slotCount, out Vector3 positionOffset, out Quaternion rotation)
     {
@@ -396,7 +408,7 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         _draggingFromBoard = true;
         _dragStartPos = _rt.position;
         _dragOriginalParent = _rt.parent;
-        _dragOriginalSibling = _rt.GetSiblingIndex();
+        _dragOriginalSibling = _playerBoardContainer.GetSiblingIndex();
         _dragOriginalLocalScale = _rt.localScale;
         _dragOriginalLocalRotation = _rt.localRotation;
         _dragPlaceholder = CreateDragPlaceholder();
@@ -696,6 +708,7 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         if (clone == null) return;
 
         int index = _dragOriginalSibling;
+        //Debug.Log(_dragOriginalSibling);
         if (index < 0 || index >= clone.childCount) return;
 
         var spot = clone.GetChild(index);
@@ -775,7 +788,7 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         for (int i = 0; i < results.Count; i++)
         {
             var view = results[i].gameObject.GetComponentInParent<CardView>();
-            if (view != null && view != this && view.transform.parent == gm.playerBoardRoot)
+            if (view != null && view != this && view.transform.IsChildOf(gm.playerBoardRoot))
                 return view;
         }
 
@@ -840,10 +853,118 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     private void LateUpdate()
     {
         FollowHandContainer();
-        if (_dragging && _hasDragTarget)
-            FollowDragContainer();
+        FollowBoardContainer();
+        if (_dragging && _hasDragTarget) FollowDragContainer();
     }
 
+    // BOARD CONTAINER
+    private void FollowBoardContainer()
+    {
+        if (_playerBoardContainer == null || _rt == null || _draggingFromBoard || _draggingHand)
+            return;
+
+        var targetPosLocal = Vector3.zero;
+        _rt.localPosition = Vector3.Lerp(
+            _rt.localPosition,
+            targetPosLocal,
+            handFollowSpeed * Time.deltaTime
+        );
+
+        var parentRot = _playerBoardContainer.parent != null
+            ? _playerBoardContainer.parent.rotation
+            : Quaternion.identity;
+
+        var targetRot = parentRot * _targetBoardRotation;
+        _rt.rotation = Quaternion.Lerp(
+            _rt.rotation,
+            targetRot,
+            handFollowRotationSpeed * Time.deltaTime
+        );
+    }
+    public RectTransform PlayerBoardContainer => _playerBoardContainer;
+
+    public RectTransform EnsurePlayerBoardContainer(Transform parent)
+    {
+        if (_playerBoardContainer == null)
+        {
+            var go = new GameObject($"{name}_BoardContainer", typeof(RectTransform));
+            _playerBoardContainer = go.GetComponent<RectTransform>();
+            _playerBoardContainer.localScale = Vector3.one;
+            _playerBoardContainer.localRotation = Quaternion.identity;
+        }
+
+        if (parent != null && _playerBoardContainer.parent != parent)
+            _playerBoardContainer.SetParent(parent, false);
+
+        if (_rt != null)
+        {
+            // Allineo il container alla posizione attuale della carta
+            _playerBoardContainer.position = _rt.position;
+            _playerBoardContainer.rotation = Quaternion.identity;
+            var crt = GetComponent<RectTransform>().rect.size;
+            // Se gli anchor non sono stretch, puoi usare direttamente sizeDelta:
+            _playerBoardContainer.sizeDelta = crt;
+
+            // oppure, in modo più esplicito:
+            _playerBoardContainer.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, crt.x);
+            _playerBoardContainer.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, crt.y);
+
+            // Se non sto trascinando dal board, metto la carta dentro al container
+            if (_rt.parent != _playerBoardContainer && !_draggingFromBoard)
+            {
+                _rt.SetParent(_playerBoardContainer, true);
+                _rt.localPosition = Vector3.zero;
+            }
+        }
+
+        return _playerBoardContainer;
+    }
+
+    public void UpdateBoardContainerTarget(Vector3 localPosition, Quaternion localRotation)
+    {
+        if (_playerBoardContainer == null)
+            return;
+
+        _targetBoardRotation = localRotation;
+        KillBoardTweens();
+
+        if (handTweenDuration <= 0f)
+        {
+            _playerBoardContainer.localPosition = localPosition;
+            _playerBoardContainer.localRotation = Quaternion.identity;
+            return;
+        }
+
+        _boardMoveTween = _playerBoardContainer
+            .DOLocalMove(localPosition, handTweenDuration)
+            .SetEase(handTweenEase)
+            .SetUpdate(true)
+            .SetLink(gameObject);
+
+        _playerBoardContainer.localRotation = Quaternion.identity;
+    }
+
+    public void ReleaseBoardContainer()
+    {
+        if (_playerBoardContainer != null)
+        {
+            KillBoardTweens();
+            Destroy(_playerBoardContainer.gameObject);
+            _playerBoardContainer = null;
+        }
+    }
+
+    private void KillBoardTweens()
+    {
+        if (_boardMoveTween != null)
+        {
+            _boardMoveTween.Kill();
+            _boardMoveTween = null;
+        }
+    }
+
+
+    //HAND CONTAINER
     private void FollowHandContainer()
     {
         if (_handContainer == null || _rt == null || _draggingHand || _returningToHand)
@@ -941,6 +1062,8 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
             _handContainer = null;
         }
     }
+
+
 
     private void SetupDragContainer()
     {
