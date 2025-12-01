@@ -470,23 +470,25 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
 
     }
 
+    
     private void HandleBoardDrop(PointerEventData eventData)
     {
         HideCloneEmptySpot();
+        Vector3 releaseWorldPos = _rt != null ? _rt.position : _dragStartPos;
         var target = FindBoardCardUnderPointer(eventData);
         RestoreDraggedBoardCard();
-
         if (target != null && gm != null)
         {
             gm.SwapCardPositions(this, target);
         }
         else if (_rt != null)
         {
-            _rt.position = _dragStartPos;
+            ReturnBoardCardToSlot(releaseWorldPos);
         }
-
         _draggingFromBoard = false;
     }
+
+
 
     private void RestoreDraggedBoardCard()
     {
@@ -523,6 +525,45 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
 
         _dragOriginalParent = null;
     }
+
+    private void ReturnBoardCardToSlot(Vector3 releaseWorldPos)
+    {
+        if (_rt == null) return;
+
+    // stop eventuali tween in corso su questa carta
+    _rt.DOKill();
+
+    float duration = Mathf.Max(0f, handTweenDuration);
+    if (duration <= 0f)
+    {
+        // ritorno immediato, ma sempre alle world coords da cui il drag è iniziato
+        _rt.position = _dragStartPos;
+        _rt.localRotation = _dragOriginalLocalRotation;
+        _rt.localScale = _dragOriginalLocalScale;
+        return;
+    }
+
+    // dopo RestoreDraggedBoardCard il parent è tornato a playerBoardRoot,
+    // ma vogliamo che VISIVAMENTE parta dal punto in cui il giocatore ha rilasciato
+    _rt.position = releaseWorldPos;
+
+    // tween verso la posizione iniziale del drag (world coordinates)
+    var seq = DOTween.Sequence()
+        .SetUpdate(true)
+        .SetLink(gameObject);
+
+    seq.Join(_rt.DOMove(_dragStartPos, duration).SetEase(handTweenEase));
+
+    // opzionale ma sicuro: riallinea rotazione/scala alla fine, usando i valori salvati all'inizio del drag
+    seq.OnComplete(() =>
+    {
+        if (_rt == null) return;
+        _rt.localRotation = _dragOriginalLocalRotation;
+        _rt.localScale = _dragOriginalLocalScale;
+    });
+    }
+
+
     private void ReturnToHandSlot()
     {
         if (_rt == null) return;
@@ -575,6 +616,7 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
             _returningToHand = false;
         });
     }
+
 
     private GameObject CreateDragPlaceholder()
     {
