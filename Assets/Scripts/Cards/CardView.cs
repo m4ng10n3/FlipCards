@@ -99,10 +99,14 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     private Tween _boardMoveTween;
     private Quaternion _targetBoardRotation = Quaternion.identity;
 
+    private Quaternion _initialLocalRotation;
+
 
     void Awake()
     {
         _rt = GetComponent<RectTransform>();
+        _initialLocalRotation = _rt.localRotation;
+
         _rootCanvas = GetComponentInParent<Canvas>();
         _canvasGroup = GetComponent<CanvasGroup>();
         if (_canvasGroup == null) _canvasGroup = gameObject.AddComponent<CanvasGroup>();
@@ -948,28 +952,44 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
 
         if (_hovering)
         {
-            // Converti la posizione del puntatore in coordinate locali della carta
-            if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                    _rt,
+            var canvasRect = _rootCanvas.transform as RectTransform;
+            if (canvasRect != null &&
+                RectTransformUtility.ScreenPointToWorldPointInRectangle(
+                    canvasRect,
                     screenPos,
                     _rootCanvas.worldCamera,
-                    out var localPoint))
+                    out var pointerWorld))
             {
-                // normalizzo in [-1, 1] rispetto al centro della carta
+                // Parent come riferimento: non è mai ruotato
+                var parentTransform = _rt.parent != null ? _rt.parent : (Transform)_rt;
+
+                Vector3 cardCenterWorld = _rt.position;
+
+                // Delta mouse nello spazio del parent (quindi non influenzato dal tilt runtime)
+                Vector3 deltaParent =
+                    parentTransform.InverseTransformPoint(pointerWorld) -
+                    parentTransform.InverseTransformPoint(cardCenterWorld);
+
+                // Assi del prefab (orientazione originale) nello spazio del parent
+                Vector3 axisX = _initialLocalRotation * Vector3.right;
+                Vector3 axisY = _initialLocalRotation * Vector3.up;
+
+                // Componenti del movimento del mouse lungo gli assi del prefab
+                float offsetX = Vector3.Dot(deltaParent, axisX);
+                float offsetY = Vector3.Dot(deltaParent, axisY);
+
+                // Normalizzazione rispetto alle dimensioni della carta
                 Rect r = _rt.rect;
-                float normX = Mathf.Clamp(localPoint.x / (r.width * 0.5f), -1f, 1f);
-                float normY = Mathf.Clamp(localPoint.y / (r.height * 0.5f), -1f, 1f);
+                float halfW = Mathf.Max(1f, r.width * 0.5f);
+                float halfH = Mathf.Max(1f, r.height * 0.5f);
 
-                // La carta "segue" il mouse: spostando il cursore sui bordi aumenta l'inclinazione
-                tiltX = -normY * manualTiltAmount; // sali col mouse -> inclina verso l'alto
-                tiltY = normX * manualTiltAmount; // vai a destra col mouse -> inclina a destra
+                float normX = Mathf.Clamp(offsetX / halfW, -1f, 1f);
+                float normY = Mathf.Clamp(offsetY / halfH, -1f, 1f);
 
-                // === Precessione sull'asse Z ===
-                // Più vai verso gli angoli, più ruota intorno a Z, con verso diverso per ogni angolo.
-                float edgeFactor = Mathf.Clamp01(new Vector2(normX, normY).magnitude); // 0 al centro, 1 bordi
-                float precessionSign = Mathf.Sign(normX) * Mathf.Sign(normY);          // angoli opposti -> verso opposto
-
-                tiltZ += precessionSign * edgeFactor * manualTiltAmount * 0.5f;
+                // Movimento lungo un asse DEL PREFAB -> rotazione attorno all’altro asse
+                // (asse Y del prefab -> rotazione attorno a X, asse X del prefab -> rotazione attorno a Y)
+                tiltX = -normY * manualTiltAmount;  // muovi il mouse lungo l'asse "up" del prefab -> pitch (X)
+                tiltY = normX * manualTiltAmount;  // muovi il mouse lungo l'asse "right" del prefab -> yaw  (Y)
             }
         }
         else
