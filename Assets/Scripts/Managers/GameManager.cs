@@ -682,7 +682,7 @@ public class GameManager : MonoBehaviour
         {
             var atkView = viewByInstance[card];
             Transform oppRoot = (atkView.owner == player) ? aiBoardRoot : playerBoardRoot;
-            int lane = atkView.transform.GetSiblingIndex();
+            int lane = atkView.PlayerBoardContainer.transform.GetSiblingIndex();
 
             if (lane < 0 || lane >= oppRoot.childCount)
                 return null;

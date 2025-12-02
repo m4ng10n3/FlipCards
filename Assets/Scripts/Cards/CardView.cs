@@ -24,6 +24,10 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     [SerializeField] private float dragRotationMagnitude = 6f;
     [SerializeField] private float dragMaxTilt = 60f;
     [SerializeField] private float dragTiltDistanceThreshold = 0.1f;
+    [Header("Flip Animation")]
+    [SerializeField] private float flipDuration = 0.25f;
+    [SerializeField] private Ease flipEase = Ease.InOutQuad;
+
 
     private Sprite frontImage;
 
@@ -212,24 +216,63 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
 
         _lastHp = instance.health;
 
-        FlipSide();
+        FlipSide(immediate: true);
     }
 
-    private void FlipSide()
+    // Flip lato carta, opzionalmente immediato (senza animazione)
+    private void FlipSide(bool immediate = false)
+    {
+        // Se non stiamo giocando (es. in editor) o non hai ancora il RectTransform, fai solo lo swap "secco"
+        if (immediate || flipDuration <= 0f || _rt == null || !Application.isPlaying)
+        {
+            ApplySideVisuals();
+            return;
+        }
+
+        // interrompe eventuali tween attivi su questa carta (rotazioni/spostamenti su _rt)
+        _rt.DOKill();
+
+        Vector3 startEuler = _rt.localEulerAngles;
+        float halfDuration = flipDuration * 0.5f;
+
+        // Sequenza: ruota a 90° sull'asse Y, cambia sprite, torna a 0°
+        var seq = DOTween.Sequence()
+            .SetUpdate(true)
+            .SetLink(gameObject);
+
+        seq.Append(
+                _rt.DOLocalRotate(
+                    new Vector3(startEuler.x, startEuler.y + 90f, startEuler.z),
+                    halfDuration
+                ).SetEase(flipEase)
+            )
+        .AppendCallback(ApplySideVisuals) // qui metti il retro/ fronte corretto
+        .Append(
+                _rt.DOLocalRotate(
+                    startEuler,
+                    halfDuration
+                ).SetEase(flipEase)
+            );
+    }
+
+    // SOLO la parte che aggiorna sprite, testi, outline.
+    // È il corpo "vecchio" di FlipSide, spostato qui.
+    private void ApplySideVisuals()
     {
         bool isFront = (instance != null && instance.side == Side.Fronte);
 
         // Cambia solo lo sprite (niente SetNativeSize / scale)
-        var newSprite = isFront ? frontImage : (backImage != null ? backImage : frontImage);
-        Template.GetComponent<Image>().type = Image.Type.Simple; // per sicurezza
-        Template.GetComponent<Image>().preserveAspect = false;   // il RectTransform decide; cambia a true se vuoi letterboxing
-        Template.GetComponent<Image>().sprite = newSprite;
-        //img.useSpriteMesh = false;
+        var img = Template != null ? Template.GetComponent<Image>() : null;
+        if (img != null)
+        {
+            var newSprite = isFront ? frontImage : (backImage != null ? backImage : frontImage);
+            img.type = Image.Type.Simple;   // per sicurezza
+            img.preserveAspect = false;     // il RectTransform decide; cambia a true se vuoi letterboxing
+            img.sprite = newSprite;
+        }
+
         // Mostra/nascondi i testi a seconda del lato
-
-        if (highlight != null)
-            highlight.effectColor = isFront ? Color.white : Color.white; // retro nero => outline bianco
-
+        if (highlight != null) highlight.effectColor = isFront ? Color.white : Color.white; // come prima
         if (nameText) nameText.enabled = isFront;
         if (hpText) hpText.enabled = isFront;
         if (AttackPwrText) AttackPwrText.enabled = isFront;
