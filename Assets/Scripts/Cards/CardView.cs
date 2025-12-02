@@ -911,10 +911,10 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
 
     private void LateUpdate()
     {
-        CardTilt();
         FollowHandContainer();
         FollowBoardContainer();
         if (_dragging && _hasDragTarget) FollowDragContainer();
+        CardTilt();
     }
 
     private void CardTilt()
