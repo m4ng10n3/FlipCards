@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public enum Faction { A, B, C }
@@ -11,4 +12,9 @@ public enum CardZone
     Discard
 }
 
-
+public enum Editions
+{
+    REGULAR,
+    POLYCHROME,
+    NEGATIVE
+}

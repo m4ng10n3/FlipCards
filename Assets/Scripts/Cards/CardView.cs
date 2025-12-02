@@ -1,10 +1,12 @@
-using UnityEngine;
-using UnityEngine.UI;
+using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine.EventSystems;
-using DG.Tweening;
+using System.Security.Cryptography;
 using Unity.VisualScripting;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
+using UnityEngine.UI;
 [RequireComponent(typeof(RectTransform))]
 
 public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler
@@ -27,7 +29,13 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     [Header("Flip Animation")]
     [SerializeField] private float flipDuration = 0.25f;
     [SerializeField] private Ease flipEase = Ease.InOutQuad;
+    [Header("Rotation Parameters")]
+    [SerializeField] private float autoTiltAmount = 30;
+    [SerializeField] private float manualTiltAmount = 20;
+    [SerializeField] private float tiltSpeed = 20;
 
+    [Header("Input System")]
+    [SerializeField] private InputActionReference pointerPositionAction; // es: UI/Point
 
     private Sprite frontImage;
 
@@ -55,8 +63,11 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     private RectTransform _rt;
     private Vector3 _dragStartPos;
     private bool _dragging;
+    public bool _hovering;
+
     private bool _draggingFromBoard;
     private Transform _dragOriginalParent;
+
     private GameObject _dragPlaceholder;
     private GameObject _cloneEmptySpotDuringDrag;
     private Image _cloneEmptySpotImage;
@@ -69,6 +80,8 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     private static readonly List<RaycastResult> _raycastBuffer = new List<RaycastResult>(8);
     private CurveParameters _lastCurveAsset;
     private int _lastCurveVersion = -1;
+    private float curveRotationOffset;
+
     private RectTransform _handContainer;
     private Tween _handMoveTween;
     private Quaternion _targetHandRotation = Quaternion.identity;
@@ -77,6 +90,9 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     private Vector3 _dragTargetWorld;
     private bool _hasDragTarget;
     private bool _returningToHand;
+    
+
+    private int savedIndex;
 
     // === Board container (analogo all'hand container) ===
     private RectTransform _playerBoardContainer;
@@ -403,6 +419,7 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         float symmetryT = Mathf.Clamp01(Mathf.Abs(centered) * 2f);
         float rotZ = Mathf.Sign(centered) * curveParameters.rotation.Evaluate(symmetryT) * curveParameters.rotationInfluence;
         rotation = Quaternion.Euler(0f, 0f, rotZ);
+        curveRotationOffset = rotZ;
     }
 
     public bool ConsumeCurveDirtyFlag()
@@ -653,6 +670,7 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         var seq = DOTween.Sequence().SetUpdate(true).SetLink(gameObject);
         seq.Join(_rt.DOMove(targetWorldPos, duration).SetEase(handTweenEase));
         seq.Join(_rt.DORotateQuaternion(targetWorldRot, duration).SetEase(handTweenEase));
+
         seq.Join(_rt.DOScale(_dragOriginalScale, duration).SetEase(handTweenEase));
 
         seq.OnKill(() => _returningToHand = false);
@@ -840,14 +858,12 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if (IsHandCard())
-            gm?.HandManager?.SetHoveredCard(this);
+        _hovering = true;
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        if (IsHandCard())
-            gm?.HandManager?.ClearHoveredCard(this);
+        _hovering = false;
     }
 
     private void ApplyDragPickupRotation()
@@ -895,10 +911,84 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
 
     private void LateUpdate()
     {
+        CardTilt();
         FollowHandContainer();
         FollowBoardContainer();
         if (_dragging && _hasDragTarget) FollowDragContainer();
     }
+
+    private void CardTilt()
+    {
+        if (_rt == null || _rootCanvas == null)
+            return;
+
+        // indice "salvato" per avere una fase diversa per ogni carta
+        savedIndex = _dragging ? savedIndex : _rt.parent.GetSiblingIndex();
+
+        // wobble automatico (idle)
+        float sine = Mathf.Sin(Time.time + savedIndex);
+        float cosine = Mathf.Cos(Time.time + savedIndex);
+
+        // === Lettura posizione puntatore (New Input System) ===
+        Vector2 screenPos = Vector2.zero;
+
+        if (Mouse.current != null)
+        {
+            screenPos = Mouse.current.position.ReadValue();
+        }
+
+        float tiltX = 0f;
+        float tiltY = 0f;
+
+        // base di rotazione Z data dalla curva della mano/board
+        float tiltZ = curveRotationOffset;
+        if (curveParameters != null && _rt.parent != null)
+            tiltZ = curveRotationOffset *
+                    (curveParameters.rotationInfluence * _rt.parent.childCount - 1);
+
+        if (_hovering)
+        {
+            // Converti la posizione del puntatore in coordinate locali della carta
+            if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                    _rt,
+                    screenPos,
+                    _rootCanvas.worldCamera,
+                    out var localPoint))
+            {
+                // normalizzo in [-1, 1] rispetto al centro della carta
+                Rect r = _rt.rect;
+                float normX = Mathf.Clamp(localPoint.x / (r.width * 0.5f), -1f, 1f);
+                float normY = Mathf.Clamp(localPoint.y / (r.height * 0.5f), -1f, 1f);
+
+                // La carta "segue" il mouse: spostando il cursore sui bordi aumenta l'inclinazione
+                tiltX = -normY * manualTiltAmount; // sali col mouse -> inclina verso l'alto
+                tiltY = normX * manualTiltAmount; // vai a destra col mouse -> inclina a destra
+
+                // === Precessione sull'asse Z ===
+                // Più vai verso gli angoli, più ruota intorno a Z, con verso diverso per ogni angolo.
+                float edgeFactor = Mathf.Clamp01(new Vector2(normX, normY).magnitude); // 0 al centro, 1 bordi
+                float precessionSign = Mathf.Sign(normX) * Mathf.Sign(normY);          // angoli opposti -> verso opposto
+
+                tiltZ += precessionSign * edgeFactor * manualTiltAmount * 0.5f;
+            }
+        }
+        else
+        {
+            // Non in hover: solo oscillazione "idle" automatica
+            tiltX = sine * autoTiltAmount;
+            tiltY = cosine * autoTiltAmount;
+        }
+
+        // Interpolazione morbida verso il nuovo orientamento
+        Vector3 current = transform.localEulerAngles;
+
+        float lerpX = Mathf.LerpAngle(current.x, tiltX, tiltSpeed * Time.deltaTime);
+        float lerpY = Mathf.LerpAngle(current.y, tiltY, tiltSpeed * Time.deltaTime);
+        float lerpZ = Mathf.LerpAngle(current.z, tiltZ, (tiltSpeed * 0.5f) * Time.deltaTime);
+
+        transform.localEulerAngles = new Vector3(lerpX, lerpY, lerpZ);
+    }
+
 
     // BOARD CONTAINER
     private void FollowBoardContainer()

@@ -1042,7 +1042,6 @@ MonoBehaviour:
   spawnScaleMultiplier: 1.5
   btnDraw: {fileID: 980305386}
   selectedCard: {fileID: 0}
-  hoveredCard: {fileID: 0}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0

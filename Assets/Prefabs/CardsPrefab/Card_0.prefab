@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 8339442125107133040}
   - component: {fileID: 9010848516961293436}
   - component: {fileID: 2489055945114031205}
-  - component: {fileID: 8647767798699985530}
+  - component: {fileID: 1954813987030437933}
   m_Layer: 0
   m_Name: imagecharacter
   m_TagString: Untagged
@@ -76,7 +76,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &8647767798699985530
+--- !u!114 &1954813987030437933
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -88,6 +88,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 385bd7ef3d997354e9b7db0218955387, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShaderCode
+  edition: 2
 --- !u!1 &2144578116558927278
 GameObject:
   m_ObjectHideFlags: 0
@@ -626,6 +627,12 @@ MonoBehaviour:
   dragRotationMagnitude: 0.3
   dragMaxTilt: 30
   dragTiltDistanceThreshold: 2
+  flipDuration: 0.25
+  flipEase: 7
+  autoTiltAmount: 30
+  manualTiltAmount: 20
+  tiltSpeed: 20
+  pointerPositionAction: {fileID: 0}
   nameText: {fileID: 8530644132936236624}
   factionText: {fileID: 4206496386914259341}
   sideText: {fileID: 7532144197698887769}
@@ -634,6 +641,7 @@ MonoBehaviour:
   BlockPwrText: {fileID: 8984491704404075823}
   gm: {fileID: 0}
   hintText: {fileID: 1378478563021068591}
+  _hovering: 0
 --- !u!114 &2565232950433125074
 MonoBehaviour:
   m_ObjectHideFlags: 0

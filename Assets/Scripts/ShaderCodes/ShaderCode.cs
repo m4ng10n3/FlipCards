@@ -1,12 +1,19 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
+
 public class ShaderCode : MonoBehaviour
 {
-
+    
     Image image;
     Material m;
+
+    public Editions edition = Editions.REGULAR;
+
+    //public string[] edition = { "REGULAR", "POLYCHROME", "NEGATIVE" };
 
     // Start is called before the first frame update
     void Start()
@@ -15,17 +22,11 @@ public class ShaderCode : MonoBehaviour
         m = new Material(image.material);
         image.material = m;
 
-        string[] editions = new string[4];
-        editions[0] = "REGULAR";
-        editions[1] = "POLYCHROME";
-        editions[2] = "REGULAR";
-        editions[3] = "NEGATIVE";
-
         for (int i = 0; i < image.material.enabledKeywords.Length; i++)
         {
             image.material.DisableKeyword(image.material.enabledKeywords[i]);
         }
-        image.material.EnableKeyword("_EDITION_" + editions[3]);
+        image.material.EnableKeyword("_EDITION_" + edition.ToString().ToUpper());
     }
 
     // Update is called once per frame
@@ -39,7 +40,7 @@ public class ShaderCode : MonoBehaviour
         Vector3 eulerAngles = currentRotation.eulerAngles;
 
         // Get the X-axis angle
-        /*
+        
         float xAngle = eulerAngles.x;
         float yAngle = eulerAngles.y;
 
@@ -48,12 +49,12 @@ public class ShaderCode : MonoBehaviour
         yAngle = ClampAngle(yAngle, -90f, 90f);
 
         m.SetVector("_Rotation", new Vector2(ExtensionMethods.Remap(xAngle, -20, 20, -.5f, .5f), ExtensionMethods.Remap(yAngle, -20, 20, -.5f, .5f)));
-        */
+        
 
-        float zAngle = ClampAngle(eulerAngles.z, -90f, 90f);
+        //float zAngle = ClampAngle(eulerAngles.z, -90f, 90f);
 
         //m.SetVector("_Rotation", new Vector2(xAngle, yAngle));
-        m.SetVector("_Rotation", new Vector2(ExtensionMethods.Remap(zAngle, -20, 20, -.5f, .5f), 0f));
+        //m.SetVector("_Rotation", new Vector2(ExtensionMethods.Remap(zAngle, -20, 20, -.5f, .5f), 0f));
     }
 
     // Method to clamp an angle between a minimum and maximum value

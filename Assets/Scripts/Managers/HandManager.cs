@@ -17,7 +17,6 @@ public class HandManager : MonoBehaviour
 
     [Header("Runtime debug")]
     [SerializeField] private CardView selectedCard;
-    [SerializeField] private CardView hoveredCard;
 
     private readonly List<CardView> handCards = new();
     private readonly List<Transform> layoutBuffer = new();
@@ -550,17 +549,6 @@ public class HandManager : MonoBehaviour
         UpdateCardsPosition();
     }
 
-    public void SetHoveredCard(CardView view)
-    {
-        hoveredCard = view;
-    }
-
-    public void ClearHoveredCard(CardView view)
-    {
-        if (hoveredCard == view)
-            hoveredCard = null;
-    }
-
     public void OnHandCardDroppedToBoard(CardView view)
     {
         if (view == null)
@@ -570,8 +558,6 @@ public class HandManager : MonoBehaviour
             draggingCard = null;
         if (selectedCard == view)
             selectedCard = null;
-        if (hoveredCard == view)
-            hoveredCard = null;
 
         activePlaceholder = null;
         SortHandCardsBySlotIndex();
