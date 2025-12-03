@@ -65,7 +65,6 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     private bool _draggingFromBoard;
     private Transform _dragOriginalParent;
 
-    private GameObject _dragPlaceholder;
     private GameObject _cloneEmptySpotDuringDrag;
     private Image _cloneEmptySpotImage;
     private int _dragOriginalSibling;
@@ -83,7 +82,6 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     private Tween _handMoveTween;
     private Quaternion _targetHandRotation = Quaternion.identity;
     private Vector3 _dragOriginalScale = Vector3.one;
-    private RectTransform _dragContainer;
     private Vector3 _dragTargetWorld;
     private bool _hasDragTarget;
     private bool _returningToHand;
@@ -374,7 +372,8 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-        if (_rt == null) return;
+        if (_rt == null) throw new System.InvalidOperationException("CardView missing RectTransform");
+        if (_rootCanvas == null) throw new System.InvalidOperationException("CardView missing Canvas");
 
         _dragTargetWorld = _rt.position;
         if (_rootCanvas != null &&
@@ -389,32 +388,29 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
 
         if (IsHandCard())
         {
+            if (gm == null || gm.HandManager == null) throw new System.InvalidOperationException("Hand drag requires GameManager and HandManager");
+            _handContainer = EnsureHandContainer(gm.HandManager.HandRoot);
+            if (_handContainer == null) throw new System.InvalidOperationException("Hand container not created");
+
             _dragging = true;
             _draggingHand = true;
             _draggingFromBoard = false;
 
             _dragStartPos = _rt.position;
-            _dragOriginalParent = _rt.parent;
-            _dragOriginalSibling = _rt.parent.GetSiblingIndex();
+            _dragOriginalParent = _handContainer;
+            _dragOriginalSibling = _handContainer.GetSiblingIndex();
             _dragOriginalLocalScale = _rt.localScale;
             _dragOriginalLocalRotation = _rt.localRotation;
             _dragOriginalScale = _rt.localScale;
 
-            _dragPlaceholder = null;
             _hasDragTarget = true;
 
-            if (_handContainer != null)
-                _handContainer.SetAsLastSibling();
-            else
-                _rt.SetAsLastSibling();
-
-            gm?.HandManager?.OnHandCardBeginDrag(this, _handContainer);
+            gm.HandManager.OnHandCardBeginDrag(this, _handContainer);
 
             return;
         }
 
         if (!CanDragBoardCard()) return;
-        if (_rootCanvas == null) return;
 
         _dragging = true;
         _draggingFromBoard = true;
@@ -444,7 +440,7 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
             _hasDragTarget = true;
 
             if (_draggingHand)
-                UpdateHandPlaceholderIndex();
+                UpdateHandOrderDuringDrag();
         }
     }
 
@@ -467,29 +463,22 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
 
     private void HandleHandDrop(PointerEventData eventData)
     {
+        if (gm == null || gm.HandManager == null) throw new System.InvalidOperationException("Hand drop requires GameManager");
+
         bool played = false;
         var spot = FindEmptySpotUnderPointer(eventData);
-        if (spot != null && gm != null)
+        if (spot != null)
         {
-            ClearDragPlaceholder();
             gm.OnEmptySpotClicked(spot);
             gm.OnCardClicked(this);
             played = true;
         }
 
         if (!played)
-        {
             ReturnToHandSlot();
-            _draggingHand = false;
-            gm?.HandManager?.OnHandCardEndDrag(this);
-        }
-        else
-        {
-            _dragOriginalParent = null;
-            _draggingHand = false;
-            gm?.HandManager?.OnHandCardEndDrag(this);
-        }
 
+        _draggingHand = false;
+        gm.HandManager.OnHandCardEndDrag(this);
     }
 
     private void HandleBoardDrop(PointerEventData eventData)
@@ -521,8 +510,7 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
 
         if (dragTransform != null && _dragOriginalParent != null)
         {
-            int insertIndex = _dragPlaceholder != null ? _dragPlaceholder.transform.GetSiblingIndex() : _dragOriginalSibling;
-            insertIndex = Mathf.Clamp(insertIndex, 0, _dragOriginalParent.childCount);
+            int insertIndex = Mathf.Clamp(_dragOriginalSibling, 0, _dragOriginalParent.childCount);
             dragTransform.SetParent(_dragOriginalParent, false);
             dragTransform.SetSiblingIndex(insertIndex);
             dragTransform.localRotation = _draggingHand && _handContainer != null ? Quaternion.identity : _dragOriginalLocalRotation;
@@ -536,71 +524,59 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
             if (asRt != null) asRt.anchoredPosition = Vector2.zero;
         }
 
-        if (_dragPlaceholder != null)
-        {
-            Destroy(_dragPlaceholder);
-            _dragPlaceholder = null;
-        }
-
         _dragOriginalParent = null;
     }
 
     private void ReturnBoardCardToSlot(Vector3 releaseWorldPos)
     {
-        if (_rt == null) return;
-
-    _rt.DOKill();
-
-    float duration = Mathf.Max(0f, handTweenDuration);
-    if (duration <= 0f)
-    {
-        _rt.position = _dragStartPos;
-        _rt.localRotation = _dragOriginalLocalRotation;
-        _rt.localScale = _dragOriginalLocalScale;
-        return;
-    }
-
-    _rt.position = releaseWorldPos;
-
-    var seq = DOTween.Sequence()
-        .SetUpdate(true)
-        .SetLink(gameObject);
-
-    seq.Join(_rt.DOMove(_dragStartPos, duration).SetEase(handTweenEase));
-
-    seq.OnComplete(() =>
-    {
-        if (_rt == null) return;
-        _rt.localRotation = _dragOriginalLocalRotation;
-        _rt.localScale = _dragOriginalLocalScale;
-    });
-    }
-
-    private void ReturnToHandSlot()
-    {
-        if (_rt == null) return;
-
-        var target = _handContainer != null ? _handContainer : _dragOriginalParent as RectTransform;
-        if (target == null) return;
+        if (_rt == null) throw new System.InvalidOperationException("CardView missing RectTransform");
 
         _rt.DOKill();
 
         float duration = Mathf.Max(0f, handTweenDuration);
+        if (duration <= 0f)
+        {
+            _rt.position = _dragStartPos;
+            _rt.localRotation = _dragOriginalLocalRotation;
+            _rt.localScale = _dragOriginalLocalScale;
+            return;
+        }
+
+        _rt.position = releaseWorldPos;
+
+        var seq = DOTween.Sequence()
+            .SetUpdate(true)
+            .SetLink(gameObject);
+
+        seq.Join(_rt.DOMove(_dragStartPos, duration).SetEase(handTweenEase));
+
+        seq.OnComplete(() =>
+        {
+            if (_rt == null) return;
+            _rt.localRotation = _dragOriginalLocalRotation;
+            _rt.localScale = _dragOriginalLocalScale;
+        });
+    }
+
+    private void ReturnToHandSlot()
+    {
+        if (_rt == null) throw new System.InvalidOperationException("CardView missing RectTransform");
+
+        var target = _handContainer ?? throw new System.InvalidOperationException("Missing hand container");
+
+        _rt.DOKill();
+        _rt.SetParent(target, true);
+
+        float duration = Mathf.Max(0f, handTweenDuration);
         var asRt = _rt as RectTransform;
-        Vector3 targetWorldPos = target.position;
-        Quaternion targetWorldRot = target.rotation;
 
         if (duration <= 0f)
         {
-            _rt.position = targetWorldPos;
-            _rt.rotation = targetWorldRot;
-            _rt.SetParent(target, true);
-            _rt.localRotation = Quaternion.identity;
+            _rt.localPosition = Vector3.zero;
+            _rt.localRotation = _targetHandRotation;
             _rt.localScale = _dragOriginalScale;
             if (asRt != null)
                 asRt.anchoredPosition = Vector2.zero;
-            else
-                _rt.localPosition = Vector3.zero;
             _returningToHand = false;
             return;
         }
@@ -608,59 +584,25 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         _returningToHand = true;
 
         var seq = DOTween.Sequence().SetUpdate(true).SetLink(gameObject);
-        seq.Join(_rt.DOMove(targetWorldPos, duration).SetEase(handTweenEase));
-        seq.Join(_rt.DORotateQuaternion(targetWorldRot, duration).SetEase(handTweenEase));
-
+        seq.Join(_rt.DOLocalMove(Vector3.zero, duration).SetEase(handTweenEase));
+        seq.Join(_rt.DOLocalRotateQuaternion(_targetHandRotation, duration).SetEase(handTweenEase));
         seq.Join(_rt.DOScale(_dragOriginalScale, duration).SetEase(handTweenEase));
 
         seq.OnKill(() => _returningToHand = false);
         seq.OnComplete(() =>
         {
-            if (_rt == null || target == null) return;
+            if (_rt == null) return;
 
-            _rt.SetParent(target, true);
-            _rt.localRotation = Quaternion.identity;
+            _rt.localPosition = Vector3.zero;
+            _rt.localRotation = _targetHandRotation;
             _rt.localScale = _dragOriginalScale;
-            var rt = _rt as RectTransform;
-            if (rt != null)
-                rt.anchoredPosition = Vector2.zero;
-            else
-                _rt.localPosition = Vector3.zero;
+            if (asRt != null)
+                asRt.anchoredPosition = Vector2.zero;
             _returningToHand = false;
         });
     }
 
-    private void ClearDragPlaceholder()
-    {
-        if (_dragPlaceholder != null)
-        {
-            Destroy(_dragPlaceholder);
-            _dragPlaceholder = null;
-        }
-
-        if (_draggingHand && gm != null && gm.HandManager != null)
-            StartCoroutine(RemoveHandCardAfterDrop());
-    }
-
-    private IEnumerator RemoveHandCardAfterDrop()
-    {
-        yield return null;
-
-        var hand = gm != null ? gm.HandManager : null;
-        if (hand == null || this == null)
-            yield break;
-
-        hand.OnHandCardDroppedToBoard(this);
-        hand.RemoveFromHand(gameObject);
-
-        if (this != null)
-        {
-            Destroy(gameObject);
-            hand.UpdateCardsPosition();
-        }
-    }
-
-    private void UpdateHandPlaceholderIndex()
+    private void UpdateHandOrderDuringDrag()
     {
         if (!_draggingHand)
             return;
@@ -766,18 +708,32 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     }
     private void FollowDragContainer()
     {
-        if (_rt == null) return;
+        if (_rt == null) throw new System.InvalidOperationException("CardView missing RectTransform");
 
         Vector3 targetPos = _dragTargetWorld;
+        _rt.position = Vector3.Lerp(_rt.position, targetPos, Mathf.Clamp01(handFollowSpeed * Time.deltaTime));
 
-        float moveT = Mathf.Clamp01(handFollowSpeed * Time.deltaTime);
-        _rt.position = Vector3.Lerp(_rt.position, targetPos, moveT);
-
-        Vector3 remaining = targetPos - _rt.position;
-        float distance = remaining.magnitude;
-
-        Quaternion targetRot = Quaternion.identity;
+        var targetRot = GetDragAnchorRotation();
         _rt.rotation = Quaternion.Lerp(_rt.rotation, targetRot, handFollowRotationSpeed * Time.deltaTime);
+    }
+
+    private Quaternion GetDragAnchorRotation()
+    {
+        if (_draggingHand)
+        {
+            if (_handContainer == null) throw new System.InvalidOperationException("Missing hand container during drag");
+            var parentRot = _handContainer.parent != null ? _handContainer.parent.rotation : Quaternion.identity;
+            return parentRot * _targetHandRotation;
+        }
+
+        if (_draggingFromBoard)
+        {
+            if (_playerBoardContainer == null) throw new System.InvalidOperationException("Missing board container during drag");
+            var parentRot = _playerBoardContainer.parent != null ? _playerBoardContainer.parent.rotation : Quaternion.identity;
+            return parentRot * _targetBoardRotation;
+        }
+
+        return _rt.rotation;
     }
 
     private void LateUpdate()

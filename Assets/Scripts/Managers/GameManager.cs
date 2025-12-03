@@ -56,6 +56,7 @@ public class GameManager : MonoBehaviour
         Logger.SetSink(AppendLog);
         EventBus.Publish(GameEventType.Info, new EventContext { phase = "GameManager ready" });
         _instance = this;
+        if (handManager == null) throw new InvalidOperationException("HandManager missing");
 
         btnAttack.onClick.AddListener(OnAttack);
         btnEndTurn.onClick.AddListener(OnEndTurn);
