@@ -76,7 +76,6 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     private static readonly List<RaycastResult> _raycastBuffer = new List<RaycastResult>(8);
     private CurveParameters _lastCurveAsset;
     private int _lastCurveVersion = -1;
-    private float curveRotationOffset;
 
     private RectTransform _handContainer;
     private Tween _handMoveTween;
@@ -92,12 +91,9 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     private Tween _boardMoveTween;
     private Quaternion _targetBoardRotation = Quaternion.identity;
 
-    private Quaternion _initialLocalRotation;
-
     void Awake()
     {
         _rt = GetComponent<RectTransform>();
-        _initialLocalRotation = _rt.localRotation;
         highlight = GetComponent<Outline>();
 
         _rootCanvas = GetComponentInParent<Canvas>();
@@ -358,7 +354,6 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         float symmetryT = Mathf.Clamp01(Mathf.Abs(centered) * 2f);
         float rotZ = Mathf.Sign(centered) * curveParameters.rotation.Evaluate(symmetryT) * curveParameters.rotationInfluence;
         rotation = Quaternion.Euler(0f, 0f, rotZ);
-        curveRotationOffset = rotZ;
     }
 
     public bool ConsumeCurveDirtyFlag()
@@ -706,73 +701,69 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     {
         _hovering = false;
     }
-    private void FollowDragContainer()
-    {
-        if (_rt == null) throw new System.InvalidOperationException("CardView missing RectTransform");
 
-        Vector3 targetPos = _dragTargetWorld;
-        _rt.position = Vector3.Lerp(_rt.position, targetPos, Mathf.Clamp01(handFollowSpeed * Time.deltaTime));
-
-        var targetRot = GetDragAnchorRotation();
-        _rt.rotation = Quaternion.Lerp(_rt.rotation, targetRot, handFollowRotationSpeed * Time.deltaTime);
-    }
-
-    private Quaternion GetDragAnchorRotation()
+    private Quaternion GetAnchorRotation()
     {
         if (_draggingHand)
-        {
-            if (_handContainer == null) throw new System.InvalidOperationException("Missing hand container during drag");
-            var parentRot = _handContainer.parent != null ? _handContainer.parent.rotation : Quaternion.identity;
-            return parentRot * _targetHandRotation;
-        }
+            return _handContainer != null && _handContainer.parent != null ? _handContainer.parent.rotation : Quaternion.identity;
 
         if (_draggingFromBoard)
-        {
-            if (_playerBoardContainer == null) throw new System.InvalidOperationException("Missing board container during drag");
-            var parentRot = _playerBoardContainer.parent != null ? _playerBoardContainer.parent.rotation : Quaternion.identity;
-            return parentRot * _targetBoardRotation;
-        }
+            return _playerBoardContainer != null && _playerBoardContainer.parent != null ? _playerBoardContainer.parent.rotation : Quaternion.identity;
 
-        return _rt.rotation;
+        if (_handContainer != null && _rt != null && _rt.IsChildOf(_handContainer) && _handContainer.parent != null)
+            return _handContainer.parent.rotation;
+
+        if (_playerBoardContainer != null && _rt != null && _rt.IsChildOf(_playerBoardContainer) && _playerBoardContainer.parent != null)
+            return _playerBoardContainer.parent.rotation;
+
+        return _rt != null && _rt.parent != null ? _rt.parent.rotation : Quaternion.identity;
     }
 
     private void LateUpdate()
     {
-        if (_dragging && _hasDragTarget) FollowDragContainer();
+        if (_rt == null) return;
+
+        var anchorRotation = GetAnchorRotation();
+
+        if (_dragging && _hasDragTarget)
+        {
+            _rt.position = Vector3.Lerp(_rt.position, _dragTargetWorld, Mathf.Clamp01(handFollowSpeed * Time.deltaTime));
+        }
         else
         {
             FollowHandContainer();
             FollowBoardContainer();
         }
-        CardTilt();
+
+        CardTilt(anchorRotation);
     }
 
-    private void CardTilt()
+    private void CardTilt(Quaternion anchorRotation)
     {
         if (_rt == null || _rootCanvas == null)
             return;
 
-        savedIndex = _dragging ? savedIndex : _rt.parent.GetSiblingIndex();
+        savedIndex = _dragging || _rt.parent == null ? savedIndex : _rt.parent.GetSiblingIndex();
+
+        bool inHand = _draggingHand || (_handContainer != null && _rt.IsChildOf(_handContainer));
+        bool inBoard = _draggingFromBoard || (_playerBoardContainer != null && _rt.IsChildOf(_playerBoardContainer));
+
+        var baseRotation = anchorRotation;
+        if (inHand) baseRotation *= _targetHandRotation;
+        else if (inBoard) baseRotation *= _targetBoardRotation;
 
         float sine = Mathf.Sin(Time.time + savedIndex);
         float cosine = Mathf.Cos(Time.time + savedIndex);
 
-        Vector2 screenPos = Vector2.zero;
-
-        if (Mouse.current != null)
-        {
-            screenPos = Mouse.current.position.ReadValue();
-        }
+        Vector2 screenPos = Mouse.current != null ? Mouse.current.position.ReadValue() : Vector2.zero;
 
         float tiltX = 0f;
         float tiltY = 0f;
+        float tiltZ = 0f;
 
-        float tiltZ = curveRotationOffset;
-        if (curveParameters != null && _rt.parent != null)
-            tiltZ = curveRotationOffset *
-                    (curveParameters.rotationInfluence * _rt.parent.childCount - 1);
+        bool hoverActive = _hovering && !_dragging;
 
-        if (_hovering)
+        if (hoverActive)
         {
             var canvasRect = _rootCanvas.transform as RectTransform;
             if (canvasRect != null &&
@@ -790,8 +781,9 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
                     parentTransform.InverseTransformPoint(pointerWorld) -
                     parentTransform.InverseTransformPoint(cardCenterWorld);
 
-                Vector3 axisX = _initialLocalRotation * Vector3.right;
-                Vector3 axisY = _initialLocalRotation * Vector3.up;
+                var localAnchor = Quaternion.Inverse(parentTransform.rotation) * baseRotation;
+                Vector3 axisX = localAnchor * Vector3.right;
+                Vector3 axisY = localAnchor * Vector3.up;
 
                 float offsetX = Vector3.Dot(deltaParent, axisX);
                 float offsetY = Vector3.Dot(deltaParent, axisY);
@@ -813,13 +805,14 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
             tiltY = cosine * autoTiltAmount;
         }
 
-        Vector3 current = transform.localEulerAngles;
+        Vector3 currentLocal = (Quaternion.Inverse(baseRotation) * _rt.rotation).eulerAngles;
 
-        float lerpX = Mathf.LerpAngle(current.x, tiltX, tiltSpeed * Time.deltaTime);
-        float lerpY = Mathf.LerpAngle(current.y, tiltY, tiltSpeed * Time.deltaTime);
-        float lerpZ = Mathf.LerpAngle(current.z, tiltZ, (tiltSpeed * 0.5f) * Time.deltaTime);
+        float lerpX = Mathf.LerpAngle(currentLocal.x, tiltX, tiltSpeed * Time.deltaTime);
+        float lerpY = Mathf.LerpAngle(currentLocal.y, tiltY, tiltSpeed * Time.deltaTime);
+        float lerpZ = Mathf.LerpAngle(currentLocal.z, tiltZ, (tiltSpeed * 0.5f) * Time.deltaTime);
 
-        transform.localEulerAngles = new Vector3(lerpX, lerpY, lerpZ);
+        var targetRot = baseRotation * Quaternion.Euler(lerpX, lerpY, lerpZ);
+        _rt.rotation = Quaternion.Lerp(_rt.rotation, targetRot, handFollowRotationSpeed * Time.deltaTime);
     }
 
     private void FollowBoardContainer()
@@ -832,17 +825,6 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
             _rt.localPosition,
             targetPosLocal,
             handFollowSpeed * Time.deltaTime
-        );
-
-        var parentRot = _playerBoardContainer.parent != null
-            ? _playerBoardContainer.parent.rotation
-            : Quaternion.identity;
-
-        var targetRot = parentRot * _targetBoardRotation;
-        _rt.rotation = Quaternion.Lerp(
-            _rt.rotation,
-            targetRot,
-            handFollowRotationSpeed * Time.deltaTime
         );
     }
     public RectTransform PlayerBoardContainer => _playerBoardContainer;
@@ -930,10 +912,6 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
 
         var targetPosLocal = Vector3.zero;
         _rt.localPosition = Vector3.Lerp(_rt.localPosition, targetPosLocal, handFollowSpeed * Time.deltaTime);
-
-        var parentRot = _handContainer.parent != null ? _handContainer.parent.rotation : Quaternion.identity;
-        var targetRot = parentRot * _targetHandRotation;
-        _rt.rotation = Quaternion.Lerp(_rt.rotation, targetRot, handFollowRotationSpeed * Time.deltaTime);
     }
 
     public RectTransform HandContainer => _handContainer;
