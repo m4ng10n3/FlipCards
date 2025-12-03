@@ -7,7 +7,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.UI;
 [RequireComponent(typeof(RectTransform))]
 
-public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler
+public class CardView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler
 {
     [Header("Image Handling")]
     [Tooltip("Sprite del retro (assegnare come Source Image in Inspector)")]
@@ -367,6 +367,7 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
 
     public void OnBeginDrag(PointerEventData eventData)
     {
+        if (_dragging) return;
         if (_rt == null) throw new System.InvalidOperationException("CardView missing RectTransform");
         if (_rootCanvas == null) throw new System.InvalidOperationException("CardView missing Canvas");
 
@@ -702,6 +703,17 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         _hovering = false;
     }
 
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        if (_dragging) return;
+        OnBeginDrag(eventData);
+    }
+
+    public void OnPointerUp(PointerEventData eventData)
+    {
+        OnEndDrag(eventData);
+    }
+
     private Quaternion GetAnchorRotation()
     {
         if (_draggingHand)
@@ -922,10 +934,16 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         {
             var go = new GameObject($"{name}_Container", typeof(RectTransform));
             _handContainer = go.GetComponent<RectTransform>();
-            _handContainer.localScale = Vector3.one;
+            _handContainer.localScale = _rt.localScale;
             _handContainer.localRotation = Quaternion.identity;
             if (_rt != null)
-                _handContainer.sizeDelta = _rt.rect.size;
+            {
+                var crt = GetComponent<RectTransform>().rect.size;
+                _handContainer.sizeDelta = crt;
+
+                _handContainer.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, crt.x);
+                _handContainer.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, crt.y);
+            }    
         }
 
         if (parent != null && _handContainer.parent != parent)
