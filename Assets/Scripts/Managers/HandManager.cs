@@ -212,15 +212,13 @@ public class HandManager : MonoBehaviour
     {
         if (movingCard == null) throw new System.InvalidOperationException("Missing moving card");
 
-        var container = movingCard.HandContainer ?? movingCard.EnsureHandContainer(handRoot);
-        if (container == null) throw new System.InvalidOperationException("Missing container for moving card");
+        var sourceContainer = movingCard.HandContainer ?? movingCard.EnsureHandContainer(handRoot);
+        if (sourceContainer == null) throw new System.InvalidOperationException("Missing container for moving card");
 
         var containers = new List<RectTransform>();
-        foreach (var card in handCards)
+        foreach (Transform child in handRoot)
         {
-            var c = card.HandContainer ?? card.EnsureHandContainer(handRoot);
-            if (c == null) throw new System.InvalidOperationException("Missing hand container");
-            containers.Add(c);
+            if (child is RectTransform rt) containers.Add(rt);
         }
 
         if (containers.Count == 0) return;
@@ -239,10 +237,15 @@ public class HandManager : MonoBehaviour
             }
         }
 
-        int currentIndex = container.GetSiblingIndex();
-        if (targetIndex == currentIndex) return;
+        var targetContainer = containers[targetIndex];
+        if (targetContainer == sourceContainer) return;
 
-        container.SetSiblingIndex(targetIndex);
+        var targetCard = targetContainer.GetComponentInChildren<CardView>(includeInactive: false);
+
+        movingCard.SetHandContainer(targetContainer, reparent: true, worldPositionStays: true);
+        if (targetCard != null)
+            targetCard.SetHandContainer(sourceContainer, reparent: true, worldPositionStays: true);
+
         SortHandCardsBySlotIndex();
         UpdateCardsPosition();
     }

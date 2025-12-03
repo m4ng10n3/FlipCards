@@ -50,8 +50,9 @@ public class CardView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, I
     private EventBus.Handler _evtHandler;
     private Canvas _rootCanvas;
     private RectTransform _rt;
+    private Canvas _canvas;
     private bool _dragging;
-    public bool _hovering;
+    private bool _hovering;
 
     private bool _draggingFromBoard;
 
@@ -81,8 +82,9 @@ public class CardView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, I
     {
         _rt = GetComponent<RectTransform>();
         highlight = GetComponent<Outline>();
-
-        _rootCanvas = GetComponentInParent<Canvas>();
+        _canvas = GetComponent<Canvas>() ?? gameObject.AddComponent<Canvas>();
+        if (GetComponent<GraphicRaycaster>() == null) gameObject.AddComponent<GraphicRaycaster>();
+        CacheRootCanvas();
 
         hintText.gameObject.SetActive(false);
 
@@ -161,6 +163,23 @@ public class CardView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, I
     public void SetHighlight(bool setting)
     {
         highlight.enabled = setting;
+    }
+
+    private void CacheRootCanvas()
+    {
+        _rootCanvas = null;
+        var canvases = GetComponentsInParent<Canvas>(includeInactive: true);
+        for (int i = 0; i < canvases.Length; i++)
+        {
+            if (canvases[i] != _canvas)
+            {
+                _rootCanvas = canvases[i];
+                break;
+            }
+        }
+
+        if (_rootCanvas == null)
+            _rootCanvas = _canvas;
     }
 
     public void Refresh()
@@ -350,6 +369,7 @@ public class CardView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, I
         if (_dragging) return;
         if (_rt == null) throw new System.InvalidOperationException("CardView missing RectTransform");
         if (_rootCanvas == null) throw new System.InvalidOperationException("CardView missing Canvas");
+        _canvas.overrideSorting = true;
 
         _dragTargetWorld = _rt.position;
         if (_rootCanvas != null &&
@@ -393,6 +413,8 @@ public class CardView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, I
     public void OnDrag(PointerEventData eventData)
     {
         if (!_dragging || _rt == null || _rootCanvas == null) return;
+        _canvas.overrideSorting = true;
+        _canvas.sortingOrder = 10;
 
         if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
                 _rootCanvas.transform as RectTransform,
@@ -412,9 +434,8 @@ public class CardView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, I
     public void OnEndDrag(PointerEventData eventData)
     {
         if (!_dragging) return;
-
+        _canvas.overrideSorting = false;
         _dragging = false;
-
         if (_draggingFromBoard)
         {
             HandleBoardDrop(eventData);
@@ -548,11 +569,13 @@ public class CardView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, I
     public void OnPointerEnter(PointerEventData eventData)
     {
         _hovering = true;
+        Debug.Log($"hovering: {_hovering}");
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
         _hovering = false;
+        Debug.Log($"hovering: {_hovering}");
     }
 
     public void OnPointerDown(PointerEventData eventData)
@@ -822,11 +845,14 @@ public class CardView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, I
             _rt.SetParent(_handContainer, worldPositionStays);
             _rt.localRotation = Quaternion.identity;
 
-            var asRt = _rt as RectTransform;
-            if (asRt != null)
-                asRt.anchoredPosition = Vector2.zero;
-            else
-                _rt.localPosition = Vector3.zero;
+            if (!worldPositionStays)
+            {
+                var asRt = _rt as RectTransform;
+                if (asRt != null)
+                    asRt.anchoredPosition = Vector2.zero;
+                else
+                    _rt.localPosition = Vector3.zero;
+            }
         }
     }
 
@@ -871,5 +897,9 @@ public class CardView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, I
             _handMoveTween = null;
         }
     }
-}
 
+    void OnTransformParentChanged()
+    {
+        CacheRootCanvas();
+    }
+}

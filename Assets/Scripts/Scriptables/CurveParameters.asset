@@ -45,7 +45,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  positioningInfluence: 7.01
+  positioningInfluence: 5.1
   rotation:
     serializedVersion: 2
     m_Curve:
@@ -70,5 +70,5 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  rotationInfluence: 12.7
-  version: 8279
+  rotationInfluence: 11.44
+  version: 9510

@@ -497,6 +497,7 @@ GameObject:
   - component: {fileID: 4317153179959056156}
   - component: {fileID: 1986460151005530549}
   - component: {fileID: -3598331717277481526}
+  - component: {fileID: 3424704807168164451}
   m_Layer: 0
   m_Name: Card_1
   m_TagString: Untagged
@@ -582,9 +583,9 @@ MonoBehaviour:
   handTweenEase: 9
   flipDuration: 0.25
   flipEase: 7
-  autoTiltAmount: 30
-  manualTiltAmount: 20
-  tiltSpeed: 20
+  autoTiltAmount: 20
+  manualTiltAmount: 30
+  tiltSpeed: 15
   nameText: {fileID: 8530644132936236624}
   factionText: {fileID: 4206496386914259341}
   sideText: {fileID: 7532144197698887769}
@@ -593,7 +594,6 @@ MonoBehaviour:
   BlockPwrText: {fileID: 8984491704404075823}
   gm: {fileID: 0}
   hintText: {fileID: 1378478563021068591}
-  _hovering: 0
 --- !u!114 &2565232950433125074
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -687,6 +687,29 @@ MonoBehaviour:
   m_EffectColor: {r: 0, g: 0, b: 0, a: 0.5}
   m_EffectDistance: {x: 1, y: -1}
   m_UseGraphicAlpha: 1
+--- !u!223 &3424704807168164451
+Canvas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4860462570295797339}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_RenderMode: 2
+  m_Camera: {fileID: 0}
+  m_PlaneDistance: 100
+  m_PixelPerfect: 0
+  m_ReceivesEvents: 1
+  m_OverrideSorting: 0
+  m_OverridePixelPerfect: 0
+  m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
+  m_AdditionalShaderChannelsFlag: 0
+  m_UpdateRectTransformForStandalone: 0
+  m_SortingLayerID: 0
+  m_SortingOrder: 0
+  m_TargetDisplay: 0
 --- !u!1 &5498676250848662441
 GameObject:
   m_ObjectHideFlags: 0
