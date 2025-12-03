@@ -7,7 +7,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.UI;
 [RequireComponent(typeof(RectTransform))]
 
-public class CardView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler
+public class CardView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
     [Header("Image Handling")]
     [Tooltip("Sprite del retro (assegnare come Source Image in Inspector)")]
@@ -45,26 +45,21 @@ public class CardView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, I
 
     [SerializeField] private Text hintText;
 
-    private Button btn;
     private Outline highlight;
     private int _lastHp = int.MinValue;
     private EventBus.Handler _evtHandler;
     private Canvas _rootCanvas;
     private RectTransform _rt;
-    private Vector3 _dragStartPos;
     private bool _dragging;
     public bool _hovering;
 
     private bool _draggingFromBoard;
-    private Transform _dragOriginalParent;
 
     private GameObject _cloneEmptySpotDuringDrag;
     private Image _cloneEmptySpotImage;
     private int _dragOriginalSibling;
     private float _lastClickTime;
     private bool _draggingHand;
-    private Vector3 _dragOriginalLocalScale;
-    private Quaternion _dragOriginalLocalRotation;
     private const float DoubleClickThreshold = 0.3f;
     private static readonly List<RaycastResult> _raycastBuffer = new List<RaycastResult>(8);
     private CurveParameters _lastCurveAsset;
@@ -73,10 +68,8 @@ public class CardView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, I
     private RectTransform _handContainer;
     private Tween _handMoveTween;
     private Quaternion _targetHandRotation = Quaternion.identity;
-    private Vector3 _dragOriginalScale = Vector3.one;
     private Vector3 _dragTargetWorld;
     private bool _hasDragTarget;
-    private bool _returningToHand;
 
     private int savedIndex;
 
@@ -120,13 +113,6 @@ public class CardView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, I
         highlight.effectColor = Color.white;
         highlight.enabled = false;
 
-        btn = GetComponent<Button>();
-        btn.onClick.RemoveAllListeners();
-        btn.onClick.AddListener(OnClicked);
-
-        var bg = Template.GetComponent<Image>();
-        if (btn.targetGraphic == null && bg != null) btn.targetGraphic = bg;
-
         Template.GetComponent<Image>().preserveAspect = false;
         Template.GetComponent<Image>().useSpriteMesh = false;
         Template.GetComponent<Image>().maskable = false;
@@ -165,6 +151,7 @@ public class CardView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, I
 
     public void OnClicked()
     {
+        if (gm == null) return;
         gm.OnCardClicked(this);
         if (IsBoardCard() && _lastClickTime > 0f && Time.time - _lastClickTime <= DoubleClickThreshold)
             gm.OnCardDoubleClicked(this);
@@ -385,13 +372,6 @@ public class CardView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, I
             _draggingHand = true;
             _draggingFromBoard = false;
 
-            _dragStartPos = _rt.position;
-            _dragOriginalParent = _handContainer;
-            _dragOriginalSibling = _handContainer.GetSiblingIndex();
-            _dragOriginalLocalScale = _rt.localScale;
-            _dragOriginalLocalRotation = _rt.localRotation;
-            _dragOriginalScale = _rt.localScale;
-
             _hasDragTarget = true;
 
             gm.HandManager.OnHandCardBeginDrag(this, _handContainer);
@@ -404,11 +384,7 @@ public class CardView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, I
         _dragging = true;
         _draggingFromBoard = true;
 
-        _dragStartPos = _rt.position;
-        _dragOriginalParent = _rt.parent;
         _dragOriginalSibling = _rt.parent.GetSiblingIndex();
-        _dragOriginalLocalScale = _rt.localScale;
-        _dragOriginalLocalRotation = _rt.localRotation;
 
         ShowCloneEmptySpot();
         _hasDragTarget = true;
@@ -466,7 +442,6 @@ public class CardView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, I
     private void HandleBoardDrop(PointerEventData eventData)
     {
         HideCloneEmptySpot();
-        Vector3 releaseWorldPos = _rt != null ? _rt.position : _dragStartPos;
         var target = FindBoardCardUnderPointer(eventData);
         if (target != null && gm != null)
         {
@@ -589,6 +564,13 @@ public class CardView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, I
     public void OnPointerUp(PointerEventData eventData)
     {
         //OnEndDrag(eventData);
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        if (_dragging || (eventData != null && eventData.dragging)) return;
+        if (eventData != null && eventData.button != PointerEventData.InputButton.Left) return;
+        OnClicked();
     }
 
     private Quaternion GetAnchorRotation()

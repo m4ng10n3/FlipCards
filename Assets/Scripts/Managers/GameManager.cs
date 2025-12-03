@@ -312,6 +312,7 @@ public void UpdateHUD()
 
     public void SwapCardPositions(CardView a, CardView b)
     {
+        if (matchEnded || awaitingEndTurn || !playerPhase) { UpdateHUD(); return; }
         if (a == null || b == null || a == b || player.actionPoints <= 0)
             return;
 
@@ -347,6 +348,10 @@ public void UpdateHUD()
 
         EventBus.Publish(GameEventType.Info, new EventContext
         {
+            owner = player,
+            opponent = ai,
+            source = a.instance,
+            target = b.instance,
             phase = $"[Swap] L{idxA + 1} <-> L{idxB + 1}"
         });
 
@@ -650,6 +655,7 @@ public void UpdateHUD()
         bool isHandCard = view.owner == null && view.instance == null;
         if (isHandCard)
         {
+            if (awaitingEndTurn || !playerPhase) { UpdateHUD(); return; }
             var emptySpot = SelectionManager.Instance != null ? SelectionManager.Instance.SelectedEmptySpot : null;
             if (emptySpot == null) return;
 

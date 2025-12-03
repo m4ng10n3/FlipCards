@@ -126,10 +126,6 @@ public class HandManager : MonoBehaviour
         cv.gm = gm;
         cv.SetHighlight(false);
 
-        var btn = go.GetComponent<Button>();
-        btn.onClick.RemoveAllListeners();
-        btn.onClick.AddListener(cv.OnClicked);
-
         go.transform.position = spawnPoint.position;
         go.transform.rotation = spawnPoint.rotation;
 
