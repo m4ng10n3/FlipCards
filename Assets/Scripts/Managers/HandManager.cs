@@ -441,21 +441,6 @@ public class HandManager : MonoBehaviour
         }
     }
 
-    private CardView FindCardByContainer(Transform container)
-    {
-        if (container == null)
-            return null;
-
-        for (int i = 0; i < handCards.Count; i++)
-        {
-            var card = handCards[i];
-            if (card != null && card.HandContainer == container)
-                return card;
-        }
-
-        return null;
-    }
-
     private void SortHandCardsBySlotIndex()
     {
         handCards.RemoveAll(c => c == null);
@@ -472,22 +457,21 @@ public class HandManager : MonoBehaviour
     // Gestisce lo swap basato sulla posizione orizzontale del drag (stile HorizontalCardHolder)
     public void ReorderHandDuringDrag(CardView movingCard, Vector3 dragPosition)
     {
-        if (handRoot == null || movingCard == null)
-            return;
+        if (handRoot == null || movingCard == null) return;
 
-        var reservedSlot = SanitizePlaceholder(movingCard.HandContainer);
-        if (reservedSlot == null)
-            return;
+        var container = movingCard.HandContainer;
+        if (container == null || container.parent != handRoot) return;
 
-        activePlaceholder = reservedSlot;
+        // Non usiamo più un placeholder: costruiamo la lista dei container reali
+        var layoutItems = BuildLayoutList(null);
+        if (layoutItems == null || layoutItems.Count == 0) return;
 
-        var layoutItems = BuildLayoutList(reservedSlot);
-        int currentIndex = layoutItems.IndexOf(reservedSlot);
-        if (currentIndex < 0)
-            return;
+        int currentIndex = layoutItems.IndexOf(container);
+        if (currentIndex < 0) return;
 
         int targetIndex = currentIndex;
         float bestDistance = float.MaxValue;
+
         for (int i = 0; i < layoutItems.Count; i++)
         {
             var item = layoutItems[i];
@@ -499,19 +483,16 @@ public class HandManager : MonoBehaviour
             }
         }
 
-        if (targetIndex == currentIndex)
-            return;
+        if (targetIndex == currentIndex) return;
 
-        var targetSlot = layoutItems[targetIndex];
-        var targetCard = FindCardByContainer(targetSlot);
+        // Sposta il container della carta trascinata nella nuova posizione
+        container.SetSiblingIndex(targetIndex);
 
-        if (targetCard != null && targetCard != movingCard)
-            targetCard.SetHandContainer(reservedSlot as RectTransform, true);
+        // Non c'è più un placeholder attivo
+        activePlaceholder = null;
 
-        movingCard.SetHandContainer(targetSlot as RectTransform, false);
-        activePlaceholder = movingCard.HandContainer;
         SortHandCardsBySlotIndex();
-        UpdateCardsPosition(activePlaceholder);
+        UpdateCardsPosition();
     }
 
     private float GetLayoutItemX(Transform item)
@@ -523,44 +504,48 @@ public class HandManager : MonoBehaviour
         var container = view != null ? view.HandContainer : null;
         return container != null ? container.position.x : item.position.x;
     }
-
     public void OnHandCardBeginDrag(CardView view, Transform reservedSlot)
     {
         draggingCard = view;
         selectedCard = view;
+
+        // assicura che la carta abbia il suo container nella mano
         view?.EnsureHandContainer(handRoot);
-        activePlaceholder = SanitizePlaceholder(reservedSlot);
+
+        // non usiamo più reservedSlot come placeholder
+        activePlaceholder = null;
+
         SortHandCardsBySlotIndex();
-        UpdateCardsPosition(activePlaceholder);
+        UpdateCardsPosition();
     }
 
     public void OnHandCardEndDrag(CardView view = null)
     {
-        // se un'altra carta sta ancora trascinando, non toccare
-        if (view != null && draggingCard != null && view != draggingCard && activePlaceholder != null)
-            return;
-
+        // se sto chiudendo il drag della carta selezionata, la deseleziono
         if (view == selectedCard || view == null)
             selectedCard = null;
 
         draggingCard = null;
         activePlaceholder = null;
+
         SortHandCardsBySlotIndex();
         UpdateCardsPosition();
     }
 
     public void OnHandCardDroppedToBoard(CardView view)
     {
-        if (view == null)
-            return;
+        if (view == null) return;
 
         if (draggingCard == view)
             draggingCard = null;
+
         if (selectedCard == view)
             selectedCard = null;
 
         activePlaceholder = null;
+
         SortHandCardsBySlotIndex();
         UpdateCardsPosition();
     }
+
 }

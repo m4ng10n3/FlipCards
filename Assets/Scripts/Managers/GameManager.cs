@@ -74,6 +74,7 @@ public class GameManager : MonoBehaviour
         SpawnInitialEmptySpots();
         var cloneGO = Instantiate(playerBoardRoot.gameObject, playerBoardRoot.parent);
         cloneGO.name = $"{playerBoardRoot.name}_Clone";
+        cloneGO.transform.SetSiblingIndex(playerBoardRoot.GetSiblingIndex());
         playerBoardRootClone = cloneGO.transform;
 
         if (EmptySpot != null)
