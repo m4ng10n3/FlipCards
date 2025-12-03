@@ -83,6 +83,7 @@ public class CardView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, I
         _rt = GetComponent<RectTransform>();
         highlight = GetComponent<Outline>();
         _canvas = GetComponent<Canvas>() ?? gameObject.AddComponent<Canvas>();
+        SetHoverState(false);
         if (GetComponent<GraphicRaycaster>() == null) gameObject.AddComponent<GraphicRaycaster>();
         CacheRootCanvas();
 
@@ -164,7 +165,7 @@ public class CardView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, I
     {
         highlight.enabled = setting;
     }
-
+ 
     private void CacheRootCanvas()
     {
         _rootCanvas = null;
@@ -369,7 +370,6 @@ public class CardView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, I
         if (_dragging) return;
         if (_rt == null) throw new System.InvalidOperationException("CardView missing RectTransform");
         if (_rootCanvas == null) throw new System.InvalidOperationException("CardView missing Canvas");
-        _canvas.overrideSorting = true;
 
         _dragTargetWorld = _rt.position;
         if (_rootCanvas != null &&
@@ -381,17 +381,14 @@ public class CardView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, I
         {
             _dragTargetWorld = _rootCanvas.transform.TransformPoint(lp);
         }
-
+        _dragging = true;
         if (IsHandCard())
         {
             if (gm == null || gm.HandManager == null) throw new System.InvalidOperationException("Hand drag requires GameManager and HandManager");
             _handContainer = EnsureHandContainer(gm.HandManager.HandRoot);
             if (_handContainer == null) throw new System.InvalidOperationException("Hand container not created");
-
-            _dragging = true;
             _draggingHand = true;
             _draggingFromBoard = false;
-
             _hasDragTarget = true;
 
             gm.HandManager.OnHandCardBeginDrag(this, _handContainer);
@@ -401,7 +398,6 @@ public class CardView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, I
 
         if (!CanDragBoardCard()) return;
 
-        _dragging = true;
         _draggingFromBoard = true;
 
         _dragOriginalSibling = _rt.parent.GetSiblingIndex();
@@ -434,17 +430,17 @@ public class CardView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, I
     public void OnEndDrag(PointerEventData eventData)
     {
         if (!_dragging) return;
-        _canvas.overrideSorting = false;
         _dragging = false;
         if (_draggingFromBoard)
         {
             HandleBoardDrop(eventData);
             _hasDragTarget = false;
+            _canvas.overrideSorting = false;
             return;
         }
-
         HandleHandDrop(eventData);
         _hasDragTarget = false;
+        _canvas.overrideSorting = false;
     }
 
     private void HandleHandDrop(PointerEventData eventData)
@@ -565,17 +561,32 @@ public class CardView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, I
 
         return null;
     }
-
+    private void SetHoverState(bool hovering)
+    {
+        if (hovering)
+        {
+            gm.hoveredCard = this;
+            _hovering = true;
+        }
+        else
+        {
+            _hovering = false;
+            if (gm != null) gm.hoveredCard = null; 
+        }
+    }
     public void OnPointerEnter(PointerEventData eventData)
     {
-        _hovering = true;
-        Debug.Log($"hovering: {_hovering}");
+        if (gm.hoveredCard != null)
+            return;
+        SetHoverState(true);
+        Debug.Log(name + $": hovering{_hovering}");
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        _hovering = false;
-        Debug.Log($"hovering: {_hovering}");
+        if (gm.hoveredCard == this)
+            SetHoverState(false);
+            Debug.Log(name + $": hovering{_hovering}");
     }
 
     public void OnPointerDown(PointerEventData eventData)
@@ -901,5 +912,11 @@ public class CardView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, I
     void OnTransformParentChanged()
     {
         CacheRootCanvas();
+    }
+
+    void OnDisable()
+    {
+        if (gm?.hoveredCard == this)
+            SetHoverState(false);
     }
 }

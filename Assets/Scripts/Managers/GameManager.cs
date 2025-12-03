@@ -18,6 +18,8 @@ public class GameManager : MonoBehaviour
     public Text hpText;
     public Text apText;
     public Text EnemyHptxt;
+    
+    public CardView hoveredCard = null;
 
 
     [Header("Match parameters")] public int turns = 10; public int playerBaseAP = 3; public int seed = 12345;
