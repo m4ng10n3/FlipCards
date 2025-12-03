@@ -57,7 +57,6 @@ public class GameManager : MonoBehaviour
         EventBus.Publish(GameEventType.Info, new EventContext { phase = "GameManager ready" });
         _instance = this;
 
-        // Listener: se non assegnati in Inspector -> NRE (voluto)
         btnAttack.onClick.AddListener(OnAttack);
         btnEndTurn.onClick.AddListener(OnEndTurn);
     }
@@ -70,32 +69,21 @@ public class GameManager : MonoBehaviour
 
         ClearChildrenUnder(playerBoardRoot);
 
-        // 1) Riempio il board del player con degli EmptySpot invece delle carte
         SpawnInitialEmptySpots();
         var cloneGO = Instantiate(playerBoardRoot.gameObject, playerBoardRoot.parent);
         cloneGO.name = $"{playerBoardRoot.name}_Clone";
         cloneGO.transform.SetSiblingIndex(playerBoardRoot.GetSiblingIndex());
         playerBoardRootClone = cloneGO.transform;
 
-        if (EmptySpot != null)
+        for (int i = 0; i < playerBoardRootClone.childCount; i++)
         {
-            for (int i = 0; i < playerBoardRootClone.childCount; i++)
-            {
-                var child = playerBoardRootClone.GetChild(i);
-                if (child.gameObject.name == EmptySpot.name)
-                {
-                    var img = child.GetComponent<Image>();
-                    if (img != null)
-                        img.enabled = false;
-                    else
-                        child.gameObject.SetActive(false);
-                }
-            }
+            var child = playerBoardRootClone.GetChild(i);
+            if (child.gameObject.name != EmptySpot.name) continue;
+            child.GetComponent<Image>().enabled = false;
         }
 
         SpawnEnemySlots();
 
-        // 3) Creo la mano iniziale
         SpawnStartingHand();
 
         EventBus.Publish(GameEventType.Info, new EventContext { phase = "=== MATCH START ===" });
@@ -105,41 +93,16 @@ public class GameManager : MonoBehaviour
         StartTurn(player, ai, true);
     }
 
-    // === BUILD ===
     void SpawnStartingHand()
     {
-        if (handManager == null) return;
-        if (StartingHandSize <= 0) return;
-
-        // Costruisco un "mazzo" lineare dai bindings
-        var deck = new List<GameObject>();
-        foreach (var b in playerCards)
-            for (int i = 0; i < b.count; i++)
-                deck.Add(b.prefab);
-
-        if (deck.Count == 0) return;
-
-        // Shuffle semplice
-        for (int i = deck.Count - 1; i > 0; i--)
-        {
-            int j = rng.Next(i + 1);
-            (deck[i], deck[j]) = (deck[j], deck[i]);
-        }
-
-        // Pesco StartingHandSize carte e le metto in mano
         player.actionPoints = StartingHandSize;
-        for (int i = 0; i < StartingHandSize; i++)
-        {
-            handManager.DrawCard();
-        }
+        for (int i = 0; i < StartingHandSize; i++) handManager.DrawCard();
         player.actionPoints = playerBaseAP;
     }
 
 
     void SpawnInitialEmptySpots()
     {
-        if (EmptySpot == null) return;
-
         for (int i = 0; i < CardsPerSide; i++)
         {
             var spotGO = Instantiate(EmptySpot, playerBoardRoot);
@@ -147,27 +110,16 @@ public class GameManager : MonoBehaviour
             spotGO.SetActive(true);
             spotGO.transform.SetSiblingIndex(i);
 
-            // Stesso comportamento degli EmptySpot creati quando muore una carta
-
-            // Outline
             var outline = spotGO.GetComponent<Outline>();
-            if (outline == null)
-            {
-                outline = spotGO.AddComponent<Outline>();
-                outline.enabled = false;
-                outline.effectDistance = new Vector2(5f, 5f);
-                outline.useGraphicAlpha = false;
-                outline.effectColor = Color.white;
-            }
+            outline.enabled = false;
+            outline.effectDistance = new Vector2(5f, 5f);
+            outline.useGraphicAlpha = false;
+            outline.effectColor = Color.white;
 
-            // Button -> OnEmptySpotClicked
             var btn = spotGO.GetComponent<Button>();
-            if (btn != null)
-            {
-                var t = spotGO.transform; // catturo la transform
-                btn.onClick.RemoveAllListeners();
-                btn.onClick.AddListener(() => OnEmptySpotClicked(t));
-            }
+            var t = spotGO.transform;
+            btn.onClick.RemoveAllListeners();
+            btn.onClick.AddListener(() => OnEmptySpotClicked(t));
         }
     }
 
@@ -208,26 +160,20 @@ public class GameManager : MonoBehaviour
 
         for (int i = 0; i < aiBoardRoot.childCount; i++) aiBoardRoot.GetChild(i).SetSiblingIndex(i);
     }
-    // === REFRESH / HUD ===
     public void UpdateAllViews()
     {
-        // 1) Prima passo: rimuovo tutte le carte morte (di qualunque owner)
-        //    Uso uno snapshot perché RemoveCard modifica viewByInstance.
         var viewsSnapshot = viewByInstance.Values.ToList();
         foreach (var v in viewsSnapshot)
         {
             if (v.instance != null && !v.instance.alive)
             {
-                // v.owner è settato in CardView.Init, quindi è il PlayerState giusto
                 RemoveCard(v.owner, v.instance);
             }
         }
 
-        // 2) Secondo passo: refresh di tutte le carte ancora vive
         foreach (var v in viewByInstance.Values)
             v.Refresh();
 
-        // 3) Slot nemici: come prima (già corretta la rimozione)
         for (int i = enemySlotViews.Count - 1; i >= 0; i--)
         {
             var sv = enemySlotViews[i];
@@ -240,41 +186,27 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void UpdateHUD()
+public void UpdateHUD()
     {
         if (matchEnded) return;
-        bool enable = playerPhase && !awaitingEndTurn;
+        var enable = playerPhase && !awaitingEndTurn;
         btnAttack.interactable = enable;
         handManager.btnDraw.interactable = enable;
 
-        // Aggiorno HUD giocatore (vita + punti abilità)
-        if (hpText != null)
-            hpText.text = $"{player.hp}";
-
-        if (apText != null)
-            apText.text = $"{player.actionPoints}/{playerBaseAP}";
-
-        if (EnemyHptxt != null)
-            EnemyHptxt.text = $"{ai.hp}";
+        hpText.text = $"{player.hp}";
+        apText.text = $"{player.actionPoints}/{playerBaseAP}";
+        EnemyHptxt.text = $"{ai.hp}";
     }
     
-    // === TURN FLOW / UI ACTIONS ===
     void StartTurn(PlayerState owner, PlayerState opponent, bool isPlayerPhase)
     {
-        playerPhase = isPlayerPhase; awaitingEndTurn = false;
-        owner.actionPoints = (owner == player) ? playerBaseAP : 0;
-
+        playerPhase = isPlayerPhase;
+        awaitingEndTurn = false;
+        owner.actionPoints = owner == player ? playerBaseAP : 0;
         EventBus.Publish(GameEventType.TurnStart, new EventContext { owner = owner, opponent = opponent, phase = $"TURN {currentTurn}" });
-        if (playerPhase)
-        { 
-            RandomizePlayerLayoutAndSides();
-            UpdateAllViews(); UpdateHUD();
-        }
-        else
-        {
-            ExecuteAiTurnStartActions();
-            UpdateAllViews(); UpdateHUD();
-        }
+        if (playerPhase) RandomizePlayerLayoutAndSides(); else ExecuteAiTurnStartActions();
+        UpdateAllViews();
+        UpdateHUD();
     }
 
     void EndTurnInternal(PlayerState owner, PlayerState opponent)
@@ -293,7 +225,6 @@ public class GameManager : MonoBehaviour
         if (IsGameOver() || currentTurn >= turns) EndMatch();
     }
 
-    // === SLOTS SHUFFLE (preserva istanze/HP) ===
     void ShuffleEnemySlotsPreservingInstances()
     {
         var children = new List<Transform>();
@@ -345,7 +276,6 @@ public class GameManager : MonoBehaviour
     {
         if (awaitingEndTurn || matchEnded || !playerPhase) { UpdateHUD(); return; }
 
-        // Il numero di lane è guidato dal numero di carte del player
         int lanes = playerBoardRoot.childCount;
         for (int lane = 0; lane < lanes; lane++)
         {
@@ -355,12 +285,10 @@ public class GameManager : MonoBehaviour
             var ci = pView.instance;
             if (!ci.alive || ci.side != Side.Fronte) continue;
 
-            // Recupero lo slot nemico SOLO se esiste quel child
             SlotView sView = null;
             if (lane < aiBoardRoot.childCount)
                 sView = aiBoardRoot.GetChild(lane).GetComponentInChildren<SlotView>(false);
 
-            // Se non c'è uno slot attivo davanti (slot distrutto o proprio nessuno) -> danno diretto agli HP nemico
             if (sView == null || !sView.instance.alive)
             {
                 int dmg = ci.def.frontDamage;
@@ -368,7 +296,6 @@ public class GameManager : MonoBehaviour
             }
             else
             {
-                // Slot ancora vivo -> attacco normale allo slot
                 var si = sView.instance;
                 if (!si.alive) continue;
 
@@ -387,7 +314,6 @@ public class GameManager : MonoBehaviour
         if (a == null || b == null || a == b || player.actionPoints <= 0)
             return;
 
-        // Container di board per entrambe le carte
         var cA = a.PlayerBoardContainer != null
             ? a.PlayerBoardContainer
             : a.EnsurePlayerBoardContainer(playerBoardRoot);
@@ -405,7 +331,6 @@ public class GameManager : MonoBehaviour
         int idxA = cA.GetSiblingIndex();
         int idxB = cB.GetSiblingIndex();
 
-        // Salvo le posizioni/rotazioni locali correnti dei container
         Vector3 posA = cA.localPosition;
         Vector3 posB = cB.localPosition;
         Quaternion rotA = cA.localRotation;
@@ -413,11 +338,9 @@ public class GameManager : MonoBehaviour
 
         player.actionPoints -= 1;
 
-        // Swap logico delle lane (indice dei figli sotto playerBoardRoot)
         cA.SetSiblingIndex(idxB);
         cB.SetSiblingIndex(idxA);
 
-        // Tween: ogni container va nella posizione dell'altro
         a.UpdateBoardContainerTarget(posB, rotB);
         b.UpdateBoardContainerTarget(posA, rotA);
 
@@ -446,7 +369,6 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // === AI ===
     void ExecuteAiTurnStartActions() { ApplyEnemySlotsEffectsLeftToRight(); }
 
     void ApplyEnemySlotsEffectsLeftToRight()
@@ -458,7 +380,7 @@ public class GameManager : MonoBehaviour
         for (int lane = 0; lane < lanes; lane++)
         {
             var sView = aiChildren[lane].GetComponentInChildren<SlotView>(false);
-            if (sView == null || !sView.instance.alive)    // <--- AGGIUNTO null check
+            if (sView == null || !sView.instance.alive)
                 continue;
 
             EventBus.Publish(GameEventType.Info, new EventContext { phase = $"[SlotEffect] Lane {lane + 1}" });
@@ -473,82 +395,58 @@ public class GameManager : MonoBehaviour
     }
 
 
-    // === CLEANUP ===
 
     void RemoveCard(PlayerState owner, CardInstance ci)
     {
-        // Unbind abilità
         if (abilitiesByInstance.TryGetValue(ci, out var list))
         {
-            for (int i = 0; i < list.Count; i++)
-                list[i].Unbind();
+            for (int i = 0; i < list.Count; i++) list[i].Unbind();
             abilitiesByInstance.Remove(ci);
         }
 
-        // Trovo il view associato
-        if (!viewByInstance.TryGetValue(ci, out var view))
-            return;
+        var view = viewByInstance[ci];
 
-        // Se era selezionata, deseleziona
         var sel = SelectionManager.Instance;
-        if (sel != null && sel.SelectedOwned == view)
-            sel.SelectOwned(null);
+        if (sel != null && sel.SelectedOwned == view) sel.SelectOwned(null);
 
-        // Salvo parent e indice di lane PRIMA di distruggere la carta
         Transform parent = view.transform.parent;
         int laneIndex = view.transform.GetSiblingIndex();
 
-        // Se la carta era su un board container del player, uso quello
         var boardContainer = view.PlayerBoardContainer;
         if (boardContainer != null && boardContainer.parent == playerBoardRoot)
         {
-            parent = boardContainer.parent;           // playerBoardRoot
+            parent = boardContainer.parent;
             laneIndex = boardContainer.GetSiblingIndex();
-
-            // distruggo il container di board (la carta viene distrutta sotto)
             Destroy(boardContainer.gameObject);
         }
 
-        // Rimuovo il modello dal dizionario e dalla board del player/ai
         viewByInstance.Remove(ci);
         owner.board.Remove(ci);
         ci.Dispose();
-
-        // Distruggo il GameObject della carta
         Destroy(view.gameObject);
 
-        // SOLO per il player: rimpiazzo lo slot con il prefab EmptySpot
-        if (owner == player && EmptySpot != null && parent != null)
+        if (owner == player)
         {
             var spotGO = Instantiate(EmptySpot, parent);
             spotGO.name = EmptySpot.name;
             spotGO.SetActive(true);
             spotGO.transform.SetSiblingIndex(laneIndex);
 
-            // AGGIUNTA: assicuro che lo EmptySpot abbia un Outline come le carte
             var outline = spotGO.GetComponent<Outline>();
-            if (outline == null)
-            {
-                outline = spotGO.AddComponent<Outline>();
-                outline.enabled = false;                    // parte spento
-                outline.effectDistance = new Vector2(5f, 5f); // usa gli stessi valori che usi sulle carte
-                outline.useGraphicAlpha = false;
-                outline.effectColor = Color.white;
-            }
+            outline.enabled = false;
+            outline.effectDistance = new Vector2(5f, 5f);
+            outline.useGraphicAlpha = false;
+            outline.effectColor = Color.white;
 
-            // Assicuro che il bottone chiami GameManager.OnEmptySpotClicked
             var btn = spotGO.GetComponent<Button>();
-            if (btn != null)
-            {
-                btn.onClick.RemoveAllListeners();
-                btn.onClick.AddListener(() => OnEmptySpotClicked(spotGO.transform));
-            }
+            btn.onClick.RemoveAllListeners();
+            btn.onClick.AddListener(() => OnEmptySpotClicked(spotGO.transform));
         }
 
         EventBus.Publish(GameEventType.Info, new EventContext
         {
             owner = owner,
-            opponent = (owner == player) ? ai : player,
+            opponent = owner == player ? ai : player,
             source = ci,
             phase = "[GM] Removed destroyed card (replaced by EmptySpot if player)"
         });
@@ -557,59 +455,30 @@ public class GameManager : MonoBehaviour
 
     void PlayCardFromHand(CardView handCard, Transform emptySpot)
     {
-        if (handCard == null || emptySpot == null) return;
-
         var cd = handCard.GetComponent<CardDefinition>();
-        if (cd == null)
-        {
-            Debug.LogError("[GM] Card in hand senza CardDefinition!");
-            return;
-        }
-
-        // Parent e lane dello spot vuoto
-        Transform parent = emptySpot.parent != null ? emptySpot.parent : playerBoardRoot;
+        var parent = emptySpot.parent;
         int laneIndex = emptySpot.GetSiblingIndex();
 
-        // Lo spot vuoto non serve più
         Destroy(emptySpot.gameObject);
 
-        // --- MODELLO / LOGICA ---
         var spec = cd.BuildSpec();
         var ci = new CardInstance(spec, rng);
         ci.AssignGM(this);
         player.board.Add(ci);
 
-        // --- VIEW: clono la carta dalla mano ma la "resetto" da board ---
         GameObject go = Instantiate(handCard.gameObject, parent);
         go.name = handCard.gameObject.name;
         go.SetActive(true);
 
-        // Reset di scala/rotazione/posizione per farla sembrare come le altre sul tabellone
-        var rt = go.transform as RectTransform;
-        if (rt != null)
-        {
-            rt.anchorMin = new Vector2(0.5f, 0.5f);
-            rt.anchorMax = new Vector2(0.5f, 0.5f);
-            rt.pivot = new Vector2(0.5f, 0.5f);
-            rt.anchoredPosition = Vector2.zero;
-            rt.localRotation = Quaternion.identity;
-            rt.localScale = Vector3.one;
-        }
-        else
-        {
-            go.transform.localPosition = Vector3.zero;
-            go.transform.localRotation = Quaternion.identity;
-            go.transform.localScale = Vector3.one;
-        }
+        var rt = (RectTransform)go.transform;
+        rt.anchorMin = new Vector2(0.5f, 0.5f);
+        rt.anchorMax = new Vector2(0.5f, 0.5f);
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.anchoredPosition = Vector2.zero;
+        rt.localRotation = Quaternion.identity;
+        rt.localScale = Vector3.one;
 
         var view = go.GetComponent<CardView>();
-        if (view == null)
-        {
-            Debug.LogError("[GM] Il clone della carta non ha CardView!");
-            return;
-        }
-
-        // Inizializzo come una normale carta sul board
         view.Init(this, player, ci);
         view.EnsurePlayerBoardContainer(playerBoardRoot);
         view.PlayerBoardContainer.SetSiblingIndex(laneIndex);
@@ -617,18 +486,13 @@ public class GameManager : MonoBehaviour
         view.SetHighlight(false);
         viewByInstance[ci] = view;
 
-        // Bind delle abilità
         var opponent = ai;
         var abilities = go.GetComponents<AbilityBase>().ToList();
         foreach (var ab in abilities) ab.Bind(ci, player, opponent);
         abilitiesByInstance[ci] = abilities;
 
-        // Rimuovo la carta dalla mano (questa distrugge SOLO la carta in mano, non il clone sul board)
-        if (handManager != null)
-        {
-            handManager.OnHandCardDroppedToBoard(handCard);
-            handManager.RemoveFromHand(handCard.gameObject);
-        }
+        handManager.OnHandCardDroppedToBoard(handCard);
+        handManager.RemoveFromHand(handCard.gameObject);
 
         EventBus.Publish(GameEventType.CardPlayed, new EventContext
         {
@@ -649,23 +513,18 @@ public class GameManager : MonoBehaviour
             if (!enemySlotViews[i].instance.alive) RemoveSlotView(enemySlotViews[i]);
     }
 
-    // === SLOTS REBUILD ===
     
 
     void RemoveSlotView(SlotView v)
     {
-        // Salvo parent e lane PRIMA di distruggere
         Transform parent = v.transform.parent;
         int laneIndex = v.transform.GetSiblingIndex();
 
-        // Lo tolgo dalle strutture dati logiche
         enemySlotViews.Remove(v);
         slotViewByInstance.Remove(v.instance);
 
-        // Distruggo lo slot attuale
         Destroy(v.gameObject);
 
-        // Rimpiazzo il posto con il prefab EmptySlot, senza far "scalare" gli altri
         if (EmptySlot != null && parent != null)
         {
             var empty = Instantiate(EmptySlot, parent);
@@ -676,7 +535,6 @@ public class GameManager : MonoBehaviour
     }
 
 
-    // === Utility ===
     public object GetOpponentObjInstance(object obj)
     {
         if (obj is CardInstance card)
@@ -691,7 +549,7 @@ public class GameManager : MonoBehaviour
             if (atkView.owner == player)
             {
                 var sView = oppRoot.GetChild(lane).GetComponentInChildren<SlotView>(false);
-                if (sView == null)                    // <--- AGGIUNTO null check
+                if (sView == null)
                     return null;
 
                 var si = sView.instance;
@@ -714,8 +572,8 @@ public class GameManager : MonoBehaviour
                 return null;
 
             var cView = playerBoardRoot.GetChild(lane).GetComponentInChildren<CardView>(false);
-            if (cView == null)          // <-- nessuna carta: lane con EmptySpot
-                return null;            // le abilità possono interpretare questo come "danno diretto al player"
+            if (cView == null)
+                return null;
 
             var ci = cView.instance;
             return ci.alive ? ci : null;
@@ -736,7 +594,6 @@ public class GameManager : MonoBehaviour
     {
         /*
         */
-        // Shuffle visuale dei figli (lasciato commentato: da attivare in futuro)
         var children = new List<Transform>();
         foreach (Transform t in playerBoardRoot) children.Add(t);
         for (int i = children.Count - 1; i > 0; i--)
@@ -750,7 +607,6 @@ public class GameManager : MonoBehaviour
             }
         }
         
-        // Random side su carte vive
         var cards = player.board.ToArray();
         for (int i = 0; i < cards.Length; i++)
         {
@@ -786,7 +642,6 @@ public class GameManager : MonoBehaviour
         EventBus.Publish(GameEventType.Info, new EventContext { phase = $"Score: PlayerHP {player.hp} vs AIHP {ai.hp} | Diff (AI-Player) = {diff} -> {result}" });
     }
 
-    // CLICK
     public void OnCardClicked(CardView view)
     {
         if (matchEnded || view == null) return;
@@ -798,13 +653,12 @@ public class GameManager : MonoBehaviour
             if (emptySpot == null) return;
 
             PlayCardFromHand(view, emptySpot);
-            SelectionManager.Instance?.SelectEmptySpot(null); // spegne outline
+            SelectionManager.Instance?.SelectEmptySpot(null);
             return;
         }
 
         if (view.owner != player || view.instance == null) return;
 
-        // la selezione della carta gestisce già lo spegnimento di eventuali empty spot
         SelectionManager.Instance.SelectOwned(view);
     }
 

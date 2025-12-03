@@ -1,8 +1,6 @@
 using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
-using System.Security.Cryptography;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -13,7 +11,7 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
 {
     [Header("Image Handling")]
     [Tooltip("Sprite del retro (assegnare come Source Image in Inspector)")]
-    [SerializeField] private GameObject Template; // child con grafica fronte
+    [SerializeField] private GameObject Template;
     [SerializeField] private Sprite backImage;
     [SerializeField] private Image artworkMonster;
     [SerializeField] private CurveParameters curveParameters;
@@ -35,7 +33,7 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     [SerializeField] private float tiltSpeed = 20;
 
     [Header("Input System")]
-    [SerializeField] private InputActionReference pointerPositionAction; // es: UI/Point
+    [SerializeField] private InputActionReference pointerPositionAction;
 
     private Sprite frontImage;
 
@@ -59,7 +57,6 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     private int _lastHp = int.MinValue;
     private EventBus.Handler _evtHandler;
     private Canvas _rootCanvas;
-    private CanvasGroup _canvasGroup;
     private RectTransform _rt;
     private Vector3 _dragStartPos;
     private bool _dragging;
@@ -90,11 +87,9 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     private Vector3 _dragTargetWorld;
     private bool _hasDragTarget;
     private bool _returningToHand;
-    
 
     private int savedIndex;
 
-    // === Board container (analogo all'hand container) ===
     private RectTransform _playerBoardContainer;
     private Tween _boardMoveTween;
     private Quaternion _targetBoardRotation = Quaternion.identity;
@@ -105,70 +100,55 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     {
         _rt = GetComponent<RectTransform>();
         _initialLocalRotation = _rt.localRotation;
+        highlight = GetComponent<Outline>();
 
         _rootCanvas = GetComponentInParent<Canvas>();
-        _canvasGroup = GetComponent<CanvasGroup>();
 
-        if (_canvasGroup == null) _canvasGroup = gameObject.AddComponent<CanvasGroup>();
+        hintText.gameObject.SetActive(false);
 
-        // UI di base sempre sicura da fare in preview/editor
-        if (hintText != null) hintText.gameObject.SetActive(false);
-
-        // Se questa CardView e gia stata inizializzata a runtime, esci.
         if (instance != null) return;
 
-        // Modalita "preview" (prefab in editor o scene senza runtime CardInstance)
         var inline = GetComponent<CardDefinition>();
         if (inline == null) return;
 
         var def = inline.BuildSpec();
 
-        if (nameText != null) nameText.text = def.cardName;
-        if (factionText != null) factionText.text = def.faction.ToString();
-        if (sideText != null) sideText.text = "Side";
-        if (hpText != null) hpText.text = def.maxHealth.ToString();
-        if (AttackPwrText != null) AttackPwrText.text = def.frontDamage.ToString();
-        if (BlockPwrText != null) BlockPwrText.text = def.frontBlockValue.ToString();
+        nameText.text = def.cardName;
+        factionText.text = def.faction.ToString();
+        sideText.text = "Side";
+        hpText.text = def.maxHealth.ToString();
+        AttackPwrText.text = def.frontDamage.ToString();
+        BlockPwrText.text = def.frontBlockValue.ToString();
     }
 
     public void Init(GameManager gm, PlayerState owner, CardInstance instance)
     {
-        // --- BIND RUNTIME ---
         this.gm = gm;
         this.owner = owner;
         this.instance = instance;
 
-        // --- HIGHLIGHT (Outline) ---
-        if (highlight == null) highlight = gameObject.AddComponent<Outline>();
+        highlight = GetComponent<Outline>();
         highlight.effectDistance = new Vector2(5, 5);
-        highlight.useGraphicAlpha = false;        // evita che l'alpha/texture influenzi l'outline
-        highlight.effectColor = Color.white;      // colore di default
+        highlight.useGraphicAlpha = false;
+        highlight.effectColor = Color.white;
         highlight.enabled = false;
 
-        // --- BUTTON / CLICK ---
-        btn = GetComponent<Button>() ?? gameObject.AddComponent<Button>();
+        btn = GetComponent<Button>();
         btn.onClick.RemoveAllListeners();
         btn.onClick.AddListener(OnClicked);
 
-        // --- IMAGE DI SFONDO / SPRITE ---
-        var bg = Template != null ? Template.GetComponent<Image>() : null;
+        var bg = Template.GetComponent<Image>();
         if (btn.targetGraphic == null && bg != null) btn.targetGraphic = bg;
 
-        if (bg != null)
-        {
-            Template.GetComponent<Image>().preserveAspect = false;            // rispetta il RectTransform
-            Template.GetComponent<Image>().useSpriteMesh = false;
-            Template.GetComponent<Image>().maskable = false;
+        Template.GetComponent<Image>().preserveAspect = false;
+        Template.GetComponent<Image>().useSpriteMesh = false;
+        Template.GetComponent<Image>().maskable = false;
 
-            // Il fronte e l'immagine impostata nel componente Image (Source Image)
-            frontImage = Template.GetComponent<Image>().sprite;
-        }
+        frontImage = Template.GetComponent<Image>().sprite;
 
-        // --- UI STATE ---
-        Refresh();                                  // mostra lo stato reale dell'istanza
-        if (hintText != null) hintText.gameObject.SetActive(false);
+        Refresh();
+        hintText.gameObject.SetActive(false);
 
-        // --- EVENTI ---
         _evtHandler = OnGameEvent;
         EventBus.Subscribe(GameEventType.AttackResolved, _evtHandler);
         EventBus.Subscribe(GameEventType.Flip, _evtHandler);
@@ -187,75 +167,57 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
 
     private void UnsubscribeAllEvents()
     {
-        if (_evtHandler != null)
-        {
-            EventBus.Unsubscribe(GameEventType.AttackResolved, _evtHandler);
-            EventBus.Unsubscribe(GameEventType.Flip, _evtHandler);
-            EventBus.Unsubscribe(GameEventType.AttackDeclared, _evtHandler);
-            EventBus.Unsubscribe(GameEventType.TurnEnd, _evtHandler);
-            EventBus.Unsubscribe(GameEventType.Info, _evtHandler);
-            EventBus.Unsubscribe(GameEventType.TurnStart, _evtHandler);
-            _evtHandler = null;
-        }
+        EventBus.Unsubscribe(GameEventType.AttackResolved, _evtHandler);
+        EventBus.Unsubscribe(GameEventType.Flip, _evtHandler);
+        EventBus.Unsubscribe(GameEventType.AttackDeclared, _evtHandler);
+        EventBus.Unsubscribe(GameEventType.TurnEnd, _evtHandler);
+        EventBus.Unsubscribe(GameEventType.Info, _evtHandler);
+        EventBus.Unsubscribe(GameEventType.TurnStart, _evtHandler);
+        _evtHandler = null;
     }
 
     public void OnClicked()
     {
-        if (gm != null)
-        {
-            gm.OnCardClicked(this);
-
-            // doppio click per flippare le carte gia sul board
-            if (IsBoardCard() && _lastClickTime > 0f && Time.time - _lastClickTime <= DoubleClickThreshold)
-                gm.OnCardDoubleClicked(this);
-
-            _lastClickTime = Time.time;
-            return;
-        }
-        SetHighlight(highlight == null ? false : !highlight.enabled);
+        gm.OnCardClicked(this);
+        if (IsBoardCard() && _lastClickTime > 0f && Time.time - _lastClickTime <= DoubleClickThreshold)
+            gm.OnCardDoubleClicked(this);
+        _lastClickTime = Time.time;
     }
 
     public void SetHighlight(bool setting)
     {
-        if (highlight == null) return;
-            highlight.enabled = setting;
+        highlight.enabled = setting;
     }
 
     public void Refresh()
     {
-        if (instance == null) return;
-
         var def = instance.def;
 
-        if (nameText != null) nameText.text = def.cardName;
-        if (factionText != null) factionText.text = def.faction.ToString();
-        if (sideText != null) sideText.text = instance.side.ToString();
-        if (hpText != null) hpText.text = instance.health + "";
-        if (AttackPwrText != null) AttackPwrText.text = "" + def.frontDamage;
-        if (BlockPwrText != null) BlockPwrText.text = "" + def.frontBlockValue;
+        nameText.text = def.cardName;
+        factionText.text = def.faction.ToString();
+        sideText.text = instance.side.ToString();
+        hpText.text = instance.health + "";
+        AttackPwrText.text = "" + def.frontDamage;
+        BlockPwrText.text = "" + def.frontBlockValue;
 
         _lastHp = instance.health;
 
         FlipSide(immediate: true);
     }
 
-    // Flip lato carta, opzionalmente immediato (senza animazione)
     private void FlipSide(bool immediate = false)
     {
-        // Se non stiamo giocando (es. in editor) o non hai ancora il RectTransform, fai solo lo swap "secco"
         if (immediate || flipDuration <= 0f || _rt == null || !Application.isPlaying)
         {
             ApplySideVisuals();
             return;
         }
 
-        // interrompe eventuali tween attivi su questa carta (rotazioni/spostamenti su _rt)
         _rt.DOKill();
 
         Vector3 startEuler = _rt.localEulerAngles;
         float halfDuration = flipDuration * 0.5f;
 
-        // Sequenza: ruota a 90° sull'asse Y, cambia sprite, torna a 0°
         var seq = DOTween.Sequence()
             .SetUpdate(true)
             .SetLink(gameObject);
@@ -266,7 +228,7 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
                     halfDuration
                 ).SetEase(flipEase)
             )
-        .AppendCallback(ApplySideVisuals) // qui metti il retro/ fronte corretto
+        .AppendCallback(ApplySideVisuals)
         .Append(
                 _rt.DOLocalRotate(
                     startEuler,
@@ -275,37 +237,27 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
             );
     }
 
-    // SOLO la parte che aggiorna sprite, testi, outline.
-    // È il corpo "vecchio" di FlipSide, spostato qui.
     private void ApplySideVisuals()
     {
-        bool isFront = (instance != null && instance.side == Side.Fronte);
+        bool isFront = instance.side == Side.Fronte;
 
-        // Cambia solo lo sprite (niente SetNativeSize / scale)
-        var img = Template != null ? Template.GetComponent<Image>() : null;
-        if (img != null)
-        {
-            var newSprite = isFront ? frontImage : (backImage != null ? backImage : frontImage);
-            img.type = Image.Type.Simple;   // per sicurezza
-            img.preserveAspect = false;     // il RectTransform decide; cambia a true se vuoi letterboxing
-            img.sprite = newSprite;
-        }
+        var img = Template.GetComponent<Image>();
+        var newSprite = isFront ? frontImage : (backImage != null ? backImage : frontImage);
+        img.type = Image.Type.Simple;
+        img.preserveAspect = false;
+        img.sprite = newSprite;
 
-        // Mostra/nascondi i testi a seconda del lato
-        if (highlight != null) highlight.effectColor = isFront ? Color.white : Color.white; // come prima
-        if (nameText) nameText.enabled = isFront;
-        if (hpText) hpText.enabled = isFront;
-        if (AttackPwrText) AttackPwrText.enabled = isFront;
-        if (BlockPwrText) BlockPwrText.enabled = isFront;
-        if (artworkMonster) artworkMonster.enabled = isFront;
-        if (hintText) hintText.enabled = isFront;
+        highlight.effectColor = isFront ? Color.white : Color.white;
+        nameText.enabled = isFront;
+        hpText.enabled = isFront;
+        AttackPwrText.enabled = isFront;
+        BlockPwrText.enabled = isFront;
+        artworkMonster.enabled = isFront;
+        hintText.enabled = isFront;
     }
-
 
     void OnGameEvent(GameEventType t, EventContext ctx)
     {
-        if (instance == null) return;
-
         switch (t)
         {
             case GameEventType.AttackResolved:
@@ -351,16 +303,13 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
 
     private void UpdateHpOnly()
     {
-        if (instance == null) return;
-        if (hpText != null)
-            hpText.text = instance.health + "";
+        hpText.text = instance.health + "";
         _lastHp = instance.health;
     }
 
     public void Blink() { StartCoroutine(BlinkRoutine()); }
     IEnumerator BlinkRoutine()
     {
-        if (Template.GetComponent<Image>() == null) yield break;
         var c = Template.GetComponent<Image>().color;
         Template.GetComponent<Image>().color = Color.yellow;
         yield return new WaitForSeconds(0.08f);
@@ -369,30 +318,20 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
 
     public void ShowHint(string msg)
     {
-        if (hintText == null)
-        {
-            Logger.Info("[Card] " + msg);
-            return;
-        }
-
         hintText.gameObject.SetActive(true);
         hintText.text = string.IsNullOrEmpty(hintText.text) ? msg : hintText.text + "\n" + msg;
     }
 
     public void HideHint()
     {
-        if (hintText != null)
-        {
-            hintText.text = string.Empty;
-            hintText.gameObject.SetActive(false);
-        }
+        hintText.text = string.Empty;
+        hintText.gameObject.SetActive(false);
     }
 
-    // === Drag & Drop (mano -> tabellone) ===
     private bool IsHandCard()
     {
-        var handRoot = gm != null ? gm.HandManager?.HandRoot : null;
-        if (owner != null || instance != null || handRoot == null || _rt == null)
+        var handRoot = gm.HandManager.HandRoot;
+        if (owner != null || instance != null)
             return false;
 
         bool isDirectChild = _rt.parent == handRoot;
@@ -401,8 +340,6 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     }
     private bool IsBoardCard() => owner != null && instance != null;
     private bool CanDragBoardCard() =>
-    gm != null &&
-    _rt != null &&
     IsBoardCard() &&
     _rt.IsChildOf(gm.playerBoardRoot);
 
@@ -450,7 +387,6 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
             _dragTargetWorld = _rootCanvas.transform.TransformPoint(lp);
         }
 
-        // --- DRAG DALLA MANO ---
         if (IsHandCard())
         {
             _dragging = true;
@@ -464,11 +400,9 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
             _dragOriginalLocalRotation = _rt.localRotation;
             _dragOriginalScale = _rt.localScale;
 
-            // nessun drag container, nessun placeholder per la mano
             _dragPlaceholder = null;
             _hasDragTarget = true;
 
-            // porta in primo piano la carta (o il suo container) nella mano
             if (_handContainer != null)
                 _handContainer.SetAsLastSibling();
             else
@@ -476,11 +410,9 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
 
             gm?.HandManager?.OnHandCardBeginDrag(this, _handContainer);
 
-            _canvasGroup.blocksRaycasts = false; // consente di colpire lo spot sottostante
             return;
         }
 
-        // --- DRAG DAL BOARD ---
         if (!CanDragBoardCard()) return;
         if (_rootCanvas == null) return;
 
@@ -495,14 +427,6 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
 
         ShowCloneEmptySpot();
         _hasDragTarget = true;
-
-        // porta in primo piano la carta (o il suo container) sul board
-        //if (_playerBoardContainer != null)
-        //    _playerBoardContainer.SetAsLastSibling();
-        //else
-        //    _rt.SetAsLastSibling();
-
-        _canvasGroup.blocksRaycasts = false;
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -520,7 +444,7 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
             _hasDragTarget = true;
 
             if (_draggingHand)
-                UpdateHandPlaceholderIndex(); // continua a notificare l'HandManager
+                UpdateHandPlaceholderIndex();
         }
     }
 
@@ -529,7 +453,6 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         if (!_dragging) return;
 
         _dragging = false;
-        _canvasGroup.blocksRaycasts = true;
 
         if (_draggingFromBoard)
         {
@@ -541,7 +464,6 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         HandleHandDrop(eventData);
         _hasDragTarget = false;
     }
-
 
     private void HandleHandDrop(PointerEventData eventData)
     {
@@ -570,7 +492,6 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
 
     }
 
-    
     private void HandleBoardDrop(PointerEventData eventData)
     {
         HideCloneEmptySpot();
@@ -587,8 +508,6 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         }
         _draggingFromBoard = false;
     }
-
-
 
     private void RestoreDraggedBoardCard()
     {
@@ -630,31 +549,25 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     {
         if (_rt == null) return;
 
-    // stop eventuali tween in corso su questa carta
     _rt.DOKill();
 
     float duration = Mathf.Max(0f, handTweenDuration);
     if (duration <= 0f)
     {
-        // ritorno immediato, ma sempre alle world coords da cui il drag è iniziato
         _rt.position = _dragStartPos;
         _rt.localRotation = _dragOriginalLocalRotation;
         _rt.localScale = _dragOriginalLocalScale;
         return;
     }
 
-    // dopo RestoreDraggedBoardCard il parent è tornato a playerBoardRoot,
-    // ma vogliamo che VISIVAMENTE parta dal punto in cui il giocatore ha rilasciato
     _rt.position = releaseWorldPos;
 
-    // tween verso la posizione iniziale del drag (world coordinates)
     var seq = DOTween.Sequence()
         .SetUpdate(true)
         .SetLink(gameObject);
 
     seq.Join(_rt.DOMove(_dragStartPos, duration).SetEase(handTweenEase));
 
-    // opzionale ma sicuro: riallinea rotazione/scala alla fine, usando i valori salvati all'inizio del drag
     seq.OnComplete(() =>
     {
         if (_rt == null) return;
@@ -662,7 +575,6 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         _rt.localScale = _dragOriginalLocalScale;
     });
     }
-
 
     private void ReturnToHandSlot()
     {
@@ -718,39 +630,6 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         });
     }
 
-
-    private GameObject CreateDragPlaceholder()
-    {
-        if (_dragOriginalParent == null || _rt == null) return null;
-
-        var go = new GameObject("CardPlaceholder");
-        var rt = go.AddComponent<RectTransform>();
-        rt.SetParent(_dragOriginalParent, false);
-        rt.SetSiblingIndex(_dragOriginalSibling);
-        var reference = _draggingHand && _handContainer != null ? _handContainer : _rt;
-        rt.sizeDelta = reference.rect.size;
-
-        var srcLayout = reference.GetComponent<LayoutElement>();
-        if (srcLayout != null)
-        {
-            var le = go.AddComponent<LayoutElement>();
-            le.preferredWidth = srcLayout.preferredWidth > 0 ? srcLayout.preferredWidth : rt.sizeDelta.x;
-            le.preferredHeight = srcLayout.preferredHeight > 0 ? srcLayout.preferredHeight : rt.sizeDelta.y;
-            le.flexibleWidth = srcLayout.flexibleWidth;
-            le.flexibleHeight = srcLayout.flexibleHeight;
-            le.minWidth = srcLayout.minWidth;
-            le.minHeight = srcLayout.minHeight;
-        }
-        else
-        {
-            var le = go.AddComponent<LayoutElement>();
-            le.preferredWidth = rt.sizeDelta.x;
-            le.preferredHeight = rt.sizeDelta.y;
-        }
-
-        return go;
-    }
-
     private void ClearDragPlaceholder()
     {
         if (_dragPlaceholder != null)
@@ -765,7 +644,6 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
 
     private IEnumerator RemoveHandCardAfterDrop()
     {
-        // Let the play logic clone the dragged card before destroying the hand copy.
         yield return null;
 
         var hand = gm != null ? gm.HandManager : null;
@@ -784,20 +662,17 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
 
     private void UpdateHandPlaceholderIndex()
     {
-        if (!_draggingHand || gm == null || _rt == null)
+        if (!_draggingHand)
             return;
 
-        gm.HandManager?.ReorderHandDuringDrag(this, _rt.position);
+        gm.HandManager.ReorderHandDuringDrag(this, _rt.position);
     }
 
     private void ShowCloneEmptySpot()
     {
-        if (gm == null) return;
         var clone = gm.PlayerBoardRootClone;
-        if (clone == null) return;
 
         int index = _dragOriginalSibling;
-        //Debug.Log(_dragOriginalSibling);
         if (index < 0 || index >= clone.childCount) return;
 
         var spot = clone.GetChild(index);
@@ -827,8 +702,6 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
 
     private Transform FindEmptySpotUnderPointer(PointerEventData eventData)
     {
-        if (EventSystem.current == null || gm == null || gm.EmptySpot == null) return null;
-
         var boardRoot = gm.playerBoardRoot;
         var cloneRoot = gm.PlayerBoardRootClone;
 
@@ -870,8 +743,6 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
 
     private CardView FindBoardCardUnderPointer(PointerEventData eventData)
     {
-        if (EventSystem.current == null || gm == null || gm.playerBoardRoot == null) return null;
-
         var results = new List<RaycastResult>();
         EventSystem.current.RaycastAll(eventData, results);
         for (int i = 0; i < results.Count; i++)
@@ -897,7 +768,6 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     {
         if (_rt == null) return;
 
-        // niente più _dragContainer: si segue direttamente il target del drag
         Vector3 targetPos = _dragTargetWorld;
 
         float moveT = Mathf.Clamp01(handFollowSpeed * Time.deltaTime);
@@ -917,7 +787,7 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         {
             FollowHandContainer();
             FollowBoardContainer();
-        }  
+        }
         CardTilt();
     }
 
@@ -926,14 +796,11 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         if (_rt == null || _rootCanvas == null)
             return;
 
-        // indice "salvato" per avere una fase diversa per ogni carta
         savedIndex = _dragging ? savedIndex : _rt.parent.GetSiblingIndex();
 
-        // wobble automatico (idle)
         float sine = Mathf.Sin(Time.time + savedIndex);
         float cosine = Mathf.Cos(Time.time + savedIndex);
 
-        // === Lettura posizione puntatore (New Input System) ===
         Vector2 screenPos = Vector2.zero;
 
         if (Mouse.current != null)
@@ -944,7 +811,6 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         float tiltX = 0f;
         float tiltY = 0f;
 
-        // base di rotazione Z data dalla curva della mano/board
         float tiltZ = curveRotationOffset;
         if (curveParameters != null && _rt.parent != null)
             tiltZ = curveRotationOffset *
@@ -960,25 +826,20 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
                     _rootCanvas.worldCamera,
                     out var pointerWorld))
             {
-                // Parent come riferimento: non è mai ruotato
                 var parentTransform = _rt.parent != null ? _rt.parent : (Transform)_rt;
 
                 Vector3 cardCenterWorld = _rt.position;
 
-                // Delta mouse nello spazio del parent (quindi non influenzato dal tilt runtime)
                 Vector3 deltaParent =
                     parentTransform.InverseTransformPoint(pointerWorld) -
                     parentTransform.InverseTransformPoint(cardCenterWorld);
 
-                // Assi del prefab (orientazione originale) nello spazio del parent
                 Vector3 axisX = _initialLocalRotation * Vector3.right;
                 Vector3 axisY = _initialLocalRotation * Vector3.up;
 
-                // Componenti del movimento del mouse lungo gli assi del prefab
                 float offsetX = Vector3.Dot(deltaParent, axisX);
                 float offsetY = Vector3.Dot(deltaParent, axisY);
 
-                // Normalizzazione rispetto alle dimensioni della carta
                 Rect r = _rt.rect;
                 float halfW = Mathf.Max(1f, r.width * 0.5f);
                 float halfH = Mathf.Max(1f, r.height * 0.5f);
@@ -986,20 +847,16 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
                 float normX = Mathf.Clamp(offsetX / halfW, -1f, 1f);
                 float normY = Mathf.Clamp(offsetY / halfH, -1f, 1f);
 
-                // Movimento lungo un asse DEL PREFAB -> rotazione attorno all’altro asse
-                // (asse Y del prefab -> rotazione attorno a X, asse X del prefab -> rotazione attorno a Y)
-                tiltX = -normY * manualTiltAmount;  // muovi il mouse lungo l'asse "up" del prefab -> pitch (X)
-                tiltY = normX * manualTiltAmount;  // muovi il mouse lungo l'asse "right" del prefab -> yaw  (Y)
+                tiltX = -normY * manualTiltAmount;
+                tiltY = normX * manualTiltAmount;
             }
         }
         else
         {
-            // Non in hover: solo oscillazione "idle" automatica
             tiltX = sine * autoTiltAmount;
             tiltY = cosine * autoTiltAmount;
         }
 
-        // Interpolazione morbida verso il nuovo orientamento
         Vector3 current = transform.localEulerAngles;
 
         float lerpX = Mathf.LerpAngle(current.x, tiltX, tiltSpeed * Time.deltaTime);
@@ -1009,8 +866,6 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         transform.localEulerAngles = new Vector3(lerpX, lerpY, lerpZ);
     }
 
-
-    // BOARD CONTAINER
     private void FollowBoardContainer()
     {
         if (_playerBoardContainer == null || _rt == null || _draggingFromBoard || _draggingHand)
@@ -1051,18 +906,14 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
 
         if (_rt != null)
         {
-            // Allineo il container alla posizione attuale della carta
             _playerBoardContainer.position = _rt.position;
             _playerBoardContainer.rotation = Quaternion.identity;
             var crt = GetComponent<RectTransform>().rect.size;
-            // Se gli anchor non sono stretch, puoi usare direttamente sizeDelta:
             _playerBoardContainer.sizeDelta = crt;
 
-            // oppure, in modo più esplicito:
             _playerBoardContainer.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, crt.x);
             _playerBoardContainer.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, crt.y);
 
-            // Se non sto trascinando dal board, metto la carta dentro al container
             if (_rt.parent != _playerBoardContainer && !_draggingFromBoard)
             {
                 _rt.SetParent(_playerBoardContainer, true);
@@ -1116,8 +967,6 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         }
     }
 
-
-    //HAND CONTAINER
     private void FollowHandContainer()
     {
         if (_handContainer == null || _rt == null || _draggingHand || _returningToHand)
@@ -1213,37 +1062,6 @@ public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
             KillHandTweens();
             Destroy(_handContainer.gameObject);
             _handContainer = null;
-        }
-    }
-
-
-
-    private void SetupDragContainer()
-    {
-        if (_rootCanvas == null || _rt == null) return;
-
-        if (_dragContainer == null)
-        {
-            var go = new GameObject($"{name}_DragContainer", typeof(RectTransform));
-            _dragContainer = go.GetComponent<RectTransform>();
-        }
-
-        _dragContainer.SetParent(_rootCanvas.transform, true);
-        _dragContainer.position = _dragTargetWorld;
-        _dragContainer.rotation = Quaternion.identity;
-        _dragContainer.localScale = Vector3.one;
-
-        if (_rt.parent != _rootCanvas.transform)
-            _rt.SetParent(_rootCanvas.transform, true);
-        _rt.localRotation = Quaternion.identity;
-    }
-
-    private void CleanupDragContainer()
-    {
-        if (_dragContainer != null)
-        {
-            Destroy(_dragContainer.gameObject);
-            _dragContainer = null;
         }
     }
 
