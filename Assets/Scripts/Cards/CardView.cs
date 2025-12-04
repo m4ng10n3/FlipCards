@@ -193,13 +193,18 @@ public class CardView : MonoBehaviour
     public void SetHoverState(bool hovering)
     {
         if (_hovering == hovering) return;
+
         _hovering = hovering;
-        if (gm != null)
+
+        if (!hovering)
         {
-            if (hovering) gm.hoveredCard = this;
-            else if (gm.hoveredCard == this) gm.hoveredCard = null;
+            ResetHoverVisual();
+            _hoverVisualActive = false;
         }
-        _hoverVisualActive = false;
+        else
+        {
+            _hoverVisualActive = false;
+        }
     }
 
     public bool TryScreenPointToWorldOnRoot(Vector2 screenPos, out Vector3 worldPoint)
@@ -392,6 +397,9 @@ public class CardView : MonoBehaviour
             MoveInHand();
             _requestReturnToHand = false;
         }
+
+        if (_hovering && _dragging)
+            SetHoverState(false);
 
         if (_selectionDirty)
         {
@@ -789,7 +797,7 @@ public class CardView : MonoBehaviour
 
     void OnDisable()
     {
-        if (gm?.hoveredCard == this)
+        if (_hovering)
             SetHoverState(false);
     }
 }

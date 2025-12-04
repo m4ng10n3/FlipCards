@@ -212,8 +212,6 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
     {
         EnsureRuntimeRefs();
         if (cardView == null) return;
-        if (gm != null && gm.hoveredCard != null && gm.hoveredCard != cardView)
-            return;
         cardView.SetHoverState(true);
     }
 
@@ -221,8 +219,7 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
     {
         EnsureRuntimeRefs();
         if (cardView == null) return;
-        if (gm != null && gm.hoveredCard == cardView)
-            cardView.SetHoverState(false);
+        cardView.SetHoverState(false);
     }
 
     public void OnPointerClick(PointerEventData eventData)
