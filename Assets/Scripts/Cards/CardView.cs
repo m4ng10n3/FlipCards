@@ -325,7 +325,7 @@ public class CardView : MonoBehaviour
         if (_rt == null) return;
 
         var anchorRotation = GetAnchorRotation();
-        bool doHover = _hovering && !_moveInHandRequested && !_dragging;
+        bool doHover = _hovering && !_moveInHandRequested && !_dragging; // TODO: only the last card in the hand can do hover unless it is selected
         if (_handContainer != null && !_dragging && _rt.IsChildOf(_handContainer))
             UpdateHandContainerTarget();
 
@@ -341,6 +341,7 @@ public class CardView : MonoBehaviour
         }
         else if (doHover)
         {
+            FollowContainer();
             HoverMotion(anchorRotation);
         }
         else if (_moveInHandRequested)
@@ -464,6 +465,9 @@ public class CardView : MonoBehaviour
         bool inHand = _handContainer != null && _rt != null && _rt.IsChildOf(_handContainer);
         if (inHand)
             targetPosLocal = _handCurveOffset;
+
+        if (_selected)
+            targetPosLocal += Vector3.up * selectPunchAmount;
 
         bool handTweenActive = _handMoveTween != null && _handMoveTween.IsActive() && _handMoveTween.IsPlaying();
         if (!handTweenActive)
@@ -593,14 +597,16 @@ public class CardView : MonoBehaviour
         UpdateHandContainerTarget();
         KillHandTweens();
 
+        var targetPos = _handCurveOffset + (_selected ? Vector3.up * selectPunchAmount : Vector3.zero);
+
         if (immediate || handTweenDuration <= 0f)
         {
-            _rt.localPosition = _handCurveOffset;
+            _rt.localPosition = targetPos;
         }
         else
         {
             _handMoveTween = _rt
-                .DOLocalMove(_handCurveOffset, handTweenDuration)
+                .DOLocalMove(targetPos, handTweenDuration)
                 .SetEase(handTweenEase)
                 .SetUpdate(true)
                 .SetLink(gameObject);
@@ -622,6 +628,8 @@ public class CardView : MonoBehaviour
     {
         if (_rt == null) return;
 
+        Selected = state;
+
         if (_selectTween != null && _selectTween.IsActive()) _selectTween.Complete(true);
         KillTween(ref _selectTween);
         if (state)
@@ -629,8 +637,11 @@ public class CardView : MonoBehaviour
             _selectTween = _rt
                 .DOPunchPosition(_rt.up * selectPunchAmount, scaleTransition, 10, 1)
                 .SetUpdate(true);
+            _canvas.overrideSorting = true;
+            _canvas.sortingOrder = 10;
         }
-
+        else { _canvas.overrideSorting = false ; }
+            
         float targetScale = 1f;
         if (state) targetScale = scaleOnSelect;
         else if (_hovering) targetScale = scaleOnHover;
