@@ -1,13 +1,11 @@
 using DG.Tweening;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 [RequireComponent(typeof(RectTransform))]
 
-public class CardView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
+public class CardView : MonoBehaviour
 {
     [Header("Image Handling")]
     [Tooltip("Sprite del retro (assegnare come Source Image in Inspector)")]
@@ -47,22 +45,13 @@ public class CardView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, I
 
     private Outline highlight;
     private int _lastHp = int.MinValue;
-    private EventBus.Handler _evtHandler;
     private Canvas _rootCanvas;
     private RectTransform _rt;
     private Canvas _canvas;
     private bool _dragging;
     private bool _hovering;
-
-    private bool _draggingFromBoard;
-
-    private GameObject _cloneEmptySpotDuringDrag;
-    private Image _cloneEmptySpotImage;
-    private int _dragOriginalSibling;
-    private float _lastClickTime;
     private bool _draggingHand;
-    private const float DoubleClickThreshold = 0.3f;
-    private static readonly List<RaycastResult> _raycastBuffer = new List<RaycastResult>(8);
+    private bool _draggingFromBoard;
     private CurveParameters _lastCurveAsset;
     private int _lastCurveVersion = -1;
 
@@ -124,41 +113,73 @@ public class CardView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, I
 
         Refresh();
         hintText.gameObject.SetActive(false);
-
-        _evtHandler = OnGameEvent;
-        EventBus.Subscribe(GameEventType.AttackResolved, _evtHandler);
-        EventBus.Subscribe(GameEventType.Flip, _evtHandler);
-        EventBus.Subscribe(GameEventType.AttackDeclared, _evtHandler);
-        EventBus.Subscribe(GameEventType.TurnEnd, _evtHandler);
-        EventBus.Subscribe(GameEventType.Info, _evtHandler);
-        EventBus.Subscribe(GameEventType.TurnStart, _evtHandler);
+        GetComponent<CardDefinition>()?.BindRuntime(gm, owner, instance, this);
     }
 
     void OnDestroy()
     {
-        UnsubscribeAllEvents();
         ReleaseHandContainer();
         ReleaseBoardContainer();
     }
 
-    private void UnsubscribeAllEvents()
+    public RectTransform RectTransform => _rt;
+    public Canvas RootCanvas => _rootCanvas;
+    public Canvas Canvas => _canvas;
+    public bool IsDragging => _dragging;
+    public bool IsDraggingFromBoard => _draggingFromBoard;
+    public bool IsDraggingHand => _draggingHand;
+    public bool IsHovering => _hovering;
+    public bool HasDragTarget => _hasDragTarget;
+
+    public void SetDraggingFlags(bool dragging, bool draggingHand, bool draggingFromBoard)
     {
-        EventBus.Unsubscribe(GameEventType.AttackResolved, _evtHandler);
-        EventBus.Unsubscribe(GameEventType.Flip, _evtHandler);
-        EventBus.Unsubscribe(GameEventType.AttackDeclared, _evtHandler);
-        EventBus.Unsubscribe(GameEventType.TurnEnd, _evtHandler);
-        EventBus.Unsubscribe(GameEventType.Info, _evtHandler);
-        EventBus.Unsubscribe(GameEventType.TurnStart, _evtHandler);
-        _evtHandler = null;
+        _dragging = dragging;
+        _draggingHand = draggingHand;
+        _draggingFromBoard = draggingFromBoard;
     }
 
-    public void OnClicked()
+    public void SetDragTargetWorld(Vector3 worldPosition, bool hasTarget = true)
     {
+        _dragTargetWorld = worldPosition;
+        _hasDragTarget = hasTarget;
+    }
+
+    public void ClearDragTarget()
+    {
+        _hasDragTarget = false;
+    }
+
+    public void SetCanvasSorting(bool enabled, int sortingOrder = 10)
+    {
+        if (_canvas == null) return;
+        _canvas.overrideSorting = enabled;
+        _canvas.sortingOrder = sortingOrder;
+    }
+
+    public void SetHoverState(bool hovering)
+    {
+        _hovering = hovering;
         if (gm == null) return;
-        gm.OnCardClicked(this);
-        if (IsBoardCard() && _lastClickTime > 0f && Time.time - _lastClickTime <= DoubleClickThreshold)
-            gm.OnCardDoubleClicked(this);
-        _lastClickTime = Time.time;
+
+        gm.hoveredCard = hovering ? this : null;
+    }
+
+    public bool TryScreenPointToWorldOnRoot(Vector2 screenPos, out Vector3 worldPoint)
+    {
+        worldPoint = _rt != null ? _rt.position : Vector3.zero;
+        if (_rootCanvas == null) return false;
+
+        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                _rootCanvas.transform as RectTransform,
+                screenPos,
+                _rootCanvas.worldCamera,
+                out var localPoint))
+        {
+            worldPoint = _rootCanvas.transform.TransformPoint(localPoint);
+            return true;
+        }
+
+        return false;
     }
 
     public void SetHighlight(bool setting)
@@ -199,7 +220,7 @@ public class CardView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, I
         FlipSide(immediate: true);
     }
 
-    private void FlipSide(bool immediate = false)
+    public void FlipSide(bool immediate = false)
     {
         if (immediate || flipDuration <= 0f || _rt == null || !Application.isPlaying)
         {
@@ -250,52 +271,7 @@ public class CardView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, I
         hintText.enabled = isFront;
     }
 
-    void OnGameEvent(GameEventType t, EventContext ctx)
-    {
-        switch (t)
-        {
-            case GameEventType.AttackResolved:
-                if (ctx.target == instance && ctx.amount > 0)
-                {
-                    ShowHint($"-{ctx.amount}HP");
-                    UpdateHpOnly();
-                    Blink();
-                }
-                if (ctx.source == instance && ctx.amount > 0)
-                {
-                    ShowHint($"Dealt {ctx.amount}");
-                }
-                break;
-
-            case GameEventType.AttackDeclared:
-                if (ctx.source == instance) ShowHint("Attack!");
-                else if (ctx.target == instance) ShowHint("Under attack!");
-                break;
-
-            case GameEventType.TurnEnd:
-                HideHint();
-                break;
-
-            case GameEventType.Info:
-                if (ctx.source == instance && !string.IsNullOrEmpty(ctx.phase) && ctx.phase.StartsWith("HINT:"))
-                    ShowHint(ctx.phase.Substring("HINT:".Length).Trim());
-                break;
-
-            case GameEventType.TurnStart:
-                HideHint();
-                break;
-
-            case GameEventType.Flip:
-                if (ctx.source == instance || ctx.target == instance)
-                {
-                    FlipSide();
-                    Blink();
-                }
-                break;
-        }
-    }
-
-    private void UpdateHpOnly()
+    public void UpdateHpOnly()
     {
         hpText.text = instance.health + "";
         _lastHp = instance.health;
@@ -321,21 +297,6 @@ public class CardView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, I
         hintText.text = string.Empty;
         hintText.gameObject.SetActive(false);
     }
-
-    private bool IsHandCard()
-    {
-        var handRoot = gm.HandManager.HandRoot;
-        if (owner != null || instance != null)
-            return false;
-
-        bool isDirectChild = _rt.parent == handRoot;
-        bool isContainerChild = _handContainer != null && _handContainer.parent == handRoot && _rt.parent == _handContainer;
-        return isDirectChild || isContainerChild;
-    }
-    private bool IsBoardCard() => owner != null && instance != null;
-    private bool CanDragBoardCard() =>
-    IsBoardCard() &&
-    _rt.IsChildOf(gm.playerBoardRoot);
 
     public void EvaluateHandCurve(float normalized, int slotCount, out Vector3 positionOffset, out Quaternion rotation)
     {
@@ -364,249 +325,6 @@ public class CardView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, I
         _lastCurveVersion = currentVersion;
         return changed;
     }
-
-    public void OnBeginDrag(PointerEventData eventData)
-    {
-        if (_dragging) return;
-        if (_rt == null) throw new System.InvalidOperationException("CardView missing RectTransform");
-        if (_rootCanvas == null) throw new System.InvalidOperationException("CardView missing Canvas");
-
-        _dragTargetWorld = _rt.position;
-        if (_rootCanvas != null &&
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                _rootCanvas.transform as RectTransform,
-                eventData.position,
-                _rootCanvas.worldCamera,
-                out var lp))
-        {
-            _dragTargetWorld = _rootCanvas.transform.TransformPoint(lp);
-        }
-        _dragging = true;
-        if (IsHandCard())
-        {
-            if (gm == null || gm.HandManager == null) throw new System.InvalidOperationException("Hand drag requires GameManager and HandManager");
-            _handContainer = EnsureHandContainer(gm.HandManager.HandRoot);
-            if (_handContainer == null) throw new System.InvalidOperationException("Hand container not created");
-            _draggingHand = true;
-            _draggingFromBoard = false;
-            _hasDragTarget = true;
-
-            gm.HandManager.OnHandCardBeginDrag(this, _handContainer);
-
-            return;
-        }
-
-        if (!CanDragBoardCard()) return;
-
-        _draggingFromBoard = true;
-
-        _dragOriginalSibling = _rt.parent.GetSiblingIndex();
-
-        ShowCloneEmptySpot();
-        _hasDragTarget = true;
-    }
-
-    public void OnDrag(PointerEventData eventData)
-    {
-        if (!_dragging || _rt == null || _rootCanvas == null) return;
-        _canvas.overrideSorting = true;
-        _canvas.sortingOrder = 10;
-
-        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                _rootCanvas.transform as RectTransform,
-                eventData.position,
-                _rootCanvas.worldCamera,
-                out var localPoint))
-        {
-            var worldPoint = _rootCanvas.transform.TransformPoint(localPoint);
-            _dragTargetWorld = worldPoint;
-            _hasDragTarget = true;
-
-            if (_draggingHand)
-                UpdateHandOrderDuringDrag();
-        }
-    }
-
-    public void OnEndDrag(PointerEventData eventData)
-    {
-        if (!_dragging) return;
-        _dragging = false;
-        if (_draggingFromBoard)
-        {
-            HandleBoardDrop(eventData);
-            _hasDragTarget = false;
-            _canvas.overrideSorting = false;
-            return;
-        }
-        HandleHandDrop(eventData);
-        _hasDragTarget = false;
-        _canvas.overrideSorting = false;
-    }
-
-    private void HandleHandDrop(PointerEventData eventData)
-    {
-        var spot = FindEmptySpotUnderPointer(eventData);
-        if (spot != null)
-        {
-            gm.OnEmptySpotClicked(spot);
-            gm.OnCardClicked(this);
-        }
-
-        _draggingHand = false;
-        gm.HandManager.OnHandCardEndDrag(this);
-    }
-
-    private void HandleBoardDrop(PointerEventData eventData)
-    {
-        HideCloneEmptySpot();
-        var target = FindBoardCardUnderPointer(eventData);
-        if (target != null && gm != null)
-        {
-            gm.SwapCardPositions(this, target);
-        }
-        _draggingFromBoard = false;
-    }
-
-    private void UpdateHandOrderDuringDrag()
-    {
-        if (!_draggingHand)
-            return;
-
-        gm.HandManager.ReorderHandDuringDrag(this, _rt.position);
-    }
-
-    private void ShowCloneEmptySpot()
-    {
-        var clone = gm.PlayerBoardRootClone;
-
-        int index = _dragOriginalSibling;
-        if (index < 0 || index >= clone.childCount) return;
-
-        var spot = clone.GetChild(index);
-        if (spot == null) return;
-
-        var spotGO = spot.gameObject;
-        if (gm.EmptySpot != null && spotGO.name != gm.EmptySpot.name) return;
-
-        var spotImage = spotGO.GetComponent<Image>();
-        if (spotImage == null) return;
-
-        _cloneEmptySpotDuringDrag = spotGO;
-        _cloneEmptySpotImage = spotImage;
-
-        if (!_cloneEmptySpotDuringDrag.activeSelf)
-            _cloneEmptySpotDuringDrag.SetActive(true);
-        _cloneEmptySpotImage.enabled = true;
-    }
-
-    private void HideCloneEmptySpot()
-    {
-        if (_cloneEmptySpotImage != null)
-            _cloneEmptySpotImage.enabled = false;
-        _cloneEmptySpotDuringDrag = null;
-        _cloneEmptySpotImage = null;
-    }
-
-    private Transform FindEmptySpotUnderPointer(PointerEventData eventData)
-    {
-        var boardRoot = gm.playerBoardRoot;
-        var cloneRoot = gm.PlayerBoardRootClone;
-
-        _raycastBuffer.Clear();
-        EventSystem.current.RaycastAll(eventData, _raycastBuffer);
-        for (int i = 0; i < _raycastBuffer.Count; i++)
-        {
-            var t = _raycastBuffer[i].gameObject.transform;
-            while (t != null)
-            {
-                if (t.gameObject.name != gm.EmptySpot.name)
-                {
-                    t = t.parent;
-                    continue;
-                }
-
-                if (cloneRoot != null && t.IsChildOf(cloneRoot))
-                {
-                    if (!t.gameObject.activeInHierarchy) break;
-
-                    int idx = t.GetSiblingIndex();
-                    if (boardRoot != null && idx < boardRoot.childCount)
-                    {
-                        var realSpot = boardRoot.GetChild(idx);
-                        if (realSpot != null && realSpot.gameObject.activeInHierarchy && realSpot.gameObject.name == gm.EmptySpot.name)
-                            return realSpot;
-                    }
-                }
-                else if (boardRoot == null || t.IsChildOf(boardRoot))
-                {
-                    return t;
-                }
-
-                t = t.parent;
-            }
-        }
-        return null;
-    }
-
-    private CardView FindBoardCardUnderPointer(PointerEventData eventData)
-    {
-        var results = new List<RaycastResult>();
-        EventSystem.current.RaycastAll(eventData, results);
-        for (int i = 0; i < results.Count; i++)
-        {
-            var view = results[i].gameObject.GetComponentInParent<CardView>();
-            if (view != null && view != this && view.transform.IsChildOf(gm.playerBoardRoot))
-                return view;
-        }
-
-        return null;
-    }
-    private void SetHoverState(bool hovering)
-    {
-        if (hovering)
-        {
-            gm.hoveredCard = this;
-            _hovering = true;
-        }
-        else
-        {
-            _hovering = false;
-            if (gm != null) gm.hoveredCard = null; 
-        }
-    }
-    public void OnPointerEnter(PointerEventData eventData)
-    {
-        if (gm.hoveredCard != null)
-            return;
-        SetHoverState(true);
-        Debug.Log(name + $": hovering{_hovering}");
-    }
-
-    public void OnPointerExit(PointerEventData eventData)
-    {
-        if (gm.hoveredCard == this)
-            SetHoverState(false);
-            Debug.Log(name + $": hovering{_hovering}");
-    }
-
-    public void OnPointerDown(PointerEventData eventData)
-    {
-        if (_dragging) return;
-        //OnBeginDrag(eventData);
-    }
-
-    public void OnPointerUp(PointerEventData eventData)
-    {
-        //OnEndDrag(eventData);
-    }
-
-    public void OnPointerClick(PointerEventData eventData)
-    {
-        if (_dragging || (eventData != null && eventData.dragging)) return;
-        if (eventData != null && eventData.button != PointerEventData.InputButton.Left) return;
-        OnClicked();
-    }
-
     private Quaternion GetAnchorRotation()
     {
         if (_draggingHand)

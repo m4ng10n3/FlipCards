@@ -1,6 +1,9 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
+using System.Collections.Generic;
 
-public class CardDefinition : MonoBehaviour
+public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
     [System.Serializable]
     public struct Spec
@@ -48,6 +51,20 @@ public class CardDefinition : MonoBehaviour
     [Header("Behaviour")]
     [Range(0, 1f)] public float endTurnFlipChance = 0.3f;
 
+    [Header("Runtime")]
+    [SerializeField] private CardView cardView;
+
+    private const float DoubleClickThreshold = 0.3f;
+    private GameManager gm;
+    private PlayerState owner;
+    private CardInstance instance;
+    private EventBus.Handler _evtHandler;
+    private GameObject _cloneEmptySpotDuringDrag;
+    private Image _cloneEmptySpotImage;
+    private int _dragOriginalSibling;
+    private float _lastClickTime;
+    private static readonly List<RaycastResult> _raycastBuffer = new List<RaycastResult>(8);
+
     // Ex-BuildRuntimeDefinition: ora ritorna la Spec senza creare ScriptableObject
     public Spec BuildSpec()
     {
@@ -64,5 +81,351 @@ public class CardDefinition : MonoBehaviour
             endTurnFlipChance = endTurnFlipChance,
             zone = zone
         };
+    }
+
+    private void Awake()
+    {
+        if (cardView == null)
+            cardView = GetComponent<CardView>() ?? GetComponentInChildren<CardView>();
+
+        if (cardView == null)
+            Debug.LogError("CardDefinition richiede un CardView nello stesso prefab", this);
+    }
+
+    public void BindRuntime(GameManager gm, PlayerState owner, CardInstance instance, CardView view)
+    {
+        cardView = view ?? cardView ?? GetComponent<CardView>() ?? GetComponentInChildren<CardView>();
+        this.gm = gm ?? cardView?.gm;
+        this.owner = owner ?? cardView?.owner;
+        this.instance = instance ?? cardView?.instance;
+
+        UnsubscribeAllEvents();
+        if (this.instance != null)
+        {
+            _evtHandler = OnGameEvent;
+            EventBus.Subscribe(GameEventType.AttackResolved, _evtHandler);
+            EventBus.Subscribe(GameEventType.Flip, _evtHandler);
+            EventBus.Subscribe(GameEventType.AttackDeclared, _evtHandler);
+            EventBus.Subscribe(GameEventType.TurnEnd, _evtHandler);
+            EventBus.Subscribe(GameEventType.Info, _evtHandler);
+            EventBus.Subscribe(GameEventType.TurnStart, _evtHandler);
+        }
+    }
+
+    private void OnDestroy()
+    {
+        UnsubscribeAllEvents();
+    }
+
+    private void UnsubscribeAllEvents()
+    {
+        if (_evtHandler == null) return;
+        EventBus.Unsubscribe(GameEventType.AttackResolved, _evtHandler);
+        EventBus.Unsubscribe(GameEventType.Flip, _evtHandler);
+        EventBus.Unsubscribe(GameEventType.AttackDeclared, _evtHandler);
+        EventBus.Unsubscribe(GameEventType.TurnEnd, _evtHandler);
+        EventBus.Unsubscribe(GameEventType.Info, _evtHandler);
+        EventBus.Unsubscribe(GameEventType.TurnStart, _evtHandler);
+        _evtHandler = null;
+    }
+
+    public void OnPointerDown(PointerEventData eventData)
+    {
+    }
+
+    public void OnPointerUp(PointerEventData eventData)
+    {
+    }
+
+    public void OnBeginDrag(PointerEventData eventData)
+    {
+        EnsureRuntimeRefs();
+        if (cardView == null || cardView.IsDragging) return;
+        if (cardView.RectTransform == null) throw new System.InvalidOperationException("CardView missing RectTransform");
+        if (cardView.RootCanvas == null) throw new System.InvalidOperationException("CardView missing Canvas");
+
+        var targetWorld = cardView.RectTransform.position;
+        if (cardView.TryScreenPointToWorldOnRoot(eventData.position, out var worldPoint))
+            targetWorld = worldPoint;
+
+        cardView.SetDragTargetWorld(targetWorld, hasTarget: true);
+        cardView.SetDraggingFlags(true, false, false);
+
+        if (IsHandCard())
+        {
+            if (gm == null || gm.HandManager == null) throw new System.InvalidOperationException("Hand drag requires GameManager and HandManager");
+            var handContainer = cardView.EnsureHandContainer(gm.HandManager.HandRoot);
+            if (handContainer == null) throw new System.InvalidOperationException("Hand container not created");
+
+            cardView.SetDraggingFlags(true, true, false);
+            gm.HandManager.OnHandCardBeginDrag(cardView, handContainer);
+            return;
+        }
+
+        if (!CanDragBoardCard())
+        {
+            cardView.SetDraggingFlags(false, false, false);
+            cardView.ClearDragTarget();
+            return;
+        }
+
+        _dragOriginalSibling = cardView.RectTransform.parent.GetSiblingIndex();
+        cardView.SetDraggingFlags(true, false, true);
+        ShowCloneEmptySpot();
+    }
+
+    public void OnDrag(PointerEventData eventData)
+    {
+        EnsureRuntimeRefs();
+        if (cardView == null || !cardView.IsDragging || cardView.RectTransform == null) return;
+
+        cardView.SetCanvasSorting(true);
+
+        if (cardView.TryScreenPointToWorldOnRoot(eventData.position, out var worldPoint))
+        {
+            cardView.SetDragTargetWorld(worldPoint, hasTarget: true);
+
+            if (cardView.IsDraggingHand && gm != null && gm.HandManager != null)
+                gm.HandManager.ReorderHandDuringDrag(cardView, cardView.RectTransform.position);
+        }
+    }
+
+    public void OnEndDrag(PointerEventData eventData)
+    {
+        EnsureRuntimeRefs();
+        if (cardView == null || !cardView.IsDragging) return;
+
+        if (cardView.IsDraggingFromBoard)
+            HandleBoardDrop(eventData);
+        else if (cardView.IsDraggingHand)
+            HandleHandDrop(eventData);
+
+        cardView.SetDraggingFlags(false, false, false);
+        cardView.ClearDragTarget();
+        cardView.SetCanvasSorting(false);
+    }
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        EnsureRuntimeRefs();
+        if (cardView == null) return;
+        if (gm != null && gm.hoveredCard != null)
+            return;
+        cardView.SetHoverState(true);
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        EnsureRuntimeRefs();
+        if (cardView == null) return;
+        if (gm != null && gm.hoveredCard == cardView)
+            cardView.SetHoverState(false);
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        EnsureRuntimeRefs();
+        if (cardView == null) return;
+        if (cardView.IsDragging || (eventData != null && eventData.dragging)) return;
+        if (eventData != null && eventData.button != PointerEventData.InputButton.Left) return;
+        if (gm == null) return;
+
+        gm.OnCardClicked(cardView);
+        if (IsBoardCard() && _lastClickTime > 0f && Time.time - _lastClickTime <= DoubleClickThreshold)
+            gm.OnCardDoubleClicked(cardView);
+        _lastClickTime = Time.time;
+    }
+
+    private void HandleHandDrop(PointerEventData eventData)
+    {
+        if (gm == null || cardView == null) return;
+
+        var spot = FindEmptySpotUnderPointer(eventData);
+        if (spot != null)
+        {
+            gm.OnEmptySpotClicked(spot);
+            gm.OnCardClicked(cardView);
+        }
+
+        gm.HandManager.OnHandCardEndDrag(cardView);
+    }
+
+    private void HandleBoardDrop(PointerEventData eventData)
+    {
+        HideCloneEmptySpot();
+        var target = FindBoardCardUnderPointer(eventData);
+        if (target != null && gm != null)
+        {
+            gm.SwapCardPositions(cardView, target);
+        }
+    }
+
+    private void ShowCloneEmptySpot()
+    {
+        if (gm == null || cardView == null) return;
+        var clone = gm.PlayerBoardRootClone;
+
+        int index = _dragOriginalSibling;
+        if (clone == null || index < 0 || index >= clone.childCount) return;
+
+        var spot = clone.GetChild(index);
+        if (spot == null) return;
+
+        var spotGO = spot.gameObject;
+        if (gm.EmptySpot != null && spotGO.name != gm.EmptySpot.name) return;
+
+        var spotImage = spotGO.GetComponent<Image>();
+        if (spotImage == null) return;
+
+        _cloneEmptySpotDuringDrag = spotGO;
+        _cloneEmptySpotImage = spotImage;
+
+        if (!_cloneEmptySpotDuringDrag.activeSelf)
+            _cloneEmptySpotDuringDrag.SetActive(true);
+        _cloneEmptySpotImage.enabled = true;
+    }
+
+    private void HideCloneEmptySpot()
+    {
+        if (_cloneEmptySpotImage != null)
+            _cloneEmptySpotImage.enabled = false;
+        _cloneEmptySpotDuringDrag = null;
+        _cloneEmptySpotImage = null;
+    }
+
+    private Transform FindEmptySpotUnderPointer(PointerEventData eventData)
+    {
+        if (gm == null) return null;
+
+        var boardRoot = gm.playerBoardRoot;
+        var cloneRoot = gm.PlayerBoardRootClone;
+
+        _raycastBuffer.Clear();
+        EventSystem.current.RaycastAll(eventData, _raycastBuffer);
+        for (int i = 0; i < _raycastBuffer.Count; i++)
+        {
+            var t = _raycastBuffer[i].gameObject.transform;
+            while (t != null)
+            {
+                if (t.gameObject.name != gm.EmptySpot.name)
+                {
+                    t = t.parent;
+                    continue;
+                }
+
+                if (cloneRoot != null && t.IsChildOf(cloneRoot))
+                {
+                    if (!t.gameObject.activeInHierarchy) break;
+
+                    int idx = t.GetSiblingIndex();
+                    if (boardRoot != null && idx < boardRoot.childCount)
+                    {
+                        var realSpot = boardRoot.GetChild(idx);
+                        if (realSpot != null && realSpot.gameObject.activeInHierarchy && realSpot.gameObject.name == gm.EmptySpot.name)
+                            return realSpot;
+                    }
+                }
+                else if (boardRoot == null || t.IsChildOf(boardRoot))
+                {
+                    return t;
+                }
+
+                t = t.parent;
+            }
+        }
+        return null;
+    }
+
+    private CardView FindBoardCardUnderPointer(PointerEventData eventData)
+    {
+        if (gm == null) return null;
+
+        var results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(eventData, results);
+        for (int i = 0; i < results.Count; i++)
+        {
+            var view = results[i].gameObject.GetComponentInParent<CardView>();
+            if (view != null && view != cardView && view.transform.IsChildOf(gm.playerBoardRoot))
+                return view;
+        }
+
+        return null;
+    }
+
+    private void OnGameEvent(GameEventType t, EventContext ctx)
+    {
+        if (cardView == null) return;
+
+        switch (t)
+        {
+            case GameEventType.AttackResolved:
+                if (ctx.target == cardView.instance && ctx.amount > 0)
+                {
+                    cardView.ShowHint($"-{ctx.amount}HP");
+                    cardView.UpdateHpOnly();
+                    cardView.Blink();
+                }
+                if (ctx.source == cardView.instance && ctx.amount > 0)
+                {
+                    cardView.ShowHint($"Dealt {ctx.amount}");
+                }
+                break;
+
+            case GameEventType.AttackDeclared:
+                if (ctx.source == cardView.instance) cardView.ShowHint("Attack!");
+                else if (ctx.target == cardView.instance) cardView.ShowHint("Under attack!");
+                break;
+
+            case GameEventType.TurnEnd:
+                cardView.HideHint();
+                break;
+
+            case GameEventType.Info:
+                if (ctx.source == cardView.instance && !string.IsNullOrEmpty(ctx.phase) && ctx.phase.StartsWith("HINT:"))
+                    cardView.ShowHint(ctx.phase.Substring("HINT:".Length).Trim());
+                break;
+
+            case GameEventType.TurnStart:
+                cardView.HideHint();
+                break;
+
+            case GameEventType.Flip:
+                if (ctx.source == cardView.instance || ctx.target == cardView.instance)
+                {
+                    cardView.FlipSide();
+                    cardView.Blink();
+                }
+                break;
+        }
+    }
+
+    private bool IsHandCard()
+    {
+        if (cardView == null || gm == null) return false;
+        if (owner != null || instance != null)
+            return false;
+
+        var handRoot = gm.HandManager.HandRoot;
+        var rt = cardView.RectTransform;
+        bool isDirectChild = rt != null && rt.parent == handRoot;
+        bool isContainerChild = cardView.HandContainer != null && cardView.HandContainer.parent == handRoot && rt != null && rt.parent == cardView.HandContainer;
+        return isDirectChild || isContainerChild;
+    }
+
+    private bool IsBoardCard() => owner != null && instance != null;
+
+    private bool CanDragBoardCard()
+    {
+        if (cardView == null || gm == null || cardView.RectTransform == null)
+            return false;
+        return IsBoardCard() && cardView.RectTransform.IsChildOf(gm.playerBoardRoot);
+    }
+
+    private void EnsureRuntimeRefs()
+    {
+        if (cardView == null) return;
+        gm ??= cardView.gm;
+        owner ??= cardView.owner;
+        instance ??= cardView.instance;
     }
 }
