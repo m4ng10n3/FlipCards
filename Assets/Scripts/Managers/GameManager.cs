@@ -489,7 +489,6 @@ public void UpdateHUD()
         view.EnsurePlayerBoardContainer(playerBoardRoot);
         view.PlayerBoardContainer.SetSiblingIndex(laneIndex);
 
-        view.SetHighlight(false);
         viewByInstance[ci] = view;
 
         var opponent = ai;

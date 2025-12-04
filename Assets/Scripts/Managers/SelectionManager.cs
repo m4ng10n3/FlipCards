@@ -35,10 +35,6 @@ public class SelectionManager : MonoBehaviour
             // esegue lo swap delle due carte sulla board del player
             GameManager.Instance.SwapCardPositions(SwapSource, view);
 
-            // la carta selezionata prima perde l'highlight
-            if (SelectedOwned != null)
-                SelectedOwned.SetHighlight(false);
-
             // azzero selezioni / stato swap
             SelectedOwned = null;
             SwapSource = null;
@@ -51,9 +47,7 @@ public class SelectionManager : MonoBehaviour
         if (!IsSwapArmed && SelectedOwned == view) return;
 
         // --- SELEZIONE NORMALE ---
-        if (SelectedOwned != null) SelectedOwned.SetHighlight(false);
         SelectedOwned = view;
-        if (SelectedOwned != null) SelectedOwned.SetHighlight(true);
 
         EventBus.Publish(GameEventType.Info, new EventContext
         {
@@ -69,7 +63,6 @@ public class SelectionManager : MonoBehaviour
         // 1) spegni highlight sulla carta selezionata (se c'è)
         if (SelectedOwned != null)
         {
-            SelectedOwned.SetHighlight(false);
             SelectedOwned = null;
         }
 
@@ -125,7 +118,6 @@ public class SelectionManager : MonoBehaviour
 
     public void ClearAll()
     {
-        if (SelectedOwned != null) SelectedOwned.SetHighlight(false);
         SelectedOwned = null;
 
         if (SelectedEmptySpot != null)
