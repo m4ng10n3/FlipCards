@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using UnityEngine.XR;
 [RequireComponent(typeof(RectTransform))]
 
 public class CardView : MonoBehaviour
@@ -21,6 +22,8 @@ public class CardView : MonoBehaviour
     [Header("Flip Animation")]
     [SerializeField] private float flipDuration = 0.25f;
     [SerializeField] private Ease flipEase = Ease.InOutQuad;
+    [Header("Hover Activation Thresholds")]
+    [SerializeField] private float maxLocalRotationAngle = 40f;
 
     private Sprite frontImage;
 
@@ -78,10 +81,9 @@ public class CardView : MonoBehaviour
     private Tween _handMoveTween;
     private Quaternion _targetHandRotation = Quaternion.identity;
     private Vector3 _handCurveOffset = Vector3.zero;
-    private Vector3 _dragTargetWorld;
+    private Vector3? _dragTarget;
     private bool _hasDragTarget;
     private bool _requestReturnToHand;
-    private bool _selectionDirty;
     private bool _selected;
     private bool _hoverVisualActive;
     private bool _moveInHandRequested;
@@ -97,12 +99,25 @@ public class CardView : MonoBehaviour
     private Tween _selectTween;
     private Tween _moveInHandTween;
 
+    public RectTransform RectTransform => _rt;
+    public Canvas RootCanvas => _rootCanvas;
+    public Canvas Canvas => _canvas;
+    public bool IsDragging { get => _dragging; set { _dragging = value; } }
+    public bool IsDraggingFromBoard => _draggingFromBoard;
+    public bool IsDraggingHand => _draggingHand;
+    public bool IsHovering { get => _hovering; set { _hovering = value; Debug.Log(name + $" hover state: {value}"); } }
+    public bool RequestReturnToHand { get => _requestReturnToHand; set => _requestReturnToHand = value; }
+    public bool Selected { get => _selected; set { if (_selected == value) return; _selected = value; } }
+    public bool MoveInHandRequest { get => _moveInHandRequested; set { _moveInHandRequested = value; } }
+
+    public RectTransform handContainer { get => _handContainer; set => _handContainer = value; }
+    public Vector3? dragTarget { get => _dragTarget; set => _dragTarget = value; }
+
     void Awake()
     {
         _rt = GetComponent<RectTransform>();
         highlight = GetComponent<Outline>();
         _canvas = GetComponent<Canvas>() ?? gameObject.AddComponent<Canvas>();
-        SetHoverState(false);
         if (GetComponent<GraphicRaycaster>() == null) gameObject.AddComponent<GraphicRaycaster>();
         CacheRootCanvas();
 
@@ -148,83 +163,10 @@ public class CardView : MonoBehaviour
 
     void OnDestroy()
     {
+        KillAllTweens();
         ReleaseHandContainer();
         ReleaseBoardContainer();
     }
-
-    public RectTransform RectTransform => _rt;
-    public Canvas RootCanvas => _rootCanvas;
-    public Canvas Canvas => _canvas;
-    public bool IsDragging => _dragging;
-    public bool IsDraggingFromBoard => _draggingFromBoard;
-    public bool IsDraggingHand => _draggingHand;
-    public bool IsHovering => _hovering;
-    public bool HasDragTarget => _hasDragTarget;
-    public bool RequestReturnToHand { get => _requestReturnToHand; set => _requestReturnToHand = value; }
-    public bool Selected { get => _selected; set { if (_selected == value) return; _selected = value; _selectionDirty = true; } }
-    public bool MoveInHandRequest { set { _moveInHandRequested = value; _moveInHandImmediate = false; } }
-    public void RequestMoveInHand(bool immediate = false) { _moveInHandRequested = true; _moveInHandImmediate = immediate; }
-
-    public void SetDraggingFlags(bool dragging, bool draggingHand, bool draggingFromBoard)
-    {
-        _dragging = dragging;
-        _draggingHand = draggingHand;
-        _draggingFromBoard = draggingFromBoard;
-    }
-
-    public void SetDragTargetWorld(Vector3 worldPosition, bool hasTarget = true)
-    {
-        _dragTargetWorld = worldPosition;
-        _hasDragTarget = hasTarget;
-    }
-
-    public void ClearDragTarget()
-    {
-        _hasDragTarget = false;
-    }
-
-    public void SetCanvasSorting(bool enabled, int sortingOrder = 10)
-    {
-        if (_canvas == null) return;
-        _canvas.overrideSorting = enabled;
-        _canvas.sortingOrder = sortingOrder;
-    }
-
-    public void SetHoverState(bool hovering)
-    {
-        if (_hovering == hovering) return;
-
-        _hovering = hovering;
-
-        if (!hovering)
-        {
-            ResetHoverVisual();
-            _hoverVisualActive = false;
-        }
-        else
-        {
-            _hoverVisualActive = false;
-        }
-    }
-
-    public bool TryScreenPointToWorldOnRoot(Vector2 screenPos, out Vector3 worldPoint)
-    {
-        worldPoint = _rt != null ? _rt.position : Vector3.zero;
-        if (_rootCanvas == null) return false;
-
-        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                _rootCanvas.transform as RectTransform,
-                screenPos,
-                _rootCanvas.worldCamera,
-                out var localPoint))
-        {
-            worldPoint = _rootCanvas.transform.TransformPoint(localPoint);
-            return true;
-        }
-
-        return false;
-    }
-
     public void SetHighlight(bool setting)
     {
         highlight.enabled = setting;
@@ -366,75 +308,120 @@ public class CardView : MonoBehaviour
     }
     private Quaternion GetAnchorRotation()
     {
-        if (_draggingHand)
-            return _handContainer != null && _handContainer.parent != null ? _handContainer.parent.rotation : Quaternion.identity;
-
-        if (_draggingFromBoard)
-            return _playerBoardContainer != null && _playerBoardContainer.parent != null ? _playerBoardContainer.parent.rotation : Quaternion.identity;
-
-        if (_handContainer != null && _rt != null && _rt.IsChildOf(_handContainer) && _handContainer.parent != null)
+        if (_handContainer == null && _playerBoardContainer == null) 
+            return Quaternion.identity;
+        if (_handContainer  != null && _rt.IsChildOf(_handContainer))
+        {
             return _handContainer.parent.rotation;
-
-        if (_playerBoardContainer != null && _rt != null && _rt.IsChildOf(_playerBoardContainer) && _playerBoardContainer.parent != null)
+        }
+        else
+        {
             return _playerBoardContainer.parent.rotation;
-
-        return _rt != null && _rt.parent != null ? _rt.parent.rotation : Quaternion.identity;
+        }
     }
 
     private void Update()
     {
         if (_rt == null) return;
 
-        if (_moveInHandRequested && !_dragging)
+        var anchorRotation = GetAnchorRotation();
+        bool inHand = _handContainer != null && _rt.IsChildOf(_handContainer);
+        bool isLastInHand = false;
+        if (inHand)
         {
-            MoveInHand(_moveInHandImmediate);
-            _moveInHandRequested = false;
-            _moveInHandImmediate = false;
+            var parent = _handContainer.parent as RectTransform;
+            if (parent != null) isLastInHand = _handContainer.GetSiblingIndex() == parent.childCount - 1;
         }
-
-        if (_requestReturnToHand && !_dragging)
-        {
-            MoveInHand();
-            _requestReturnToHand = false;
-        }
-
-        if (_hovering && _dragging)
-            SetHoverState(false);
-
-        if (_selectionDirty)
-        {
-            ApplySelect(_selected);
-            _selectionDirty = false;
-        }
-
-        if (_hovering && !_dragging && !_hoverVisualActive)
-        {
-            ApplyPointerEnter();
-            _hoverVisualActive = true;
-        }
-        else if (!_hovering && _hoverVisualActive)
-        {
-            ResetHoverVisual();
-            _hoverVisualActive = false;
-        }
-
-        if (!_dragging && _handContainer != null && _rt.IsChildOf(_handContainer))
+        bool doHover = _hovering && !_moveInHandRequested && !_dragging && (!_selected ? (!inHand || isLastInHand) : true);
+        if (_handContainer != null && !_dragging && _rt.IsChildOf(_handContainer))
             UpdateHandContainerTarget();
 
-        var anchorRotation = GetAnchorRotation();
-
-        if (_dragging && _hasDragTarget)
+        if (_dragging && _dragTarget != null)
         {
-            _rt.position = Vector3.Lerp(_rt.position, _dragTargetWorld, Mathf.Clamp01(handFollowSpeed * Time.deltaTime));
+            if (_handContainer != null) _draggingHand = _rt.IsChildOf(_handContainer);
+            else _draggingHand = false;
+            if (_playerBoardContainer != null) _draggingFromBoard = _rt.IsChildOf(_playerBoardContainer);
+            else _draggingFromBoard = false;
+            _canvas.overrideSorting = true;
+            _canvas.sortingOrder = 10;
+            _rt.position = Vector3.Lerp(_rt.position, _dragTarget.Value, Mathf.Clamp01(handFollowSpeed * Time.deltaTime));
+        }
+        else if (doHover)
+        {
+            FollowContainer();
+            HoverMotion(anchorRotation);
+        }
+        else if (_moveInHandRequested)
+        {
+            MoveInHand(_moveInHandImmediate);
         }
         else
         {
+            _canvas.overrideSorting = false;
             FollowContainer();
         }
-
-        CardTilt(anchorRotation);
+        if (!doHover) CardTilt(anchorRotation);
     }
+    private void HoverMotion(Quaternion anchorRotation)
+    {
+        var baseRotation = anchorRotation;
 
+        if (_handContainer != null && _rt.IsChildOf(_handContainer)) baseRotation *= _targetHandRotation;
+        else if (_playerBoardContainer!= null && _rt.IsChildOf(_playerBoardContainer)) baseRotation *= _targetBoardRotation;
+
+        float tiltX = 0f;
+        float tiltY = 0f;
+        float tiltZ = 0f;
+
+        Vector2 screenPos = Mouse.current != null ? Mouse.current.position.ReadValue() : Vector2.zero;
+        var canvasRect = _rootCanvas.transform as RectTransform;
+        if (canvasRect != null &&
+            RectTransformUtility.ScreenPointToWorldPointInRectangle(
+                canvasRect,
+                screenPos,
+                _rootCanvas.worldCamera,
+                out var pointerWorld))
+        {
+            var parentTransform = _rt.parent != null ? _rt.parent : (Transform)_rt;
+
+            Vector3 cardCenterWorld = _rt.position;
+
+            Vector3 deltaParent =
+                parentTransform.InverseTransformPoint(pointerWorld) -
+                parentTransform.InverseTransformPoint(cardCenterWorld);
+
+            var localAnchor = Quaternion.Inverse(parentTransform.rotation) * baseRotation;
+            Vector3 axisX = localAnchor * Vector3.right;
+            Vector3 axisY = localAnchor * Vector3.up;
+
+            float offsetX = Vector3.Dot(deltaParent, axisX);
+            float offsetY = Vector3.Dot(deltaParent, axisY);
+
+            Rect r = _rt.rect;
+            float halfW = Mathf.Max(1f, r.width * 0.5f);
+            float halfH = Mathf.Max(1f, r.height * 0.5f);
+
+            float normX = Mathf.Clamp(offsetX / halfW, -1f, 1f);
+            float normY = Mathf.Clamp(offsetY / halfH, -1f, 1f);
+
+            tiltX = -normY * manualTiltAmount;
+            tiltY = normX * manualTiltAmount;
+        }
+        Vector3 currentLocal = (Quaternion.Inverse(baseRotation) * _rt.rotation).eulerAngles;
+
+        float lerpX = Mathf.LerpAngle(currentLocal.x, tiltX, tiltSpeed * Time.deltaTime);
+        float lerpY = Mathf.LerpAngle(currentLocal.y, tiltY, tiltSpeed * Time.deltaTime);
+        float lerpZ = Mathf.LerpAngle(currentLocal.z, tiltZ, (tiltSpeed * 0.5f) * Time.deltaTime);
+
+        var targetRot = baseRotation * Quaternion.Euler(lerpX, lerpY, lerpZ);
+        _rt.rotation = Quaternion.Lerp(_rt.rotation, targetRot, handFollowRotationSpeed * Time.deltaTime);
+        float clampAng = Quaternion.Angle(baseRotation, _rt.rotation);
+        if (clampAng > maxLocalRotationAngle)
+        {
+            float t = maxLocalRotationAngle / Mathf.Max(clampAng, 0.0001f);
+            _rt.rotation = Quaternion.Slerp(baseRotation, _rt.rotation, t);
+        }
+    }
     private void CardTilt(Quaternion anchorRotation)
     {
         if (_rt == null || _rootCanvas == null)
@@ -452,55 +439,12 @@ public class CardView : MonoBehaviour
         float sine = Mathf.Sin(Time.time + savedIndex);
         float cosine = Mathf.Cos(Time.time + savedIndex);
 
-        Vector2 screenPos = Mouse.current != null ? Mouse.current.position.ReadValue() : Vector2.zero;
-
         float tiltX = 0f;
         float tiltY = 0f;
         float tiltZ = 0f;
 
-        bool hoverActive = _hovering && !_dragging;
-
-        if (hoverActive)
-        {
-            var canvasRect = _rootCanvas.transform as RectTransform;
-            if (canvasRect != null &&
-                RectTransformUtility.ScreenPointToWorldPointInRectangle(
-                    canvasRect,
-                    screenPos,
-                    _rootCanvas.worldCamera,
-                    out var pointerWorld))
-            {
-                var parentTransform = _rt.parent != null ? _rt.parent : (Transform)_rt;
-
-                Vector3 cardCenterWorld = _rt.position;
-
-                Vector3 deltaParent =
-                    parentTransform.InverseTransformPoint(pointerWorld) -
-                    parentTransform.InverseTransformPoint(cardCenterWorld);
-
-                var localAnchor = Quaternion.Inverse(parentTransform.rotation) * baseRotation;
-                Vector3 axisX = localAnchor * Vector3.right;
-                Vector3 axisY = localAnchor * Vector3.up;
-
-                float offsetX = Vector3.Dot(deltaParent, axisX);
-                float offsetY = Vector3.Dot(deltaParent, axisY);
-
-                Rect r = _rt.rect;
-                float halfW = Mathf.Max(1f, r.width * 0.5f);
-                float halfH = Mathf.Max(1f, r.height * 0.5f);
-
-                float normX = Mathf.Clamp(offsetX / halfW, -1f, 1f);
-                float normY = Mathf.Clamp(offsetY / halfH, -1f, 1f);
-
-                tiltX = -normY * manualTiltAmount;
-                tiltY = normX * manualTiltAmount;
-            }
-        }
-        else
-        {
-            tiltX = sine * autoTiltAmount;
-            tiltY = cosine * autoTiltAmount;
-        }
+        tiltX = sine * autoTiltAmount;
+        tiltY = cosine * autoTiltAmount;
 
         Vector3 currentLocal = (Quaternion.Inverse(baseRotation) * _rt.rotation).eulerAngles;
 
@@ -510,6 +454,12 @@ public class CardView : MonoBehaviour
 
         var targetRot = baseRotation * Quaternion.Euler(lerpX, lerpY, lerpZ);
         _rt.rotation = Quaternion.Lerp(_rt.rotation, targetRot, handFollowRotationSpeed * Time.deltaTime);
+        float clampAng = Quaternion.Angle(baseRotation, _rt.rotation);
+        if (clampAng > maxLocalRotationAngle)
+        {
+            float t = maxLocalRotationAngle / Mathf.Max(clampAng, 0.0001f);
+            _rt.rotation = Quaternion.Slerp(baseRotation, _rt.rotation, t);
+        }
     }
 
     private void FollowContainer()
@@ -522,6 +472,9 @@ public class CardView : MonoBehaviour
         bool inHand = _handContainer != null && _rt != null && _rt.IsChildOf(_handContainer);
         if (inHand)
             targetPosLocal = _handCurveOffset;
+
+        if (_selected)
+            targetPosLocal += Vector3.up * selectPunchAmount;
 
         bool handTweenActive = _handMoveTween != null && _handMoveTween.IsActive() && _handMoveTween.IsPlaying();
         if (!handTweenActive)
@@ -606,8 +559,6 @@ public class CardView : MonoBehaviour
         }
     }
 
-    public RectTransform HandContainer => _handContainer;
-
     public RectTransform EnsureHandContainer(Transform parent)
     {
         if (_handContainer == null)
@@ -645,43 +596,24 @@ public class CardView : MonoBehaviour
         return _handContainer;
     }
 
-    public void SetHandContainer(RectTransform container, bool reparent, bool worldPositionStays = true)
-    {
-        if (container == null)
-            return;
-
-        _handContainer = container;
-
-        if (reparent && _rt != null)
-        {
-            _rt.SetParent(_handContainer, worldPositionStays);
-            if (!worldPositionStays)
-            {
-                _rt.localRotation = Quaternion.identity;
-                _rt.localPosition = Vector3.zero;
-            }
-        }
-
-        if (!_dragging && _handContainer != null && _handContainer.parent == gm?.HandManager?.HandRoot)
-            MoveInHand();
-    }
-
     public void MoveInHand(bool immediate = false)
     {
-        if (_handContainer == null || _rt == null)
+        if (_handContainer == null || _rt == null || !_moveInHandRequested)
             return;
 
         UpdateHandContainerTarget();
         KillHandTweens();
 
+        var targetPos = _handCurveOffset + (_selected ? Vector3.up * selectPunchAmount : Vector3.zero);
+
         if (immediate || handTweenDuration <= 0f)
         {
-            _rt.localPosition = _handCurveOffset;
+            _rt.localPosition = targetPos;
         }
         else
         {
             _handMoveTween = _rt
-                .DOLocalMove(_handCurveOffset, handTweenDuration)
+                .DOLocalMove(targetPos, handTweenDuration)
                 .SetEase(handTweenEase)
                 .SetUpdate(true)
                 .SetLink(gameObject);
@@ -694,12 +626,18 @@ public class CardView : MonoBehaviour
                 .DOPunchRotation(Vector3.forward * MoveInHandRotationAngle, MoveInHandTransition, MoveInHandVibration, 1)
                 .SetUpdate(true);
         }
+
+        _moveInHandRequested = false;
+        _moveInHandImmediate = false;
     }
 
-    private void ApplySelect(bool state)
+    public void ApplySelect(bool state)
     {
         if (_rt == null) return;
 
+        Selected = state;
+
+        if (_selectTween != null && _selectTween.IsActive()) _selectTween.Complete(true);
         KillTween(ref _selectTween);
         if (state)
         {
@@ -707,13 +645,14 @@ public class CardView : MonoBehaviour
                 .DOPunchPosition(_rt.up * selectPunchAmount, scaleTransition, 10, 1)
                 .SetUpdate(true);
         }
-
+            
         float targetScale = 1f;
         if (state) targetScale = scaleOnSelect;
         else if (_hovering) targetScale = scaleOnHover;
 
         if (scaleAnimations)
         {
+            if (_scaleTween != null && _scaleTween.IsActive()) _scaleTween.Complete(true);
             KillTween(ref _scaleTween);
             _scaleTween = transform.DOScale(targetScale, scaleTransition)
                 .SetEase(scaleEase)
@@ -721,30 +660,38 @@ public class CardView : MonoBehaviour
         }
     }
 
-    private void ApplyPointerEnter()
+    public void ApplyPointerEnter()
     {
         if (_rt == null) return;
+
+        if (_handContainer != null && _rt.IsChildOf(_handContainer))
+        {
+            UpdateHandContainerTarget();
+        }
 
         if (scaleAnimations)
         {
             float targetScale = _selected ? scaleOnSelect : scaleOnHover;
+            if (_scaleTween != null && _scaleTween.IsActive()) _scaleTween.Complete(true);
             KillTween(ref _scaleTween);
             _scaleTween = transform.DOScale(targetScale, scaleTransition)
                 .SetEase(scaleEase)
                 .SetUpdate(true);
         }
 
+        if (_hoverPunchTween != null && _hoverPunchTween.IsActive()) _hoverPunchTween.Complete(true);
         KillTween(ref _hoverPunchTween);
         _hoverPunchTween = _rt
             .DOPunchRotation(Vector3.forward * hoverPunchAngle, hoverTransition, 20, 1)
             .SetUpdate(true);
     }
 
-    private void ResetHoverVisual()
+    public void ResetHoverVisual()
     {
         if (!scaleAnimations) return;
 
         float targetScale = _selected ? scaleOnSelect : 1f;
+        if (_scaleTween != null && _scaleTween.IsActive()) _scaleTween.Complete(true);
         KillTween(ref _scaleTween);
         _scaleTween = transform.DOScale(targetScale, scaleTransition)
             .SetEase(scaleEase)
@@ -781,11 +728,11 @@ public class CardView : MonoBehaviour
         }
     }
 
-    private void KillTween(ref Tween t)
+    private void KillTween(ref Tween t, bool complete = false)
     {
         if (t != null)
         {
-            t.Kill();
+            t.Kill(complete);
             t = null;
         }
     }
@@ -798,6 +745,18 @@ public class CardView : MonoBehaviour
     void OnDisable()
     {
         if (_hovering)
-            SetHoverState(false);
+            _hovering = false;
+    }
+
+    private void KillAllTweens()
+    {
+        _rt?.DOKill();
+        transform.DOKill(); // ensure lingering tweens tied to this GameObject are removed
+        KillTween(ref _scaleTween);
+        KillTween(ref _hoverPunchTween);
+        KillTween(ref _selectTween);
+        KillTween(ref _moveInHandTween);
+        KillHandTweens();
+        KillBoardTweens();
     }
 }
