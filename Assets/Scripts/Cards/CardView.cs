@@ -165,6 +165,7 @@ public class CardView : MonoBehaviour
 
     void OnDestroy()
     {
+        KillAllTweens();
         ReleaseHandContainer();
         ReleaseBoardContainer();
     }
@@ -750,5 +751,17 @@ public class CardView : MonoBehaviour
     {
         if (_hovering)
             _hovering = false;
+    }
+
+    private void KillAllTweens()
+    {
+        _rt?.DOKill();
+        transform.DOKill(); // ensure lingering tweens tied to this GameObject are removed
+        KillTween(ref _scaleTween);
+        KillTween(ref _hoverPunchTween);
+        KillTween(ref _selectTween);
+        KillTween(ref _moveInHandTween);
+        KillHandTweens();
+        KillBoardTweens();
     }
 }
