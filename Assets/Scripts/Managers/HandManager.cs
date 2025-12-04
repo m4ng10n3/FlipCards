@@ -182,16 +182,14 @@ public class HandManager : MonoBehaviour
             if (container.parent != handRoot) container.SetParent(handRoot, true);
 
             int slotIndex = container.GetSiblingIndex();
-            float normalized = slotCount <= 1 ? 0.5f : (float)slotIndex / (slotCount - 1);
             Vector3 finalLocalPos = new Vector3(startX + slotIndex * spacing, 0f, 0f);
 
-            card.EvaluateHandCurve(normalized, slotCount, out var posOffset, out var rotOffset);
-            finalLocalPos += posOffset;
-
             bool needsMove = (container.localPosition - finalLocalPos).sqrMagnitude > PositionThresholdSqr;
-            bool needsRot = Quaternion.Angle(container.localRotation, rotOffset) > RotationThreshold;
-            if (needsMove || needsRot)
-                card.UpdateHandContainerTarget(finalLocalPos, rotOffset);
+            if (needsMove)
+                container.localPosition = finalLocalPos;
+
+            if (Quaternion.Angle(container.localRotation, Quaternion.identity) > RotationThreshold)
+                container.localRotation = Quaternion.identity;
         }
     }
 

@@ -53,11 +53,11 @@ public class CardView : MonoBehaviour
     private bool _draggingHand;
     private bool _draggingFromBoard;
     private CurveParameters _lastCurveAsset;
-    private int _lastCurveVersion = -1;
 
     private RectTransform _handContainer;
     private Tween _handMoveTween;
     private Quaternion _targetHandRotation = Quaternion.identity;
+    private Vector3 _handCurveOffset = Vector3.zero;
     private Vector3 _dragTargetWorld;
     private bool _hasDragTarget;
 
@@ -298,13 +298,18 @@ public class CardView : MonoBehaviour
         hintText.gameObject.SetActive(false);
     }
 
-    public void EvaluateHandCurve(float normalized, int slotCount, out Vector3 positionOffset, out Quaternion rotation)
+    public void EvaluateHandCurve(out Vector3 positionOffset, out Quaternion rotation)
     {
         positionOffset = Vector3.zero;
         rotation = Quaternion.identity;
 
-        if (curveParameters == null)
+        if (curveParameters == null || _handContainer == null || _handContainer.parent == null)
             return;
+
+        var parent = _handContainer.parent as RectTransform;
+        int slotCount = parent != null ? parent.childCount : _handContainer.parent.childCount;
+        int slotIndex = _handContainer.GetSiblingIndex();
+        float normalized = slotCount <= 1 ? 0.5f : (float)slotIndex / (slotCount - 1);
 
         int siblings = Mathf.Max(0, slotCount);
         float yOff = curveParameters.positioning.Evaluate(normalized) * curveParameters.positioningInfluence * siblings;
@@ -336,6 +341,9 @@ public class CardView : MonoBehaviour
     private void Update()
     {
         if (_rt == null) return;
+
+        if (!_dragging && _handContainer != null && _rt.IsChildOf(_handContainer))
+            UpdateHandContainerTarget();
 
         var anchorRotation = GetAnchorRotation();
 
@@ -434,7 +442,12 @@ public class CardView : MonoBehaviour
             return;
 
         var targetPosLocal = Vector3.zero;
-        _rt.localPosition = Vector3.Lerp(_rt.localPosition,targetPosLocal,handFollowSpeed * Time.deltaTime);
+
+        bool inHand = _handContainer != null && _rt != null && _rt.IsChildOf(_handContainer);
+        if (inHand)
+            targetPosLocal = _handCurveOffset;
+
+        _rt.localPosition = Vector3.Lerp(_rt.localPosition, targetPosLocal, handFollowSpeed * Time.deltaTime);
     }
 
     public RectTransform PlayerBoardContainer => _playerBoardContainer;
@@ -521,7 +534,7 @@ public class CardView : MonoBehaviour
     {
         if (_handContainer == null)
         {
-            var go = new GameObject($"{name}_Container", typeof(RectTransform));
+            var go = new GameObject("HandContainer", typeof(RectTransform));
             _handContainer = go.GetComponent<RectTransform>();
             _handContainer.localScale = _rt.localScale;
             _handContainer.localRotation = Quaternion.identity;
@@ -533,6 +546,7 @@ public class CardView : MonoBehaviour
                 _handContainer.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, crt.x);
                 _handContainer.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, crt.y);
             }    
+            _handContainer.gameObject.name = "HandContainer";
         }
 
         if (parent != null && _handContainer.parent != parent)
@@ -576,27 +590,14 @@ public class CardView : MonoBehaviour
         }
     }
 
-    public void UpdateHandContainerTarget(Vector3 localPosition, Quaternion localRotation)
+    public void UpdateHandContainerTarget()
     {
         if (_handContainer == null)
             return;
 
-        _targetHandRotation = localRotation;
-        KillHandTweens();
-
-        if (handTweenDuration <= 0f)
-        {
-            _handContainer.localPosition = localPosition;
-            _handContainer.localRotation = Quaternion.identity;
-            return;
-        }
-
-        _handMoveTween = _handContainer.DOLocalMove(localPosition, handTweenDuration)
-        .SetEase(handTweenEase)
-        .SetUpdate(true)
-        .SetLink(gameObject);
-
-        _handContainer.localRotation = Quaternion.identity;
+        EvaluateHandCurve(out var positionOffset, out var rotation);
+        _handCurveOffset = positionOffset;
+        _targetHandRotation = rotation;
     }
 
     public void ReleaseHandContainer()
