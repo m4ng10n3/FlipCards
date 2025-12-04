@@ -144,33 +144,30 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
         if (cardView.RectTransform == null) throw new System.InvalidOperationException("CardView missing RectTransform");
         if (cardView.RootCanvas == null) throw new System.InvalidOperationException("CardView missing Canvas");
 
-        var targetWorld = cardView.RectTransform.position;
-        if (cardView.TryScreenPointToWorldOnRoot(eventData.position, out var worldPoint))
-            targetWorld = worldPoint;
+        Vector3 worldPoint = cardView.RectTransform != null ? cardView.RectTransform.position : Vector3.zero;
 
-        cardView.SetDragTargetWorld(targetWorld, hasTarget: true);
-        cardView.SetDraggingFlags(true, false, false);
+        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                cardView.RootCanvas.transform as RectTransform,
+                eventData.position,
+                cardView.RootCanvas.worldCamera,
+                out var localPoint))
+        {
+            worldPoint = cardView.RootCanvas.transform.TransformPoint(localPoint);
+        }
+
+        cardView.dragTarget = worldPoint;
+        cardView.IsDragging = true;
 
         if (IsHandCard())
         {
-            if (gm == null || gm.HandManager == null) throw new System.InvalidOperationException("Hand drag requires GameManager and HandManager");
-            var handContainer = cardView.EnsureHandContainer(gm.HandManager.HandRoot);
-            if (handContainer == null) throw new System.InvalidOperationException("Hand container not created");
+            if (cardView.handContainer == null) throw new System.InvalidOperationException("Hand container not created");
 
-            cardView.SetDraggingFlags(true, true, false);
-            gm.HandManager.OnHandCardBeginDrag(cardView, handContainer);
+            gm.HandManager.OnHandCardBeginDrag(cardView, cardView.handContainer);
             return;
         }
 
-        if (!CanDragBoardCard())
-        {
-            cardView.SetDraggingFlags(false, false, false);
-            cardView.ClearDragTarget();
-            return;
-        }
 
         _dragOriginalSibling = cardView.RectTransform.parent.GetSiblingIndex();
-        cardView.SetDraggingFlags(true, false, true);
         ShowCloneEmptySpot();
     }
 
@@ -179,15 +176,22 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
         EnsureRuntimeRefs();
         if (cardView == null || !cardView.IsDragging || cardView.RectTransform == null) return;
 
-        cardView.SetCanvasSorting(true);
+        Vector3 worldPoint = cardView.RectTransform != null ? cardView.RectTransform.position : Vector3.zero;
 
-        if (cardView.TryScreenPointToWorldOnRoot(eventData.position, out var worldPoint))
+        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                cardView.RootCanvas.transform as RectTransform,
+                eventData.position,
+                cardView.RootCanvas.worldCamera,
+                out var localPoint))
         {
-            cardView.SetDragTargetWorld(worldPoint, hasTarget: true);
-
-            if (cardView.IsDraggingHand && gm != null && gm.HandManager != null)
-                gm.HandManager.ReorderHandDuringDrag(cardView, cardView.RectTransform.position);
+            worldPoint = cardView.RootCanvas.transform.TransformPoint(localPoint);
         }
+
+        cardView.dragTarget = worldPoint;
+        cardView.IsDragging = true;
+
+        if (cardView.IsDraggingHand && gm != null && gm.HandManager != null)
+            gm.HandManager.ReorderHandDuringDrag(cardView, cardView.RectTransform.position);
     }
 
     public void OnEndDrag(PointerEventData eventData)
@@ -200,11 +204,10 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
         else if (cardView.IsDraggingHand)
             HandleHandDrop(eventData);
 
-        cardView.SetDraggingFlags(false, false, false);
-        cardView.ClearDragTarget();
-        cardView.SetCanvasSorting(false);
+        cardView.dragTarget = null;
+        cardView.IsDragging = false;
 
-        if (cardView.HandContainer != null && cardView.HandContainer.parent == gm?.HandManager?.HandRoot)
+        if (cardView.handContainer != null && cardView.handContainer.parent == gm?.HandManager?.HandRoot)
             cardView.RequestReturnToHand = true;
     }
 
@@ -212,14 +215,16 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
     {
         EnsureRuntimeRefs();
         if (cardView == null) return;
-        cardView.SetHoverState(true);
+        cardView.IsHovering = true;
+        cardView.ApplyPointerEnter();
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
         EnsureRuntimeRefs();
         if (cardView == null) return;
-        cardView.SetHoverState(false);
+        cardView.IsHovering = false;
+        cardView.ResetHoverVisual();
     }
 
     public void OnPointerClick(PointerEventData eventData)
@@ -234,6 +239,7 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
         if (IsBoardCard() && _lastClickTime > 0f && Time.time - _lastClickTime <= DoubleClickThreshold)
             gm.OnCardDoubleClicked(cardView);
         _lastClickTime = Time.time;
+        cardView.ApplySelect(!cardView.Selected);
     }
 
     private void HandleHandDrop(PointerEventData eventData)
@@ -408,18 +414,11 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
         var handRoot = gm.HandManager.HandRoot;
         var rt = cardView.RectTransform;
         bool isDirectChild = rt != null && rt.parent == handRoot;
-        bool isContainerChild = cardView.HandContainer != null && cardView.HandContainer.parent == handRoot && rt != null && rt.parent == cardView.HandContainer;
+        bool isContainerChild = cardView.handContainer != null && cardView.handContainer.parent == handRoot && rt != null && rt.parent == cardView.handContainer;
         return isDirectChild || isContainerChild;
     }
 
     private bool IsBoardCard() => owner != null && instance != null;
-
-    private bool CanDragBoardCard()
-    {
-        if (cardView == null || gm == null || cardView.RectTransform == null)
-            return false;
-        return IsBoardCard() && cardView.RectTransform.IsChildOf(gm.playerBoardRoot);
-    }
 
     private void EnsureRuntimeRefs()
     {

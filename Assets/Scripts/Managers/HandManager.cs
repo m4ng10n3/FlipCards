@@ -155,7 +155,7 @@ public class HandManager : MonoBehaviour
 
         if (handCards.Remove(cv))
         {
-            var container = cv.HandContainer != null ? cv.HandContainer.transform : null;
+            var container = cv.handContainer != null ? cv.handContainer.transform : null;
             if (container != null && container.parent == handRoot) Destroy(container.gameObject);
             Destroy(cv.gameObject);
             UpdateCardsPosition();
@@ -177,7 +177,7 @@ public class HandManager : MonoBehaviour
         for (int i = 0; i < slotCount; i++)
         {
             var card = handCards[i];
-            var container = card.HandContainer ?? card.EnsureHandContainer(handRoot);
+            var container = card.handContainer ?? card.EnsureHandContainer(handRoot);
             if (container == null) throw new System.InvalidOperationException("Hand container missing");
             if (container.parent != handRoot) container.SetParent(handRoot, true);
 
@@ -198,8 +198,8 @@ public class HandManager : MonoBehaviour
         handCards.RemoveAll(c => c == null);
         handCards.Sort((a, b) =>
         {
-            var ta = a != null ? a.HandContainer : null;
-            var tb = b != null ? b.HandContainer : null;
+            var ta = a != null ? a.handContainer : null;
+            var tb = b != null ? b.handContainer : null;
             int ia = ta != null ? ta.GetSiblingIndex() : int.MaxValue;
             int ib = tb != null ? tb.GetSiblingIndex() : int.MaxValue;
             return ia.CompareTo(ib);
@@ -210,7 +210,7 @@ public class HandManager : MonoBehaviour
     {
         if (movingCard == null) throw new System.InvalidOperationException("Missing moving card");
 
-        var sourceContainer = movingCard.HandContainer ?? movingCard.EnsureHandContainer(handRoot);
+        var sourceContainer = movingCard.handContainer ?? movingCard.EnsureHandContainer(handRoot);
         if (sourceContainer == null) throw new System.InvalidOperationException("Missing container for moving card");
 
         var containers = new List<RectTransform>();
@@ -240,9 +240,13 @@ public class HandManager : MonoBehaviour
 
         var targetCard = targetContainer.GetComponentInChildren<CardView>(includeInactive: false);
 
-        movingCard.SetHandContainer(targetContainer, reparent: true, worldPositionStays: true);
+        movingCard.handContainer = targetContainer;
+        movingCard.RectTransform.SetParent(targetContainer);
+        movingCard.MoveInHandRequest = true;
         if (targetCard != null)
-            targetCard.SetHandContainer(sourceContainer, reparent: true, worldPositionStays: true);
+            targetCard.handContainer = sourceContainer;
+            targetCard.RectTransform.SetParent(sourceContainer);
+            targetCard.MoveInHandRequest = true;
 
         SortHandCardsBySlotIndex();
         UpdateCardsPosition();
