@@ -23,8 +23,6 @@ public class CardView : MonoBehaviour
     [SerializeField] private float flipDuration = 0.25f;
     [SerializeField] private Ease flipEase = Ease.InOutQuad;
     [Header("Hover Activation Thresholds")]
-    [SerializeField] private float hoverActivationPosThreshold = 2f;
-    [SerializeField] private float hoverActivationRotThreshold = 7f;
     [SerializeField] private float maxLocalRotationAngle = 40f;
 
     private Sprite frontImage;
@@ -107,7 +105,7 @@ public class CardView : MonoBehaviour
     public bool IsDragging { get => _dragging; set { _dragging = value; } }
     public bool IsDraggingFromBoard => _draggingFromBoard;
     public bool IsDraggingHand => _draggingHand;
-    public bool IsHovering { get => _hovering; set { _hovering = value; } }
+    public bool IsHovering { get => _hovering; set { _hovering = value; Debug.Log(name + $" hover state: {value}"); } }
     public bool RequestReturnToHand { get => _requestReturnToHand; set => _requestReturnToHand = value; }
     public bool Selected { get => _selected; set { if (_selected == value) return; _selected = value; } }
     public bool MoveInHandRequest { get => _moveInHandRequested; set { _moveInHandRequested = value; } }
@@ -327,7 +325,7 @@ public class CardView : MonoBehaviour
         if (_rt == null) return;
 
         var anchorRotation = GetAnchorRotation();
-        bool doHover = _hovering && !_moveInHandRequested;
+        bool doHover = _hovering && !_moveInHandRequested && !_dragging;
         if (_handContainer != null && !_dragging && _rt.IsChildOf(_handContainer))
             UpdateHandContainerTarget();
 
@@ -418,7 +416,6 @@ public class CardView : MonoBehaviour
     }
     private void CardTilt(Quaternion anchorRotation)
     {
-        if (_hovering) return;
         if (_rt == null || _rootCanvas == null)
             return;
 
@@ -651,28 +648,11 @@ public class CardView : MonoBehaviour
     public void ApplyPointerEnter()
     {
         if (_rt == null) return;
-        if (_moveInHandRequested || _dragging)
-        {
-            _hovering = false;
-            return;
-        }
 
         if (_handContainer != null && _rt.IsChildOf(_handContainer))
         {
             UpdateHandContainerTarget();
-            float posThreshold = hoverActivationPosThreshold * hoverActivationPosThreshold;
-            float posDiff = (_rt.localPosition - _handCurveOffset).sqrMagnitude;
-            var anchorRot = GetAnchorRotation();
-            var targetRot = anchorRot * _targetHandRotation;
-            float ang = Quaternion.Angle(_rt.rotation, targetRot);
-            if (posDiff > posThreshold || ang > hoverActivationRotThreshold)
-            {
-                _hovering = false;
-                return;
-            }
         }
-
-        _hovering = true;
 
         if (scaleAnimations)
         {

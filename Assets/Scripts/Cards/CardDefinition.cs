@@ -131,10 +131,15 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
 
     public void OnPointerDown(PointerEventData eventData)
     {
+        
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
+        if (cardView.IsDragging)
+        {
+            OnEndDrag(eventData);
+        }
     }
 
     public void OnBeginDrag(PointerEventData eventData)
