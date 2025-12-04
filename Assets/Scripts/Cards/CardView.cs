@@ -325,7 +325,14 @@ public class CardView : MonoBehaviour
         if (_rt == null) return;
 
         var anchorRotation = GetAnchorRotation();
-        bool doHover = _hovering && !_moveInHandRequested && !_dragging; // TODO: only the last card in the hand can do hover unless it is selected
+        bool inHand = _handContainer != null && _rt.IsChildOf(_handContainer);
+        bool isLastInHand = false;
+        if (inHand)
+        {
+            var parent = _handContainer.parent as RectTransform;
+            if (parent != null) isLastInHand = _handContainer.GetSiblingIndex() == parent.childCount - 1;
+        }
+        bool doHover = _hovering && !_moveInHandRequested && !_dragging && (!_selected ? (!inHand || isLastInHand) : true);
         if (_handContainer != null && !_dragging && _rt.IsChildOf(_handContainer))
             UpdateHandContainerTarget();
 
