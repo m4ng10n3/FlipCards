@@ -316,15 +316,6 @@ public class CardView : MonoBehaviour
         float rotZ = Mathf.Sign(centered) * curveParameters.rotation.Evaluate(symmetryT) * curveParameters.rotationInfluence;
         rotation = Quaternion.Euler(0f, 0f, rotZ);
     }
-
-    public bool ConsumeCurveDirtyFlag()
-    {
-        int currentVersion = curveParameters != null ? curveParameters.version : -1;
-        bool changed = curveParameters != _lastCurveAsset || currentVersion != _lastCurveVersion;
-        _lastCurveAsset = curveParameters;
-        _lastCurveVersion = currentVersion;
-        return changed;
-    }
     private Quaternion GetAnchorRotation()
     {
         if (_draggingHand)
@@ -342,7 +333,7 @@ public class CardView : MonoBehaviour
         return _rt != null && _rt.parent != null ? _rt.parent.rotation : Quaternion.identity;
     }
 
-    private void LateUpdate()
+    private void Update()
     {
         if (_rt == null) return;
 
