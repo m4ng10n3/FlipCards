@@ -124,7 +124,6 @@ public class HandManager : MonoBehaviour
 
         var cv = go.GetComponent<CardView>() ?? throw new System.InvalidOperationException("Card prefab missing CardView");
         cv.gm = gm;
-        cv.SetHighlight(false);
 
         go.transform.position = spawnPoint.position;
         go.transform.rotation = spawnPoint.rotation;

@@ -66,7 +66,6 @@ public class CardView : MonoBehaviour
 
     [SerializeField] private Text hintText;
 
-    private Outline highlight;
     private int _lastHp = int.MinValue;
     private Canvas _rootCanvas;
     private RectTransform _rt;
@@ -116,7 +115,6 @@ public class CardView : MonoBehaviour
     void Awake()
     {
         _rt = GetComponent<RectTransform>();
-        highlight = GetComponent<Outline>();
         _canvas = GetComponent<Canvas>() ?? gameObject.AddComponent<Canvas>();
         if (GetComponent<GraphicRaycaster>() == null) gameObject.AddComponent<GraphicRaycaster>();
         CacheRootCanvas();
@@ -144,12 +142,6 @@ public class CardView : MonoBehaviour
         this.owner = owner;
         this.instance = instance;
 
-        highlight = GetComponent<Outline>();
-        highlight.effectDistance = new Vector2(5, 5);
-        highlight.useGraphicAlpha = false;
-        highlight.effectColor = Color.white;
-        highlight.enabled = false;
-
         Template.GetComponent<Image>().preserveAspect = false;
         Template.GetComponent<Image>().useSpriteMesh = false;
         Template.GetComponent<Image>().maskable = false;
@@ -166,10 +158,6 @@ public class CardView : MonoBehaviour
         KillAllTweens();
         ReleaseHandContainer();
         ReleaseBoardContainer();
-    }
-    public void SetHighlight(bool setting)
-    {
-        highlight.enabled = setting;
     }
  
     private void CacheRootCanvas()
@@ -247,7 +235,6 @@ public class CardView : MonoBehaviour
         img.preserveAspect = false;
         img.sprite = newSprite;
 
-        highlight.effectColor = isFront ? Color.white : Color.white;
         nameText.enabled = isFront;
         hpText.enabled = isFront;
         AttackPwrText.enabled = isFront;
