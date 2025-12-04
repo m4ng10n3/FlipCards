@@ -583,9 +583,24 @@ MonoBehaviour:
   handTweenEase: 9
   flipDuration: 0.25
   flipEase: 7
+  hoverActivationPosThreshold: 0
+  hoverActivationRotThreshold: 0
+  maxLocalRotationAngle: 20
+  MoveInHandAnimations: 1
+  MoveInHandRotationAngle: 30
+  MoveInHandTransition: 0.15
+  MoveInHandVibration: 5
+  scaleAnimations: 1
+  scaleOnHover: 1.15
+  scaleOnSelect: 1.25
+  scaleTransition: 0.15
+  scaleEase: 27
+  selectPunchAmount: 20
   autoTiltAmount: 20
   manualTiltAmount: 30
   tiltSpeed: 15
+  hoverPunchAngle: 5
+  hoverTransition: 0.15
   nameText: {fileID: 8530644132936236624}
   factionText: {fileID: 4206496386914259341}
   sideText: {fileID: 7532144197698887769}
@@ -616,6 +631,7 @@ MonoBehaviour:
   backBlockBonusSameFaction: 0
   backBonusPAIfTwoRetroSameFaction: 0
   endTurnFlipChance: 0.3
+  cardView: {fileID: 0}
 --- !u!114 &8727470506572292250
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -22,6 +22,10 @@ public class CardView : MonoBehaviour
     [Header("Flip Animation")]
     [SerializeField] private float flipDuration = 0.25f;
     [SerializeField] private Ease flipEase = Ease.InOutQuad;
+    [Header("Hover Activation Thresholds")]
+    [SerializeField] private float hoverActivationPosThreshold = 2f;
+    [SerializeField] private float hoverActivationRotThreshold = 7f;
+    [SerializeField] private float maxLocalRotationAngle = 40f;
 
     private Sprite frontImage;
 
@@ -321,8 +325,10 @@ public class CardView : MonoBehaviour
     {
         if (_rt == null) return;
 
-        //UpdateHandContainerTarget();
         var anchorRotation = GetAnchorRotation();
+        bool doHover = _hovering && !_moveInHandRequested;
+        if (_handContainer != null && !_dragging && _rt.IsChildOf(_handContainer))
+            UpdateHandContainerTarget();
 
         if (_dragging && _dragTarget != null)
         {
@@ -334,7 +340,7 @@ public class CardView : MonoBehaviour
             _canvas.sortingOrder = 10;
             _rt.position = Vector3.Lerp(_rt.position, _dragTarget.Value, Mathf.Clamp01(handFollowSpeed * Time.deltaTime));
         }
-        else if (_hovering && !_moveInHandRequested)
+        else if (doHover)
         {
             HoverMotion(anchorRotation);
         }
@@ -347,7 +353,7 @@ public class CardView : MonoBehaviour
             _canvas.overrideSorting = false;
             FollowContainer();
         }
-        CardTilt(anchorRotation);
+        if (!doHover) CardTilt(anchorRotation);
     }
     private void HoverMotion(Quaternion anchorRotation)
     {
@@ -402,9 +408,16 @@ public class CardView : MonoBehaviour
 
         var targetRot = baseRotation * Quaternion.Euler(lerpX, lerpY, lerpZ);
         _rt.rotation = Quaternion.Lerp(_rt.rotation, targetRot, handFollowRotationSpeed * Time.deltaTime);
+        float clampAng = Quaternion.Angle(baseRotation, _rt.rotation);
+        if (clampAng > maxLocalRotationAngle)
+        {
+            float t = maxLocalRotationAngle / Mathf.Max(clampAng, 0.0001f);
+            _rt.rotation = Quaternion.Slerp(baseRotation, _rt.rotation, t);
+        }
     }
     private void CardTilt(Quaternion anchorRotation)
     {
+        if (_hovering) return;
         if (_rt == null || _rootCanvas == null)
             return;
 
@@ -435,6 +448,12 @@ public class CardView : MonoBehaviour
 
         var targetRot = baseRotation * Quaternion.Euler(lerpX, lerpY, lerpZ);
         _rt.rotation = Quaternion.Lerp(_rt.rotation, targetRot, handFollowRotationSpeed * Time.deltaTime);
+        float clampAng = Quaternion.Angle(baseRotation, _rt.rotation);
+        if (clampAng > maxLocalRotationAngle)
+        {
+            float t = maxLocalRotationAngle / Mathf.Max(clampAng, 0.0001f);
+            _rt.rotation = Quaternion.Slerp(baseRotation, _rt.rotation, t);
+        }
     }
 
     private void FollowContainer()
@@ -596,12 +615,16 @@ public class CardView : MonoBehaviour
                 .DOPunchRotation(Vector3.forward * MoveInHandRotationAngle, MoveInHandTransition, MoveInHandVibration, 1)
                 .SetUpdate(true);
         }
+
+        _moveInHandRequested = false;
+        _moveInHandImmediate = false;
     }
 
     public void ApplySelect(bool state)
     {
         if (_rt == null) return;
 
+        if (_selectTween != null && _selectTween.IsActive()) _selectTween.Complete(true);
         KillTween(ref _selectTween);
         if (state)
         {
@@ -616,6 +639,7 @@ public class CardView : MonoBehaviour
 
         if (scaleAnimations)
         {
+            if (_scaleTween != null && _scaleTween.IsActive()) _scaleTween.Complete(true);
             KillTween(ref _scaleTween);
             _scaleTween = transform.DOScale(targetScale, scaleTransition)
                 .SetEase(scaleEase)
@@ -626,16 +650,40 @@ public class CardView : MonoBehaviour
     public void ApplyPointerEnter()
     {
         if (_rt == null) return;
+        if (_moveInHandRequested || _dragging)
+        {
+            _hovering = false;
+            return;
+        }
+
+        if (_handContainer != null && _rt.IsChildOf(_handContainer))
+        {
+            UpdateHandContainerTarget();
+            float posThreshold = hoverActivationPosThreshold * hoverActivationPosThreshold;
+            float posDiff = (_rt.localPosition - _handCurveOffset).sqrMagnitude;
+            var anchorRot = GetAnchorRotation();
+            var targetRot = anchorRot * _targetHandRotation;
+            float ang = Quaternion.Angle(_rt.rotation, targetRot);
+            if (posDiff > posThreshold || ang > hoverActivationRotThreshold)
+            {
+                _hovering = false;
+                return;
+            }
+        }
+
+        _hovering = true;
 
         if (scaleAnimations)
         {
             float targetScale = _selected ? scaleOnSelect : scaleOnHover;
+            if (_scaleTween != null && _scaleTween.IsActive()) _scaleTween.Complete(true);
             KillTween(ref _scaleTween);
             _scaleTween = transform.DOScale(targetScale, scaleTransition)
                 .SetEase(scaleEase)
                 .SetUpdate(true);
         }
 
+        if (_hoverPunchTween != null && _hoverPunchTween.IsActive()) _hoverPunchTween.Complete(true);
         KillTween(ref _hoverPunchTween);
         _hoverPunchTween = _rt
             .DOPunchRotation(Vector3.forward * hoverPunchAngle, hoverTransition, 20, 1)
@@ -647,6 +695,7 @@ public class CardView : MonoBehaviour
         if (!scaleAnimations) return;
 
         float targetScale = _selected ? scaleOnSelect : 1f;
+        if (_scaleTween != null && _scaleTween.IsActive()) _scaleTween.Complete(true);
         KillTween(ref _scaleTween);
         _scaleTween = transform.DOScale(targetScale, scaleTransition)
             .SetEase(scaleEase)
