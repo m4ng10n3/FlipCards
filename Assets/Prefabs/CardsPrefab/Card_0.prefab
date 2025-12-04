@@ -583,16 +583,14 @@ MonoBehaviour:
   handTweenEase: 9
   flipDuration: 0.25
   flipEase: 7
-  hoverActivationPosThreshold: 0
-  hoverActivationRotThreshold: 0
   maxLocalRotationAngle: 20
   MoveInHandAnimations: 1
   MoveInHandRotationAngle: 30
   MoveInHandTransition: 0.15
   MoveInHandVibration: 5
   scaleAnimations: 1
-  scaleOnHover: 1.15
-  scaleOnSelect: 1.25
+  scaleOnHover: 1.02
+  scaleOnSelect: 1.1
   scaleTransition: 0.15
   scaleEase: 27
   selectPunchAmount: 20

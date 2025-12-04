@@ -644,10 +644,7 @@ public class CardView : MonoBehaviour
             _selectTween = _rt
                 .DOPunchPosition(_rt.up * selectPunchAmount, scaleTransition, 10, 1)
                 .SetUpdate(true);
-            _canvas.overrideSorting = true;
-            _canvas.sortingOrder = 10;
         }
-        else { _canvas.overrideSorting = false ; }
             
         float targetScale = 1f;
         if (state) targetScale = scaleOnSelect;
@@ -731,11 +728,11 @@ public class CardView : MonoBehaviour
         }
     }
 
-    private void KillTween(ref Tween t)
+    private void KillTween(ref Tween t, bool complete = false)
     {
         if (t != null)
         {
-            t.Kill();
+            t.Kill(complete);
             t = null;
         }
     }
