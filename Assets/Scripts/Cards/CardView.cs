@@ -21,12 +21,32 @@ public class CardView : MonoBehaviour
     [Header("Flip Animation")]
     [SerializeField] private float flipDuration = 0.25f;
     [SerializeField] private Ease flipEase = Ease.InOutQuad;
-    [Header("Rotation Parameters")]
+
+    private Sprite frontImage;
+
+    [Header("MoveInHand Parameters")]
+    [SerializeField] private bool MoveInHandAnimations = true;
+    [SerializeField] private float MoveInHandRotationAngle = 30;
+    [SerializeField] private float MoveInHandTransition = .15f;
+    [SerializeField] private int MoveInHandVibration = 5;
+
+    [Header("Scale Parameters")]
+    [SerializeField] private bool scaleAnimations = true;
+    [SerializeField] private float scaleOnHover = 1.15f;
+    [SerializeField] private float scaleOnSelect = 1.25f;
+    [SerializeField] private float scaleTransition = .15f;
+    [SerializeField] private Ease scaleEase = Ease.OutBack;
+
+    [Header("Select Parameters")]
+    [SerializeField] private float selectPunchAmount = 20;
+
+    [Header("Hover Parameters")]
     [SerializeField] private float autoTiltAmount = 30;
     [SerializeField] private float manualTiltAmount = 20;
     [SerializeField] private float tiltSpeed = 20;
 
-    private Sprite frontImage;
+    [SerializeField] private float hoverPunchAngle = 5;
+    [SerializeField] private float hoverTransition = .15f;
 
     [Header("Legacy UI Text (assign in prefab)")]
     public Text nameText;
@@ -60,12 +80,22 @@ public class CardView : MonoBehaviour
     private Vector3 _handCurveOffset = Vector3.zero;
     private Vector3 _dragTargetWorld;
     private bool _hasDragTarget;
+    private bool _requestReturnToHand;
+    private bool _selectionDirty;
+    private bool _selected;
+    private bool _hoverVisualActive;
+    private bool _moveInHandRequested;
+    private bool _moveInHandImmediate;
 
     private int savedIndex;
 
     private RectTransform _playerBoardContainer;
     private Tween _boardMoveTween;
     private Quaternion _targetBoardRotation = Quaternion.identity;
+    private Tween _scaleTween;
+    private Tween _hoverPunchTween;
+    private Tween _selectTween;
+    private Tween _moveInHandTween;
 
     void Awake()
     {
@@ -130,6 +160,10 @@ public class CardView : MonoBehaviour
     public bool IsDraggingHand => _draggingHand;
     public bool IsHovering => _hovering;
     public bool HasDragTarget => _hasDragTarget;
+    public bool RequestReturnToHand { get => _requestReturnToHand; set => _requestReturnToHand = value; }
+    public bool Selected { get => _selected; set { if (_selected == value) return; _selected = value; _selectionDirty = true; } }
+    public bool MoveInHandRequest { set { _moveInHandRequested = value; _moveInHandImmediate = false; } }
+    public void RequestMoveInHand(bool immediate = false) { _moveInHandRequested = true; _moveInHandImmediate = immediate; }
 
     public void SetDraggingFlags(bool dragging, bool draggingHand, bool draggingFromBoard)
     {
@@ -158,10 +192,14 @@ public class CardView : MonoBehaviour
 
     public void SetHoverState(bool hovering)
     {
+        if (_hovering == hovering) return;
         _hovering = hovering;
-        if (gm == null) return;
-
-        gm.hoveredCard = hovering ? this : null;
+        if (gm != null)
+        {
+            if (hovering) gm.hoveredCard = this;
+            else if (gm.hoveredCard == this) gm.hoveredCard = null;
+        }
+        _hoverVisualActive = false;
     }
 
     public bool TryScreenPointToWorldOnRoot(Vector2 screenPos, out Vector3 worldPoint)
@@ -342,6 +380,36 @@ public class CardView : MonoBehaviour
     {
         if (_rt == null) return;
 
+        if (_moveInHandRequested && !_dragging)
+        {
+            MoveInHand(_moveInHandImmediate);
+            _moveInHandRequested = false;
+            _moveInHandImmediate = false;
+        }
+
+        if (_requestReturnToHand && !_dragging)
+        {
+            MoveInHand();
+            _requestReturnToHand = false;
+        }
+
+        if (_selectionDirty)
+        {
+            ApplySelect(_selected);
+            _selectionDirty = false;
+        }
+
+        if (_hovering && !_dragging && !_hoverVisualActive)
+        {
+            ApplyPointerEnter();
+            _hoverVisualActive = true;
+        }
+        else if (!_hovering && _hoverVisualActive)
+        {
+            ResetHoverVisual();
+            _hoverVisualActive = false;
+        }
+
         if (!_dragging && _handContainer != null && _rt.IsChildOf(_handContainer))
             UpdateHandContainerTarget();
 
@@ -447,7 +515,9 @@ public class CardView : MonoBehaviour
         if (inHand)
             targetPosLocal = _handCurveOffset;
 
-        _rt.localPosition = Vector3.Lerp(_rt.localPosition, targetPosLocal, handFollowSpeed * Time.deltaTime);
+        bool handTweenActive = _handMoveTween != null && _handMoveTween.IsActive() && _handMoveTween.IsPlaying();
+        if (!handTweenActive)
+            _rt.localPosition = Vector3.Lerp(_rt.localPosition, targetPosLocal, handFollowSpeed * Time.deltaTime);
     }
 
     public RectTransform PlayerBoardContainer => _playerBoardContainer;
@@ -577,18 +647,102 @@ public class CardView : MonoBehaviour
         if (reparent && _rt != null)
         {
             _rt.SetParent(_handContainer, worldPositionStays);
-            _rt.localRotation = Quaternion.identity;
-
             if (!worldPositionStays)
             {
-                var asRt = _rt as RectTransform;
-                if (asRt != null)
-                    asRt.anchoredPosition = Vector2.zero;
-                else
-                    _rt.localPosition = Vector3.zero;
+                _rt.localRotation = Quaternion.identity;
+                _rt.localPosition = Vector3.zero;
             }
         }
+
+        if (!_dragging && _handContainer != null && _handContainer.parent == gm?.HandManager?.HandRoot)
+            MoveInHand();
     }
+
+    public void MoveInHand(bool immediate = false)
+    {
+        if (_handContainer == null || _rt == null)
+            return;
+
+        UpdateHandContainerTarget();
+        KillHandTweens();
+
+        if (immediate || handTweenDuration <= 0f)
+        {
+            _rt.localPosition = _handCurveOffset;
+        }
+        else
+        {
+            _handMoveTween = _rt
+                .DOLocalMove(_handCurveOffset, handTweenDuration)
+                .SetEase(handTweenEase)
+                .SetUpdate(true)
+                .SetLink(gameObject);
+        }
+
+        if (MoveInHandAnimations)
+        {
+            KillTween(ref _moveInHandTween);
+            _moveInHandTween = _rt
+                .DOPunchRotation(Vector3.forward * MoveInHandRotationAngle, MoveInHandTransition, MoveInHandVibration, 1)
+                .SetUpdate(true);
+        }
+    }
+
+    private void ApplySelect(bool state)
+    {
+        if (_rt == null) return;
+
+        KillTween(ref _selectTween);
+        if (state)
+        {
+            _selectTween = _rt
+                .DOPunchPosition(_rt.up * selectPunchAmount, scaleTransition, 10, 1)
+                .SetUpdate(true);
+        }
+
+        float targetScale = 1f;
+        if (state) targetScale = scaleOnSelect;
+        else if (_hovering) targetScale = scaleOnHover;
+
+        if (scaleAnimations)
+        {
+            KillTween(ref _scaleTween);
+            _scaleTween = transform.DOScale(targetScale, scaleTransition)
+                .SetEase(scaleEase)
+                .SetUpdate(true);
+        }
+    }
+
+    private void ApplyPointerEnter()
+    {
+        if (_rt == null) return;
+
+        if (scaleAnimations)
+        {
+            float targetScale = _selected ? scaleOnSelect : scaleOnHover;
+            KillTween(ref _scaleTween);
+            _scaleTween = transform.DOScale(targetScale, scaleTransition)
+                .SetEase(scaleEase)
+                .SetUpdate(true);
+        }
+
+        KillTween(ref _hoverPunchTween);
+        _hoverPunchTween = _rt
+            .DOPunchRotation(Vector3.forward * hoverPunchAngle, hoverTransition, 20, 1)
+            .SetUpdate(true);
+    }
+
+    private void ResetHoverVisual()
+    {
+        if (!scaleAnimations) return;
+
+        float targetScale = _selected ? scaleOnSelect : 1f;
+        KillTween(ref _scaleTween);
+        _scaleTween = transform.DOScale(targetScale, scaleTransition)
+            .SetEase(scaleEase)
+            .SetUpdate(true);
+    }
+
 
     public void UpdateHandContainerTarget()
     {
@@ -616,6 +770,15 @@ public class CardView : MonoBehaviour
         {
             _handMoveTween.Kill();
             _handMoveTween = null;
+        }
+    }
+
+    private void KillTween(ref Tween t)
+    {
+        if (t != null)
+        {
+            t.Kill();
+            t = null;
         }
     }
 

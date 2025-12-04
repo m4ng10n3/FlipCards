@@ -203,13 +203,16 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
         cardView.SetDraggingFlags(false, false, false);
         cardView.ClearDragTarget();
         cardView.SetCanvasSorting(false);
+
+        if (cardView.HandContainer != null && cardView.HandContainer.parent == gm?.HandManager?.HandRoot)
+            cardView.RequestReturnToHand = true;
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
         EnsureRuntimeRefs();
         if (cardView == null) return;
-        if (gm != null && gm.hoveredCard != null)
+        if (gm != null && gm.hoveredCard != null && gm.hoveredCard != cardView)
             return;
         cardView.SetHoverState(true);
     }
