@@ -347,6 +347,7 @@ public class CardView : MonoBehaviour
         }
         if (!doHover) CardTilt(anchorRotation);
     }
+
     private void HoverMotion(Quaternion anchorRotation)
     {
         var baseRotation = anchorRotation;
@@ -359,39 +360,57 @@ public class CardView : MonoBehaviour
         float tiltZ = 0f;
 
         Vector2 screenPos = Mouse.current != null ? Mouse.current.position.ReadValue() : Vector2.zero;
-        var canvasRect = _rootCanvas.transform as RectTransform;
-        if (canvasRect != null &&
-            RectTransformUtility.ScreenPointToWorldPointInRectangle(
-                canvasRect,
+
+        if (_rootCanvas != null &&
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                _rt,
                 screenPos,
                 _rootCanvas.worldCamera,
-                out var pointerWorld))
+                out var localPoint))
         {
-            var parentTransform = _rt.parent != null ? _rt.parent : (Transform)_rt;
+            var r = _rt.rect;
 
-            Vector3 cardCenterWorld = _rt.position;
+            // Delta dal centro del RectTransform
+            Vector2 delta = localPoint - r.center;
 
-            Vector3 deltaParent =
-                parentTransform.InverseTransformPoint(pointerWorld) -
-                parentTransform.InverseTransformPoint(cardCenterWorld);
-
-            var localAnchor = Quaternion.Inverse(parentTransform.rotation) * baseRotation;
-            Vector3 axisX = localAnchor * Vector3.right;
-            Vector3 axisY = localAnchor * Vector3.up;
-
-            float offsetX = Vector3.Dot(deltaParent, axisX);
-            float offsetY = Vector3.Dot(deltaParent, axisY);
-
-            Rect r = _rt.rect;
             float halfW = Mathf.Max(1f, r.width * 0.5f);
             float halfH = Mathf.Max(1f, r.height * 0.5f);
 
-            float normX = Mathf.Clamp(offsetX / halfW, -1f, 1f);
-            float normY = Mathf.Clamp(offsetY / halfH, -1f, 1f);
+            // Normalizzazione rispetto alle dimensioni (spazio -1..1 “ellittico”)
+            float nx = delta.x / halfW;
+            float ny = delta.y / halfH;
 
-            tiltX = -normY * manualTiltAmount;
-            tiltY = normX * manualTiltAmount;
+            Vector2 n = new Vector2(nx, ny);
+
+            // Modulo della distanza dal centro normalizzato in 0..1
+            float dist = Mathf.Clamp01(n.magnitude);
+
+            // Direzione del mouse rispetto al centro
+            Vector2 dir = n.sqrMagnitude > 0.000001f ? n.normalized : Vector2.zero;
+
+            // Logica diagonale:
+            // a (1,1) -> dir ~ (0.707, 0.707)
+            // tiltVec ~ (-0.707, +0.707) * manualTiltAmount
+            // => asse effettivo lungo (-1, +1)
+            Vector2 tiltVec = new Vector2(-dir.y, dir.x) * manualTiltAmount * dist;
+
+            // Limiti corretti per sicurezza
+            tiltX = Mathf.Clamp(tiltVec.x, -manualTiltAmount, manualTiltAmount);
+            tiltY = Mathf.Clamp(tiltVec.y, -manualTiltAmount, manualTiltAmount);
+
+            // Se vuoi:
+            Debug.Log($"dir {dir} dist {dist} => tiltX {tiltX} tiltY {tiltY}");
+
+            float dirAngleDeg = dir != Vector2.zero
+            ? Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg
+            : 0f;
+
+            Debug.Log(
+                $"dir {dir} (angle {dirAngleDeg:F1}°) dist {dist:F2} => " +
+                $"tiltX {tiltX:F1}° tiltY {tiltY:F1}°"
+            );
         }
+
         Vector3 currentLocal = (Quaternion.Inverse(baseRotation) * _rt.rotation).eulerAngles;
 
         float lerpX = Mathf.LerpAngle(currentLocal.x, tiltX, tiltSpeed * Time.deltaTime);
@@ -399,7 +418,7 @@ public class CardView : MonoBehaviour
         float lerpZ = Mathf.LerpAngle(currentLocal.z, tiltZ, (tiltSpeed * 0.5f) * Time.deltaTime);
 
         var targetRot = baseRotation * Quaternion.Euler(lerpX, lerpY, lerpZ);
-        _rt.rotation = Quaternion.Lerp(_rt.rotation, targetRot, handFollowRotationSpeed * Time.deltaTime);
+        _rt.rotation = targetRot;
     }
     private void CardTilt(Quaternion anchorRotation)
     {

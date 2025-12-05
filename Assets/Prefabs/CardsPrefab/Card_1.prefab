@@ -663,13 +663,13 @@ MonoBehaviour:
   MoveInHandTransition: 0.15
   MoveInHandVibration: 5
   scaleAnimations: 1
-  scaleOnHover: 1.02
+  scaleOnHover: 1.1
   scaleOnSelect: 1.1
   scaleTransition: 0.15
   scaleEase: 27
   selectPunchAmount: 20
   autoTiltAmount: 10
-  manualTiltAmount: 0
+  manualTiltAmount: 5
   tiltSpeed: 15
   hoverPunchAngle: 5
   hoverTransition: 0.15
