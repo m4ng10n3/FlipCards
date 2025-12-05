@@ -116,7 +116,6 @@ public class CardView : MonoBehaviour
     {
         _rt = GetComponent<RectTransform>();
         _canvas = GetComponent<Canvas>() ?? gameObject.AddComponent<Canvas>();
-        if (GetComponent<GraphicRaycaster>() == null) gameObject.AddComponent<GraphicRaycaster>();
         CacheRootCanvas();
 
         hintText.gameObject.SetActive(false);
