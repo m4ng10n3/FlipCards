@@ -131,11 +131,12 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        
+        LogPointerEvent("PointerDown", eventData);
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
+        LogPointerEvent("PointerUp", eventData);
         if (cardView.IsDragging)
         {
             OnEndDrag(eventData);
@@ -144,6 +145,7 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
 
     public void OnBeginDrag(PointerEventData eventData)
     {
+        LogPointerEvent("BeginDrag", eventData);
         EnsureRuntimeRefs();
         if (cardView == null || cardView.IsDragging) return;
         if (cardView.RectTransform == null) throw new System.InvalidOperationException("CardView missing RectTransform");
@@ -178,6 +180,7 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
 
     public void OnDrag(PointerEventData eventData)
     {
+        LogPointerEvent("Drag", eventData);
         EnsureRuntimeRefs();
         if (cardView == null || !cardView.IsDragging || cardView.RectTransform == null) return;
 
@@ -201,6 +204,7 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
 
     public void OnEndDrag(PointerEventData eventData)
     {
+        LogPointerEvent("EndDrag", eventData);
         EnsureRuntimeRefs();
         if (cardView == null || !cardView.IsDragging) return;
 
@@ -218,6 +222,8 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
 
     public void OnPointerEnter(PointerEventData eventData)
     {
+        LogPointerEvent("PointerEnter", eventData);
+
         EnsureRuntimeRefs();
         if (cardView == null) return;
         cardView.IsHovering = true;
@@ -226,6 +232,7 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
 
     public void OnPointerExit(PointerEventData eventData)
     {
+        LogPointerEvent("PointerExit", eventData);
         EnsureRuntimeRefs();
         if (cardView == null) return;
         cardView.IsHovering = false;
@@ -234,6 +241,7 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
 
     public void OnPointerClick(PointerEventData eventData)
     {
+        LogPointerEvent("PointerClick", eventData);
         EnsureRuntimeRefs();
         if (cardView == null) return;
         if (cardView.IsDragging || (eventData != null && eventData.dragging)) return;
@@ -431,5 +439,16 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
         gm ??= cardView.gm;
         owner ??= cardView.owner;
         instance ??= cardView.instance;
+    }
+
+    private void LogPointerEvent(string evt, PointerEventData data)
+    {
+        if (data == null)
+        {
+            Debug.Log($"[Input] {evt} on {gameObject.name} (no event data)");
+            return;
+        }
+
+        Debug.Log($"[Input] {evt} on {gameObject.name} pos:{data.position} btn:{data.button} dragging:{data.dragging} clickCount:{data.clickCount}");
     }
 }

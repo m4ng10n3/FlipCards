@@ -243,10 +243,11 @@ public class HandManager : MonoBehaviour
         movingCard.RectTransform.SetParent(targetContainer);
         movingCard.MoveInHandRequest = true;
         if (targetCard != null)
+        {
             targetCard.handContainer = sourceContainer;
             targetCard.RectTransform.SetParent(sourceContainer);
             targetCard.MoveInHandRequest = true;
-
+        }
         SortHandCardsBySlotIndex();
         UpdateCardsPosition();
     }

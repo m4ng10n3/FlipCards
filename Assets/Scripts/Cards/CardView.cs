@@ -23,7 +23,6 @@ public class CardView : MonoBehaviour
     [SerializeField] private float flipDuration = 0.25f;
     [SerializeField] private Ease flipEase = Ease.InOutQuad;
     [Header("Hover Activation Thresholds")]
-    [SerializeField] private float maxLocalRotationAngle = 40f;
 
     private Sprite frontImage;
 
@@ -318,7 +317,7 @@ public class CardView : MonoBehaviour
             var parent = _handContainer.parent as RectTransform;
             if (parent != null) isLastInHand = _handContainer.GetSiblingIndex() == parent.childCount - 1;
         }
-        bool doHover = _hovering && !_moveInHandRequested && !_dragging && (!_selected ? (!inHand || isLastInHand) : true);
+        bool doHover = _hovering && !_moveInHandRequested && !_dragging;//&& (!_selected ? (!inHand || isLastInHand) : true);
         if (_handContainer != null && !_dragging && _rt.IsChildOf(_handContainer))
             UpdateHandContainerTarget();
 
@@ -401,12 +400,6 @@ public class CardView : MonoBehaviour
 
         var targetRot = baseRotation * Quaternion.Euler(lerpX, lerpY, lerpZ);
         _rt.rotation = Quaternion.Lerp(_rt.rotation, targetRot, handFollowRotationSpeed * Time.deltaTime);
-        float clampAng = Quaternion.Angle(baseRotation, _rt.rotation);
-        if (clampAng > maxLocalRotationAngle)
-        {
-            float t = maxLocalRotationAngle / Mathf.Max(clampAng, 0.0001f);
-            _rt.rotation = Quaternion.Slerp(baseRotation, _rt.rotation, t);
-        }
     }
     private void CardTilt(Quaternion anchorRotation)
     {
@@ -440,12 +433,6 @@ public class CardView : MonoBehaviour
 
         var targetRot = baseRotation * Quaternion.Euler(lerpX, lerpY, lerpZ);
         _rt.rotation = Quaternion.Lerp(_rt.rotation, targetRot, handFollowRotationSpeed * Time.deltaTime);
-        float clampAng = Quaternion.Angle(baseRotation, _rt.rotation);
-        if (clampAng > maxLocalRotationAngle)
-        {
-            float t = maxLocalRotationAngle / Mathf.Max(clampAng, 0.0001f);
-            _rt.rotation = Quaternion.Slerp(baseRotation, _rt.rotation, t);
-        }
     }
 
     private void FollowContainer()

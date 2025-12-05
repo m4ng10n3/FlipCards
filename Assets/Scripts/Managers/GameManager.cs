@@ -42,7 +42,6 @@ public class GameManager : MonoBehaviour
     int currentTurn = 1; bool playerPhase = true; bool matchEnded = false;
 
     readonly Dictionary<CardInstance, CardView> viewByInstance = new Dictionary<CardInstance, CardView>();
-    readonly List<CardView> playerViews = new List<CardView>();
     readonly Dictionary<CardInstance, List<AbilityBase>> abilitiesByInstance = new Dictionary<CardInstance, List<AbilityBase>>();
 
     readonly Dictionary<SlotInstance, SlotView> slotViewByInstance = new Dictionary<SlotInstance, SlotView>();
