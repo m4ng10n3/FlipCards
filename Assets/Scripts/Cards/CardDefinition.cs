@@ -169,7 +169,7 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
         {
             if (cardView.handContainer == null) throw new System.InvalidOperationException("Hand container not created");
 
-            gm.HandManager.OnHandCardBeginDrag(cardView, cardView.handContainer);
+            gm.HandManager.OnHandCardBeginDrag(cardView);
             return;
         }
 
@@ -445,10 +445,10 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
     {
         if (data == null)
         {
-            Debug.Log($"[Input] {evt} on {gameObject.name} (no event data)");
+            //Debug.Log($"[Input] {evt} on {gameObject.name} (no event data)");
             return;
         }
 
-        Debug.Log($"[Input] {evt} on {gameObject.name} pos:{data.position} btn:{data.button} dragging:{data.dragging} clickCount:{data.clickCount}");
+        //Debug.Log($"[Input] {evt} on {gameObject.name} pos:{data.position} btn:{data.button} dragging:{data.dragging} clickCount:{data.clickCount}");
     }
 }

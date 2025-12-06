@@ -67,7 +67,7 @@ public class CardView : MonoBehaviour
 
     private int _lastHp = int.MinValue;
     private Canvas _rootCanvas;
-    private RectTransform _rt;
+    [SerializeField] private RectTransform _rt;
     private Canvas _canvas;
     private bool _dragging;
     private bool _hovering;
@@ -103,7 +103,8 @@ public class CardView : MonoBehaviour
     public bool IsDragging { get => _dragging; set { _dragging = value; } }
     public bool IsDraggingFromBoard => _draggingFromBoard;
     public bool IsDraggingHand => _draggingHand;
-    public bool IsHovering { get => _hovering; set { _hovering = value; Debug.Log(name + $" hover state: {value}"); } }
+    //public bool IsHovering { get => _hovering; set { _hovering = value; Debug.Log(name + $" hover state: {value}"); } }
+    public bool IsHovering { get => _hovering; set { _hovering = value; } }
     public bool RequestReturnToHand { get => _requestReturnToHand; set => _requestReturnToHand = value; }
     public bool Selected { get => _selected; set { if (_selected == value) return; _selected = value; } }
     public bool MoveInHandRequest { get => _moveInHandRequested; set { _moveInHandRequested = value; } }
@@ -113,15 +114,15 @@ public class CardView : MonoBehaviour
 
     void Awake()
     {
-        _rt = GetComponent<RectTransform>();
-        _canvas = GetComponent<Canvas>() ?? gameObject.AddComponent<Canvas>();
+        //_rt = GetComponent<RectTransform>();
+        _canvas = GetComponent<Canvas>();
         CacheRootCanvas();
 
         hintText.gameObject.SetActive(false);
 
         if (instance != null) return;
 
-        var inline = GetComponent<CardDefinition>();
+        var inline = GetComponentInParent<CardDefinition>();
         if (inline == null) return;
 
         var def = inline.BuildSpec();
@@ -297,11 +298,11 @@ public class CardView : MonoBehaviour
             return Quaternion.identity;
         if (_handContainer  != null && _rt.IsChildOf(_handContainer))
         {
-            return _handContainer.parent.rotation;
+            return _handContainer.rotation;
         }
         else
         {
-            return _playerBoardContainer.parent.rotation;
+            return _playerBoardContainer.rotation;
         }
     }
 
@@ -399,6 +400,7 @@ public class CardView : MonoBehaviour
             tiltY = Mathf.Clamp(tiltVec.y, -manualTiltAmount, manualTiltAmount);
 
             // Se vuoi:
+            /*
             Debug.Log($"dir {dir} dist {dist} => tiltX {tiltX} tiltY {tiltY}");
 
             float dirAngleDeg = dir != Vector2.zero
@@ -409,6 +411,7 @@ public class CardView : MonoBehaviour
                 $"dir {dir} (angle {dirAngleDeg:F1}°) dist {dist:F2} => " +
                 $"tiltX {tiltX:F1}° tiltY {tiltY:F1}°"
             );
+            */
         }
 
         Vector3 currentLocal = (Quaternion.Inverse(baseRotation) * _rt.rotation).eulerAngles;
@@ -477,9 +480,10 @@ public class CardView : MonoBehaviour
 
     public RectTransform EnsurePlayerBoardContainer(Transform parent)
     {
+        var crt = GetComponent<RectTransform>().rect.size;
         if (_playerBoardContainer == null)
         {
-            var go = new GameObject($"{name}_BoardContainer", typeof(RectTransform));
+            var go = new GameObject($"BoardContainer", typeof(RectTransform));
             _playerBoardContainer = go.GetComponent<RectTransform>();
             _playerBoardContainer.localScale = Vector3.one;
             _playerBoardContainer.localRotation = Quaternion.identity;
@@ -487,22 +491,23 @@ public class CardView : MonoBehaviour
 
         if (parent != null && _playerBoardContainer.parent != parent)
             _playerBoardContainer.SetParent(parent, false);
-
-        if (_rt != null)
+        if (_rt == null)
         {
-            _playerBoardContainer.position = _rt.position;
-            _playerBoardContainer.rotation = Quaternion.identity;
-            var crt = GetComponent<RectTransform>().rect.size;
-            _playerBoardContainer.sizeDelta = crt;
+            _rt = gameObject.GetComponentInParent<RectTransform>();
+        }
 
-            _playerBoardContainer.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, crt.x);
-            _playerBoardContainer.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, crt.y);
+        _playerBoardContainer.position = _rt.position;
+        _playerBoardContainer.rotation = Quaternion.identity;
+        
+        _playerBoardContainer.sizeDelta = crt;
 
-            if (_rt.parent != _playerBoardContainer && !_draggingFromBoard)
-            {
-                _rt.SetParent(_playerBoardContainer, true);
-                _rt.localPosition = Vector3.zero;
-            }
+        _playerBoardContainer.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, crt.x);
+        _playerBoardContainer.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, crt.y);
+
+        if (_rt.parent != _playerBoardContainer && !_draggingFromBoard)
+        {
+            _rt.SetParent(_playerBoardContainer, true);
+            _rt.localPosition = Vector3.zero;
         }
 
         return _playerBoardContainer;
@@ -553,36 +558,32 @@ public class CardView : MonoBehaviour
 
     public RectTransform EnsureHandContainer(Transform parent)
     {
+        var crt = GetComponent<RectTransform>().rect.size;
         if (_handContainer == null)
         {
             var go = new GameObject("HandContainer", typeof(RectTransform));
             _handContainer = go.GetComponent<RectTransform>();
             _handContainer.localScale = _rt.localScale;
             _handContainer.localRotation = Quaternion.identity;
-            if (_rt != null)
-            {
-                var crt = GetComponent<RectTransform>().rect.size;
-                _handContainer.sizeDelta = crt;
-
-                _handContainer.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, crt.x);
-                _handContainer.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, crt.y);
-            }    
-            _handContainer.gameObject.name = "HandContainer";
         }
 
         if (parent != null && _handContainer.parent != parent)
             _handContainer.SetParent(parent, false);
-
-        if (_rt != null)
+        if (_rt == null)
         {
-            _handContainer.position = _rt.position;
-            _handContainer.rotation = Quaternion.identity;
+            _rt = gameObject.GetComponentInParent<RectTransform>();
+        }
+        _handContainer.position = _rt.position;
+        _handContainer.rotation = Quaternion.identity;
+        _handContainer.sizeDelta = crt;
 
-            if (_rt.parent != _handContainer && !_draggingHand)
-            {
-                _rt.SetParent(_handContainer, true);
-                _rt.localPosition = Vector3.zero;
-            }
+        _handContainer.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, crt.x);
+        _handContainer.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, crt.y);
+
+        if (_rt.parent != _handContainer && !_draggingHand)
+        {
+            _rt.SetParent(_handContainer, true);
+            _rt.localPosition = Vector3.zero;
         }
 
         return _handContainer;
