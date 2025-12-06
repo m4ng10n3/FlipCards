@@ -122,7 +122,7 @@ public class CardView : MonoBehaviour
 
         if (instance != null) return;
 
-        var inline = GetComponent<CardDefinition>();
+        var inline = GetComponentInParent<CardDefinition>();
         if (inline == null) return;
 
         var def = inline.BuildSpec();
