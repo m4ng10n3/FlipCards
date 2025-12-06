@@ -122,7 +122,7 @@ public class HandManager : MonoBehaviour
         go.SetActive(true);
         go.transform.localScale = Vector3.one * spawnScaleMultiplier;
 
-        var cv = go.GetComponent<CardView>() ?? throw new System.InvalidOperationException("Card prefab missing CardView");
+        var cv = go.GetComponentInChildren<CardView>() ?? throw new System.InvalidOperationException("Card prefab missing CardView");
         cv.gm = gm;
 
         go.transform.position = spawnPoint.position;

@@ -67,7 +67,7 @@ public class CardView : MonoBehaviour
 
     private int _lastHp = int.MinValue;
     private Canvas _rootCanvas;
-    private RectTransform _rt;
+    [SerializeField] private RectTransform _rt;
     private Canvas _canvas;
     private bool _dragging;
     private bool _hovering;
@@ -113,7 +113,7 @@ public class CardView : MonoBehaviour
 
     void Awake()
     {
-        _rt = GetComponent<RectTransform>();
+        //_rt = GetComponent<RectTransform>();
         _canvas = GetComponent<Canvas>() ?? gameObject.AddComponent<Canvas>();
         CacheRootCanvas();
 
