@@ -143,9 +143,6 @@ public class HandManager : MonoBehaviour
 
         SortHandCardsBySlotIndex();
     }
-
-    public void RemoveFromHand(GameObject cardGO) => RemoveFromHand(cardGO != null ? cardGO.GetComponent<CardView>() : null);
-
     public void RemoveFromHand(CardView cv)
     {
         if (cv == null) return;
@@ -156,7 +153,7 @@ public class HandManager : MonoBehaviour
         {
             var container = cv.handContainer != null ? cv.handContainer.transform : null;
             if (container != null && container.parent == handRoot) Destroy(container.gameObject);
-            Destroy(cv.gameObject);
+            Destroy(cv.GetComponentInParent<CardDefinition>().gameObject);
             UpdateCardsPosition();
         }
     }
@@ -252,7 +249,7 @@ public class HandManager : MonoBehaviour
         UpdateCardsPosition();
     }
 
-    public void OnHandCardBeginDrag(CardView view, Transform reservedSlot)
+    public void OnHandCardBeginDrag(CardView view)
     {
         draggingCard = view;
         selectedCard = view;

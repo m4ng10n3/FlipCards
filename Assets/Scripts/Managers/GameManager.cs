@@ -460,7 +460,7 @@ public void UpdateHUD()
 
     void PlayCardFromHand(CardView handCard, Transform emptySpot)
     {
-        var cd = handCard.GetComponent<CardDefinition>();
+        var cd = handCard.GetComponentInParent<CardDefinition>();
         var parent = emptySpot.parent;
         int laneIndex = emptySpot.GetSiblingIndex();
 
@@ -471,8 +471,8 @@ public void UpdateHUD()
         ci.AssignGM(this);
         player.board.Add(ci);
 
-        GameObject go = Instantiate(handCard.gameObject, parent);
-        go.name = handCard.gameObject.name;
+        GameObject go = Instantiate(handCard.GetComponentInParent<CardDefinition>().gameObject, parent);
+        go.name = handCard.GetComponentInParent<CardDefinition>().gameObject.name;
         go.SetActive(true);
 
         var rt = (RectTransform)go.transform;
@@ -483,7 +483,7 @@ public void UpdateHUD()
         rt.localRotation = Quaternion.identity;
         rt.localScale = Vector3.one;
 
-        var view = go.GetComponent<CardView>();
+        var view = go.GetComponentInChildren<CardView>();
         view.Init(this, player, ci);
         view.EnsurePlayerBoardContainer(playerBoardRoot);
         view.PlayerBoardContainer.SetSiblingIndex(laneIndex);
@@ -496,7 +496,7 @@ public void UpdateHUD()
         abilitiesByInstance[ci] = abilities;
 
         handManager.OnHandCardDroppedToBoard(handCard);
-        handManager.RemoveFromHand(handCard.gameObject);
+        handManager.RemoveFromHand(handCard);
 
         EventBus.Publish(GameEventType.CardPlayed, new EventContext
         {
