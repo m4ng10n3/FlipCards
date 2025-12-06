@@ -363,7 +363,7 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
         EventSystem.current.RaycastAll(eventData, results);
         for (int i = 0; i < results.Count; i++)
         {
-            var view = results[i].gameObject.GetComponentInParent<CardView>();
+            var view = results[i].gameObject.GetComponentInChildren<CardView>();
             if (view != null && view != cardView && view.transform.IsChildOf(gm.playerBoardRoot))
                 return view;
         }
