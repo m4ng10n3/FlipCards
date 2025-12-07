@@ -571,7 +571,7 @@ MonoBehaviour:
   BlockPwrText: {fileID: 8984491704404075823}
   gm: {fileID: 0}
   hintText: {fileID: 1378478563021068591}
-  _rt: {fileID: 269544598099478963}
+  _rt: {fileID: 8460482343619317376}
 --- !u!223 &8621173826152947536
 Canvas:
   m_ObjectHideFlags: 0
