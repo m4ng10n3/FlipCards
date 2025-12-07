@@ -237,12 +237,12 @@ public class HandManager : MonoBehaviour
         var targetCard = targetContainer.GetComponentInChildren<CardView>(includeInactive: false);
 
         movingCard.handContainer = targetContainer;
-        movingCard.RectTransform.SetParent(targetContainer);
+        movingCard.GetComponent<RectTransform>().parent.SetParent(targetContainer);
         movingCard.MoveInHandRequest = true;
         if (targetCard != null)
         {
             targetCard.handContainer = sourceContainer;
-            targetCard.RectTransform.SetParent(sourceContainer);
+            targetCard.GetComponent<RectTransform>().parent.SetParent(sourceContainer);
             targetCard.MoveInHandRequest = true;
         }
         SortHandCardsBySlotIndex();
