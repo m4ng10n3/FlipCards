@@ -86,7 +86,7 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
     private void Awake()
     {
         if (cardView == null)
-            cardView = GetComponent<CardView>() ?? GetComponentInChildren<CardView>();
+            cardView = GetComponentInChildren<CardView>();
 
         if (cardView == null)
             Debug.LogError("CardDefinition richiede un CardView nello stesso prefab", this);
@@ -94,7 +94,7 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
 
     public void BindRuntime(GameManager gm, PlayerState owner, CardInstance instance, CardView view)
     {
-        cardView = view ?? cardView ?? GetComponent<CardView>() ?? GetComponentInChildren<CardView>();
+        cardView = view ?? cardView ?? GetComponentInChildren<CardView>();
         this.gm = gm ?? cardView?.gm;
         this.owner = owner ?? cardView?.owner;
         this.instance = instance ?? cardView?.instance;
@@ -174,7 +174,7 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
         }
 
 
-        _dragOriginalSibling = cardView.RectTransform.parent.GetSiblingIndex();
+        _dragOriginalSibling = cardView.RectTransform.parent.parent.GetSiblingIndex();
         ShowCloneEmptySpot();
     }
 

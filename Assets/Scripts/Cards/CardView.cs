@@ -114,7 +114,7 @@ public class CardView : MonoBehaviour
     void Awake()
     {
         _rt = GetComponent<RectTransform>();
-        _canvas = GetComponent<Canvas>() ?? gameObject.AddComponent<Canvas>();
+        _canvas = GetComponent<Canvas>();
         CacheRootCanvas();
 
         hintText.gameObject.SetActive(false);
@@ -321,6 +321,7 @@ public class CardView : MonoBehaviour
         if (_handContainer != null && !_dragging && _rt.parent.IsChildOf(_handContainer))
             UpdateHandContainerTarget();
 
+        _canvas.overrideSorting = false;
         if (_dragging && _dragTarget != null)
         {
             if (_handContainer != null) _draggingHand = _rt.parent.IsChildOf(_handContainer);
@@ -342,7 +343,6 @@ public class CardView : MonoBehaviour
         }
         else
         {
-            _canvas.overrideSorting = false;
             FollowContainer();
         }
         if (!doHover) CardTilt(anchorRotation);
@@ -580,7 +580,7 @@ public class CardView : MonoBehaviour
             if (_rt.parent.parent != _handContainer && !_draggingHand)
             {
                 _rt.parent.SetParent(_handContainer, true);
-                _rt.localPosition = Vector3.zero;
+                _rt.parent.localPosition = Vector3.zero;
             }
         }
 
@@ -603,7 +603,7 @@ public class CardView : MonoBehaviour
         }
         else
         {
-            _handMoveTween = _rt
+            _handMoveTween = _rt.parent
                 .DOLocalMove(targetPos, handTweenDuration)
                 .SetEase(handTweenEase)
                 .SetUpdate(true)
@@ -613,7 +613,7 @@ public class CardView : MonoBehaviour
         if (MoveInHandAnimations)
         {
             KillTween(ref _moveInHandTween);
-            _moveInHandTween = _rt
+            _moveInHandTween = _rt.parent
                 .DOPunchRotation(Vector3.forward * MoveInHandRotationAngle, MoveInHandTransition, MoveInHandVibration, 1)
                 .SetUpdate(true);
         }
