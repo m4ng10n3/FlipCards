@@ -121,7 +121,7 @@ public class CardView : MonoBehaviour
 
         if (instance != null) return;
 
-        var inline = GetComponent<CardDefinition>();
+        var inline = GetComponentInParent<CardDefinition>();
         if (inline == null) return;
 
         var def = inline.BuildSpec();
@@ -468,9 +468,14 @@ public class CardView : MonoBehaviour
         if (_selected)
             targetPosLocal += Vector3.up * selectPunchAmount;
 
-        bool handTweenActive = _handMoveTween != null && _handMoveTween.IsActive() && _handMoveTween.IsPlaying();
-        if (!handTweenActive)
-            _rt.localPosition = Vector3.Lerp(_rt.localPosition, targetPosLocal, handFollowSpeed * Time.deltaTime);
+        _rt.localPosition = Vector3.Lerp(_rt.localPosition, targetPosLocal, handFollowSpeed * Time.deltaTime);
+        Debug.Log(inHand);
+        if ((_rt.localPosition-targetPosLocal).magnitude > 0.5f && !inHand)
+        {
+            _canvas.overrideSorting = true;
+            _canvas.sortingOrder = 10;
+        }
+        else _canvas.overrideSorting = false;
     }
 
     public RectTransform PlayerBoardContainer => _playerBoardContainer;
