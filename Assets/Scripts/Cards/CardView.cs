@@ -360,15 +360,15 @@ public class CardView : MonoBehaviour
         float tiltZ = 0f;
 
         Vector2 screenPos = Mouse.current != null ? Mouse.current.position.ReadValue() : Vector2.zero;
-
+        RectTransform rt_def = (RectTransform)_rt.parent;
         if (_rootCanvas != null &&
             RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                _rt,
+                rt_def,
                 screenPos,
                 _rootCanvas.worldCamera,
                 out var localPoint))
         {
-            var r = _rt.rect;
+            var r = rt_def.rect;
 
             // Delta dal centro del RectTransform
             Vector2 delta = localPoint - r.center;

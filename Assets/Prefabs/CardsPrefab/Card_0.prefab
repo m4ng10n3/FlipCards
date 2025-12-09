@@ -559,7 +559,7 @@ MonoBehaviour:
   scaleEase: 27
   selectPunchAmount: 20
   autoTiltAmount: 10
-  manualTiltAmount: 5
+  manualTiltAmount: 15
   tiltSpeed: 15
   hoverPunchAngle: 5
   hoverTransition: 0.15
@@ -571,7 +571,6 @@ MonoBehaviour:
   BlockPwrText: {fileID: 8984491704404075823}
   gm: {fileID: 0}
   hintText: {fileID: 1378478563021068591}
-  _rt: {fileID: 8460482343619317376}
 --- !u!223 &8621173826152947536
 Canvas:
   m_ObjectHideFlags: 0
