@@ -787,7 +787,7 @@ MonoBehaviour:
   scaleEase: 27
   selectPunchAmount: 20
   autoTiltAmount: 15
-  manualTiltAmount: 5
+  manualTiltAmount: 15
   tiltSpeed: 15
   hoverPunchAngle: 5
   hoverTransition: 0.15
