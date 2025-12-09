@@ -103,7 +103,7 @@ public class CardView : MonoBehaviour
     public bool IsDragging { get => _dragging; set { _dragging = value; } }
     public bool IsDraggingFromBoard => _draggingFromBoard;
     public bool IsDraggingHand => _draggingHand;
-    public bool IsHovering { get => _hovering; set { _hovering = value; Debug.Log(name + $" hover state: {value}"); } }
+    public bool IsHovering { get => _hovering; set { _hovering = value; } }// Debug.Log(name + $" hover state: {value}"); } }
     public bool RequestReturnToHand { get => _requestReturnToHand; set => _requestReturnToHand = value; }
     public bool Selected { get => _selected; set { if (_selected == value) return; _selected = value; } }
     public bool MoveInHandRequest { get => _moveInHandRequested; set { _moveInHandRequested = value; } }
@@ -181,24 +181,29 @@ public class CardView : MonoBehaviour
 
         nameText.text = def.cardName;
         factionText.text = def.faction.ToString();
-        sideText.text = instance.side.ToString();
+        
         hpText.text = instance.health + "";
         AttackPwrText.text = "" + def.frontDamage;
         BlockPwrText.text = "" + def.frontBlockValue;
 
         _lastHp = instance.health;
-
-        FlipSide(immediate: true);
+        if (sideText.text != instance.side.ToString())
+        {
+            sideText.text = instance.side.ToString();
+            FlipSide();
+        }  
     }
 
     public void FlipSide(bool immediate = false)
     {
-        if (immediate || flipDuration <= 0f || _rt == null || !Application.isPlaying)
+        Debug.Log($"immediate: {immediate}");
+        if (immediate || flipDuration <= 0f || _rt == null)
         {
+            Debug.Log("should not be here");
             ApplySideVisuals();
             return;
         }
-
+        Debug.Log("should be here");
         _rt.DOKill();
 
         Vector3 startEuler = _rt.localEulerAngles;
@@ -398,7 +403,7 @@ public class CardView : MonoBehaviour
             tiltX = Mathf.Clamp(tiltVec.x, -manualTiltAmount, manualTiltAmount);
             tiltY = Mathf.Clamp(tiltVec.y, -manualTiltAmount, manualTiltAmount);
 
-            // Se vuoi:
+            /*
             Debug.Log($"dir {dir} dist {dist} => tiltX {tiltX} tiltY {tiltY}");
 
             float dirAngleDeg = dir != Vector2.zero
@@ -409,6 +414,7 @@ public class CardView : MonoBehaviour
                 $"dir {dir} (angle {dirAngleDeg:F1}°) dist {dist:F2} => " +
                 $"tiltX {tiltX:F1}° tiltY {tiltY:F1}°"
             );
+            */
         }
 
         Vector3 currentLocal = (Quaternion.Inverse(baseRotation) * _rt.rotation).eulerAngles;
@@ -469,7 +475,6 @@ public class CardView : MonoBehaviour
             targetPosLocal += Vector3.up * selectPunchAmount;
 
         _rt.localPosition = Vector3.Lerp(_rt.localPosition, targetPosLocal, handFollowSpeed * Time.deltaTime);
-        Debug.Log(inHand);
         if ((_rt.localPosition-targetPosLocal).magnitude > 0.5f && !inHand)
         {
             _canvas.overrideSorting = true;

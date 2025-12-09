@@ -411,7 +411,8 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
             case GameEventType.Flip:
                 if (ctx.source == cardView.instance || ctx.target == cardView.instance)
                 {
-                    cardView.FlipSide();
+                    Debug.Log(cardView);
+                    cardView.FlipSide(false);
                     cardView.Blink();
                 }
                 break;
