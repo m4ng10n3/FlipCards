@@ -426,7 +426,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3941443284057551652}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -435,7 +435,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.049999, y: -6}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 90, y: 154}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2678875090401315180
@@ -639,6 +639,8 @@ MonoBehaviour:
   tiltSpeed: 15
   hoverPunchAngle: 5
   hoverTransition: 0.15
+  _shadow: {fileID: 8984076515441021487}
+  shadowOffset: 20
   nameText: {fileID: 8530644132936236624}
   factionText: {fileID: 4206496386914259341}
   sideText: {fileID: 7532144197698887769}

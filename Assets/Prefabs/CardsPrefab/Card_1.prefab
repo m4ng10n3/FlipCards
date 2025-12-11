@@ -356,7 +356,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.049926758, y: -6}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 90, y: 154}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7769812491720703992
@@ -867,6 +867,8 @@ MonoBehaviour:
   tiltSpeed: 15
   hoverPunchAngle: 5
   hoverTransition: 0.15
+  _shadow: {fileID: 5033594217841871754}
+  shadowOffset: 20
   nameText: {fileID: 8530644132936236624}
   factionText: {fileID: 4206496386914259341}
   sideText: {fileID: 7532144197698887769}

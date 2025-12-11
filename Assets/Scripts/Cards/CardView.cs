@@ -50,6 +50,13 @@ public class CardView : MonoBehaviour
     [SerializeField] private float hoverPunchAngle = 5;
     [SerializeField] private float hoverTransition = .15f;
 
+    [Header("Shadow")]
+    [SerializeField] public Transform _shadow;
+    [SerializeField] private float shadowOffset = 20f;
+    private Vector2 shadowDistance;
+    private Vector3 _shadowBaseLocalPos;
+    private Vector3 _shadowBaseScale;
+
     [Header("Legacy UI Text (assign in prefab)")]
     public Text nameText;
     public Text factionText;
@@ -116,6 +123,8 @@ public class CardView : MonoBehaviour
         _rt = GetComponent<RectTransform>();
         _canvas = GetComponent<Canvas>();
         CacheRootCanvas();
+        _shadowBaseLocalPos = _shadow != null ? _shadow.localPosition : Vector3.zero;
+        _shadowBaseScale = _shadow != null ? _shadow.localScale : Vector3.one;
 
         hintText.gameObject.SetActive(false);
 
@@ -348,6 +357,7 @@ public class CardView : MonoBehaviour
             FollowContainer();
         }
         if (!doHover) CardTilt(anchorRotation);
+        UpdateShadow();
     }
 
     private void HoverMotion(Quaternion anchorRotation)
@@ -378,7 +388,7 @@ public class CardView : MonoBehaviour
             float halfW = Mathf.Max(1f, r.width * 0.5f);
             float halfH = Mathf.Max(1f, r.height * 0.5f);
 
-            // Normalizzazione rispetto alle dimensioni (spazio -1..1 “ellittico”)
+            // Normalizzazione rispetto alle dimensioni (spazio -1..1 ï¿½ellitticoï¿½)
             float nx = delta.x / halfW;
             float ny = delta.y / halfH;
 
@@ -408,8 +418,8 @@ public class CardView : MonoBehaviour
             : 0f;
 
             Debug.Log(
-                $"dir {dir} (angle {dirAngleDeg:F1}°) dist {dist:F2} => " +
-                $"tiltX {tiltX:F1}° tiltY {tiltY:F1}°"
+                $"dir {dir} (angle {dirAngleDeg:F1}ï¿½) dist {dist:F2} => " +
+                $"tiltX {tiltX:F1}ï¿½ tiltY {tiltY:F1}ï¿½"
             );
             */
         }
@@ -756,5 +766,20 @@ public class CardView : MonoBehaviour
         KillTween(ref _moveInHandTween);
         KillHandTweens();
         KillBoardTweens();
+    }
+
+    private void UpdateShadow()
+    {
+        if (_shadow == null || _rt == null)
+            return;
+
+        Vector3 forward = _rt.forward;
+        shadowDistance = new Vector2(-forward.x, -forward.y) * shadowOffset;
+
+        float stateMultiplier = _selected ? 1.1f : (_hovering ? 1f : 1f);
+        Vector3 target = _shadowBaseLocalPos + new Vector3(shadowDistance.x, shadowDistance.y, 0f) * stateMultiplier;
+
+        _shadow.localPosition = Vector3.Lerp(_shadow.localPosition, target, 20f * Time.deltaTime);
+        _shadow.localScale = Vector3.Lerp(_shadow.localScale, _shadowBaseScale * stateMultiplier, 10f * Time.deltaTime);
     }
 }
