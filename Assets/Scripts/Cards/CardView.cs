@@ -52,10 +52,12 @@ public class CardView : MonoBehaviour
 
     [Header("Shadow")]
     [SerializeField] public Transform _shadow;
-    [SerializeField] private float shadowOffset = 20f;
+    [SerializeField] private Transform _lightSource;
     private Vector2 shadowDistance;
     private Vector3 _shadowBaseLocalPos;
     private Vector3 _shadowBaseScale;
+    private Vector2 _shadowBaseSize;
+    private Vector3 _lightLocalPos;
 
     [Header("Legacy UI Text (assign in prefab)")]
     public Text nameText;
@@ -125,6 +127,8 @@ public class CardView : MonoBehaviour
         CacheRootCanvas();
         _shadowBaseLocalPos = _shadow != null ? _shadow.localPosition : Vector3.zero;
         _shadowBaseScale = _shadow != null ? _shadow.localScale : Vector3.one;
+        _shadowBaseSize = _shadow != null && _shadow.TryGetComponent(out RectTransform srt) ? srt.sizeDelta : Vector2.one;
+        if (_lightSource != null) _lightLocalPos = _lightSource.localPosition;
 
         hintText.gameObject.SetActive(false);
 
@@ -773,13 +777,30 @@ public class CardView : MonoBehaviour
         if (_shadow == null || _rt == null)
             return;
 
-        Vector3 forward = _rt.forward;
-        shadowDistance = new Vector2(-forward.x, -forward.y) * shadowOffset;
+        if (_lightSource != null)
+            _lightSource.localPosition = _lightLocalPos;
 
-        float stateMultiplier = _selected ? 1.1f : (_hovering ? 1f : 1f);
+        Vector3 toLight = _lightSource != null
+            ? _rt.position - _lightSource.position
+            : _rt.forward;
+        Vector3 lightDir = toLight.normalized;
+
+        Vector3 right = _rt.right;
+        Vector3 up = _rt.up;
+
+        shadowDistance = new Vector2(Vector3.Dot(toLight, right), Vector3.Dot(toLight, up));
+
+        float stateMultiplier = _selected ? 1.35f : (_hovering ? 1.15f : 1f);
         Vector3 target = _shadowBaseLocalPos + new Vector3(shadowDistance.x, shadowDistance.y, 0f) * stateMultiplier;
 
         _shadow.localPosition = Vector3.Lerp(_shadow.localPosition, target, 20f * Time.deltaTime);
         _shadow.localScale = Vector3.Lerp(_shadow.localScale, _shadowBaseScale * stateMultiplier, 10f * Time.deltaTime);
+
+        if (_shadow.TryGetComponent(out RectTransform srt))
+        {
+            float facing = Mathf.Abs(Vector3.Dot(_rt.forward, -lightDir));
+            float sizeMul = 1f + facing * 0.4f * stateMultiplier;
+            srt.sizeDelta = Vector2.Lerp(srt.sizeDelta, _shadowBaseSize * sizeMul, 15f * Time.deltaTime);
+        }
     }
 }
