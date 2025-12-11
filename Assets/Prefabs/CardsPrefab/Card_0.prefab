@@ -619,7 +619,7 @@ MonoBehaviour:
   artworkMonster: {fileID: 2489055945114031205}
   curveParameters: {fileID: 11400000, guid: c231421d86771494ca4a976c6ad34486, type: 2}
   handFollowSpeed: 10
-  handFollowRotationSpeed: 10
+  handFollowRotationSpeed: 200
   handTweenDuration: 0.1
   handTweenEase: 9
   flipDuration: 0.25

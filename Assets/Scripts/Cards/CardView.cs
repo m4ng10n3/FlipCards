@@ -196,14 +196,11 @@ public class CardView : MonoBehaviour
 
     public void FlipSide(bool immediate = false)
     {
-        Debug.Log($"immediate: {immediate}");
         if (immediate || flipDuration <= 0f || _rt == null)
         {
-            Debug.Log("should not be here");
             ApplySideVisuals();
             return;
         }
-        Debug.Log("should be here");
         _rt.DOKill();
 
         Vector3 startEuler = _rt.localEulerAngles;
