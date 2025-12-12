@@ -53,12 +53,9 @@ public class CardView : MonoBehaviour
     [Header("Shadow")]
     [SerializeField] public Transform _shadow;
     [SerializeField] private Transform _lightSource;
-    private Vector2 shadowDistance;
-    private Vector3 _shadowBaseLocalPos;
+    [SerializeField] private float _shadowPlaneZ = 1f;
     private Vector3 _shadowBaseScale;
     private Vector2 _shadowBaseSize;
-    private Vector3 _lightLocalPos;
-    private Vector2 _shadowBaseAnchored;
 
     [Header("Legacy UI Text (assign in prefab)")]
     public Text nameText;
@@ -126,20 +123,15 @@ public class CardView : MonoBehaviour
         _rt = GetComponent<RectTransform>();
         _canvas = GetComponent<Canvas>();
         CacheRootCanvas();
-        _shadowBaseLocalPos = _shadow != null ? _shadow.localPosition : Vector3.zero;
         _shadowBaseScale = _shadow != null ? _shadow.localScale : Vector3.one;
         if (_shadow != null && _shadow.TryGetComponent(out RectTransform srt))
         {
             _shadowBaseSize = srt.sizeDelta;
-            _shadowBaseAnchored = srt.anchoredPosition;
         }
         else
         {
             _shadowBaseSize = Vector2.one;
-            _shadowBaseAnchored = Vector2.zero;
         }
-        if (_lightSource != null) _lightLocalPos = _lightSource.localPosition;
-
         hintText.gameObject.SetActive(false);
 
         if (instance != null) return;
@@ -787,37 +779,92 @@ public class CardView : MonoBehaviour
         if (_shadow == null || _rt == null)
             return;
 
+        Transform parent = _rt.parent;
+        Vector3 lightDirParent;
         if (_lightSource != null)
-            _lightSource.localPosition = _lightLocalPos;
-
-        Vector3 toLight = _lightSource != null
-            ? _rt.position - _lightSource.position
-            : _rt.forward;
-        Vector3 lightDir = toLight.normalized;
-
-        Vector3 right = _rt.right;
-        Vector3 up = _rt.up;
-
-        shadowDistance = new Vector2(Vector3.Dot(lightDir, right), Vector3.Dot(lightDir, up));
-
-        float stateMultiplier = _selected ? 1.35f : (_hovering ? 1.15f : 1f);
-        float baseDistance = Mathf.Max(1f, Mathf.Max(_rt.rect.width, _rt.rect.height) * 0.15f);
-
-        if (_shadow.TryGetComponent(out RectTransform srt))
         {
-            Vector2 target = _shadowBaseAnchored + shadowDistance * baseDistance * stateMultiplier;
-            srt.anchoredPosition = Vector2.Lerp(srt.anchoredPosition, target, 20f * Time.deltaTime);
-
-            float facing = Mathf.Abs(Vector3.Dot(_rt.forward, -lightDir));
-            float sizeMul = 1f + facing * 0.4f * stateMultiplier;
-            srt.sizeDelta = Vector2.Lerp(srt.sizeDelta, _shadowBaseSize * sizeMul, 15f * Time.deltaTime);
+            Vector3 rtPosParent = parent != null ? parent.InverseTransformPoint(_rt.position) : _rt.position;
+            Vector3 lightPosParent = parent != null ? parent.InverseTransformPoint(_lightSource.position) : _lightSource.position;
+            Vector3 fromLight = (rtPosParent - lightPosParent);
+            Vector3 forwardParent = parent != null ? parent.InverseTransformDirection(_lightSource.forward) : _lightSource.forward;
+            if (fromLight.sqrMagnitude > 1e-6f)
+                lightDirParent = fromLight.normalized;
+            else
+                lightDirParent = forwardParent.sqrMagnitude > 1e-6f ? forwardParent.normalized : Vector3.forward;
         }
         else
         {
-            Vector3 target = _shadowBaseLocalPos + new Vector3(shadowDistance.x, shadowDistance.y, 0f) * baseDistance * stateMultiplier;
-            _shadow.localPosition = Vector3.Lerp(_shadow.localPosition, target, 20f * Time.deltaTime);
+            Vector3 forwardParent = parent != null ? parent.InverseTransformDirection(_rt.forward) : _rt.forward;
+            lightDirParent = forwardParent.normalized;
         }
 
-        _shadow.localScale = Vector3.Lerp(_shadow.localScale, _shadowBaseScale * stateMultiplier, 10f * Time.deltaTime);
+        if (lightDirParent.sqrMagnitude < 1e-6f)
+            lightDirParent = Vector3.forward;
+
+        Vector3 lightDir = parent != null ? parent.TransformDirection(lightDirParent) : lightDirParent;
+        Vector3 projectionDir = -lightDir;
+
+        Vector3 planeNormal = parent != null ? parent.TransformDirection(Vector3.forward) : Vector3.forward;
+        if (planeNormal.sqrMagnitude < 1e-6f)
+            planeNormal = Vector3.forward;
+
+        Vector3 planePoint;
+        if (parent != null)
+        {
+            // Use parent space to respect local units and make _shadowPlaneZ reactive to runtime changes
+            Vector3 localPlanePoint = _rt.localPosition - Vector3.forward * _shadowPlaneZ;
+            planePoint = parent.TransformPoint(localPlanePoint);
+        }
+        else
+        {
+            planePoint = _rt.position - planeNormal * _shadowPlaneZ;
+        }
+
+        Vector3 ProjectOntoPlane(Vector3 point)
+        {
+            float denom = Vector3.Dot(projectionDir, planeNormal);
+            if (Mathf.Abs(denom) < 1e-4f)
+            {
+                // Fallback to orthogonal projection if light is nearly parallel to the plane
+                return point - planeNormal * Vector3.Dot(point - planePoint, planeNormal);
+            }
+
+            float t = Vector3.Dot(planePoint - point, planeNormal) / denom;
+            return point + projectionDir * t;
+        }
+
+        Vector3 shadowCenter = ProjectOntoPlane(_rt.position);
+        float halfWidth = _rt.rect.width * 0.5f;
+        float halfHeight = _rt.rect.height * 0.5f;
+        Vector3 rightWorld = _rt.right * halfWidth;
+        Vector3 upWorld = _rt.up * halfHeight;
+
+        Vector3 projectedRight = ProjectOntoPlane(_rt.position + rightWorld) - shadowCenter;
+        Vector3 projectedUp = ProjectOntoPlane(_rt.position + upWorld) - shadowCenter;
+
+        float invRightLen = 1f / Mathf.Max(0.0001f, rightWorld.magnitude);
+        float invUpLen = 1f / Mathf.Max(0.0001f, upWorld.magnitude);
+
+        float stateMultiplier = _selected ? 1.35f : (_hovering ? 1.15f : 1f);
+
+        Vector3 localShadowPos = parent != null ? parent.InverseTransformPoint(shadowCenter) : shadowCenter;
+        _shadow.localPosition = Vector3.Lerp(_shadow.localPosition, localShadowPos, 25f * Time.deltaTime);
+
+        Vector3 shadowUp = projectedUp.sqrMagnitude > 1e-6f ? projectedUp.normalized : (parent != null ? parent.up : Vector3.up);
+        Quaternion targetRotation = Quaternion.LookRotation(planeNormal, shadowUp);
+        _shadow.rotation = Quaternion.Lerp(_shadow.rotation, targetRotation, 25f * Time.deltaTime);
+
+        float widthScale = projectedRight.magnitude * invRightLen * stateMultiplier;
+        float heightScale = projectedUp.magnitude * invUpLen * stateMultiplier;
+
+        if (_shadow.TryGetComponent(out RectTransform srt))
+        {
+            Vector2 targetSize = new Vector2(_shadowBaseSize.x * widthScale, _shadowBaseSize.y * heightScale);
+            srt.sizeDelta = Vector2.Lerp(srt.sizeDelta, targetSize, 20f * Time.deltaTime);
+        }
+
+        Vector3 targetScale = new Vector3(_shadowBaseScale.x * widthScale, _shadowBaseScale.y * heightScale, _shadowBaseScale.z * stateMultiplier);
+        _shadow.localScale = Vector3.Lerp(_shadow.localScale, targetScale, 20f * Time.deltaTime);
+
     }
 }
