@@ -194,19 +194,43 @@ public class CardView : MonoBehaviour
     {
         var def = instance.def;
 
-        nameText.text = def.cardName;
+        nameText.text    = def.cardName;
         factionText.text = def.faction.ToString();
-        
-        hpText.text = instance.health + "";
-        AttackPwrText.text = "" + def.frontDamage;
-        BlockPwrText.text = "" + def.frontBlockValue;
+        hpText.text      = $"{instance.health}/{def.maxHealth}";
+
+        // Stat display dipende dal lato corrente
+        RefreshStatTexts();
 
         _lastHp = instance.health;
         if (sideText.text != instance.side.ToString())
         {
             sideText.text = instance.side.ToString();
             FlipSide();
-        }  
+        }
+    }
+
+    /// <summary>Aggiorna ATK e BLOCK in base al lato corrente e alle flipCharge.</summary>
+    public void RefreshStatTexts()
+    {
+        if (instance == null) return;
+        bool isFront = instance.side == Side.Fronte;
+
+        if (isFront)
+        {
+            int atk = instance.def.frontDamage;
+            AttackPwrText.text = instance.flipCharge > 0
+                ? $"{atk}+{instance.flipCharge}"
+                : atk.ToString();
+            BlockPwrText.text = instance.def.frontBlockValue.ToString();
+        }
+        else
+        {
+            // In Retro: nessun attacco, ma mostra block e charge
+            AttackPwrText.text = instance.flipCharge > 0
+                ? $"[{instance.flipCharge}/3]"
+                : "—";
+            BlockPwrText.text = instance.def.backBlockValue.ToString();
+        }
     }
 
     public void FlipSide(bool immediate = false)
@@ -245,17 +269,20 @@ public class CardView : MonoBehaviour
         bool isFront = instance.side == Side.Fronte;
 
         var img = Template.GetComponent<Image>();
-        var newSprite = isFront ? frontImage : (backImage != null ? backImage : frontImage);
-        img.type = Image.Type.Simple;
+        img.type           = Image.Type.Simple;
         img.preserveAspect = false;
-        img.sprite = newSprite;
+        img.sprite         = isFront ? frontImage : (backImage != null ? backImage : frontImage);
 
-        nameText.enabled = isFront;
-        hpText.enabled = isFront;
-        AttackPwrText.enabled = isFront;
-        BlockPwrText.enabled = isFront;
+        // Nome, HP sempre visibili; artwork solo in Fronte
+        nameText.enabled       = true;
+        hpText.enabled         = true;
         artworkMonster.enabled = isFront;
-        hintText.enabled = isFront;
+        hintText.enabled       = true;
+
+        // ATK e BLOCK sempre visibili ma con valori diversi per lato
+        AttackPwrText.enabled = true;
+        BlockPwrText.enabled  = true;
+        RefreshStatTexts();
     }
 
     public void UpdateHpOnly()

@@ -17,6 +17,7 @@ public class CardInstance
     // Modificatori temporanei che le abilità possono impostare reagendo agli eventi
     public int? incomingDamageOverride; // override puntuale del danno in arrivo (es. 0 per parata)
     public int tempBlockBonus;          // bonus block additivo per questo colpo
+    public int tempAtkBonus;            // bonus attacco aggiuntivo per questo turno
 
     // Flip Charge System: si accumula stando in Retro, si consuma attaccando in Fronte
     public int flipCharge;              // 0..3, bonus danno al prossimo attacco
@@ -57,8 +58,9 @@ public class CardInstance
     {
         if (!alive || target == null) return;
 
-        int damage = def.frontDamage + flipCharge;
-        flipCharge = 0; // consuma le cariche
+        int damage = def.frontDamage + flipCharge + tempAtkBonus;
+        flipCharge   = 0;
+        tempAtkBonus = 0;
 
         EventBus.Publish(GameEventType.AttackDeclared, new EventContext
         {
@@ -71,7 +73,7 @@ public class CardInstance
     }
 
     // Danno in Fronte senza passare per evento (usato da LaneResolver per direct hit)
-    public int ComputeAttackDamage() => def.frontDamage + flipCharge;
+    public int ComputeAttackDamage() => def.frontDamage + flipCharge + tempAtkBonus;
     public void ConsumeCharge() { flipCharge = 0; }
 
 
@@ -121,6 +123,7 @@ public class CardInstance
         // reset modificatori per-colpo
         incomingDamageOverride = null;
         tempBlockBonus = 0;
+        tempAtkBonus   = 0;
     }
     // Hint pilotato dalla logica carta/abilit� (CardView lo intercetta)
     public void PushHint(string msg)

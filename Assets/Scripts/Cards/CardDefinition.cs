@@ -3,38 +3,33 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System.Collections.Generic;
 
+public enum CardClass { Assalto, Tecnico, Mistico, Guardia }
+
 public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
     [System.Serializable]
     public struct Spec
     {
-        // Identit
-        public string cardName;
-        public Faction faction;
-        public CardZone zone;
-        // Stats base
-        public int maxHealth;
-
-        // Fronte
-        public int frontDamage;
-        public int frontBlockValue;
-
-        // Retro
-        public int backBlockValue;
-
-        // Retro (passivi/sinergie)
-        public int backDamageBonusSameFaction;
-        public int backBlockBonusSameFaction;
-        public int backBonusPAIfTwoRetroSameFaction;
-        // dentro Spec
+        public string    cardName;
+        public Faction   faction;
+        public CardClass cardClass;
+        public CardZone  zone;
+        public int  maxHealth;
+        public int  frontDamage;
+        public int  frontBlockValue;
+        public int  backBlockValue;
+        public int  backDamageBonusSameFaction;
+        public int  backBlockBonusSameFaction;
+        public int  backBonusPAIfTwoRetroSameFaction;
         public float endTurnFlipChance;
 
-        public override string ToString() => $"{cardName} [{faction}]";
+        public override string ToString() => $"{cardName} [{cardClass}]";
     }
 
     [Header("Identity")]
-    public string cardName = "Card";
-    public Faction faction = Faction.A;
+    public string    cardName  = "Card";
+    public Faction   faction   = Faction.A;
+    public CardClass cardClass = CardClass.Assalto;
 
     public CardZone zone = CardZone.Board;
 
@@ -74,17 +69,18 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
     {
         return new Spec
         {
-            cardName = cardName,
-            faction = faction,
-            maxHealth = maxHealth,
+            cardName   = cardName,
+            faction    = faction,
+            cardClass  = cardClass,
+            zone       = zone,
+            maxHealth  = maxHealth,
             frontDamage = frontDamage,
             frontBlockValue = frontBlockValue,
-            backBlockValue = backBlockValue,
-            backDamageBonusSameFaction = backDamageBonusSameFaction,
-            backBlockBonusSameFaction = backBlockBonusSameFaction,
+            backBlockValue  = backBlockValue,
+            backDamageBonusSameFaction      = backDamageBonusSameFaction,
+            backBlockBonusSameFaction       = backBlockBonusSameFaction,
             backBonusPAIfTwoRetroSameFaction = backBonusPAIfTwoRetroSameFaction,
             endTurnFlipChance = endTurnFlipChance,
-            zone = zone
         };
     }
 

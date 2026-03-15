@@ -8,15 +8,11 @@ public class SlotDefinition : MonoBehaviour
         public string SlotName;
         public Faction faction;
         public int maxHealth;
-
-        // Statistiche di combattimento
-        public int atkDamage;       // danno base che lo slot infligge
-        public int blockFront;      // block quando è in Fronte
-        public int blockRetro;      // block quando è in Retro (più alto)
-
-        // Pattern di flip AI: sequenza di Side che lo slot segue ogni turno.
-        // Se null o vuoto, lo slot resta sempre in Fronte.
+        public int atkDamage;
+        public int blockFront;
+        public int blockRetro;
         public Side[] flipPattern;
+        public int reelFrameIndex;
 
         public override string ToString() => $"{SlotName} [{faction}]";
     }
@@ -35,6 +31,10 @@ public class SlotDefinition : MonoBehaviour
     [Tooltip("Sequenza di lati che lo slot segue ogni turno. Vuoto = sempre Fronte.")]
     public Side[] flipPattern;
 
+    [Header("Reel Animation")]
+    [Tooltip("Indice del frame nello sprite sheet del reel (0 = prima riga dall'alto).")]
+    [Min(0)] public int reelFrameIndex = 0;
+
     public Spec BuildSpec()
     {
         return new Spec
@@ -48,6 +48,7 @@ public class SlotDefinition : MonoBehaviour
             flipPattern = flipPattern != null && flipPattern.Length > 0
                 ? (Side[])flipPattern.Clone()
                 : null,
+            reelFrameIndex = reelFrameIndex,
         };
     }
 }
