@@ -14,9 +14,13 @@ public class CardInstance
         gm = gameManager;
     }
 
-    // Modificatori temporanei che le abilità possono impostare reagendo agli eventi
+    // Modificatori temporanei che le abilitÃ  possono impostare reagendo agli eventi
     public int? incomingDamageOverride; // override puntuale del danno in arrivo (es. 0 per parata)
-    public int tempBlockBonus;        // bonus block additivo per questo colpo
+    public int tempBlockBonus;          // bonus block additivo per questo colpo
+
+    // Flip Charge System: si accumula stando in Retro, si consuma attaccando in Fronte
+    public int flipCharge;              // 0..3, bonus danno al prossimo attacco
+    public const int MaxFlipCharge = 3;
 
     EventBus.Handler _evtHandler;
 
@@ -48,10 +52,13 @@ public class CardInstance
 
     // ====== FLUSSO EVENT-DRIVEN ======
 
-    // ATTACCANTE: pubblica proposta e poi chiede alla vittima di risolvere
+    // ATTACCANTE: pubblica proposta includendo le flipCharge accumulate
     public void Attack(PlayerState owner, PlayerState defender, object target)
     {
         if (!alive || target == null) return;
+
+        int damage = def.frontDamage + flipCharge;
+        flipCharge = 0; // consuma le cariche
 
         EventBus.Publish(GameEventType.AttackDeclared, new EventContext
         {
@@ -59,9 +66,13 @@ public class CardInstance
             opponent = defender,
             source = this,
             target = target,
-            amount = def.frontDamage
+            amount = damage
         });
     }
+
+    // Danno in Fronte senza passare per evento (usato da LaneResolver per direct hit)
+    public int ComputeAttackDamage() => def.frontDamage + flipCharge;
+    public void ConsumeCharge() { flipCharge = 0; }
 
 
     // VITTIMA: risolve solo se il bersaglio sono io
@@ -79,40 +90,39 @@ public class CardInstance
     }
 
 
-    // Calcolo/applicazione del danno: niente logica abilità qui dentro
+    // Calcolo/applicazione del danno: niente logica abilitÃ  qui dentro
     void ResolveIncomingAttack(PlayerState attackerOwner, PlayerState defenderOwner, object attacker, int proposedDamage)
     {
-        // Le abilità hanno avuto occasione di settare questi modificatori ascoltando IncomingAttack.
         int incoming = Mathf.Max(0, incomingDamageOverride ?? proposedDamage);
-        int block = def.frontBlockValue;
+
+        // In Fronte: block base frontale. In Retro: block potenziato (la carta assorbe per il player)
+        int block = (side == Side.Fronte)
+            ? (def.frontBlockValue + tempBlockBonus)
+            : (def.backBlockValue  + tempBlockBonus);
+
         int final = Mathf.Max(0, incoming - block);
 
-        if (side==Side.Retro)
-        {
-            gm.player.hp -= final;
-            gm.UpdateHUD();
-        }
+        // Il danno va sempre alla carta, mai direttamente al player
+        // (il player subisce danno solo se la lane Ã¨ vuota â€” gestito da LaneResolver)
+        if (final > 0)
+            health = Mathf.Max(0, health - final);
         else
-        {
-            if (final > 0) health = Mathf.Max(0, health - final);
-            else PushHint("No damage");
+            PushHint("Blocked!");
 
-            // Evento unico di esito del combattimento
-            EventBus.Publish(GameEventType.AttackResolved, new EventContext
-            {
-                owner = attackerOwner,
-                opponent = defenderOwner,
-                source = attacker,
-                target = this,
-                amount = final
-            });
-        }
+        EventBus.Publish(GameEventType.AttackResolved, new EventContext
+        {
+            owner = attackerOwner,
+            opponent = defenderOwner,
+            source = attacker,
+            target = this,
+            amount = final
+        });
 
         // reset modificatori per-colpo
         incomingDamageOverride = null;
         tempBlockBonus = 0;
     }
-    // Hint pilotato dalla logica carta/abilità (CardView lo intercetta)
+    // Hint pilotato dalla logica carta/abilitï¿½ (CardView lo intercetta)
     public void PushHint(string msg)
         => EventBus.Publish(GameEventType.Info, new EventContext { source = this, phase = "HINT: " + msg });
 

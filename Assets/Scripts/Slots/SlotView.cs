@@ -8,6 +8,7 @@ public class SlotView : MonoBehaviour
     public Text nameText;
     public Text factionText;
     public Text hpText;
+    public Text sideText;   // mostra FRONTE/RETRO + prossimo step pattern
 
     [Header("Runtime wiring")]
     [HideInInspector] public GameManager gm;
@@ -22,7 +23,7 @@ public class SlotView : MonoBehaviour
     Button btn;
     Outline highlight;
 
-    // tracking solo HP, niente più hint automatici su DMG/BLK
+    // tracking solo HP, niente piï¿½ hint automatici su DMG/BLK
     private int _lastHp = int.MinValue;
 
     // handler eventi
@@ -41,13 +42,13 @@ public class SlotView : MonoBehaviour
         le.preferredWidth = preferredSize.x;
         le.preferredHeight = preferredSize.y;
 
-        // Preview editor-only: se non c'è istanza runtime, mostra i dati dell'inline
+        // Preview editor-only: se non c'ï¿½ istanza runtime, mostra i dati dell'inline
         PreviewFromInlineIfNoInstance();
         if (hintText != null) hintText.gameObject.SetActive(false);
     }
 
     /// <summary>
-    /// Anteprima: mostra i dati statici se la carta è presente in scena ma senza istanza runtime.
+    /// Anteprima: mostra i dati statici se la carta ï¿½ presente in scena ma senza istanza runtime.
     /// </summary>
     void PreviewFromInlineIfNoInstance()
     {
@@ -121,9 +122,10 @@ public class SlotView : MonoBehaviour
 
         var def = instance.def;
 
-        if (nameText != null) nameText.text = def.SlotName;
+        if (nameText    != null) nameText.text    = def.SlotName;
         if (factionText != null) factionText.text = def.faction.ToString();
-        if (hpText != null) hpText.text = instance.health + "/" + def.maxHealth;
+        if (hpText      != null) hpText.text      = instance.health + "/" + def.maxHealth;
+        if (sideText    != null) sideText.text     = BuildSideLabel();
 
         _lastHp = instance.health;
     }
@@ -172,7 +174,7 @@ public class SlotView : MonoBehaviour
                 if (ctx.source == instance && !string.IsNullOrEmpty(ctx.phase) && ctx.phase.StartsWith("HINT:"))
                 {
                     ShowHint(ctx.phase.Substring("HINT:".Length).Trim());
-                    // niente Blink obbligatorio qui: lascialo a discrezione di chi invia l’hint
+                    // niente Blink obbligatorio qui: lascialo a discrezione di chi invia lï¿½hint
                 }
                 break;
             case GameEventType.TurnStart:
@@ -218,6 +220,22 @@ public class SlotView : MonoBehaviour
             hintText.text = string.Empty;   // svuota coda messaggi
         }
     }
+    private string BuildSideLabel()
+    {
+        if (instance == null) return "";
+        string current = instance.side == Side.Fronte ? "â–¶ FRONTE" : "â—€ RETRO";
+
+        // Mostra il prossimo step del pattern, se esiste
+        var pattern = instance.def.flipPattern;
+        if (pattern != null && pattern.Length > 1)
+        {
+            int nextIdx = (System.Array.IndexOf(pattern, instance.side) + 1) % pattern.Length;
+            string next = pattern[nextIdx] == Side.Fronte ? "â–¶" : "â—€";
+            current += $"  â†’{next}";
+        }
+        return current;
+    }
+
     public void HideHint()
     {
         if (hintText != null)

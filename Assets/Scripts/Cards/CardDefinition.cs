@@ -19,7 +19,10 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
         public int frontDamage;
         public int frontBlockValue;
 
-        // Retro (passivi)
+        // Retro
+        public int backBlockValue;
+
+        // Retro (passivi/sinergie)
         public int backDamageBonusSameFaction;
         public int backBlockBonusSameFaction;
         public int backBonusPAIfTwoRetroSameFaction;
@@ -44,6 +47,7 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
     [Min(0)] public int frontBlockValue = 0;
 
     [Header("Back (passive)")]
+    [Min(0)] public int backBlockValue = 2;
     [Min(0)] public int backDamageBonusSameFaction = 0;
     [Min(0)] public int backBlockBonusSameFaction = 0;
     [Min(0)] public int backBonusPAIfTwoRetroSameFaction = 0;
@@ -75,6 +79,7 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
             maxHealth = maxHealth,
             frontDamage = frontDamage,
             frontBlockValue = frontBlockValue,
+            backBlockValue = backBlockValue,
             backDamageBonusSameFaction = backDamageBonusSameFaction,
             backBlockBonusSameFaction = backBlockBonusSameFaction,
             backBonusPAIfTwoRetroSameFaction = backBonusPAIfTwoRetroSameFaction,

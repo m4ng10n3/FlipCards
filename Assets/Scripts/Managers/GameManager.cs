@@ -202,47 +202,87 @@ public void UpdateHUD()
     {
         playerPhase = isPlayerPhase;
         awaitingEndTurn = false;
-        owner.actionPoints = owner == player ? playerBaseAP : 0;
-        EventBus.Publish(GameEventType.TurnStart, new EventContext { owner = owner, opponent = opponent, phase = $"TURN {currentTurn}" });
-        if (playerPhase) RandomizePlayerLayoutAndSides(); else ExecuteAiTurnStartActions();
+        owner.actionPoints = playerBaseAP;
+        EventBus.Publish(GameEventType.TurnStart, new EventContext
+        {
+            owner    = owner,
+            opponent = opponent,
+            phase    = $"TURN {currentTurn}"
+        });
         UpdateAllViews();
         UpdateHUD();
     }
 
-    void EndTurnInternal(PlayerState owner, PlayerState opponent)
+    // ═══════════════════════════════════════════════════════════
+    //  RISOLUZIONE LANE (sostituisce il vecchio OnAttack)
+    // ═══════════════════════════════════════════════════════════
+
+    void OnAttack()
     {
-        if (matchEnded) return;
+        if (awaitingEndTurn || matchEnded || !playerPhase) { UpdateHUD(); return; }
 
-        EventBus.Publish(GameEventType.TurnEnd, new EventContext { owner = owner, opponent = opponent, phase = "TurnEnd" });
+        int lanes = Mathf.Max(playerBoardRoot.childCount, aiBoardRoot.childCount);
 
-        if (owner == ai)
+        for (int lane = 0; lane < lanes; lane++)
         {
-            ShuffleEnemySlotsPreservingInstances();
-            EventBus.Publish(GameEventType.Info, new EventContext { owner = ai, opponent = player, phase = "EnemyTurnEndShuffle" });
-            UpdateAllViews();
+            CardInstance card = null;
+            SlotInstance slot = null;
+
+            if (lane < playerBoardRoot.childCount)
+            {
+                var cv = playerBoardRoot.GetChild(lane).GetComponentInChildren<CardView>(false);
+                if (cv?.instance != null && cv.instance.alive) card = cv.instance;
+            }
+
+            if (lane < aiBoardRoot.childCount)
+            {
+                var sv = aiBoardRoot.GetChild(lane).GetComponentInChildren<SlotView>(false);
+                if (sv?.instance != null && sv.instance.alive) slot = sv.instance;
+            }
+
+            LaneResolver.Resolve(lane, card, slot, player, ai);
         }
 
-        if (IsGameOver() || currentTurn >= turns) EndMatch();
+        CleanupDestroyedSlots();
+        UpdateAllViews();
+        awaitingEndTurn = true;
+        UpdateHUD();
     }
 
-    void ShuffleEnemySlotsPreservingInstances()
+    // ═══════════════════════════════════════════════════════════
+    //  ACCUMULO CHARGE (chiamato a fine turno per carte in Retro)
+    // ═══════════════════════════════════════════════════════════
+
+    void AccumulateFlipCharges()
     {
-        var children = new List<Transform>();
-        for (int i = 0; i < aiBoardRoot.childCount; i++) children.Add(aiBoardRoot.GetChild(i));
-        if (children.Count <= 1) return;
-
-        for (int i = children.Count - 1; i > 0; i--)
+        foreach (var ci in player.board)
         {
-            int j = rng.Next(i + 1);
-            if (i == j) continue;
-
-            int iIdx = children[i].GetSiblingIndex();
-            int jIdx = children[j].GetSiblingIndex();
-            children[i].SetSiblingIndex(jIdx);
-            children[j].SetSiblingIndex(iIdx);
+            if (!ci.alive || ci.side != Side.Retro) continue;
+            ci.flipCharge = Mathf.Min(ci.flipCharge + 1, CardInstance.MaxFlipCharge);
+            string bar = ci.flipCharge == 3 ? "●●● MAX!" :
+                         ci.flipCharge == 2 ? "●●○"      : "●○○";
+            ci.PushHint($"Charge {bar}");
         }
+    }
 
-        for (int i = 0; i < aiBoardRoot.childCount; i++) aiBoardRoot.GetChild(i).SetSiblingIndex(i);
+    // ═══════════════════════════════════════════════════════════
+    //  AVANZAMENTO PATTERN SLOT (chiamato a fine turno)
+    // ═══════════════════════════════════════════════════════════
+
+    void AdvanceSlotPatterns()
+    {
+        for (int i = 0; i < enemySlotViews.Count; i++)
+        {
+            var sv = enemySlotViews[i];
+            if (sv?.instance == null || !sv.instance.alive) continue;
+
+            Side oldSide = sv.instance.side;
+            sv.instance.AdvanceFlip();
+            sv.Refresh();
+
+            if (sv.instance.side != oldSide)
+                Logger.Info($"[Slot] {sv.instance.def.SlotName} → {sv.instance.side}");
+        }
     }
 
     public void OnCardDoubleClicked(CardView view)
@@ -272,43 +312,6 @@ public void UpdateHUD()
         UpdateHUD();
         return true;
     }
-    void OnAttack()
-    {
-        if (awaitingEndTurn || matchEnded || !playerPhase) { UpdateHUD(); return; }
-
-        int lanes = playerBoardRoot.childCount;
-        for (int lane = 0; lane < lanes; lane++)
-        {
-            var pView = playerBoardRoot.GetChild(lane).GetComponentInChildren<CardView>(false);
-            if (pView == null || pView.instance == null) continue;
-
-            var ci = pView.instance;
-            if (!ci.alive || ci.side != Side.Fronte) continue;
-
-            SlotView sView = null;
-            if (lane < aiBoardRoot.childCount)
-                sView = aiBoardRoot.GetChild(lane).GetComponentInChildren<SlotView>(false);
-
-            if (sView == null || !sView.instance.alive)
-            {
-                int dmg = ci.def.frontDamage;
-                ci.DealDamageToPlayer(player, ai, dmg, "DirectToEnemy");
-            }
-            else
-            {
-                var si = sView.instance;
-                if (!si.alive) continue;
-
-                ci.Attack(player, ai, si);
-            }
-        }
-
-        CleanupDestroyedSlots();
-        UpdateAllViews();
-        awaitingEndTurn = true; 
-        UpdateHUD();
-    }
-
     public void SwapCardPositions(CardView a, CardView b)
     {
         if (matchEnded || awaitingEndTurn || !playerPhase) { UpdateHUD(); return; }
@@ -361,42 +364,28 @@ public void UpdateHUD()
 
     void OnEndTurn()
     {
-        if (matchEnded) return;
-        if (playerPhase)
+        if (matchEnded || !playerPhase) return;
+
+        // 1. Accumula charge per le carte in Retro
+        AccumulateFlipCharges();
+
+        // 2. Avanza il pattern di flip di tutti gli slot
+        AdvanceSlotPatterns();
+
+        // 3. Pubblica TurnEnd (abilità come OnEndTurnDealDamage reagiscono qui)
+        EventBus.Publish(GameEventType.TurnEnd, new EventContext
         {
-            EndTurnInternal(player, ai);
-            if (!matchEnded) StartTurn(ai, player, false);
-        }
-        else
-        {
-            EndTurnInternal(ai, player);
-            if (!matchEnded) { currentTurn++; StartTurn(player, ai, true); }
-        }
-    }
+            owner    = player,
+            opponent = ai,
+            phase    = "TurnEnd"
+        });
 
-    void ExecuteAiTurnStartActions() { ApplyEnemySlotsEffectsLeftToRight(); }
+        // 4. Controlla fine partita
+        if (IsGameOver() || currentTurn >= turns) { EndMatch(); return; }
 
-    void ApplyEnemySlotsEffectsLeftToRight()
-    {
-        int lanes = Mathf.Min(aiBoardRoot.childCount, playerBoardRoot.childCount);
-        var aiChildren = new Transform[lanes];
-        for (int i = 0; i < lanes; i++) aiChildren[i] = aiBoardRoot.GetChild(i);
-
-        for (int lane = 0; lane < lanes; lane++)
-        {
-            var sView = aiChildren[lane].GetComponentInChildren<SlotView>(false);
-            if (sView == null || !sView.instance.alive)
-                continue;
-
-            EventBus.Publish(GameEventType.Info, new EventContext { phase = $"[SlotEffect] Lane {lane + 1}" });
-            EventBus.Publish(GameEventType.Custom, new EventContext
-            {
-                owner = ai,
-                opponent = player,
-                source = sView.instance,
-                phase = "SlotEffect"
-            });
-        }
+        // 5. Avvia nuovo turno player
+        currentTurn++;
+        StartTurn(player, ai, true);
     }
 
 
@@ -594,35 +583,8 @@ public void UpdateHUD()
         return -1;
     }
 
-    void RandomizePlayerLayoutAndSides()
-    {
-        /*
-        */
-        var children = new List<Transform>();
-        foreach (Transform t in playerBoardRoot) children.Add(t);
-        for (int i = children.Count - 1; i > 0; i--)
-        {
-            int j = rng.Next(i + 1);
-            if (i != j)
-            {
-                int iIdx = children[i].GetSiblingIndex();
-                int jIdx = children[j].GetSiblingIndex();
-                children[i].SetSiblingIndex(jIdx); children[j].SetSiblingIndex(iIdx);
-            }
-        }
-        
-        var cards = player.board.ToArray();
-        for (int i = 0; i < cards.Length; i++)
-        {
-            var ci = cards[i];
-            var newSide = (rng.NextDouble() < 0.5) ? Side.Fronte : Side.Retro;
-            if (ci.side != newSide)
-            {
-                ci.Flip();
-                EventBus.Publish(GameEventType.Flip, new EventContext { owner = player, opponent = ai, source = ci, phase = "TurnStartRandomize" });
-            }
-        }
-    }
+    // RIMOSSO: RandomizePlayerLayoutAndSides() distruggeva la strategia del player.
+    // Il layout e i lati sono ora completamente sotto controllo del giocatore.
 
     void ClearChildrenUnder(Transform root)
     {

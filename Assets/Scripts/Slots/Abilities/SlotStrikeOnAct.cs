@@ -2,7 +2,7 @@ using System.ComponentModel;
 using UnityEngine;
 
 /// <summary>
-/// Abilità per SLOT: quando arriva il suo turno di agire (fase "SlotEffect"),
+/// Abilitï¿½ per SLOT: quando arriva il suo turno di agire (fase "SlotEffect"),
 /// infligge 'damage' alla carta di fronte, se presente.
 /// </summary>
 public class SlotStrikeOnAct : AbilityBase
@@ -15,7 +15,7 @@ public class SlotStrikeOnAct : AbilityBase
 
     protected override void Register()
     {
-        // L’abilità è montata sul prefab dello slot: recupero SlotView/SlotInstance
+        // Lï¿½abilitï¿½ ï¿½ montata sul prefab dello slot: recupero SlotView/SlotInstance
         _slotView = GetComponent<SlotView>();
         _slot = _slotView ? _slotView.instance : null;
 
@@ -26,15 +26,11 @@ public class SlotStrikeOnAct : AbilityBase
         _h = (t, ctx) =>
         {
             if (_slot == null || !_slot.alive) return;
-            if (t == GameEventType.TurnEnd && ReferenceEquals(ctx.owner, gm.ai))
-            {
-                Logger.Info("pippo");
-                _slotView.ClearHint();
-                _slotView.ShowHint($"incoming damage {damage}");
-                return;
-            }
-            // Agiamo solo nella fase dedicata agli slot
-            if (ctx.phase != "SlotEffect") return;
+
+            // DEPRECATO: questa abilitÃ  usava la fase "SlotEffect" del vecchio turno AI.
+            // L'attacco base degli slot Ã¨ ora gestito da LaneResolver.
+            // Questa componente Ã¨ mantenuta per retrocompatibilitÃ  ma non agisce piÃ¹.
+            if (ctx.phase != "DEPRECATED_SlotEffect") return;
 
             // E solo quando l'evento riguarda proprio questo slot
             if (!ReferenceEquals(ctx.source, _slot)) return;
