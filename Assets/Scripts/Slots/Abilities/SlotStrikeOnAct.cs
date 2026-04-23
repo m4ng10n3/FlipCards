@@ -1,120 +1,172 @@
-using System.ComponentModel;
 using UnityEngine;
 
-/// <summary>
-/// Abilit� per SLOT: quando arriva il suo turno di agire (fase "SlotEffect"),
-/// infligge 'damage' alla carta di fronte, se presente.
-/// </summary>
 public class SlotStrikeOnAct : AbilityBase
 {
-    [Min(1)] public int damage = 2;
+    public enum SlotSignature
+    {
+        None,
+        PressureFront,
+        ArmorFront,
+        BerserkFront,
+        GuardAuraRetro,
+        RegenRetro
+    }
+
+    public SlotSignature signature = SlotSignature.None;
+    [Min(0)] public int power = 1;
+    [Min(1)] public int threshold = 2;
 
     private EventBus.Handler _h;
     private SlotView _slotView;
     private SlotInstance _slot;
+    private int _frontTurns;
+    private bool _rageReady;
 
     protected override void Register()
     {
-        // L�abilit� � montata sul prefab dello slot: recupero SlotView/SlotInstance
         _slotView = GetComponent<SlotView>();
         _slot = _slotView ? _slotView.instance : null;
+        _frontTurns = 0;
+        _rageReady = false;
 
-        _slotView.ClearHint();
-        _slotView.ShowHint($"incoming damage {damage}");
-        var gm = GameManager.Instance;
-
-        _h = (t, ctx) =>
-        {
-            if (_slot == null || !_slot.alive) return;
-
-            // DEPRECATO: questa abilità usava la fase "SlotEffect" del vecchio turno AI.
-            // L'attacco base degli slot è ora gestito da LaneResolver.
-            // Questa componente è mantenuta per retrocompatibilità ma non agisce più.
-            if (ctx.phase != "DEPRECATED_SlotEffect") return;
-
-            // E solo quando l'evento riguarda proprio questo slot
-            if (!ReferenceEquals(ctx.source, _slot)) return;
-
-            // Trova la carta di fronte nella stessa lane
-            if (gm == null || gm.playerBoardRoot == null || _slotView == null) return;
-
-            int lane = _slotView.transform.GetSiblingIndex();
-            if (lane < 0 || lane >= gm.playerBoardRoot.childCount) return;
-
-            var pChild = gm.playerBoardRoot.GetChild(lane);
-            var pView = pChild ? pChild.GetComponentInChildren<CardView>(includeInactive: false) : null;
-            var target = pView ? pView.instance : null;
-
-            if (target == null || !target.alive)
-            {
-                EventBus.Publish(GameEventType.AttackResolved, new EventContext
-                {
-                    owner = Owner,
-                    opponent = Opponent,
-                    source = _slot,
-                    target = null,             // danno diretto al player
-                    amount = damage,
-                    phase = "Direct Damage"
-                });
-                DealDamageToPlayer(Owner, Opponent, damage);
-                return;
-            }
-            else
-            {
-                // Usa la pipeline eventi standard: AttackDeclared + IncomingAttack.
-                // owner = AI (Owner), opponent = Player (Opponent), source = questo SlotInstance
-                EventBus.Publish(GameEventType.AttackDeclared, new EventContext
-                {
-                    owner = Owner,
-                    opponent = Opponent,
-                    source = _slot,
-                    target = target,
-                    amount = Mathf.Max(0, damage),
-                    phase = "SlotStrikeOnAct"
-                });
-            }
-
-            EventBus.Publish(GameEventType.Info, new EventContext
-            {
-                owner = Owner,             // AI
-                opponent = Opponent,       // Player
-                source = _slot,            // SlotInstance locale
-                phase = "HINT: Strike!"
-            });
-
-
-        };
-
+        _h = OnEvent;
+        EventBus.Subscribe(GameEventType.TurnStart, _h);
+        EventBus.Subscribe(GameEventType.AttackDeclared, _h);
         EventBus.Subscribe(GameEventType.Custom, _h);
-        EventBus.Subscribe(GameEventType.TurnEnd, _h);
     }
 
-    public void DealDamageToPlayer(PlayerState owner, PlayerState opponent, int amount, string phase = null)
+    void OnEvent(GameEventType t, EventContext ctx)
     {
-        int final = Mathf.Max(0, amount);
-        opponent.hp -= final;
+        if (_slot == null || !_slot.alive) return;
 
-        GameManager.Instance?.UpdateHUD();
-
-        EventBus.Publish(GameEventType.AttackResolved, new EventContext
+        switch (t)
         {
-            owner = owner,
-            opponent = opponent,
-            source = this,
-            target = null,             // danno diretto al player
-            amount = final,
-            phase = phase ?? "Damage"
-        });
+            case GameEventType.TurnStart:
+                HandleTurnStart();
+                break;
+
+            case GameEventType.AttackDeclared:
+                if (ReferenceEquals(ctx.target, _slot) && _slot.side == Side.Fronte && signature == SlotSignature.ArmorFront)
+                {
+                    _slot.tempBlockBonus += power;
+                    _slot.PushHint($"Armor +{power}");
+                }
+                break;
+
+            case GameEventType.Custom:
+                if (ctx.phase == "PreSlotAttack" && ReferenceEquals(ctx.source, _slot))
+                    HandlePreSlotAttack(ctx);
+                else if (ctx.phase == "SlotRetroEffect" && ReferenceEquals(ctx.source, _slot))
+                    HandleRetroEffect();
+                break;
+        }
+    }
+
+    void HandleTurnStart()
+    {
+        if (signature != SlotSignature.BerserkFront) return;
+
+        if (_slot.side != Side.Fronte)
+        {
+            _frontTurns = 0;
+            _rageReady = false;
+            return;
+        }
+
+        _frontTurns++;
+        if (_frontTurns >= threshold)
+        {
+            _rageReady = true;
+            _frontTurns = 0;
+            _slot.PushHint("Rage ready");
+        }
+    }
+
+    void HandlePreSlotAttack(EventContext ctx)
+    {
+        if (_slot.side != Side.Fronte) return;
+
+        switch (signature)
+        {
+            case SlotSignature.PressureFront:
+                if (ctx.target == null)
+                {
+                    _slot.tempAtkBonus += power;
+                    _slot.PushHint($"Pressure +{power}");
+                }
+                break;
+
+            case SlotSignature.BerserkFront:
+                if (_rageReady)
+                {
+                    _slot.tempAtkBonus += power;
+                    _slot.PushHint($"Rage +{power}");
+                    _rageReady = false;
+                }
+                break;
+        }
+    }
+
+    void HandleRetroEffect()
+    {
+        if (_slot.side != Side.Retro) return;
+
+        switch (signature)
+        {
+            case SlotSignature.GuardAuraRetro:
+                ApplyGuardAura();
+                break;
+
+            case SlotSignature.RegenRetro:
+                ApplyRegen();
+                break;
+        }
+    }
+
+    void ApplyGuardAura()
+    {
+        var gm = GameManager.Instance;
+        if (gm == null || power <= 0) return;
+
+        int lane = gm.GetLaneIndexFor(_slot);
+        int buffed = 0;
+
+        for (int delta = -1; delta <= 1; delta += 2)
+        {
+            var other = gm.GetEnemySlotAtLane(lane + delta);
+            if (other == null) continue;
+            other.tempBlockBonus += power;
+            other.PushHint($"Aura +{power}");
+            buffed++;
+        }
+
+        if (buffed > 0)
+        {
+            _slot.PushHint($"Aura {buffed}");
+            Logger.Info($"Slot aura: {_slot.def.SlotName} shields {buffed} neighbors");
+        }
+    }
+
+    void ApplyRegen()
+    {
+        if (power <= 0) return;
+
+        int before = _slot.health;
+        _slot.health = Mathf.Min(_slot.def.maxHealth, _slot.health + power);
+        int healed = _slot.health - before;
+        if (healed <= 0) return;
+
+        _slot.PushHint($"+{healed} HP");
+        if (_slotView != null) _slotView.Refresh();
+        Logger.Info($"Slot regen: {_slot.def.SlotName} heals {healed}");
     }
 
     protected override void Unregister()
     {
-        if (_h != null)
-        {
-            EventBus.Unsubscribe(GameEventType.Custom, _h);
-            _h = null;
-        }
-
+        EventBus.Unsubscribe(GameEventType.TurnStart, _h);
+        EventBus.Unsubscribe(GameEventType.AttackDeclared, _h);
+        EventBus.Unsubscribe(GameEventType.Custom, _h);
+        _h = null;
         _slotView = null;
         _slot = null;
     }

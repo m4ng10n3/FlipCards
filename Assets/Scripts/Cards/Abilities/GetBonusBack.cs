@@ -6,55 +6,71 @@ public class GetBonusBack : AbilityBase
 
     protected override void Register()
     {
-        int originalFrontDamage = Source.def.frontDamage;
-        _h = (t, ctx) =>
-        {
-            if (t != GameEventType.Flip) return;
-            if (Source.side != Side.Fronte && ctx.source == Source)
-            {
-                Source.def.frontDamage = originalFrontDamage;
-                return;
-            }
-
-            UpdateFrontAttack(originalFrontDamage);
-        };
-
+        _h = OnEvent;
+        EventBus.Subscribe(GameEventType.Custom, _h);
         EventBus.Subscribe(GameEventType.Flip, _h);
     }
 
-    private void UpdateFrontAttack(int baseDamage)
+    void OnEvent(GameEventType t, EventContext ctx)
     {
+        if (Source == null || !Source.alive) return;
+
+        if (t == GameEventType.Custom && ctx.phase == "PrepareBattle")
+            ApplyRetroSupport();
+
+        if (t == GameEventType.Flip && ctx.source == Source && Source.side == Side.Retro)
+            TryGrantRetroAP();
+    }
+
+    void ApplyRetroSupport()
+    {
+        if (Source.side != Side.Retro) return;
+        if (Source.def.backDamageBonusSameFaction <= 0 && Source.def.backBlockBonusSameFaction <= 0) return;
+
         var gm = GameManager.Instance;
-        int damage = baseDamage;
+        if (gm == null) return;
 
-        for (int i = 0; i < gm.playerBoardRoot.childCount; i++)
+        int supported = 0;
+        foreach (var card in gm.GetOrderedPlayerCards())
         {
-            var cardView = gm.playerBoardRoot.GetChild(i).GetComponentInChildren<CardView>();
-            if (cardView == null) continue;
+            if (card == null || card == Source || !card.alive) continue;
+            if (card.def.faction != Source.def.faction) continue;
 
-            var ci = cardView.instance;
-            if (ci.side == Side.Retro && ci != Source && ci.def.faction == Source.def.faction)
-            {
-                damage += 1;
-            }
+            if (card.side == Side.Fronte && Source.def.backDamageBonusSameFaction > 0)
+                card.tempAtkBonus += Source.def.backDamageBonusSameFaction;
+
+            if (Source.def.backBlockBonusSameFaction > 0)
+                card.tempBlockBonus += Source.def.backBlockBonusSameFaction;
+
+            supported++;
         }
 
-        if (damage != baseDamage)
+        if (supported > 0)
         {
-            EventBus.Publish(GameEventType.Info, new EventContext
-            {
-                owner = Owner,
-                opponent = Opponent,
-                source = Source,
-                phase = "HINT: Back Bonus"
-            });
+            Source.PushHint($"+{Source.def.backDamageBonusSameFaction}/+{Source.def.backBlockBonusSameFaction} support");
+            Logger.Info($"Passive: {Source.def.cardName} supports {supported} ally cards");
         }
+    }
 
-        Source.def.frontDamage = damage;
+    void TryGrantRetroAP()
+    {
+        int bonusAP = Source.def.backBonusPAIfTwoRetroSameFaction;
+        if (bonusAP <= 0) return;
+
+        int retroCount = Owner.CountRetro(Source.def.faction);
+        if (retroCount < 2) return;
+
+        var gm = GameManager.Instance;
+        if (gm == null) return;
+
+        int gained = gm.GainPlayerAP(bonusAP, $"{Source.def.cardName} relay");
+        if (gained > 0)
+            Source.PushHint($"+{gained} AP");
     }
 
     protected override void Unregister()
     {
+        EventBus.Unsubscribe(GameEventType.Custom, _h);
         EventBus.Unsubscribe(GameEventType.Flip, _h);
         _h = null;
     }

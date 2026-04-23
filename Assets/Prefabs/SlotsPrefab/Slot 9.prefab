@@ -650,13 +650,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da8524a587795234ab3fc4fc1078c704, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SlotDefinition
-  SlotName: Candle
-  faction: 0
+  SlotName: Parasite
+  faction: 2
   maxHealth: 3
   atkDamage: 2
   blockFront: 1
-  blockRetro: 4
-  flipPattern: 
+  blockRetro: 3
+  flipPattern:
+  - 1
+  - 0
+  - 1
+  reelFrameIndex: 9
 --- !u!114 &6982401249790505906
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -669,4 +673,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69b556a09672ca44c88cf0f19ff9e2f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SlotStrikeOnAct
-  damage: 3
+  signature: 5
+  power: 2
+  threshold: 2

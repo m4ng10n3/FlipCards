@@ -8,6 +8,8 @@ using System.Collections.Generic;
 /// </summary>
 public class TutorialLogger : MonoBehaviour
 {
+    [SerializeField] private bool enableTutorialTips = false;
+
     // Flags "prima volta" per messaggi di introduzione
     private bool _shownFlipTip;
     private bool _shownChargeTip;
@@ -44,6 +46,8 @@ public class TutorialLogger : MonoBehaviour
 
     void OnGameEvent(GameEventType t, EventContext ctx)
     {
+        if (!enableTutorialTips) return;
+
         var gm = GameManager.Instance;
         if (gm == null) return;
 

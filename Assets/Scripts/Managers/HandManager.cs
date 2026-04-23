@@ -107,11 +107,11 @@ public class HandManager : MonoBehaviour
             deckInitialized = true;
         }
 
-        if (deck.Count == 0 || handCards.Count >= maxHandSize || gm.player.actionPoints <= 0)
+        if (deck.Count == 0 || handCards.Count >= maxHandSize)
             return;
 
-        gm.player.actionPoints -= 1;
-        gm.UpdateHUD();
+        if (!gm.TrySpendPlayerAP(gm.drawCardCost, "Draw"))
+            return;
 
         int deckIndex = Random.Range(0, deck.Count);
         GameObject cardPrefabToSpawn = deck[deckIndex];
@@ -129,6 +129,7 @@ public class HandManager : MonoBehaviour
         go.transform.rotation = spawnPoint.rotation;
 
         RegisterHandCard(cv);
+        Logger.Info($"Draw: {cv.GetComponentInParent<CardDefinition>()?.cardName ?? cv.gameObject.name}");
         UpdateCardsPosition();
     }
 

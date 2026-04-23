@@ -756,16 +756,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ce414175bdb9c346b3737d0aac2f71f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CardDefinitionInline
-  cardName: Kevin
-  faction: 2
+  cardName: Vanguard
+  faction: 0
+  cardClass: 0
   zone: 2
-  maxHealth: 10
-  frontDamage: 2
-  frontBlockValue: 0
+  maxHealth: 5
+  frontDamage: 3
+  frontBlockValue: 1
+  backBlockValue: 1
   backDamageBonusSameFaction: 0
   backBlockBonusSameFaction: 0
   backBonusPAIfTwoRetroSameFaction: 0
-  endTurnFlipChance: 0.3
+  endTurnFlipChance: 0.55
   cardView: {fileID: 8884977622982582929}
 --- !u!114 &8727470506572292250
 MonoBehaviour:
@@ -779,7 +781,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: af1d69bfcc03be848b2c19e4816a556c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OnFlipDealDamage
-  damage: 1
+  damage: 2
   onlyWhenToFront: 1
 --- !u!114 &4317153179959056156
 MonoBehaviour:

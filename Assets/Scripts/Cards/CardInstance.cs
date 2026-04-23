@@ -50,6 +50,19 @@ public class CardInstance
     public override string ToString() => $"#{id} {def.cardName} ({def.faction}) {side} HP:{health}";
 
     // ====== UTIL ======
+    public void ClearCombatBonuses()
+    {
+        incomingDamageOverride = null;
+        tempBlockBonus = 0;
+        tempAtkBonus = 0;
+    }
+
+    public int GainCharge(int amount)
+    {
+        int before = flipCharge;
+        flipCharge = Mathf.Clamp(flipCharge + Mathf.Max(0, amount), 0, MaxFlipCharge);
+        return flipCharge - before;
+    }
 
     // ====== FLUSSO EVENT-DRIVEN ======
 
@@ -57,6 +70,15 @@ public class CardInstance
     public void Attack(PlayerState owner, PlayerState defender, object target)
     {
         if (!alive || target == null) return;
+
+        EventBus.Publish(GameEventType.Custom, new EventContext
+        {
+            owner = owner,
+            opponent = defender,
+            source = this,
+            target = target,
+            phase = "PreCardAttack"
+        });
 
         int damage = def.frontDamage + flipCharge + tempAtkBonus;
         flipCharge   = 0;
@@ -133,7 +155,7 @@ public class CardInstance
     public void DealDamageToPlayer(PlayerState owner, PlayerState opponent, int amount, string phase = null)
     {
         int final = Mathf.Max(0, amount);
-        opponent.hp -= final;
+        opponent.TakeDamage(final);
 
         GameManager.Instance?.UpdateHUD();
 

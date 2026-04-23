@@ -1,36 +1,47 @@
 using UnityEngine;
+
 public class OnFlipDealDamage : AbilityBase
 {
-    [Min(1)] public int damage = 1;
+    [Min(0)] public int damage = 1;
     public bool onlyWhenToFront = true;
+
     private EventBus.Handler _h;
+
     protected override void Register()
     {
-        _h = (t, ctx) =>
-        {
-            if (t != GameEventType.Flip || ctx.source != Source) return;
-            if (onlyWhenToFront && Source.side != Side.Fronte) return;
-            EventBus.Publish(GameEventType.Info, new EventContext { owner = Owner, opponent = Opponent, source = Source, phase = "HINT: Flip Damage" });
-            DoFlipAttack();
-        };
+        _h = OnEvent;
         EventBus.Subscribe(GameEventType.Flip, _h);
     }
-    private void DoFlipAttack()
+
+    void OnEvent(GameEventType t, EventContext ctx)
     {
+        if (Source == null || !Source.alive) return;
+        if (ctx.source != Source || damage <= 0) return;
+        if (onlyWhenToFront && Source.side != Side.Fronte) return;
+
         var gm = GameManager.Instance;
-        var target = gm.GetOpponentObjInstance(Source);
-        if (target == null)
+        if (gm == null) return;
+
+        int lane = gm.GetLaneIndexFor(Source);
+        if (lane < 0) return;
+
+        var slot = gm.GetEnemySlotAtLane(lane);
+        if (slot != null)
         {
-            Opponent.hp -= damage;
+            slot.health = Mathf.Max(0, slot.health - damage);
+            slot.PushHint($"Flip -{damage}");
+            Logger.Info($"Flip strike: {Source.def.cardName} hits {slot.def.SlotName} for {damage}");
         }
         else
         {
-            int originalFrontDamage = Source.def.frontDamage;
-            Source.def.frontDamage = damage;
-            Source.Attack(Owner, Opponent, target);
-            Source.def.frontDamage = originalFrontDamage;
+            Opponent.TakeDamage(damage);
+            gm.UpdateHUD();
+            Logger.Info($"Flip strike: {Source.def.cardName} hits boss for {damage}");
         }
+
+        Source.PushHint($"Flip {damage}");
     }
+
     protected override void Unregister()
     {
         EventBus.Unsubscribe(GameEventType.Flip, _h);

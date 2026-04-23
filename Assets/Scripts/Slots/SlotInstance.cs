@@ -57,6 +57,13 @@ public class SlotInstance
         _patternIndex++;
     }
 
+    public void ClearCombatBonuses()
+    {
+        incomingDamageOverride = null;
+        tempBlockBonus = 0;
+        tempAtkBonus = 0;
+    }
+
     /// <summary>
     /// Block calcolato in base al lato corrente + eventuali bonus temporanei.
     /// </summary>

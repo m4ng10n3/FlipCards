@@ -25,7 +25,7 @@ public static class Diagnostics
         if (so != null && !gm.player.board.Contains(so))
         {
             gm.AppendLog("[FIX] SelectedOwned fuori dal board -> clear");
-            SelectionManager.Instance.SelectOwned(null);
+            SelectionManager.Instance.ClearAll();
         }
 
         // 4) AP negativi / out-of-range

@@ -1,45 +1,42 @@
 using UnityEngine;
 
-/// <summary>
-/// Assalto — abilità FRONTE:
-/// Se una carta adiacente sulla board ha la stessa classe (Assalto),
-/// questa carta ottiene +bonusDamage ATK temporaneo prima di attaccare.
-/// </summary>
 public class ClassSynergyBoost : AbilityBase
 {
-    [Min(1)] public int bonusDamage = 2;
+    [Min(1)] public int bonusDamage = 1;
 
     protected override void Register()
     {
-        EventBus.Subscribe(GameEventType.AttackDeclared, OnEvent);
+        EventBus.Subscribe(GameEventType.Custom, OnEvent);
     }
 
     protected override void Unregister()
     {
-        EventBus.Unsubscribe(GameEventType.AttackDeclared, OnEvent);
+        EventBus.Unsubscribe(GameEventType.Custom, OnEvent);
     }
 
     void OnEvent(GameEventType t, EventContext ctx)
     {
-        if (ctx.source != Source || Source.side != Side.Fronte) return;
+        if (t != GameEventType.Custom || ctx.phase != "PrepareBattle") return;
+        if (Source == null || !Source.alive || Source.side != Side.Fronte) return;
 
         var gm = GameManager.Instance;
         if (gm == null) return;
 
-        var board = Owner.board;
-        int myIdx = board.IndexOf(Source);
-        if (myIdx < 0) return;
+        int lane = gm.GetLaneIndexFor(Source);
+        if (lane < 0) return;
 
-        bool adjacentSameClass = false;
-        if (myIdx > 0 && board[myIdx - 1]?.alive == true && board[myIdx - 1].def.cardClass == Source.def.cardClass)
-            adjacentSameClass = true;
-        if (myIdx < board.Count - 1 && board[myIdx + 1]?.alive == true && board[myIdx + 1].def.cardClass == Source.def.cardClass)
-            adjacentSameClass = true;
+        bool adjacentSameClass =
+            MatchesClass(gm.GetPlayerCardAtLane(lane - 1)) ||
+            MatchesClass(gm.GetPlayerCardAtLane(lane + 1));
 
-        if (adjacentSameClass)
-        {
-            Source.tempAtkBonus += bonusDamage;
-            Source.PushHint($"+{bonusDamage} sinergia");
-        }
+        if (!adjacentSameClass) return;
+
+        Source.tempAtkBonus += bonusDamage;
+        Source.PushHint($"+{bonusDamage} class");
+    }
+
+    bool MatchesClass(CardInstance other)
+    {
+        return other != null && other.alive && other.def.cardClass == Source.def.cardClass;
     }
 }

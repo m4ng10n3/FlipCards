@@ -54,6 +54,7 @@ public static class EventBus
 {
     public delegate void Handler(GameEventType type, EventContext ctx);
     static readonly Dictionary<GameEventType, List<Handler>> _subs = new();
+    public static bool VerboseLogging = false;
 
 #if UNITY_EDITOR
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -75,7 +76,8 @@ public static class EventBus
 
     public static void Publish(GameEventType t, EventContext ctx)
     {
-        Logger.Info(Format(t, ctx));   // logging centralizzato
+        if (VerboseLogging)
+            Logger.Info(Format(t, ctx));
 
         if (_subs.TryGetValue(t, out var list))
         {

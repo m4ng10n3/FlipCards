@@ -669,16 +669,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ce414175bdb9c346b3737d0aac2f71f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CardDefinitionInline
-  cardName: Skull
+  cardName: Reaper
   faction: 2
+  cardClass: 0
   zone: 2
-  maxHealth: 10
-  frontDamage: 1
+  maxHealth: 4
+  frontDamage: 3
   frontBlockValue: 0
+  backBlockValue: 1
   backDamageBonusSameFaction: 0
   backBlockBonusSameFaction: 0
   backBonusPAIfTwoRetroSameFaction: 0
-  endTurnFlipChance: 0.3
+  endTurnFlipChance: 0.4
   cardView: {fileID: 0}
 --- !u!114 &4317153179959056156
 MonoBehaviour:
@@ -704,7 +706,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7bbdedf61c6a13f41a94f865155fd986, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OnEndTurnDealDamage
-  damage: 1
+  damage: 0
   onlyWhenToFront: 1
 --- !u!114 &7732402466754141190
 MonoBehaviour:

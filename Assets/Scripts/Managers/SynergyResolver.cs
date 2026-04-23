@@ -1,118 +1,80 @@
-using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// Rileva combinazioni di classi sulla board player e applica bonus dopo la risoluzione lane.
-///
-/// SINERGIE ATTIVE:
-///  Devastazione  — 3x Assalto in Fronte       → +4 danni diretti al boss
-///  Doppio Colpo  — 2x Assalto + 1x Tecnico    → ri-attacca la lane con lo slot più debole
-///  Nexus         — 3x Mistico (qualsiasi lato) → 15 danni diretti al boss
-///  Fortezza      — 2x Guardia (qualsiasi)      → blocca il prossimo attacco slot (tempBlockBonus +99 per 1 turno)
-///  Benedizione   — 1x Guardia + 1x Mistico adj → cura player 3 HP
-///  Ira           — 2x Assalto adj (entrambi Fronte) → +2 ATK a ciascuno (tempAtkBonus)
-/// </summary>
 public static class SynergyResolver
 {
-    public static void Resolve(List<CardInstance> board, PlayerState player, PlayerState ai)
+    public static void Resolve(GameManager gm, PlayerState player, PlayerState ai)
     {
-        if (board == null || board.Count == 0) return;
+        if (gm == null) return;
 
-        // Snapshot delle carte vive
-        var alive = new List<CardInstance>();
-        foreach (var ci in board)
-            if (ci != null && ci.alive) alive.Add(ci);
+        ApplyBladePairs(gm);
+        ApplyGuardLinks(gm);
+        ApplyMysticPulse(gm, player);
+    }
 
-        if (alive.Count == 0) return;
-
-        int assalto = 0, tecnico = 0, mistico = 0, guardia = 0;
-        int assaltoFront = 0;
-
-        foreach (var ci in alive)
+    static void ApplyBladePairs(GameManager gm)
+    {
+        for (int lane = 0; lane < gm.playerBoardRoot.childCount - 1; lane++)
         {
-            switch (ci.def.cardClass)
-            {
-                case CardClass.Assalto: assalto++; if (ci.side == Side.Fronte) assaltoFront++; break;
-                case CardClass.Tecnico: tecnico++; break;
-                case CardClass.Mistico: mistico++; break;
-                case CardClass.Guardia: guardia++; break;
-            }
+            var left = gm.GetPlayerCardAtLane(lane);
+            var right = gm.GetPlayerCardAtLane(lane + 1);
+            if (left == null || right == null) continue;
+            if (left.side != Side.Fronte || right.side != Side.Fronte) continue;
+            if (left.def.cardClass != CardClass.Assalto || right.def.cardClass != CardClass.Assalto) continue;
+
+            left.tempAtkBonus += 1;
+            right.tempAtkBonus += 1;
+            left.PushHint("Blade Pair +1");
+            right.PushHint("Blade Pair +1");
+            Logger.Info($"Combo: Blade Pair on lanes {lane + 1}-{lane + 2}");
         }
+    }
 
-        // ── DEVASTAZIONE: 3 Assalto tutti in Fronte ──────────────────────────
-        if (assalto >= 3 && assaltoFront >= 3)
+    static void ApplyGuardLinks(GameManager gm)
+    {
+        for (int lane = 0; lane < gm.playerBoardRoot.childCount - 1; lane++)
         {
-            ai.hp -= 4;
-            Logger.Info("✨ SINERGIA — Devastazione: 3 Assalto in Fronte! +4 danni al boss.");
-            EventBus.Publish(GameEventType.Info, new EventContext { phase = "SYNERGY:Devastazione" });
+            var left = gm.GetPlayerCardAtLane(lane);
+            var right = gm.GetPlayerCardAtLane(lane + 1);
+            if (left == null || right == null) continue;
+
+            bool hasGuard = left.def.cardClass == CardClass.Guardia || right.def.cardClass == CardClass.Guardia;
+            bool hasRetro = left.side == Side.Retro || right.side == Side.Retro;
+            if (!hasGuard || !hasRetro) continue;
+
+            left.tempBlockBonus += 1;
+            right.tempBlockBonus += 1;
+            left.PushHint("Guard Link +1");
+            right.PushHint("Guard Link +1");
+            Logger.Info($"Combo: Guard Link on lanes {lane + 1}-{lane + 2}");
         }
+    }
 
-        // ── NEXUS: 3 Mistici ─────────────────────────────────────────────────
-        if (mistico >= 3)
-        {
-            ai.hp -= 15;
-            Logger.Info("✨ SINERGIA — Nexus: 3 Mistici! 15 danni diretti al boss.");
-            EventBus.Publish(GameEventType.Info, new EventContext { phase = "SYNERGY:Nexus" });
-        }
+    static void ApplyMysticPulse(GameManager gm, PlayerState player)
+    {
+        bool triggered = false;
 
-        // ── DOPPIO COLPO: 2 Assalto + 1 Tecnico ─────────────────────────────
-        if (assalto >= 2 && tecnico >= 1)
+        for (int lane = 0; lane < gm.playerBoardRoot.childCount - 1; lane++)
         {
-            // Trova la lane Assalto con Fronte più forte e ri-applica metà danno
-            int bonus = 0;
-            foreach (var ci in alive)
-                if (ci.def.cardClass == CardClass.Assalto && ci.side == Side.Fronte)
-                    bonus = Mathf.Max(bonus, ci.def.frontDamage + ci.flipCharge);
-            if (bonus > 0)
-            {
-                int half = Mathf.Max(1, bonus / 2);
-                ai.hp -= half;
-                Logger.Info($"✨ SINERGIA — Doppio Colpo: +{half} danni bonus al boss.");
-                EventBus.Publish(GameEventType.Info, new EventContext { phase = "SYNERGY:DoppioColpo" });
-            }
-        }
+            var left = gm.GetPlayerCardAtLane(lane);
+            var right = gm.GetPlayerCardAtLane(lane + 1);
+            if (left == null || right == null) continue;
 
-        // ── IRA: 2 Assalto adiacenti entrambi in Fronte ──────────────────────
-        for (int i = 0; i < alive.Count - 1; i++)
-        {
-            var a = alive[i];
-            var b = alive[i + 1];
-            if (a.def.cardClass == CardClass.Assalto && b.def.cardClass == CardClass.Assalto
-                && a.side == Side.Fronte && b.side == Side.Fronte)
-            {
-                a.tempAtkBonus += 2;
-                b.tempAtkBonus += 2;
-                Logger.Info($"✨ SINERGIA — Ira: {a.def.cardName} & {b.def.cardName} +2 ATK questo turno.");
-                EventBus.Publish(GameEventType.Info, new EventContext { phase = "SYNERGY:Ira" });
-                break; // applica una volta sola
-            }
-        }
+            CardInstance mystic = left.def.cardClass == CardClass.Mistico ? left :
+                                  right.def.cardClass == CardClass.Mistico ? right : null;
+            CardInstance retro = left.side == Side.Retro ? left :
+                                 right.side == Side.Retro ? right : null;
 
-        // ── FORTEZZA: 2 Guardie ───────────────────────────────────────────────
-        if (guardia >= 2)
-        {
-            // Imposta un block massiccio su tutte le Guardie per il prossimo attacco slot
-            foreach (var ci in alive)
-                if (ci.def.cardClass == CardClass.Guardia)
-                    ci.tempBlockBonus += 5;
-            Logger.Info("✨ SINERGIA — Fortezza: le Guardie assorbono il prossimo attacco.");
-            EventBus.Publish(GameEventType.Info, new EventContext { phase = "SYNERGY:Fortezza" });
-        }
+            if (mystic == null || retro == null) continue;
+            if (mystic == retro) continue;
 
-        // ── BENEDIZIONE: Guardia + Mistico adiacenti ─────────────────────────
-        for (int i = 0; i < alive.Count - 1; i++)
-        {
-            var a = alive[i];
-            var b = alive[i + 1];
-            bool adj = (a.def.cardClass == CardClass.Guardia && b.def.cardClass == CardClass.Mistico)
-                    || (a.def.cardClass == CardClass.Mistico && b.def.cardClass == CardClass.Guardia);
-            if (adj)
-            {
-                player.hp += 3;
-                Logger.Info($"✨ SINERGIA — Benedizione: Guardia+Mistico adiacenti, +3 HP player.");
-                EventBus.Publish(GameEventType.Info, new EventContext { phase = "SYNERGY:Benedizione" });
-                break;
-            }
+            int gained = retro.GainCharge(1);
+            int healed = triggered ? 0 : player.Heal(1);
+
+            if (gained > 0) retro.PushHint($"+{gained} charge");
+            if (healed > 0) mystic.PushHint($"+{healed} HP");
+
+            Logger.Info($"Combo: Mystic Pulse on lanes {lane + 1}-{lane + 2}");
+            triggered = true;
         }
     }
 }

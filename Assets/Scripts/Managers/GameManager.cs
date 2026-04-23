@@ -10,53 +10,90 @@ public class GameManager : MonoBehaviour
     [Serializable] public class PrefabCardBinding { public GameObject prefab; [Min(1)] public int count = 1; }
     [Serializable] public class PrefabSlotBinding { public GameObject prefab; [Min(1)] public int count = 1; }
 
-    [Header("Roots")] public Transform playerBoardRoot; public Transform aiBoardRoot;
-    [Header("UI")] public Button btnAttack; public Button btnEndTurn; 
-    [Header("LOG")] public Text logText; static readonly StringBuilder _logBuf = new StringBuilder(4096);
+    [Header("Roots")]
+    public Transform playerBoardRoot;
+    public Transform aiBoardRoot;
+
+    [Header("UI")]
+    public Button btnAttack;
+    public Button btnEndTurn;
+    public Text logText;
+
+    static readonly StringBuilder _logBuf = new StringBuilder(4096);
 
     [Header("HUD")]
     public Text hpText;
     public Text apText;
     public Text EnemyHptxt;
 
+    [Header("Match Parameters")]
+    public int turns = 12;
+    public int playerBaseAP = 4;
+    public int seed = 12345;
 
-    [Header("Match parameters")] public int turns = 10; public int playerBaseAP = 3; public int seed = 12345;
-    [Header("Start constraints")]
+    [Header("Start Constraints")]
     [Min(1)] public int CardsPerSide = 3;
     [Min(1)] public int StartingHandSize = 3;
+
+    [Header("Balance")]
+    [Min(1)] public int playerMaxHp = 20;
+    [Min(1)] public int enemyMaxHp = 24;
+    [Min(0)] public int drawCardCost = 1;
+    [Min(0)] public int playCardCost = 1;
+    [Min(0)] public int flipCardCost = 1;
+    [Min(0)] public int swapCardCost = 1;
+    [Min(0)] public int maxBonusAP = 1;
+    [Min(0)] public int bossDamageOnSlotBreak = 1;
+    [Range(0f, 1f)] public float chaosFlipChance = 0.45f;
+    [Range(0f, 1f)] public float chaosSwapChance = 0.3f;
+    [Min(0)] public int maxChaosFlipsPerTurn = 1;
 
     [Header("Refs")]
     [SerializeField] private HandManager handManager;
     public HandManager HandManager => handManager;
     [SerializeField] private SlotBatchManager slotBatchManager;
 
-    [Header("Empty Spot")] public GameObject EmptySpot;
-    [Header("Empty Slot")] public GameObject EmptySlot;
+    [Header("Empty Spot")]
+    public GameObject EmptySpot;
 
-    [Header("Prefab bindings")] public List<PrefabCardBinding> playerCards = new List<PrefabCardBinding>();
-    [Header("Enemy Slots (bindings only)")] public List<PrefabSlotBinding> enemySlots = new List<PrefabSlotBinding>();
+    [Header("Empty Slot")]
+    public GameObject EmptySlot;
 
-    bool awaitingEndTurn = false;
-    static GameManager _instance; public static GameManager Instance => _instance;
+    [Header("Prefab Bindings")]
+    public List<PrefabCardBinding> playerCards = new List<PrefabCardBinding>();
 
-    System.Random rng; public PlayerState player; public PlayerState ai;
-    int currentTurn = 1; bool playerPhase = true; bool matchEnded = false;
+    [Header("Enemy Slots")]
+    public List<PrefabSlotBinding> enemySlots = new List<PrefabSlotBinding>();
+
+    bool awaitingEndTurn;
+    static GameManager _instance;
+    public static GameManager Instance => _instance;
+
+    System.Random rng;
+    public PlayerState player;
+    public PlayerState ai;
+
+    int currentTurn = 1;
+    bool playerPhase = true;
+    bool matchEnded;
 
     readonly Dictionary<CardInstance, CardView> viewByInstance = new Dictionary<CardInstance, CardView>();
     readonly Dictionary<CardInstance, List<AbilityBase>> abilitiesByInstance = new Dictionary<CardInstance, List<AbilityBase>>();
-
     readonly Dictionary<SlotInstance, SlotView> slotViewByInstance = new Dictionary<SlotInstance, SlotView>();
     readonly List<SlotView> enemySlotViews = new List<SlotView>();
 
     Transform playerBoardRootClone;
     public Transform PlayerBoardRootClone => playerBoardRootClone;
 
+    public int MaxPlayerAP => playerBaseAP + maxBonusAP;
+
     void Awake()
     {
         Logger.SetSink(AppendLog);
-        EventBus.Publish(GameEventType.Info, new EventContext { phase = "GameManager ready" });
         _instance = this;
-        if (handManager == null) throw new InvalidOperationException("HandManager missing");
+
+        if (handManager == null)
+            throw new InvalidOperationException("HandManager missing");
 
         btnAttack.onClick.AddListener(OnAttack);
         btnEndTurn.onClick.AddListener(OnEndTurn);
@@ -65,12 +102,12 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         rng = new System.Random(seed);
-        player = new PlayerState("Player", playerBaseAP);
-        ai = new PlayerState("AI", 0);
+        player = new PlayerState("Player", playerMaxHp, playerBaseAP);
+        ai = new PlayerState("Boss", enemyMaxHp, 0);
 
         ClearChildrenUnder(playerBoardRoot);
-
         SpawnInitialEmptySpots();
+
         var cloneGO = Instantiate(playerBoardRoot.gameObject, playerBoardRoot.parent);
         cloneGO.name = $"{playerBoardRoot.name}_Clone";
         cloneGO.transform.SetSiblingIndex(playerBoardRoot.GetSiblingIndex());
@@ -80,14 +117,15 @@ public class GameManager : MonoBehaviour
         {
             var child = playerBoardRootClone.GetChild(i);
             if (child.gameObject.name != EmptySpot.name) continue;
-            child.GetComponent<Image>().enabled = false;
+            var image = child.GetComponent<Image>();
+            if (image != null) image.enabled = false;
         }
 
         SpawnEnemySlots();
-
         SpawnStartingHand();
 
-        EventBus.Publish(GameEventType.Info, new EventContext { phase = "=== MATCH START ===" });
+        ClearLog();
+        Logger.Info($"Match start | Player {player.hp}/{player.maxHp} HP | Boss {ai.hp}/{ai.maxHp} HP | AP {playerBaseAP}");
 
         UpdateAllViews();
         UpdateHUD();
@@ -96,11 +134,12 @@ public class GameManager : MonoBehaviour
 
     void SpawnStartingHand()
     {
-        player.actionPoints = StartingHandSize;
-        for (int i = 0; i < StartingHandSize; i++) handManager.DrawCard();
+        int savedAP = player.actionPoints;
+        player.actionPoints = Mathf.Max(savedAP, StartingHandSize * Mathf.Max(1, drawCardCost));
+        for (int i = 0; i < StartingHandSize; i++)
+            handManager.DrawCard();
         player.actionPoints = playerBaseAP;
     }
-
 
     void SpawnInitialEmptySpots()
     {
@@ -112,10 +151,13 @@ public class GameManager : MonoBehaviour
             spotGO.transform.SetSiblingIndex(i);
 
             var outline = spotGO.GetComponent<Outline>();
-            outline.enabled = false;
-            outline.effectDistance = new Vector2(5f, 5f);
-            outline.useGraphicAlpha = false;
-            outline.effectColor = Color.white;
+            if (outline != null)
+            {
+                outline.enabled = false;
+                outline.effectDistance = new Vector2(5f, 5f);
+                outline.useGraphicAlpha = false;
+                outline.effectColor = Color.white;
+            }
 
             var btn = spotGO.GetComponent<Button>();
             var t = spotGO.transform;
@@ -124,73 +166,109 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    List<GameObject> BuildEnemySlotPool()
+    {
+        var flat = new List<GameObject>();
+
+        if (slotBatchManager != null && slotBatchManager.batch != null && slotBatchManager.batch.Count > 0)
+        {
+            foreach (var binding in slotBatchManager.batch)
+            {
+                if (binding?.prefab == null) continue;
+                for (int i = 0; i < Mathf.Max(1, binding.count); i++)
+                    flat.Add(binding.prefab);
+            }
+        }
+
+        if (flat.Count > 0) return flat;
+
+        foreach (var binding in enemySlots)
+        {
+            if (binding?.prefab == null) continue;
+            for (int i = 0; i < Mathf.Max(1, binding.count); i++)
+                flat.Add(binding.prefab);
+        }
+
+        return flat;
+    }
+
     void AddSlotFromTemplate(PlayerState owner, SlotDefinition.Spec def, GameObject prefab, Transform root, List<SlotView> outViews)
     {
         var si = new SlotInstance(def);
-        var go = Instantiate(prefab, root); go.name = prefab.name; go.SetActive(true);
+        var go = Instantiate(prefab, root);
+        go.name = prefab.name;
+        go.SetActive(true);
 
         var view = go.GetComponent<SlotView>();
         view.Init(this, owner, si);
-        slotViewByInstance[si] = view; outViews.Add(view);
+        slotViewByInstance[si] = view;
+        outViews.Add(view);
 
-        foreach (var ab in go.GetComponents<AbilityBase>()) ab.Bind(null, ai, player);
+        foreach (var ab in go.GetComponents<AbilityBase>())
+            ab.Bind(null, owner, player);
     }
 
     void SpawnEnemySlots()
     {
         enemySlotViews.Clear();
         var toKill = new List<GameObject>();
-        foreach (Transform t in aiBoardRoot) toKill.Add(t.gameObject);
-        for (int i = 0; i < toKill.Count; i++) Destroy(toKill[i]);
+        foreach (Transform t in aiBoardRoot)
+            toKill.Add(t.gameObject);
+        for (int i = 0; i < toKill.Count; i++)
+            Destroy(toKill[i]);
         slotViewByInstance.Clear();
 
-        var flat = new List<GameObject>();
-        for (int i = 0; i < enemySlots.Count; i++)
-            for (int k = 0; k < enemySlots[i].count; k++) flat.Add(enemySlots[i].prefab);
+        var flat = BuildEnemySlotPool();
+        if (flat.Count == 0) return;
 
-        for (int i = flat.Count - 1; i > 0; i--) { int j = rng.Next(i + 1); (flat[i], flat[j]) = (flat[j], flat[i]); }
-
-        int lanes = playerBoardRoot.childCount;
-        for (int i = 0; i < lanes; i++)
+        for (int i = flat.Count - 1; i > 0; i--)
         {
-            var prefab = flat[i % flat.Count];
-            var sd = prefab.GetComponent<SlotDefinition>();
-            var spec = sd.BuildSpec();
-            AddSlotFromTemplate(ai, spec, prefab, aiBoardRoot, enemySlotViews);
+            int j = rng.Next(i + 1);
+            (flat[i], flat[j]) = (flat[j], flat[i]);
         }
 
-        for (int i = 0; i < aiBoardRoot.childCount; i++) aiBoardRoot.GetChild(i).SetSiblingIndex(i);
+        int lanes = playerBoardRoot.childCount;
+        for (int lane = 0; lane < lanes; lane++)
+        {
+            var prefab = flat[lane % flat.Count];
+            var sd = prefab.GetComponent<SlotDefinition>();
+            if (sd == null) continue;
+            AddSlotFromTemplate(ai, sd.BuildSpec(), prefab, aiBoardRoot, enemySlotViews);
+        }
+
+        for (int i = 0; i < aiBoardRoot.childCount; i++)
+            aiBoardRoot.GetChild(i).SetSiblingIndex(i);
     }
+
     public void UpdateAllViews()
     {
         var viewsSnapshot = viewByInstance.Values.ToList();
-        foreach (var v in viewsSnapshot)
+        foreach (var view in viewsSnapshot)
         {
-            if (v.instance != null && !v.instance.alive)
-            {
-                RemoveCard(v.owner, v.instance);
-            }
+            if (view.instance != null && !view.instance.alive)
+                RemoveCard(view.owner, view.instance);
         }
 
-        foreach (var v in viewByInstance.Values)
-            v.Refresh();
+        foreach (var view in viewByInstance.Values)
+            view.Refresh();
 
         for (int i = enemySlotViews.Count - 1; i >= 0; i--)
         {
-            var sv = enemySlotViews[i];
-            if (!sv.instance.alive)
+            var slotView = enemySlotViews[i];
+            if (!slotView.instance.alive)
             {
-                RemoveSlotView(sv);
+                RemoveSlotView(slotView);
                 continue;
             }
-            sv.Refresh();
+            slotView.Refresh();
         }
     }
 
-public void UpdateHUD()
+    public void UpdateHUD()
     {
         if (matchEnded) return;
-        var enable = playerPhase && !awaitingEndTurn;
+
+        bool enable = playerPhase && !awaitingEndTurn;
         btnAttack.interactable = enable;
         handManager.btnDraw.interactable = enable;
 
@@ -198,140 +276,225 @@ public void UpdateHUD()
         apText.text = $"{player.actionPoints}/{playerBaseAP}";
         EnemyHptxt.text = $"{ai.hp}";
     }
-    
+
     void StartTurn(PlayerState owner, PlayerState opponent, bool isPlayerPhase)
     {
         playerPhase = isPlayerPhase;
         awaitingEndTurn = false;
-        owner.actionPoints = playerBaseAP;
+        owner.ResetAP(playerBaseAP);
+        ResetCombatModifiers();
+
         EventBus.Publish(GameEventType.TurnStart, new EventContext
         {
-            owner    = owner,
+            owner = owner,
             opponent = opponent,
-            phase    = $"TURN {currentTurn}"
+            phase = $"TURN {currentTurn}"
         });
+
+        Logger.Info($"Turn {currentTurn} start | HP {player.hp}-{ai.hp} | AP {owner.actionPoints}/{playerBaseAP}");
+
         UpdateAllViews();
         UpdateHUD();
     }
 
-    // ═══════════════════════════════════════════════════════════
-    //  RISOLUZIONE LANE (sostituisce il vecchio OnAttack)
-    // ═══════════════════════════════════════════════════════════
+    public bool TrySpendPlayerAP(int amount, string reason = null)
+    {
+        int cost = Mathf.Max(0, amount);
+        if (cost <= 0) return true;
+
+        if (player.actionPoints < cost)
+        {
+            if (!string.IsNullOrEmpty(reason))
+                Logger.Info($"{reason}: not enough AP");
+            UpdateHUD();
+            return false;
+        }
+
+        player.actionPoints -= cost;
+        UpdateHUD();
+        return true;
+    }
+
+    public int GainPlayerAP(int amount, string reason = null)
+    {
+        if (amount <= 0) return 0;
+
+        int before = player.actionPoints;
+        player.actionPoints = Mathf.Min(player.actionPoints + amount, MaxPlayerAP);
+        int gained = player.actionPoints - before;
+
+        if (gained > 0 && !string.IsNullOrEmpty(reason))
+            Logger.Info($"{reason}: +{gained} AP");
+
+        UpdateHUD();
+        return gained;
+    }
+
+    public void ResetCombatModifiers()
+    {
+        if (player != null)
+        {
+            foreach (var card in player.board)
+                card?.ClearCombatBonuses();
+        }
+
+        for (int i = 0; i < enemySlotViews.Count; i++)
+            enemySlotViews[i]?.instance?.ClearCombatBonuses();
+    }
+
+    public CardView GetPlayerCardViewAtLane(int lane)
+    {
+        if (lane < 0 || lane >= playerBoardRoot.childCount) return null;
+        return playerBoardRoot.GetChild(lane).GetComponentInChildren<CardView>(false);
+    }
+
+    public SlotView GetEnemySlotViewAtLane(int lane)
+    {
+        if (lane < 0 || lane >= aiBoardRoot.childCount) return null;
+        return aiBoardRoot.GetChild(lane).GetComponentInChildren<SlotView>(false);
+    }
+
+    public CardInstance GetPlayerCardAtLane(int lane)
+    {
+        var view = GetPlayerCardViewAtLane(lane);
+        return view?.instance != null && view.instance.alive ? view.instance : null;
+    }
+
+    public SlotInstance GetEnemySlotAtLane(int lane)
+    {
+        var view = GetEnemySlotViewAtLane(lane);
+        return view?.instance != null && view.instance.alive ? view.instance : null;
+    }
+
+    public List<CardInstance> GetOrderedPlayerCards()
+    {
+        var ordered = new List<CardInstance>();
+        for (int lane = 0; lane < playerBoardRoot.childCount; lane++)
+        {
+            var card = GetPlayerCardAtLane(lane);
+            if (card != null) ordered.Add(card);
+        }
+        return ordered;
+    }
+
+    public void DealBossPressureFromBreak(CardInstance source, int amount, int lane)
+    {
+        int damage = Mathf.Max(0, amount);
+        if (source == null || damage <= 0) return;
+
+        ai.TakeDamage(damage);
+        source.PushHint($"Boss -{damage}");
+        Logger.Info($"Lane {lane + 1}: {source.def.cardName} breaks through for {damage} boss damage");
+        UpdateHUD();
+    }
 
     void OnAttack()
     {
-        if (awaitingEndTurn || matchEnded || !playerPhase) { UpdateHUD(); return; }
-
-        int lanes = Mathf.Max(playerBoardRoot.childCount, aiBoardRoot.childCount);
-
-        for (int lane = 0; lane < lanes; lane++)
+        if (awaitingEndTurn || matchEnded || !playerPhase)
         {
-            CardInstance card = null;
-            SlotInstance slot = null;
-
-            if (lane < playerBoardRoot.childCount)
-            {
-                var cv = playerBoardRoot.GetChild(lane).GetComponentInChildren<CardView>(false);
-                if (cv?.instance != null && cv.instance.alive) card = cv.instance;
-            }
-
-            if (lane < aiBoardRoot.childCount)
-            {
-                var sv = aiBoardRoot.GetChild(lane).GetComponentInChildren<SlotView>(false);
-                if (sv?.instance != null && sv.instance.alive) slot = sv.instance;
-            }
-
-            LaneResolver.Resolve(lane, card, slot, player, ai);
+            UpdateHUD();
+            return;
         }
 
-        // Sinergie — controlla combo dopo la risoluzione di tutte le lane
-        SynergyResolver.Resolve(player.board, player, ai);
+        ResetCombatModifiers();
+        EventBus.Publish(GameEventType.Custom, new EventContext
+        {
+            owner = player,
+            opponent = ai,
+            phase = "PrepareBattle"
+        });
+
+        SynergyResolver.Resolve(this, player, ai);
+
+        int lanes = Mathf.Max(playerBoardRoot.childCount, aiBoardRoot.childCount);
+        for (int lane = 0; lane < lanes; lane++)
+            LaneResolver.Resolve(lane, GetPlayerCardAtLane(lane), GetEnemySlotAtLane(lane), player, ai);
 
         CleanupDestroyedSlots();
         UpdateAllViews();
         awaitingEndTurn = true;
+        Logger.Info($"Attack phase end | Boss {ai.hp}/{ai.maxHp} | Player {player.hp}/{player.maxHp}");
         UpdateHUD();
     }
 
-    // ═══════════════════════════════════════════════════════════
-    //  CAOS ROGUELITE — flip/swap casuali a fine turno
-    // ═══════════════════════════════════════════════════════════
-
     void RandomizePlayerBoard()
     {
-        var board = player.board;
-        if (board.Count == 0) return;
+        var ordered = GetOrderedPlayerCards();
+        if (ordered.Count == 0) return;
 
-        // 1. Flip casuale: ogni carta usa la sua endTurnFlipChance
-        for (int i = 0; i < board.Count; i++)
+        int flipsDone = 0;
+        var flipCandidates = new List<CardInstance>();
+        foreach (var card in ordered)
         {
-            var ci = board[i];
-            if (!ci.alive) continue;
-            if (rng.NextDouble() < ci.def.endTurnFlipChance)
+            if (rng.NextDouble() <= Mathf.Clamp01(card.def.endTurnFlipChance))
+                flipCandidates.Add(card);
+        }
+
+        while (flipCandidates.Count > 0 && flipsDone < maxChaosFlipsPerTurn && rng.NextDouble() < chaosFlipChance)
+        {
+            int pick = rng.Next(flipCandidates.Count);
+            var card = flipCandidates[pick];
+            flipCandidates.RemoveAt(pick);
+
+            card.Flip();
+            EventBus.Publish(GameEventType.Flip, new EventContext
             {
-                ci.Flip();
-                EventBus.Publish(GameEventType.Flip, new EventContext { owner = player, opponent = ai, source = ci });
+                owner = player,
+                opponent = ai,
+                source = card
+            });
 
-                // Notifica visiva sulla CardView corrispondente
-                if (viewByInstance.TryGetValue(ci, out var cv))
-                    cv.FlipSide(false);
-            }
+            if (viewByInstance.TryGetValue(card, out var view))
+                view.FlipSide(false);
+
+            Logger.Info($"Chaos: {card.def.cardName} flips to {card.side}");
+            flipsDone++;
         }
 
-        // 2. Swap casuale tra coppie adiacenti (25% per coppia)
-        for (int i = 0; i < playerBoardRoot.childCount - 1; i++)
+        if (playerBoardRoot.childCount < 2 || rng.NextDouble() >= chaosSwapChance)
+            return;
+
+        var swappableLanes = new List<int>();
+        for (int lane = 0; lane < playerBoardRoot.childCount - 1; lane++)
         {
-            if (rng.NextDouble() >= 0.25) continue;
-
-            var childA = playerBoardRoot.GetChild(i);
-            var childB = playerBoardRoot.GetChild(i + 1);
-
-            var cvA = childA.GetComponentInChildren<CardView>(false);
-            var cvB = childB.GetComponentInChildren<CardView>(false);
-            if (cvA == null || cvB == null) continue;
-            if (cvA.instance == null || cvB.instance == null) continue;
-
-            // Scambia i sibling index
-            childA.SetSiblingIndex(i + 1);
-            childB.SetSiblingIndex(i);
-
-            Logger.Info($"[Caos] Swap: L{i + 1} {cvA.instance.def.cardName} ↔ L{i + 2} {cvB.instance.def.cardName}");
+            if (GetPlayerCardAtLane(lane) != null && GetPlayerCardAtLane(lane + 1) != null)
+                swappableLanes.Add(lane);
         }
-    }
 
-    // ═══════════════════════════════════════════════════════════
-    //  ACCUMULO CHARGE (chiamato a fine turno per carte in Retro)
-    // ═══════════════════════════════════════════════════════════
+        if (swappableLanes.Count == 0) return;
+
+        int swapLane = swappableLanes[rng.Next(swappableLanes.Count)];
+        var left = playerBoardRoot.GetChild(swapLane);
+        var right = playerBoardRoot.GetChild(swapLane + 1);
+        left.SetSiblingIndex(swapLane + 1);
+        right.SetSiblingIndex(swapLane);
+        Logger.Info($"Chaos: lane {swapLane + 1} swaps with lane {swapLane + 2}");
+    }
 
     void AccumulateFlipCharges()
     {
-        foreach (var ci in player.board)
+        foreach (var card in GetOrderedPlayerCards())
         {
-            if (!ci.alive || ci.side != Side.Retro) continue;
-            ci.flipCharge = Mathf.Min(ci.flipCharge + 1, CardInstance.MaxFlipCharge);
-            string bar = ci.flipCharge == 3 ? "●●● MAX!" :
-                         ci.flipCharge == 2 ? "●●○"      : "●○○";
-            ci.PushHint($"Charge {bar}");
+            if (card.side != Side.Retro) continue;
+            int gained = card.GainCharge(1);
+            if (gained <= 0) continue;
+            card.PushHint($"Charge {card.flipCharge}/{CardInstance.MaxFlipCharge}");
         }
     }
-
-    // ═══════════════════════════════════════════════════════════
-    //  AVANZAMENTO PATTERN SLOT (chiamato a fine turno)
-    // ═══════════════════════════════════════════════════════════
 
     void AdvanceSlotPatterns()
     {
         for (int i = 0; i < enemySlotViews.Count; i++)
         {
-            var sv = enemySlotViews[i];
-            if (sv?.instance == null || !sv.instance.alive) continue;
+            var slotView = enemySlotViews[i];
+            if (slotView?.instance == null || !slotView.instance.alive) continue;
 
-            Side oldSide = sv.instance.side;
-            sv.instance.AdvanceFlip();
-            sv.Refresh();
+            Side oldSide = slotView.instance.side;
+            slotView.instance.AdvanceFlip();
+            slotView.Refresh();
 
-            if (sv.instance.side != oldSide)
-                Logger.Info($"[Slot] {sv.instance.def.SlotName} → {sv.instance.side}");
+            if (slotView.instance.side != oldSide)
+                Logger.Info($"Slot shift: {slotView.instance.def.SlotName} -> {slotView.instance.side}");
         }
     }
 
@@ -340,16 +503,21 @@ public void UpdateHUD()
         TryFlipCard(view);
     }
 
-    private bool TryFlipCard(CardView view)
+    bool TryFlipCard(CardView view)
     {
-        if (awaitingEndTurn || matchEnded || !playerPhase) { UpdateHUD(); return false; }
-        if (player.actionPoints <= 0) { EventBus.Publish(GameEventType.Info, new EventContext { phase = "Not enough Player PA" }); UpdateHUD(); return false; }
+        if (awaitingEndTurn || matchEnded || !playerPhase)
+        {
+            UpdateHUD();
+            return false;
+        }
 
         if (view == null || view.instance == null || view.owner != player)
             return false;
 
+        if (!TrySpendPlayerAP(flipCardCost, "Flip"))
+            return false;
+
         view.instance.Flip();
-        player.actionPoints -= 1;
 
         EventBus.Publish(GameEventType.Flip, new EventContext
         {
@@ -358,29 +526,30 @@ public void UpdateHUD()
             source = view.instance
         });
 
+        Logger.Info($"Flip: {view.instance.def.cardName} -> {view.instance.side}");
         UpdateAllViews();
         UpdateHUD();
         return true;
     }
+
     public void SwapCardPositions(CardView a, CardView b)
     {
-        if (matchEnded || awaitingEndTurn || !playerPhase) { UpdateHUD(); return; }
-        if (a == null || b == null || a == b || player.actionPoints <= 0)
+        if (matchEnded || awaitingEndTurn || !playerPhase)
+        {
+            UpdateHUD();
+            return;
+        }
+
+        if (a == null || b == null || a == b)
             return;
 
-        var cA = a.PlayerBoardContainer != null
-            ? a.PlayerBoardContainer
-            : a.EnsurePlayerBoardContainer(playerBoardRoot);
-
-        var cB = b.PlayerBoardContainer != null
-            ? b.PlayerBoardContainer
-            : b.EnsurePlayerBoardContainer(playerBoardRoot);
-
-        if (cA == null || cB == null || cA == cB)
+        if (!TrySpendPlayerAP(swapCardCost, "Swap"))
             return;
 
-        if (cA.parent != playerBoardRoot || cB.parent != playerBoardRoot)
-            return;
+        var cA = a.PlayerBoardContainer != null ? a.PlayerBoardContainer : a.EnsurePlayerBoardContainer(playerBoardRoot);
+        var cB = b.PlayerBoardContainer != null ? b.PlayerBoardContainer : b.EnsurePlayerBoardContainer(playerBoardRoot);
+        if (cA == null || cB == null || cA == cB) return;
+        if (cA.parent != playerBoardRoot || cB.parent != playerBoardRoot) return;
 
         int idxA = cA.GetSiblingIndex();
         int idxB = cB.GetSiblingIndex();
@@ -390,56 +559,44 @@ public void UpdateHUD()
         Quaternion rotA = cA.localRotation;
         Quaternion rotB = cB.localRotation;
 
-        player.actionPoints -= 1;
-
         cA.SetSiblingIndex(idxB);
         cB.SetSiblingIndex(idxA);
 
         a.UpdateBoardContainerTarget(posB, rotB);
         b.UpdateBoardContainerTarget(posA, rotA);
 
-        EventBus.Publish(GameEventType.Info, new EventContext
-        {
-            owner = player,
-            opponent = ai,
-            source = a.instance,
-            target = b.instance,
-            phase = $"[Swap] L{idxA + 1} <-> L{idxB + 1}"
-        });
-
+        Logger.Info($"Swap: lane {idxA + 1} with lane {idxB + 1}");
         UpdateAllViews();
         UpdateHUD();
     }
-
 
     void OnEndTurn()
     {
         if (matchEnded || !playerPhase) return;
 
-        // 1. Caos roguelite: flip/swap casuale carte player
         RandomizePlayerBoard();
-
-        // 2. Accumula charge per le carte rimaste in Retro
         AccumulateFlipCharges();
-
-        // 3. Avanza il pattern di flip di tutti gli slot
         AdvanceSlotPatterns();
 
-        // 4. Pubblica TurnEnd (abilità come OnEndTurnDealDamage reagiscono qui)
         EventBus.Publish(GameEventType.TurnEnd, new EventContext
         {
-            owner    = player,
+            owner = player,
             opponent = ai,
-            phase    = "TurnEnd"
+            phase = "TurnEnd"
         });
 
-        // 5. Controlla fine partita
-        if (IsGameOver() || currentTurn >= turns) { EndMatch(); return; }
+        CleanupDestroyedSlots();
+        UpdateAllViews();
+        Logger.Info($"Turn {currentTurn} end | HP {player.hp}-{ai.hp}");
 
-        // 6. Avanza contatore turno
+        if (IsGameOver() || currentTurn >= turns)
+        {
+            EndMatch();
+            return;
+        }
+
         currentTurn++;
 
-        // 7. Roll slot nemici con animazione, poi avvia il nuovo turno
         if (slotBatchManager != null)
         {
             SetButtonsInteractable(false);
@@ -459,67 +616,67 @@ public void UpdateHUD()
 
     void SetButtonsInteractable(bool on)
     {
-        btnAttack.interactable  = on;
+        btnAttack.interactable = on;
         btnEndTurn.interactable = on;
-        if (handManager != null) handManager.btnDraw.interactable = on;
+        if (handManager != null)
+            handManager.btnDraw.interactable = on;
     }
 
     void RespawnEnemySlotsFromList(List<GameObject> prefabs)
     {
-        // Rimuovi slot view esistenti
         for (int i = enemySlotViews.Count - 1; i >= 0; i--)
         {
-            var sv = enemySlotViews[i];
-            slotViewByInstance.Remove(sv.instance);
-            Destroy(sv.gameObject);
+            var slotView = enemySlotViews[i];
+            slotViewByInstance.Remove(slotView.instance);
+            Destroy(slotView.gameObject);
         }
         enemySlotViews.Clear();
 
-        // Pulisci eventuali placeholder rimasti (EmptySlot, _BatchReelBG, ecc.)
         var toKill = new List<GameObject>();
-        foreach (Transform t in aiBoardRoot) toKill.Add(t.gameObject);
-        foreach (var go in toKill) Destroy(go);
+        foreach (Transform t in aiBoardRoot)
+            toKill.Add(t.gameObject);
+        foreach (var go in toKill)
+            Destroy(go);
 
         int lanes = playerBoardRoot.childCount;
-        for (int i = 0; i < lanes; i++)
+        for (int lane = 0; lane < lanes; lane++)
         {
-            if (i >= prefabs.Count || prefabs[i] == null)
+            if (lane >= prefabs.Count || prefabs[lane] == null)
             {
                 if (EmptySlot != null)
                 {
                     var empty = Instantiate(EmptySlot, aiBoardRoot);
-                    empty.name  = EmptySlot.name;
+                    empty.name = EmptySlot.name;
                     empty.SetActive(true);
                 }
                 continue;
             }
 
-            var prefab = prefabs[i];
-            var sd     = prefab.GetComponent<SlotDefinition>();
-            if (sd == null) continue;
-
-            AddSlotFromTemplate(ai, sd.BuildSpec(), prefab, aiBoardRoot, enemySlotViews);
+            var prefab = prefabs[lane];
+            var definition = prefab.GetComponent<SlotDefinition>();
+            if (definition == null) continue;
+            AddSlotFromTemplate(ai, definition.BuildSpec(), prefab, aiBoardRoot, enemySlotViews);
         }
 
-        // Riordina i sibling index
-        for (int i = 0; i < aiBoardRoot.childCount; i++)
-            aiBoardRoot.GetChild(i).SetSiblingIndex(i);
+        for (int lane = 0; lane < aiBoardRoot.childCount; lane++)
+            aiBoardRoot.GetChild(lane).SetSiblingIndex(lane);
     }
 
-
-
-    void RemoveCard(PlayerState owner, CardInstance ci)
+    void RemoveCard(PlayerState owner, CardInstance card)
     {
-        if (abilitiesByInstance.TryGetValue(ci, out var list))
+        if (abilitiesByInstance.TryGetValue(card, out var abilities))
         {
-            for (int i = 0; i < list.Count; i++) list[i].Unbind();
-            abilitiesByInstance.Remove(ci);
+            for (int i = 0; i < abilities.Count; i++)
+                abilities[i].Unbind();
+            abilitiesByInstance.Remove(card);
         }
 
-        var view = viewByInstance[ci];
+        if (!viewByInstance.TryGetValue(card, out var view))
+            return;
 
         var sel = SelectionManager.Instance;
-        if (sel != null && sel.SelectedOwned == view) sel.SelectOwned(null);
+        if (sel != null && sel.SelectedOwned == view)
+            sel.ClearAll();
 
         Transform parent = view.transform.parent;
         int laneIndex = view.transform.GetSiblingIndex();
@@ -532,9 +689,9 @@ public void UpdateHUD()
             Destroy(boardContainer.gameObject);
         }
 
-        viewByInstance.Remove(ci);
-        owner.board.Remove(ci);
-        ci.Dispose();
+        viewByInstance.Remove(card);
+        owner.board.Remove(card);
+        card.Dispose();
         Destroy(view.gameObject);
 
         if (owner == player)
@@ -545,41 +702,37 @@ public void UpdateHUD()
             spotGO.transform.SetSiblingIndex(laneIndex);
 
             var outline = spotGO.GetComponent<Outline>();
-            outline.enabled = false;
-            outline.effectDistance = new Vector2(5f, 5f);
-            outline.useGraphicAlpha = false;
-            outline.effectColor = Color.white;
+            if (outline != null)
+            {
+                outline.enabled = false;
+                outline.effectDistance = new Vector2(5f, 5f);
+                outline.useGraphicAlpha = false;
+                outline.effectColor = Color.white;
+            }
 
             var btn = spotGO.GetComponent<Button>();
             btn.onClick.RemoveAllListeners();
             btn.onClick.AddListener(() => OnEmptySpotClicked(spotGO.transform));
         }
-
-        EventBus.Publish(GameEventType.Info, new EventContext
-        {
-            owner = owner,
-            opponent = owner == player ? ai : player,
-            source = ci,
-            phase = "[GM] Removed destroyed card (replaced by EmptySpot if player)"
-        });
     }
-
 
     void PlayCardFromHand(CardView handCard, Transform emptySpot)
     {
-        var cd = handCard.GetComponentInParent<CardDefinition>();
+        if (!TrySpendPlayerAP(playCardCost, "Play"))
+            return;
+
+        var definition = handCard.GetComponentInParent<CardDefinition>();
         var parent = emptySpot.parent;
         int laneIndex = emptySpot.GetSiblingIndex();
 
         Destroy(emptySpot.gameObject);
 
-        var spec = cd.BuildSpec();
-        var ci = new CardInstance(spec, rng);
-        ci.AssignGM(this);
-        player.board.Add(ci);
+        var card = new CardInstance(definition.BuildSpec(), rng);
+        card.AssignGM(this);
+        player.board.Add(card);
 
-        GameObject go = Instantiate(handCard.GetComponentInParent<CardDefinition>().gameObject, parent);
-        go.name = handCard.GetComponentInParent<CardDefinition>().gameObject.name;
+        GameObject go = Instantiate(definition.gameObject, parent);
+        go.name = definition.gameObject.name;
         go.SetActive(true);
 
         var rt = (RectTransform)go.transform;
@@ -591,16 +744,15 @@ public void UpdateHUD()
         rt.localScale = Vector3.one;
 
         var view = go.GetComponentInChildren<CardView>();
-        view.Init(this, player, ci);
+        view.Init(this, player, card);
         view.EnsurePlayerBoardContainer(playerBoardRoot);
         view.PlayerBoardContainer.SetSiblingIndex(laneIndex);
+        viewByInstance[card] = view;
 
-        viewByInstance[ci] = view;
-
-        var opponent = ai;
         var abilities = go.GetComponents<AbilityBase>().ToList();
-        foreach (var ab in abilities) ab.Bind(ci, player, opponent);
-        abilitiesByInstance[ci] = abilities;
+        foreach (var ability in abilities)
+            ability.Bind(card, player, ai);
+        abilitiesByInstance[card] = abilities;
 
         handManager.OnHandCardDroppedToBoard(handCard);
         handManager.RemoveFromHand(handCard);
@@ -609,32 +761,33 @@ public void UpdateHUD()
         {
             owner = player,
             opponent = ai,
-            source = ci,
-            phase = "FromHandToEmptySpot"
+            source = card,
+            phase = "FromHandToBoard"
         });
 
+        Logger.Info($"Play: {card.def.cardName} to lane {laneIndex + 1}");
         UpdateAllViews();
         UpdateHUD();
     }
 
-
     void CleanupDestroyedSlots()
     {
         for (int i = enemySlotViews.Count - 1; i >= 0; i--)
-            if (!enemySlotViews[i].instance.alive) RemoveSlotView(enemySlotViews[i]);
+        {
+            if (!enemySlotViews[i].instance.alive)
+                RemoveSlotView(enemySlotViews[i]);
+        }
     }
 
-    
-
-    void RemoveSlotView(SlotView v)
+    void RemoveSlotView(SlotView view)
     {
-        Transform parent = v.transform.parent;
-        int laneIndex = v.transform.GetSiblingIndex();
+        Transform parent = view.transform.parent;
+        int laneIndex = view.transform.GetSiblingIndex();
 
-        enemySlotViews.Remove(v);
-        slotViewByInstance.Remove(v.instance);
-
-        Destroy(v.gameObject);
+        enemySlotViews.Remove(view);
+        slotViewByInstance.Remove(view.instance);
+        view.instance.Dispose();
+        Destroy(view.gameObject);
 
         if (EmptySlot != null && parent != null)
         {
@@ -645,85 +798,68 @@ public void UpdateHUD()
         }
     }
 
-
     public object GetOpponentObjInstance(object obj)
     {
         if (obj is CardInstance card)
-        {
-            var atkView = viewByInstance[card];
-            Transform oppRoot = (atkView.owner == player) ? aiBoardRoot : playerBoardRoot;
-            int lane = atkView.PlayerBoardContainer.transform.GetSiblingIndex();
-
-            if (lane < 0 || lane >= oppRoot.childCount)
-                return null;
-
-            if (atkView.owner == player)
-            {
-                var sView = oppRoot.GetChild(lane).GetComponentInChildren<SlotView>(false);
-                if (sView == null)
-                    return null;
-
-                var si = sView.instance;
-                return si.alive ? si : null;
-            }
-            else
-            {
-                var cView = oppRoot.GetChild(lane).GetComponentInChildren<CardView>(false);
-                var ci = cView.instance;
-                return ci.alive ? ci : null;
-            }
-        }
+            return GetEnemySlotAtLane(GetLaneIndexFor(card));
 
         if (obj is SlotInstance slot)
-        {
-            var sView = slotViewByInstance[slot];
-            int lane = sView.transform.GetSiblingIndex();
-
-            if (lane < 0 || lane >= playerBoardRoot.childCount)
-                return null;
-
-            var cView = playerBoardRoot.GetChild(lane).GetComponentInChildren<CardView>(false);
-            if (cView == null)
-                return null;
-
-            var ci = cView.instance;
-            return ci.alive ? ci : null;
-        }
-
+            return GetPlayerCardAtLane(GetLaneIndexFor(slot));
 
         return null;
     }
 
     public int GetLaneIndexFor(object obj)
     {
-        if (obj is CardInstance ci) return viewByInstance[ci].transform.GetSiblingIndex();
-        if (obj is SlotInstance si) return slotViewByInstance[si].transform.GetSiblingIndex();
+        if (obj is CardInstance card && viewByInstance.TryGetValue(card, out var cardView))
+        {
+            if (cardView.PlayerBoardContainer != null && cardView.PlayerBoardContainer.parent == playerBoardRoot)
+                return cardView.PlayerBoardContainer.GetSiblingIndex();
+
+            if (cardView.transform.parent != null && cardView.transform.parent.parent == playerBoardRoot)
+                return cardView.transform.parent.GetSiblingIndex();
+
+            return cardView.transform.GetSiblingIndex();
+        }
+
+        if (obj is SlotInstance slot && slotViewByInstance.TryGetValue(slot, out var slotView))
+            return slotView.transform.GetSiblingIndex();
+
         return -1;
     }
-
-    // RIMOSSO: RandomizePlayerLayoutAndSides() distruggeva la strategia del player.
-    // Il layout e i lati sono ora completamente sotto controllo del giocatore.
 
     void ClearChildrenUnder(Transform root)
     {
         var toKill = new List<GameObject>();
-        foreach (Transform t in root) toKill.Add(t.gameObject);
-        for (int i = 0; i < toKill.Count; i++) Destroy(toKill[i]);
+        foreach (Transform t in root)
+            toKill.Add(t.gameObject);
+        for (int i = 0; i < toKill.Count; i++)
+            Destroy(toKill[i]);
     }
 
-    public void AppendLog(string msg) { _logBuf.AppendLine(msg); logText.text = _logBuf.ToString(); }
+    public void AppendLog(string msg)
+    {
+        _logBuf.AppendLine(msg);
+        logText.text = _logBuf.ToString();
+    }
 
-    public void ClearLog() { _logBuf.Clear(); logText.text = ""; }
+    public void ClearLog()
+    {
+        _logBuf.Clear();
+        logText.text = string.Empty;
+    }
 
     bool IsGameOver() => player.hp <= 0 || ai.hp <= 0;
 
     void EndMatch()
     {
-        if (matchEnded) return; matchEnded = true;
-        int diff = ai.hp - player.hp;
-        string result = diff > 0 ? "AI AHEAD" : diff < 0 ? "PLAYER AHEAD" : "TIE";
-        EventBus.Publish(GameEventType.Info, new EventContext { phase = "=== MATCH END ===" });
-        EventBus.Publish(GameEventType.Info, new EventContext { phase = $"Score: PlayerHP {player.hp} vs AIHP {ai.hp} | Diff (AI-Player) = {diff} -> {result}" });
+        if (matchEnded) return;
+        matchEnded = true;
+
+        string result = player.hp > ai.hp ? "Player ahead" :
+                        player.hp < ai.hp ? "Boss ahead" :
+                        "Tie";
+        Logger.Info($"Match end | Player {player.hp}/{player.maxHp} | Boss {ai.hp}/{ai.maxHp} | {result}");
     }
 
     public void OnCardClicked(CardView view)
@@ -733,7 +869,12 @@ public void UpdateHUD()
         bool isHandCard = view.owner == null && view.instance == null;
         if (isHandCard)
         {
-            if (awaitingEndTurn || !playerPhase) { UpdateHUD(); return; }
+            if (awaitingEndTurn || !playerPhase)
+            {
+                UpdateHUD();
+                return;
+            }
+
             var emptySpot = SelectionManager.Instance != null ? SelectionManager.Instance.SelectedEmptySpot : null;
             if (emptySpot == null) return;
 
@@ -743,20 +884,12 @@ public void UpdateHUD()
         }
 
         if (view.owner != player || view.instance == null) return;
-
         SelectionManager.Instance.SelectOwned(view);
     }
-
-
 
     public void OnEmptySpotClicked(Transform emptySpot)
     {
         if (matchEnded || emptySpot == null) return;
-
-        if (SelectionManager.Instance != null)
-            SelectionManager.Instance.SelectEmptySpot(emptySpot);
+        SelectionManager.Instance?.SelectEmptySpot(emptySpot);
     }
-
-
-
 }

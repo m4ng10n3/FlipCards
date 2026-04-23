@@ -362,8 +362,8 @@ MonoBehaviour:
   hpText: {fileID: 614480571}
   apText: {fileID: 1969419426}
   EnemyHptxt: {fileID: 966046675}
-  turns: 10
-  playerBaseAP: 3
+  turns: 12
+  playerBaseAP: 4
   seed: 12345
   CardsPerSide: 3
   StartingHandSize: 3
@@ -373,12 +373,46 @@ MonoBehaviour:
   EmptySlot: {fileID: 4860462570295797339, guid: 707c7cb99bd34c74b86ba2d6ace05165, type: 3}
   playerCards:
   - prefab: {fileID: 4860462570295797339, guid: f03c514f27a9ec84f84e2d4e8793c6fb, type: 3}
-    count: 8
+    count: 1
   - prefab: {fileID: 4860462570295797339, guid: ad58544dc459dc24f94599135a4ae854, type: 3}
-    count: 8
+    count: 1
+  - prefab: {fileID: 4860462570295797339, guid: 1f7dbaf6b6c54f74e9ba18164ce37023, type: 3}
+    count: 1
+  - prefab: {fileID: 4860462570295797339, guid: 81f62021292cbe7449cb60dca7ce833e, type: 3}
+    count: 1
+  - prefab: {fileID: 4860462570295797339, guid: e09440460fb710b44b8957e4c6d64b78, type: 3}
+    count: 1
+  - prefab: {fileID: 4860462570295797339, guid: 0fbfd534ffee76f44826e2824d5002a1, type: 3}
+    count: 1
+  - prefab: {fileID: 4860462570295797339, guid: db86ceac3be5c404d92b01608d60722b, type: 3}
+    count: 1
+  - prefab: {fileID: 4860462570295797339, guid: 1679fc9d13e650047b73d9c037f152e1, type: 3}
+    count: 1
+  - prefab: {fileID: 4860462570295797339, guid: c91e600854a335a4ebd47e1293100a02, type: 3}
+    count: 1
+  - prefab: {fileID: 4860462570295797339, guid: 054e9f5f2bc1fae4f9ea0a6cf41fb640, type: 3}
+    count: 1
   enemySlots:
   - prefab: {fileID: 9094616095918957040, guid: 1905928e36017444dbe30489bacc9569, type: 3}
-    count: 3
+    count: 1
+  - prefab: {fileID: 9094616095918957040, guid: 4141b1db38c99f04ba48bef09e6e25c6, type: 3}
+    count: 1
+  - prefab: {fileID: 9094616095918957040, guid: 95569b8a84f950142ae2691464ee49c7, type: 3}
+    count: 1
+  - prefab: {fileID: 9094616095918957040, guid: fd2bd775fe660da4f9ccafef8fe0c470, type: 3}
+    count: 1
+  - prefab: {fileID: 9094616095918957040, guid: 57628dce97acf574cbf71651b44031b6, type: 3}
+    count: 1
+  - prefab: {fileID: 9094616095918957040, guid: 4eb43e1b2f8f4e244a721171c868d8ac, type: 3}
+    count: 1
+  - prefab: {fileID: 9094616095918957040, guid: d5be7df677b125041a9721c40b10d9e9, type: 3}
+    count: 1
+  - prefab: {fileID: 9094616095918957040, guid: 2e1692f0aea84d44eba445b6e973b5cc, type: 3}
+    count: 1
+  - prefab: {fileID: 9094616095918957040, guid: 807766cc3493eef4f9e14b0761006e3b, type: 3}
+    count: 1
+  - prefab: {fileID: 9094616095918957040, guid: e34b7789bf7d33b4cbb2cc2c26b81794, type: 3}
+    count: 1
 --- !u!114 &203056801
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -417,11 +451,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SlotBatchManager
   batch:
   - prefab: {fileID: 9094616095918957040, guid: 1905928e36017444dbe30489bacc9569, type: 3}
-    count: 5
+    count: 1
   - prefab: {fileID: 9094616095918957040, guid: 4141b1db38c99f04ba48bef09e6e25c6, type: 3}
-    count: 3
+    count: 1
   - prefab: {fileID: 9094616095918957040, guid: 95569b8a84f950142ae2691464ee49c7, type: 3}
-    count: 3
+    count: 1
+  - prefab: {fileID: 9094616095918957040, guid: fd2bd775fe660da4f9ccafef8fe0c470, type: 3}
+    count: 1
+  - prefab: {fileID: 9094616095918957040, guid: 57628dce97acf574cbf71651b44031b6, type: 3}
+    count: 1
+  - prefab: {fileID: 9094616095918957040, guid: 4eb43e1b2f8f4e244a721171c868d8ac, type: 3}
+    count: 1
+  - prefab: {fileID: 9094616095918957040, guid: d5be7df677b125041a9721c40b10d9e9, type: 3}
+    count: 1
+  - prefab: {fileID: 9094616095918957040, guid: 2e1692f0aea84d44eba445b6e973b5cc, type: 3}
+    count: 1
+  - prefab: {fileID: 9094616095918957040, guid: 807766cc3493eef4f9e14b0761006e3b, type: 3}
+    count: 1
+  - prefab: {fileID: 9094616095918957040, guid: e34b7789bf7d33b4cbb2cc2c26b81794, type: 3}
+    count: 1
   reelSpriteSheet: {fileID: 2800000, guid: 48e8fa3e68b3a7c40ac500c12851a0ce, type: 3}
   reelFrameCount: 11
   reelScrollSpeed: 12

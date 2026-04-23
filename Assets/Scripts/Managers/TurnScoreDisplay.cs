@@ -8,6 +8,8 @@ using UnityEngine.UI;
 /// </summary>
 public class TurnScoreDisplay : MonoBehaviour
 {
+    [SerializeField] private bool enableTurnSummary = false;
+
     // ── Accumuli turno ────────────────────────────────────────────────────────
     private int _dmgDealt;     // danni inflitti agli slot (card → slot)
     private int _dmgReceived;  // danni ricevuti dal player (slot → card / direct)
@@ -37,6 +39,8 @@ public class TurnScoreDisplay : MonoBehaviour
 
     void OnGameEvent(GameEventType type, EventContext ctx)
     {
+        if (!enableTurnSummary) return;
+
         switch (type)
         {
             case GameEventType.TurnStart:
