@@ -14,6 +14,10 @@ public class SlotBerserker : AbilityBase
     private int _furyStacks;
     private bool _burstReady;
 
+    /// <summary>Stack accumulati: senza contatore a schermo il pattern non e' leggibile.</summary>
+    public int FuryStacks => _furyStacks;
+    public bool BurstReady => _burstReady;
+
     private EventBus.Handler _h;
     private SlotView _slotView;
     private SlotInstance _slot;

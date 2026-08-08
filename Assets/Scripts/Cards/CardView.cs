@@ -15,6 +15,10 @@ public class CardView : MonoBehaviour
     [SerializeField] private Image artworkMonster;
     [SerializeField] private CurveParameters curveParameters;
     [Header("Hand Follow")]
+    [Tooltip("Quanto sale una carta in mano al passaggio del puntatore. La zona mano " +
+             "ne mostra solo la fascia alta: senza questo sollevamento il resto della " +
+             "carta resta fuori schermo.")]
+    [SerializeField] private float handHoverLift = 190f;
     [SerializeField] private float handFollowSpeed = 18f;
     [SerializeField] private float handFollowRotationSpeed = 18f;
     [SerializeField] private float handTweenDuration = 0.2f;
@@ -300,10 +304,15 @@ public class CardView : MonoBehaviour
         Template.GetComponent<Image>().color = c;
     }
 
+    /// <summary>
+    /// L'hint SOSTITUISCE il messaggio precedente. Accodando, il rect fisso
+    /// mostrava solo la prima riga e tutto il resto spariva nel Truncate.
+    /// </summary>
     public void ShowHint(string msg)
     {
+        if (hintText == null) return;
         hintText.gameObject.SetActive(true);
-        hintText.text = string.IsNullOrEmpty(hintText.text) ? msg : hintText.text + "\n" + msg;
+        hintText.text = msg;
     }
 
     public void HideHint()
@@ -509,7 +518,10 @@ public class CardView : MonoBehaviour
 
         bool inHand = _handContainer != null && _rt != null && _rt.parent.IsChildOf(_handContainer);
         if (inHand)
+        {
             targetPosLocal = _handCurveOffset;
+            if (_hovering && !_dragging) targetPosLocal += Vector3.up * handHoverLift;
+        }
 
         if (_selected)
             targetPosLocal += Vector3.up * selectPunchAmount;
@@ -816,9 +828,13 @@ public class CardView : MonoBehaviour
         if (planeNormal.sqrMagnitude < 1e-6f) planeNormal = Vector3.forward;
         planeNormal.Normalize();
 
+        // +forward: il piano dell'ombra sta DIETRO la carta. Con il segno opposto
+        // l'ombra finiva a z negativa, cioe' piu' vicina alla camera: in
+        // Screen Space - Overlay la z veniva ignorata e non si notava, in
+        // Screen Space - Camera l'ombra copriva la carta.
         Vector3 planePoint = parent != null
-            ? parent.TransformPoint(_rt.localPosition - Vector3.forward * _shadowPlaneZ)
-            : _rt.position - planeNormal * _shadowPlaneZ;
+            ? parent.TransformPoint(_rt.localPosition + Vector3.forward * _shadowPlaneZ)
+            : _rt.position + planeNormal * _shadowPlaneZ;
 
         // Centro dell'ombra: proiezione ORTOGONALE del centro carta sul piano.
         // La proiezione prospettica (con light dir) causava stretch quando _rt.forward

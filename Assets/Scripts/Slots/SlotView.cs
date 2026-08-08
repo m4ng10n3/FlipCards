@@ -112,17 +112,19 @@ public class SlotView : MonoBehaviour
         {
             // Prima dell'attacco: mostra cosa sta per succedere
             case GameEventType.AttackDeclared:
+                // Niente glifi fuori dal set del font legacy: ⚔ e 🛡 uscivano
+                // come rettangoli vuoti.
                 if (ctx.source == instance)
                 {
                     // Questo slot attacca una carta player
                     int atk = instance.def.atkDamage + instance.tempAtkBonus;
-                    ShowHint($"⚔ {atk}");
+                    ShowHint($"ATTACCA {atk}");
                 }
                 else if (ctx.target == instance)
                 {
                     // Questo slot sta per essere colpito
                     int block = instance.ComputeSelfBlock();
-                    ShowHint($"🛡 {block}");
+                    ShowHint($"PARA {block}");
                 }
                 break;
 
@@ -187,11 +189,12 @@ public class SlotView : MonoBehaviour
         img.color = c;
     }
 
+    /// <summary>L'hint sostituisce il precedente: vedi CardView.ShowHint.</summary>
     public void ShowHint(string msg)
     {
         if (hintText == null) return;
         hintText.gameObject.SetActive(true);
-        hintText.text = string.IsNullOrEmpty(hintText.text) ? msg : hintText.text + "\n" + msg;
+        hintText.text = msg;
     }
 
     public void ClearHint()

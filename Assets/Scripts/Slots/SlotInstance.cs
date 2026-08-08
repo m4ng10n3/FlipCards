@@ -43,6 +43,31 @@ public class SlotInstance
         }
     }
 
+    /// <summary>Lunghezza del pattern; 0 = nessun pattern (sempre Fronte).</summary>
+    public int PatternLength => def.flipPattern != null ? def.flipPattern.Length : 0;
+
+    /// <summary>
+    /// Passo del pattern attualmente a schermo. _patternIndex punta gia' al prossimo,
+    /// quindi il corrente e' quello precedente in modulo.
+    /// </summary>
+    public int PatternStep
+    {
+        get
+        {
+            int len = PatternLength;
+            if (len == 0) return 0;
+            return ((_patternIndex - 1) % len + len) % len;
+        }
+    }
+
+    /// <summary>Lato previsto al passo indicato del pattern.</summary>
+    public Side PatternSideAt(int step)
+    {
+        int len = PatternLength;
+        if (len == 0) return Side.Fronte;
+        return def.flipPattern[((step % len) + len) % len];
+    }
+
     /// <summary>
     /// Avanza il pattern di flip di un passo. Chiamato da GameManager a fine turno player.
     /// </summary>

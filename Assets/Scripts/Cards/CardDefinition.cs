@@ -170,6 +170,8 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
         {
             if (cardView.handContainer == null) throw new System.InvalidOperationException("Hand container not created");
 
+            // Stato 3: carta in mano presa -> tutte le caselle libere evidenziate.
+            gm.HighlightFreeSpots(true);
             gm.HandManager.OnHandCardBeginDrag(cardView);
             return;
         }
@@ -229,6 +231,9 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
         if (cardView == null) return;
         cardView.IsHovering = true;
         cardView.ApplyPointerEnter();
+
+        if (cardView.instance != null)
+            InspectorPanel.Instance?.ShowCard(cardView);
     }
 
     public void OnPointerExit(PointerEventData eventData)
@@ -238,6 +243,7 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
         if (cardView == null) return;
         cardView.IsHovering = false;
         cardView.ResetHoverVisual();
+        InspectorPanel.Instance?.HideFor(cardView);
     }
 
     public void OnPointerClick(PointerEventData eventData)
@@ -267,6 +273,7 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
             gm.OnCardClicked(cardView);
         }
 
+        gm.HighlightFreeSpots(false);
         gm.HandManager.OnHandCardEndDrag(cardView);
     }
 
@@ -302,13 +309,13 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
 
         if (!_cloneEmptySpotDuringDrag.activeSelf)
             _cloneEmptySpotDuringDrag.SetActive(true);
-        _cloneEmptySpotImage.enabled = true;
+        GameManager.SetSpotGraphicsVisible(spotGO, true);
     }
 
     private void HideCloneEmptySpot()
     {
-        if (_cloneEmptySpotImage != null)
-            _cloneEmptySpotImage.enabled = false;
+        if (_cloneEmptySpotDuringDrag != null)
+            GameManager.SetSpotGraphicsVisible(_cloneEmptySpotDuringDrag, false);
         _cloneEmptySpotDuringDrag = null;
         _cloneEmptySpotImage = null;
     }

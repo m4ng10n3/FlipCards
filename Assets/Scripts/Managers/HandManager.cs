@@ -25,6 +25,28 @@ public class HandManager : MonoBehaviour
     public Transform HandRoot => handRoot;
     private CardView draggingCard;
 
+    // Contatori per la HUD: DrawCard esce in silenzio a mazzo vuoto o mano piena,
+    // quindi senza questi numeri il bottone PESCA sembra rotto.
+    public int MaxHandSize => maxHandSize;
+    public int HandCount => handCards.Count;
+    public int DeckCount => deckInitialized ? deck.Count : CountDeckFromBindings();
+
+    /// <summary>Conteggio del mazzo prima della prima pesca, senza costruirlo.</summary>
+    private int CountDeckFromBindings()
+    {
+        var gm = GameManager.Instance;
+        if (gm == null) return 0;
+
+        int total = 0;
+        foreach (var binding in gm.playerCards)
+            if (binding != null && binding.prefab != null) total += Mathf.Max(0, binding.count);
+
+        foreach (Transform child in gm.playerBoardRoot)
+            if (child.GetComponentInChildren<CardView>(false) != null) total--;
+
+        return Mathf.Max(0, total);
+    }
+
     private void Awake()
     {
         if (btnDraw == null || handRoot == null || spawnPoint == null)

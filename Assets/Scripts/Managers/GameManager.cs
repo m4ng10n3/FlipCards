@@ -17,14 +17,14 @@ public class GameManager : MonoBehaviour
     [Header("UI")]
     public Button btnAttack;
     public Button btnEndTurn;
-    public Text logText;
+    public TMPro.TMP_Text logText;
 
     static readonly StringBuilder _logBuf = new StringBuilder(4096);
 
     [Header("HUD")]
-    public Text hpText;
-    public Text apText;
-    public Text EnemyHptxt;
+    public TMPro.TMP_Text hpText;
+    public TMPro.TMP_Text apText;
+    public TMPro.TMP_Text EnemyHptxt;
 
     [Header("Match Parameters")]
     public int turns = 12;
@@ -80,6 +80,17 @@ public class GameManager : MonoBehaviour
     int currentTurn = 1;
     bool playerPhase = true;
     bool matchEnded;
+    string matchResult;
+
+    // Stato letto dalla HUD: senza questi il layout non puo' distinguere le fasi
+    // 7 (attacco risolto) e 8 (reel in corso), che altrimenti differiscono solo
+    // per il grigio dei bottoni.
+    public int CurrentTurn => currentTurn;
+    public bool PlayerPhase => playerPhase;
+    public bool AwaitingEndTurn => awaitingEndTurn;
+    public bool InputLocked => inputLocked;
+    public bool MatchEnded => matchEnded;
+    public string MatchResult => matchResult;
 
     readonly Dictionary<CardInstance, CardView> viewByInstance = new Dictionary<CardInstance, CardView>();
     readonly Dictionary<CardInstance, List<AbilityBase>> abilitiesByInstance = new Dictionary<CardInstance, List<AbilityBase>>();
@@ -117,12 +128,14 @@ public class GameManager : MonoBehaviour
         cloneGO.transform.SetSiblingIndex(playerBoardRoot.GetSiblingIndex());
         playerBoardRootClone = cloneGO.transform;
 
+        // Il clone e' il fantasma usato durante il drag: deve essere invisibile
+        // finche' non serve. Spegnere solo l'Image della radice non basta, la
+        // casella ha anche la cornice come figli.
         for (int i = 0; i < playerBoardRootClone.childCount; i++)
         {
             var child = playerBoardRootClone.GetChild(i);
             if (child.gameObject.name != EmptySpot.name) continue;
-            var image = child.GetComponent<Image>();
-            if (image != null) image.enabled = false;
+            SetSpotGraphicsVisible(child.gameObject, false);
         }
 
         SpawnEnemySlots();
@@ -270,9 +283,11 @@ public class GameManager : MonoBehaviour
         btnEndTurn.interactable = !inputLocked;
         handManager.btnDraw.interactable = enable;
 
-        hpText.text = $"{player.hp}";
-        apText.text = $"{player.actionPoints}/{playerBaseAP}";
-        EnemyHptxt.text = $"{ai.hp}";
+        // Il tetto degli AP e' MaxPlayerAP, non playerBaseAP: con il vecchio
+        // denominatore un guadagno da abilita' stampava "5/4".
+        if (hpText != null) hpText.text = $"{player.hp}/{player.maxHp}";
+        if (apText != null) apText.text = $"{player.actionPoints}/{MaxPlayerAP}";
+        if (EnemyHptxt != null) EnemyHptxt.text = $"{ai.hp}/{ai.maxHp}";
     }
 
     void StartTurn(PlayerState owner, PlayerState opponent, bool isPlayerPhase)
@@ -850,16 +865,38 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>Tetto del buffer di log: sopra i ~16000 caratteri TMP smette di renderizzare.</summary>
+    const int MaxLogChars = 6000;
+
+    /// <summary>Notifica al pannello di log che il testo e' cambiato (autoscroll).</summary>
+    public static event Action LogChanged;
+
     public void AppendLog(string msg)
     {
         _logBuf.AppendLine(msg);
-        logText.text = _logBuf.ToString();
+
+        if (_logBuf.Length > MaxLogChars)
+        {
+            // Taglia in testa fino al primo a capo utile: mai a meta' di una riga.
+            int cut = _logBuf.Length - MaxLogChars;
+            for (int i = cut; i < _logBuf.Length && i < cut + 400; i++)
+            {
+                if (_logBuf[i] != '\n') continue;
+                cut = i + 1;
+                break;
+            }
+            _logBuf.Remove(0, cut);
+        }
+
+        if (logText != null) logText.text = _logBuf.ToString();
+        LogChanged?.Invoke();
     }
 
     public void ClearLog()
     {
         _logBuf.Clear();
-        logText.text = string.Empty;
+        if (logText != null) logText.text = string.Empty;
+        LogChanged?.Invoke();
     }
 
     bool IsGameOver() => player.hp <= 0 || ai.hp <= 0;
@@ -873,10 +910,10 @@ public class GameManager : MonoBehaviour
         // permetterebbe di pescare a partita finita.
         SetButtonsInteractable(false);
 
-        string result = player.hp > ai.hp ? "Player ahead" :
-                        player.hp < ai.hp ? "Boss ahead" :
-                        "Tie";
-        Logger.Info($"Match end | Player {player.hp}/{player.maxHp} | Boss {ai.hp}/{ai.maxHp} | {result}");
+        matchResult = player.hp > ai.hp ? "Player ahead" :
+                      player.hp < ai.hp ? "Boss ahead" :
+                      "Tie";
+        Logger.Info($"Match end | Player {player.hp}/{player.maxHp} | Boss {ai.hp}/{ai.maxHp} | {matchResult}");
     }
 
     public void OnCardClicked(CardView view)
@@ -893,9 +930,17 @@ public class GameManager : MonoBehaviour
             }
 
             var emptySpot = SelectionManager.Instance != null ? SelectionManager.Instance.SelectedEmptySpot : null;
-            if (emptySpot == null) return;
+            if (emptySpot == null)
+            {
+                // "Casella prima, carta poi" non e' scopribile: invece di uscire in
+                // silenzio, accendi tutte le caselle libere e dillo nel log.
+                HighlightFreeSpots(true);
+                Logger.Info("Play: scegli prima una casella libera");
+                return;
+            }
 
             PlayCardFromHand(view, emptySpot);
+            HighlightFreeSpots(false);
             SelectionManager.Instance?.SelectEmptySpot(null);
             return;
         }
@@ -907,6 +952,37 @@ public class GameManager : MonoBehaviour
     public void OnEmptySpotClicked(Transform emptySpot)
     {
         if (matchEnded || emptySpot == null) return;
+        HighlightFreeSpots(false);
         SelectionManager.Instance?.SelectEmptySpot(emptySpot);
+    }
+
+    /// <summary>Accende o spegne tutti i grafici di una casella (radice + cornice).</summary>
+    public static void SetSpotGraphicsVisible(GameObject spot, bool visible)
+    {
+        if (spot == null) return;
+        foreach (var graphic in spot.GetComponentsInChildren<Graphic>(true))
+            graphic.enabled = visible;
+    }
+
+    /// <summary>
+    /// Accende l'Outline di tutte le caselle libere: e' l'unico segnale che rende
+    /// scopribile la sequenza "casella prima, carta poi" (stato 3 del layout).
+    /// La casella gia' selezionata resta accesa comunque.
+    /// </summary>
+    public void HighlightFreeSpots(bool on)
+    {
+        if (playerBoardRoot == null || EmptySpot == null) return;
+
+        var selected = SelectionManager.Instance != null ? SelectionManager.Instance.SelectedEmptySpot : null;
+
+        for (int i = 0; i < playerBoardRoot.childCount; i++)
+        {
+            var child = playerBoardRoot.GetChild(i);
+            if (child.gameObject.name != EmptySpot.name) continue;
+
+            var outline = child.GetComponent<Outline>();
+            if (outline == null) continue;
+            outline.enabled = on || child == selected;
+        }
     }
 }
