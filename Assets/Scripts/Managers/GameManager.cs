@@ -66,6 +66,10 @@ public class GameManager : MonoBehaviour
     public List<PrefabSlotBinding> enemySlots = new List<PrefabSlotBinding>();
 
     bool awaitingEndTurn;
+    // True mentre gira il reel di fine turno: gli slot nemici sono gia' stati
+    // scambiati ma sono ancora coperti. Senza questo lock UpdateHUD riaccende
+    // Attack/Draw a meta' animazione e il giocatore attaccherebbe slot invisibili.
+    bool inputLocked;
     static GameManager _instance;
     public static GameManager Instance => _instance;
 
@@ -211,12 +215,8 @@ public class GameManager : MonoBehaviour
     void SpawnEnemySlots()
     {
         enemySlotViews.Clear();
-        var toKill = new List<GameObject>();
-        foreach (Transform t in aiBoardRoot)
-            toKill.Add(t.gameObject);
-        for (int i = 0; i < toKill.Count; i++)
-            Destroy(toKill[i]);
         slotViewByInstance.Clear();
+        DetachAndDestroy(aiBoardRoot);
 
         var flat = BuildEnemySlotPool();
         if (flat.Count == 0) return;
@@ -235,9 +235,6 @@ public class GameManager : MonoBehaviour
             if (sd == null) continue;
             AddSlotFromTemplate(ai, sd.BuildSpec(), prefab, aiBoardRoot, enemySlotViews);
         }
-
-        for (int i = 0; i < aiBoardRoot.childCount; i++)
-            aiBoardRoot.GetChild(i).SetSiblingIndex(i);
     }
 
     public void UpdateAllViews()
@@ -268,8 +265,9 @@ public class GameManager : MonoBehaviour
     {
         if (matchEnded) return;
 
-        bool enable = playerPhase && !awaitingEndTurn;
+        bool enable = playerPhase && !awaitingEndTurn && !inputLocked;
         btnAttack.interactable = enable;
+        btnEndTurn.interactable = !inputLocked;
         handManager.btnDraw.interactable = enable;
 
         hpText.text = $"{player.hp}";
@@ -390,7 +388,7 @@ public class GameManager : MonoBehaviour
 
     void OnAttack()
     {
-        if (awaitingEndTurn || matchEnded || !playerPhase)
+        if (awaitingEndTurn || matchEnded || !playerPhase || inputLocked)
         {
             UpdateHUD();
             return;
@@ -505,7 +503,7 @@ public class GameManager : MonoBehaviour
 
     bool TryFlipCard(CardView view)
     {
-        if (awaitingEndTurn || matchEnded || !playerPhase)
+        if (awaitingEndTurn || matchEnded || !playerPhase || inputLocked)
         {
             UpdateHUD();
             return false;
@@ -534,7 +532,7 @@ public class GameManager : MonoBehaviour
 
     public void SwapCardPositions(CardView a, CardView b)
     {
-        if (matchEnded || awaitingEndTurn || !playerPhase)
+        if (matchEnded || awaitingEndTurn || !playerPhase || inputLocked)
         {
             UpdateHUD();
             return;
@@ -572,7 +570,7 @@ public class GameManager : MonoBehaviour
 
     void OnEndTurn()
     {
-        if (matchEnded || !playerPhase) return;
+        if (matchEnded || !playerPhase || inputLocked) return;
 
         RandomizePlayerBoard();
         AccumulateFlipCharges();
@@ -601,12 +599,17 @@ public class GameManager : MonoBehaviour
         {
             SetButtonsInteractable(false);
             int laneCount = playerBoardRoot.childCount;
-            slotBatchManager.RollNewSlots(laneCount, chosenPrefabs =>
-            {
-                RespawnEnemySlotsFromList(chosenPrefabs);
-                SetButtonsInteractable(true);
-                StartTurn(player, ai, true);
-            });
+
+            // Il respawn avviene mentre le lane sono coperte dal reel: quando il
+            // rullo si ferma sfuma e rivela lo slot vero, gia in posizione.
+            slotBatchManager.RollNewSlots(
+                laneCount,
+                chosenPrefabs => RespawnEnemySlotsFromList(chosenPrefabs),
+                _ =>
+                {
+                    SetButtonsInteractable(true);
+                    StartTurn(player, ai, true);
+                });
         }
         else
         {
@@ -616,6 +619,7 @@ public class GameManager : MonoBehaviour
 
     void SetButtonsInteractable(bool on)
     {
+        inputLocked = !on;
         btnAttack.interactable = on;
         btnEndTurn.interactable = on;
         if (handManager != null)
@@ -627,16 +631,12 @@ public class GameManager : MonoBehaviour
         for (int i = enemySlotViews.Count - 1; i >= 0; i--)
         {
             var slotView = enemySlotViews[i];
-            slotViewByInstance.Remove(slotView.instance);
-            Destroy(slotView.gameObject);
+            if (slotView != null && slotView.instance != null)
+                slotViewByInstance.Remove(slotView.instance);
         }
         enemySlotViews.Clear();
 
-        var toKill = new List<GameObject>();
-        foreach (Transform t in aiBoardRoot)
-            toKill.Add(t.gameObject);
-        foreach (var go in toKill)
-            Destroy(go);
+        DetachAndDestroy(aiBoardRoot);
 
         int lanes = playerBoardRoot.childCount;
         for (int lane = 0; lane < lanes; lane++)
@@ -657,9 +657,6 @@ public class GameManager : MonoBehaviour
             if (definition == null) continue;
             AddSlotFromTemplate(ai, definition.BuildSpec(), prefab, aiBoardRoot, enemySlotViews);
         }
-
-        for (int lane = 0; lane < aiBoardRoot.childCount; lane++)
-            aiBoardRoot.GetChild(lane).SetSiblingIndex(lane);
     }
 
     void RemoveCard(PlayerState owner, CardInstance card)
@@ -686,12 +683,14 @@ public class GameManager : MonoBehaviour
         {
             parent = boardContainer.parent;
             laneIndex = boardContainer.GetSiblingIndex();
+            boardContainer.SetParent(null, false);   // vedi RemoveSlotView
             Destroy(boardContainer.gameObject);
         }
 
         viewByInstance.Remove(card);
         owner.board.Remove(card);
         card.Dispose();
+        if (view.transform.parent != null) view.transform.SetParent(null, false);
         Destroy(view.gameObject);
 
         if (owner == player)
@@ -725,6 +724,7 @@ public class GameManager : MonoBehaviour
         var parent = emptySpot.parent;
         int laneIndex = emptySpot.GetSiblingIndex();
 
+        emptySpot.SetParent(null, false);   // vedi DetachAndDestroy
         Destroy(emptySpot.gameObject);
 
         var card = new CardInstance(definition.BuildSpec(), rng);
@@ -787,6 +787,10 @@ public class GameManager : MonoBehaviour
         enemySlotViews.Remove(view);
         slotViewByInstance.Remove(view.instance);
         view.instance.Dispose();
+        // Distacco immediato: subito sotto viene istanziato l'EmptySlot che lo
+        // rimpiazza e senza questo la lane resterebbe contata due volte fino a
+        // fine frame (childCount gonfiato -> lane sfasate e reel disallineato).
+        view.transform.SetParent(null, false);
         Destroy(view.gameObject);
 
         if (EmptySlot != null && parent != null)
@@ -828,13 +832,22 @@ public class GameManager : MonoBehaviour
         return -1;
     }
 
-    void ClearChildrenUnder(Transform root)
+    void ClearChildrenUnder(Transform root) => DetachAndDestroy(root);
+
+    /// <summary>
+    /// Svuota 'root' SUBITO. Destroy e' differito a fine frame: senza il distacco,
+    /// childCount e GetChild(i) restano sporchi per un frame e il LayoutGroup
+    /// impagina il doppio dei figli (slot che si stringono / saltano di posto).
+    /// </summary>
+    static void DetachAndDestroy(Transform root)
     {
-        var toKill = new List<GameObject>();
-        foreach (Transform t in root)
-            toKill.Add(t.gameObject);
-        for (int i = 0; i < toKill.Count; i++)
-            Destroy(toKill[i]);
+        if (root == null) return;
+        for (int i = root.childCount - 1; i >= 0; i--)
+        {
+            var child = root.GetChild(i);
+            child.SetParent(null, false);
+            Destroy(child.gameObject);
+        }
     }
 
     public void AppendLog(string msg)
@@ -855,6 +868,10 @@ public class GameManager : MonoBehaviour
     {
         if (matchEnded) return;
         matchEnded = true;
+        // UpdateHUD esce subito su matchEnded, quindi i bottoni resterebbero
+        // accesi: btnDraw e' cablato direttamente su HandManager.DrawCard e
+        // permetterebbe di pescare a partita finita.
+        SetButtonsInteractable(false);
 
         string result = player.hp > ai.hp ? "Player ahead" :
                         player.hp < ai.hp ? "Boss ahead" :
@@ -869,7 +886,7 @@ public class GameManager : MonoBehaviour
         bool isHandCard = view.owner == null && view.instance == null;
         if (isHandCard)
         {
-            if (awaitingEndTurn || !playerPhase)
+            if (awaitingEndTurn || !playerPhase || inputLocked)
             {
                 UpdateHUD();
                 return;
