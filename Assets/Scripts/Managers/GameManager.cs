@@ -477,10 +477,9 @@ public class GameManager : MonoBehaviour
         if (swappableLanes.Count == 0) return;
 
         int swapLane = swappableLanes[rng.Next(swappableLanes.Count)];
-        var left = playerBoardRoot.GetChild(swapLane);
-        var right = playerBoardRoot.GetChild(swapLane + 1);
-        left.SetSiblingIndex(swapLane + 1);
-        right.SetSiblingIndex(swapLane);
+        // Stesso percorso dello scambio per trascinamento: il giocatore subisce
+        // questo cambiamento, quindi deve almeno vederlo succedere.
+        AnimateLaneSwap(GetPlayerCardViewAtLane(swapLane), GetPlayerCardViewAtLane(swapLane + 1));
         Logger.Info($"Chaos: lane {swapLane + 1} swaps with lane {swapLane + 2}");
     }
 
@@ -559,28 +558,49 @@ public class GameManager : MonoBehaviour
         if (!TrySpendPlayerAP(swapCardCost, "Swap"))
             return;
 
-        var cA = a.PlayerBoardContainer != null ? a.PlayerBoardContainer : a.EnsurePlayerBoardContainer(playerBoardRoot);
-        var cB = b.PlayerBoardContainer != null ? b.PlayerBoardContainer : b.EnsurePlayerBoardContainer(playerBoardRoot);
-        if (cA == null || cB == null || cA == cB) return;
-        if (cA.parent != playerBoardRoot || cB.parent != playerBoardRoot) return;
+        int idxA = GetLaneIndexFor(a.instance);
+        int idxB = GetLaneIndexFor(b.instance);
 
-        int idxA = cA.GetSiblingIndex();
-        int idxB = cB.GetSiblingIndex();
-
-        Vector3 posA = cA.localPosition;
-        Vector3 posB = cB.localPosition;
-        Quaternion rotA = cA.localRotation;
-        Quaternion rotB = cB.localRotation;
-
-        cA.SetSiblingIndex(idxB);
-        cB.SetSiblingIndex(idxA);
-
-        a.UpdateBoardContainerTarget(posB, rotB);
-        b.UpdateBoardContainerTarget(posA, rotA);
+        if (!AnimateLaneSwap(a, b)) return;
 
         Logger.Info($"Swap: lane {idxA + 1} with lane {idxB + 1}");
         UpdateAllViews();
         UpdateHUD();
+    }
+
+    /// <summary>
+    /// Scambia due corsie e lascia che le carte ci arrivino animate.
+    ///
+    /// Il tween NON puo' stare sul container: l'HorizontalLayoutGroup lo
+    /// riposiziona a ogni layout pass e vincerebbe lui. Si sposta invece la
+    /// grafica della carta indietro alla posizione di partenza e si lascia fare a
+    /// CardView.FollowContainer, che e' la stessa animazione del rilascio dopo un
+    /// trascinamento — carta sollevata compresa.
+    /// </summary>
+    bool AnimateLaneSwap(CardView a, CardView b)
+    {
+        if (a == null || b == null || a == b) return false;
+
+        var cA = a.PlayerBoardContainer != null ? a.PlayerBoardContainer : a.EnsurePlayerBoardContainer(playerBoardRoot);
+        var cB = b.PlayerBoardContainer != null ? b.PlayerBoardContainer : b.EnsurePlayerBoardContainer(playerBoardRoot);
+        if (cA == null || cB == null || cA == cB) return false;
+        if (cA.parent != playerBoardRoot || cB.parent != playerBoardRoot) return false;
+
+        Vector3 worldA = a.RectTransform.position;
+        Vector3 worldB = b.RectTransform.position;
+
+        int idxA = cA.GetSiblingIndex();
+        int idxB = cB.GetSiblingIndex();
+        cA.SetSiblingIndex(idxB);
+        cB.SetSiblingIndex(idxA);
+
+        // Il layout group applica le nuove posizioni solo a fine frame: qui serve
+        // subito, altrimenti si rimetterebbe la grafica rispetto al posto vecchio.
+        Canvas.ForceUpdateCanvases();
+
+        a.RectTransform.position = worldA;
+        b.RectTransform.position = worldB;
+        return true;
     }
 
     void OnEndTurn()

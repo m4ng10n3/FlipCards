@@ -9,6 +9,9 @@ public class UiBar : MonoBehaviour
 {
     public RectTransform fill;
 
+    /// <summary>Verticale: si riempie dal basso verso l'alto.</summary>
+    public bool vertical;
+
     float _value = -1f;
 
     public float Value
@@ -21,7 +24,7 @@ public class UiBar : MonoBehaviour
             _value = value;
 
             var max = fill.anchorMax;
-            max.x = value;
+            if (vertical) max.y = value; else max.x = value;
             fill.anchorMax = max;
             fill.gameObject.SetActive(value > 0f);
         }

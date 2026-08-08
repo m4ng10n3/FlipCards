@@ -120,7 +120,11 @@ public class HudController : MonoBehaviour
             _pips[i].color = i < ap ? GamePalette.Ap : GamePalette.WithAlpha(GamePalette.Ap, 0.16f);
     }
 
-    /// <summary>Un pallino per AP disponibile: il costo delle azioni e' 1, quindi si contano a occhio.</summary>
+    /// <summary>
+    /// Un pallino per AP disponibile: il costo delle azioni e' 1, quindi si
+    /// contano a occhio. La colonna si dispone da sola in verticale se il rect e'
+    /// piu' alto che largo.
+    /// </summary>
     void BuildPips(int max)
     {
         if (apPipsRoot == null || _pips.Count == max) return;
@@ -128,11 +132,19 @@ public class HudController : MonoBehaviour
         UiBuild.ClearChildren(apPipsRoot);
         _pips.Clear();
 
-        const float size = 20f, gap = 8f;
+        bool vertical = apPipsRoot.rect.height > apPipsRoot.rect.width;
+        const float gap = 8f;
+        float size = vertical
+            ? Mathf.Min(apPipsRoot.rect.width, (apPipsRoot.rect.height - gap * (max - 1)) / max)
+            : Mathf.Min(apPipsRoot.rect.height, (apPipsRoot.rect.width - gap * (max - 1)) / max);
+
         for (int i = 0; i < max; i++)
         {
             var rt = UiBuild.Rect($"Pip{i}", apPipsRoot);
-            UiBuild.Band(rt, i * (size + gap), (apPipsRoot.rect.height - size) * 0.5f, size, size);
+            if (vertical)
+                UiBuild.Band(rt, (apPipsRoot.rect.width - size) * 0.5f, i * (size + gap), size, size);
+            else
+                UiBuild.Band(rt, i * (size + gap), (apPipsRoot.rect.height - size) * 0.5f, size, size);
             _pips.Add(UiBuild.Fill(rt, GamePalette.Ap));
         }
     }

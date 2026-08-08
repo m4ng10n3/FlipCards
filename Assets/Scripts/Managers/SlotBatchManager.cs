@@ -32,11 +32,7 @@ public class SlotBatchManager : MonoBehaviour
     [Header("Batch (pool di slot possibili)")]
     public List<GameManager.PrefabSlotBinding> batch = new List<GameManager.PrefabSlotBinding>();
 
-    [Header("Sprite Sheet Reel")]
-    [Tooltip("Immagine 144x(144xN) con tutti gli sprite slot impilati dall'alto verso il basso. Wrap Mode DEVE essere Repeat.")]
-    [SerializeField] private Texture2D reelSpriteSheet;
-    [Tooltip("Numero di frame nello sprite sheet (righe). Es: 11 slot = 11 frame.")]
-    [SerializeField] private int reelFrameCount = 10;
+    [Header("Reel")]
     [Tooltip("Velocita scroll in 'frame al secondo' durante la fase veloce.")]
     [SerializeField] private float reelScrollSpeed = 12f;
     [Tooltip("Durata in secondi del tween di rallentamento verso il frame finale.")]
@@ -75,6 +71,17 @@ public class SlotBatchManager : MonoBehaviour
     private readonly List<Cell> _cells = new List<Cell>();
     private bool _rolling;
 
+    /// <summary>
+    /// Facce del rullo: sono i prefab candidati di questo roll, in ordine e senza
+    /// ripetizioni. Il rullo mostra le LORO immagini, non un foglio a parte:
+    /// e' cio' che garantisce che l'immagine su cui si ferma sia esattamente
+    /// quella dello slot che viene rivelato.
+    /// </summary>
+    private readonly List<GameObject> _reelFaces = new List<GameObject>();
+
+    /// <summary>Ripetizioni della striscia: servono per far scorrere senza stacchi.</summary>
+    const int StripLoops = 3;
+
     struct LaneStep { public Vector2 first; public Vector2 size; public float stride; }
     private LaneStep? _laneStep;
 
@@ -85,20 +92,10 @@ public class SlotBatchManager : MonoBehaviour
         public RectTransform root;
         public CanvasGroup   group;
         public RectTransform artArea;   // stesso rect dell'artwork dello slot
-        public RectTransform art;       // RawImage, aspect bloccato
-        public RawImage      raw;
+        public RectTransform strip;     // colonna di facce che scorre
+        public readonly List<RectTransform> frames = new List<RectTransform>();
         public RectTransform labelArea;
         public Text          label;
-    }
-
-    void Awake()
-    {
-        if (reelSpriteSheet != null && reelSpriteSheet.wrapMode != TextureWrapMode.Repeat)
-        {
-            Debug.LogWarning(
-                $"[SlotBatchManager] La texture '{reelSpriteSheet.name}' ha Wrap Mode = {reelSpriteSheet.wrapMode}. " +
-                "Impostala su Repeat nell'importer, altrimenti lo scroll UV mostra una banda smussata a ogni giro.");
-        }
     }
 
     // ── API pubblica ──────────────────────────────────────────────────────────
@@ -156,6 +153,11 @@ public class SlotBatchManager : MonoBehaviour
                 yield break;   // il finally invoca comunque onComplete
             }
 
+            // Le facce del rullo sono i candidati distinti di questo roll.
+            _reelFaces.Clear();
+            foreach (var candidate in flat)
+                if (!_reelFaces.Contains(candidate)) _reelFaces.Add(candidate);
+
             var rng = new System.Random();
             for (int i = 0; i < laneCount; i++)
                 _chosenPrefabs.Add(flat[rng.Next(flat.Count)]);
@@ -209,49 +211,49 @@ public class SlotBatchManager : MonoBehaviour
         yield return new WaitForSeconds(delay);
         if (cell == null || cell.root == null) { onDone?.Invoke(); yield break; }
 
-        float frameH  = reelFrameCount > 0 ? 1f / reelFrameCount : 1f;
-        float scrollY = Random.Range(0f, 1f);
-        float elapsed = 0f;
-
         if (cell.label != null) cell.label.gameObject.SetActive(false);
 
-        // ── Fase scroll: UV scorre continuamente verso il basso ───────────────
+        int faces  = _reelFaces.Count;
+        float step = cell.artArea != null ? cell.artArea.rect.height : 0f;
+
+        if (faces == 0 || step <= 0f || cell.strip == null)
+        {
+            // Nessuna striscia da far girare: si passa direttamente al reveal.
+            yield return Reveal(cell, finalPrefab, onDone);
+            yield break;
+        }
+
+        float loop    = faces * step;
+        float y       = loop + Random.Range(0, faces) * step;   // parte dalla ripetizione centrale
+        float elapsed = 0f;
+
+        // ── Fase scroll: la colonna di facce scorre verso l'alto ──────────────
         while (elapsed < rollDuration)
         {
             if (cell.root == null) { onDone?.Invoke(); yield break; }
 
-            scrollY -= reelScrollSpeed * frameH * Time.deltaTime;
-            scrollY  = ((scrollY % 1f) + 1f) % 1f;
+            y += reelScrollSpeed * step * Time.deltaTime;
+            while (y >= 2f * loop) y -= loop;                   // rientro invisibile
 
-            if (cell.raw != null)
-                cell.raw.uvRect = new Rect(0f, scrollY, 1f, frameH);
-
+            cell.strip.anchoredPosition = new Vector2(0f, y);
             elapsed += Time.deltaTime;
             yield return null;
         }
 
         if (cell.root == null) { onDone?.Invoke(); yield break; }
 
-        // ── Settle: tween UV verso il frame corretto ──────────────────────────
-        var finalSD  = finalPrefab != null ? finalPrefab.GetComponent<SlotDefinition>() : null;
-        int frameIdx = finalSD != null ? finalSD.reelFrameIndex : 0;
-        frameIdx     = Mathf.Clamp(frameIdx, 0, Mathf.Max(0, reelFrameCount - 1));
+        // ── Settle: si ferma sulla faccia del prefab scelto ───────────────────
+        int index = _reelFaces.IndexOf(finalPrefab);
+        if (index < 0) index = 0;
 
-        float targetY     = 1f - (frameIdx + 1) * frameH;   // frame 0 = in cima allo sheet
-        float distance    = ((scrollY - targetY) + 1f) % 1f;
-        float totalTravel = distance + 1f;                  // un giro extra per la decelerazione
-        float endY        = scrollY - totalTravel;
+        float target = loop + index * step;
+        while (target < y + loop * 0.5f) target += loop;        // almeno mezzo giro di decelerazione
 
         bool tweenDone = false;
         DOTween.To(
-            () => scrollY,
-            y =>
-            {
-                scrollY = y;
-                if (cell.raw != null)
-                    cell.raw.uvRect = new Rect(0f, ((y % 1f) + 1f) % 1f, 1f, frameH);
-            },
-            endY,
+            () => y,
+            v => { y = v; if (cell.strip != null) cell.strip.anchoredPosition = new Vector2(0f, v); },
+            target,
             reelSettleDuration
         ).SetEase(Ease.OutCubic)
          .SetLink(cell.root.gameObject)
@@ -260,15 +262,20 @@ public class SlotBatchManager : MonoBehaviour
         yield return new WaitUntil(() => tweenDone || cell.root == null);
         if (cell.root == null) { onDone?.Invoke(); yield break; }
 
-        if (cell.raw != null)
-            cell.raw.uvRect = new Rect(0f, targetY, 1f, frameH);
+        cell.strip.anchoredPosition = new Vector2(0f, target);
 
-        // Punch opzionale: agisce solo sull'immagine, ritagliata dal RectMask2D
-        if (settlePunch > 0f && cell.art != null)
-            cell.art.DOPunchScale(Vector3.one * settlePunch, 0.28f, 6, 0.6f)
-                    .SetLink(cell.root.gameObject);
+        if (settlePunch > 0f)
+            cell.strip.DOPunchScale(Vector3.one * settlePunch, 0.28f, 6, 0.6f)
+                      .SetLink(cell.root.gameObject);
 
-        // ── Nome e stat dello slot uscito ─────────────────────────────────────
+        yield return Reveal(cell, finalPrefab, onDone);
+    }
+
+    /// <summary>Etichetta dello slot uscito, pausa, poi la copertura sfuma.</summary>
+    IEnumerator Reveal(Cell cell, GameObject finalPrefab, System.Action onDone)
+    {
+        var finalSD = finalPrefab != null ? finalPrefab.GetComponent<SlotDefinition>() : null;
+
         if (cell.label != null && finalSD != null)
         {
             cell.label.gameObject.SetActive(true);
@@ -367,20 +374,36 @@ public class SlotBatchManager : MonoBehaviour
         cell.artArea = areaGO.GetComponent<RectTransform>();
         cell.artArea.SetParent(cell.root, false);
 
-        // Immagine: aspect 1:1 bloccato dal fitter, mai deformata.
-        var artGO = new GameObject("Reel", typeof(RectTransform));
-        cell.art  = artGO.GetComponent<RectTransform>();
-        cell.art.SetParent(cell.artArea, false);
+        // Striscia: una faccia per candidato, ripetuta StripLoops volte per poter
+        // scorrere senza stacchi. Le facce sono copie dell'artwork dei prefab, non
+        // fotogrammi di un foglio a parte: cosi cio' su cui il rullo si ferma e'
+        // esattamente cio' che viene rivelato.
+        var stripGO = new GameObject("Strip", typeof(RectTransform));
+        cell.strip  = stripGO.GetComponent<RectTransform>();
+        cell.strip.SetParent(cell.artArea, false);
+        cell.strip.anchorMin = new Vector2(0f, 1f);
+        cell.strip.anchorMax = new Vector2(1f, 1f);
+        cell.strip.pivot     = new Vector2(0.5f, 1f);
 
-        cell.raw = artGO.AddComponent<RawImage>();
-        cell.raw.texture       = reelSpriteSheet;
-        cell.raw.raycastTarget = false;
-        float fh = reelFrameCount > 0 ? 1f / reelFrameCount : 1f;
-        cell.raw.uvRect = new Rect(0f, 1f - fh, 1f, fh);
+        int faces = _reelFaces.Count;
+        for (int loop = 0; loop < StripLoops; loop++)
+        {
+            for (int face = 0; face < faces; face++)
+            {
+                var frameGO = new GameObject($"Face_{loop}_{face}", typeof(RectTransform));
+                var frameRt = frameGO.GetComponent<RectTransform>();
+                frameRt.SetParent(cell.strip, false);
+                frameRt.anchorMin = new Vector2(0f, 1f);
+                frameRt.anchorMax = new Vector2(1f, 1f);
+                frameRt.pivot     = new Vector2(0.5f, 1f);
 
-        var fitter = artGO.AddComponent<AspectRatioFitter>();
-        fitter.aspectMode  = AspectRatioFitter.AspectMode.FitInParent;
-        fitter.aspectRatio = FrameAspect();
+                var img = frameGO.AddComponent<Image>();
+                img.raycastTarget = false;
+                CopyArtwork(_reelFaces[face], img);
+
+                cell.frames.Add(frameRt);
+            }
+        }
 
         // Etichetta: sotto l'artwork, non sopra.
         var labelGO   = new GameObject("Label", typeof(RectTransform));
@@ -437,12 +460,26 @@ public class SlotBatchManager : MonoBehaviour
         cell.artArea.offsetMin = Vector2.zero;
         cell.artArea.offsetMax = Vector2.zero;
 
-        // Il fitter ricalcola sizeDelta da solo: qui basta partire da uno stretch pulito.
-        cell.art.anchorMin = Vector2.zero;
-        cell.art.anchorMax = Vector2.one;
-        cell.art.offsetMin = Vector2.zero;
-        cell.art.offsetMax = Vector2.zero;
-        cell.art.localScale = Vector3.one;
+        // La striscia e' alta quanto tutte le facce messe in colonna; ogni faccia
+        // occupa esattamente l'area artwork, cosi il fermo e' sempre allineato.
+        float faceH = cell.artArea.rect.height;
+        if (cell.strip != null && faceH > 0f)
+        {
+            cell.strip.localScale = Vector3.one;
+            cell.strip.offsetMin = new Vector2(0f, cell.strip.offsetMin.y);
+            cell.strip.offsetMax = new Vector2(0f, cell.strip.offsetMax.y);
+            cell.strip.sizeDelta = new Vector2(0f, faceH * cell.frames.Count);
+            cell.strip.anchoredPosition = Vector2.zero;
+
+            for (int f = 0; f < cell.frames.Count; f++)
+            {
+                var frame = cell.frames[f];
+                frame.offsetMin = new Vector2(0f, frame.offsetMin.y);
+                frame.offsetMax = new Vector2(0f, frame.offsetMax.y);
+                frame.sizeDelta = new Vector2(0f, faceH);
+                frame.anchoredPosition = new Vector2(0f, -f * faceH);
+            }
+        }
 
         cell.labelArea.anchorMin = new Vector2(0f, 0f);
         cell.labelArea.anchorMax = new Vector2(1f, Mathf.Max(0.01f, nMin.y));
@@ -569,12 +606,28 @@ public class SlotBatchManager : MonoBehaviour
         return _fallbackFont;
     }
 
-    float FrameAspect()
+    /// <summary>
+    /// Copia sull'immagine del rullo l'artwork del prefab slot: sprite, colore,
+    /// materiale. Il colore conta — piu' slot condividono lo stesso sprite e si
+    /// distinguono solo per la tinta.
+    /// </summary>
+    void CopyArtwork(GameObject prefab, Image target)
     {
-        if (reelSpriteSheet == null || reelFrameCount <= 0) return 1f;
-        float frameHeight = reelSpriteSheet.height / (float)reelFrameCount;
-        if (frameHeight <= 0f) return 1f;
-        return reelSpriteSheet.width / frameHeight;
+        if (prefab == null || target == null) return;
+
+        var art = prefab.transform.Find(artChildName);
+        var source = art != null ? art.GetComponent<Image>() : null;
+        if (source == null)
+        {
+            target.color = coverColor;
+            return;
+        }
+
+        target.sprite         = source.sprite;
+        target.color          = source.color;
+        target.material       = source.material;
+        target.type           = source.type;
+        target.preserveAspect = source.preserveAspect;
     }
 
     List<GameObject> BuildFlatBatch()

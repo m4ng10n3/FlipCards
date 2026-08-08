@@ -115,7 +115,8 @@ public static class UiBuild
     }
 
     /// <summary>Barra valore/massimo: sfondo incassato + riempimento ad ancore.</summary>
-    public static UiBar Bar(string name, Transform parent, Color fillColor, out RectTransform root)
+    public static UiBar Bar(string name, Transform parent, Color fillColor, out RectTransform root,
+                            bool vertical = false)
     {
         root = Rect(name, parent);
         Fill(root, GamePalette.PanelSunken);
@@ -127,6 +128,7 @@ public static class UiBuild
 
         var bar = root.gameObject.AddComponent<UiBar>();
         bar.fill = fillRt;
+        bar.vertical = vertical;
         return bar;
     }
 

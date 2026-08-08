@@ -15,10 +15,10 @@ public class CardView : MonoBehaviour
     [SerializeField] private Image artworkMonster;
     [SerializeField] private CurveParameters curveParameters;
     [Header("Hand Follow")]
-    [Tooltip("Quanto sale una carta in mano al passaggio del puntatore. La zona mano " +
-             "ne mostra solo la fascia alta: senza questo sollevamento il resto della " +
-             "carta resta fuori schermo.")]
-    [SerializeField] private float handHoverLift = 190f;
+    [Tooltip("Sollevamento della singola carta in mano al passaggio del puntatore. " +
+             "Tenerlo basso: a salire e' la mano intera (HandTray), e un sollevamento " +
+             "grande qui sposterebbe la carta fuori dal rect su cui si fa hover.")]
+    [SerializeField] private float handHoverLift = 24f;
     [SerializeField] private float handFollowSpeed = 18f;
     [SerializeField] private float handFollowRotationSpeed = 18f;
     [SerializeField] private float handTweenDuration = 0.2f;

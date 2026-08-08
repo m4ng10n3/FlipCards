@@ -1,5 +1,10 @@
 # Unity Project Development Guide for AI Agents
 
+> **Leggi prima [AGENTS.md](AGENTS.md) → "Guida operativa FlipCards"**: mappa dei
+> file, ciclo di lavoro con Unity MCP, ricette di test e trappole già pagate.
+> I lavori aperti sono in [ROADMAP.md](ROADMAP.md), la specifica di layout in
+> [LAYOUT_SPEC.md](LAYOUT_SPEC.md).
+
 ## Project Context
 
 You are working on a **Unity project** used to build games or interactive experiences. Unity is a cross-platform game engine that uses C# for scripting and organizes content into scenes, prefabs, and assets.

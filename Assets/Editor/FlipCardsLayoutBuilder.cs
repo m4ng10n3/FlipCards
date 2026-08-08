@@ -23,22 +23,33 @@ public static class FlipCardsLayoutBuilder
     // ── Misure (LAYOUT_SPEC §6.2 / §6.3 / §6.4) ───────────────────────────────
 
     const float RefW = 1920f, RefH = 1080f;
-    const float FieldW = 1440f;
     const float SideW = 480f, SidePad = 40f, SideContentW = 400f;
+
+    // Rail verticale del giocatore: HP e AP stavano su una banda orizzontale che
+    // costava 52 px di altezza al campo. In colonna costano solo larghezza.
+    const float RailW = 96f;
+    const float FieldX = RailW;
+    const float FieldW = RefW - SideW - RailW;   // 1344
 
     const float CellW = 220f, CellH = 330f;   // carta e slot
     const float LaneGap = 68f;                // colonna 240 - cella 220 + gap 48
     const float LaneColumn = 240f;
 
     // Bande del campo di gioco
-    const float TopBarY = 0f, TopBarH = 56f;
-    const float BossY = 56f, BossH = 92f;
-    const float EnemyY = 148f, EnemyH = 330f;
-    const float AxisY = 478f, AxisH = 68f;
-    const float PlayerY = 546f, PlayerH = 340f;
-    const float PlayerBandY = 886f, PlayerBandH = 52f;
-    const float HandY = 938f, HandH = 142f;
-    const float HandRootW = 1400f;   // vedi BuildHandZone: detta anche lo spacing
+    const float TopBarY = 0f, TopBarH = 52f;
+    const float BossY = 52f, BossH = 72f;
+    const float EnemyY = 124f, EnemyH = 358f;
+    const float AxisY = 482f, AxisH = 64f;
+    const float PlayerY = 546f, PlayerH = 368f;
+
+    // Mano: a riposo mostra solo la fascia alta delle carte, sollevata le mostra
+    // intere e copre in parte le corsie. Quote misurate dal fondo dello schermo.
+    const float HandY = 914f;
+    const float HandRestY = 1f;         // centro carta appena sotto il bordo
+    const float HandRaisedY = 185f;
+    const float HandRestH = RefH - HandY;   // 166
+    const float HandRaisedH = 380f;
+    const float HandRootW = 1344f;      // detta anche lo spacing: width / maxHandSize
 
     // Bande della colonna destra
     const float HeaderY = 56f, HeaderH = 40f;
@@ -115,17 +126,25 @@ public static class FlipCardsLayoutBuilder
 
                 // Bande della cella carta (LAYOUT_SPEC §6.5). Il Template resta a
                 // tutta cella: e' la cornice.
+                //
+                // L'artwork torna al rect di progetto del prefab (89x95 dentro
+                // 100x154, riscalato): e' il buco trasparente del template, e
+                // comprimerlo per far posto ai chip lo aveva rimpicciolito troppo.
                 Place(cell, "Template", 0f, 0f, CellW, CellH);
-                Place(cell, "Name", 4f, 2f, CellW - 8f, 30f);
-                Place(cell, "imagecharacter", 0f, 36f, CellW, 158f);
-                Place(cell, "FrontDamage", 4f, 198f, 68f, 44f);
-                Place(cell, "HP", 76f, 198f, 68f, 44f);
-                Place(cell, "BackBlock", 148f, 198f, 68f, 44f);
+                Place(cell, "Name", 4f, 2f, CellW - 8f, 26f);
+                Place(cell, "imagecharacter", 11.2f, 39f, 195.8f, 203.6f);
 
-                StyleText(cell, "Name", 20, TextAnchor.MiddleCenter, GamePalette.TextPrimary);
-                StyleText(cell, "FrontDamage", 26, TextAnchor.MiddleCenter, GamePalette.TextPrimary);
-                StyleText(cell, "HP", 26, TextAnchor.MiddleCenter, GamePalette.TextPrimary);
-                StyleText(cell, "BackBlock", 26, TextAnchor.MiddleCenter, GamePalette.TextPrimary);
+                // Statistiche simboliche: solo il numero, colorato per ruolo, con
+                // sottolineatura dello stesso colore disegnata da CardOverlay.
+                // Niente etichette: rosso = attacco, verde = vita, blu = blocco.
+                Place(cell, "FrontDamage", CardOverlay.StatX(0), CardOverlay.StatY, CardOverlay.StatW, CardOverlay.StatH);
+                Place(cell, "HP", CardOverlay.StatX(1), CardOverlay.StatY, CardOverlay.StatW, CardOverlay.StatH);
+                Place(cell, "BackBlock", CardOverlay.StatX(2), CardOverlay.StatY, CardOverlay.StatW, CardOverlay.StatH);
+
+                StyleText(cell, "Name", 19, TextAnchor.MiddleCenter, GamePalette.TextPrimary);
+                StyleText(cell, "FrontDamage", 24, TextAnchor.MiddleCenter, GamePalette.Danger);
+                StyleText(cell, "HP", 24, TextAnchor.MiddleCenter, GamePalette.PlayerHp);
+                StyleText(cell, "BackBlock", 24, TextAnchor.MiddleCenter, GamePalette.Retro);
 
                 // Fazione e lato li disegna CardOverlay come badge e fascia colorata.
                 // I Text del prefab restano (CardView li scrive e usa sideText per
@@ -475,20 +494,20 @@ public static class FlipCardsLayoutBuilder
         UiBuild.Fill(backdrop, GamePalette.Background);
 
         var field = UiBuild.Rect("Field", root);
-        UiBuild.Band(field, 0f, 0f, FieldW, RefH);
+        UiBuild.Band(field, FieldX, 0f, FieldW, RefH);
 
         var side = UiBuild.Rect("SidePanel", root);
-        UiBuild.Band(side, FieldW, 0f, SideW, RefH);
+        UiBuild.Band(side, RefW - SideW, 0f, SideW, RefH);
         UiBuild.Fill(side, GamePalette.Panel);
 
         var hud = canvasGO.GetComponent<HudController>() ?? canvasGO.AddComponent<HudController>();
 
+        BuildPlayerRail(root, hud);
         BuildTopBar(field, hud);
         BuildBossBand(field, hud);
         var aiBoardRoot = BuildEnemyLanes(field);
         BuildLaneAxis(field);
         var playerBoardRoot = BuildPlayerLanes(field);
-        BuildPlayerBand(field, hud);
         var (handRoot, spawnPoint) = BuildHandZone(field);
 
         BuildSideHeader(side, hud);
@@ -602,63 +621,83 @@ public static class FlipCardsLayoutBuilder
         group.padding = new RectOffset(0, 0, 0, 0);
     }
 
-    static void BuildPlayerBand(RectTransform field, HudController hud)
+    /// <summary>
+    /// Rail verticale del giocatore: HP e AP in colonna sul bordo sinistro.
+    /// In orizzontale costavano una banda intera al campo di gioco.
+    /// </summary>
+    static void BuildPlayerRail(RectTransform root, HudController hud)
     {
-        var band = UiBuild.PanelBox("PlayerBand", field, GamePalette.PanelSunken);
-        UiBuild.Band(band, 40f, PlayerBandY, FieldW - 80f, PlayerBandH);
+        var rail = UiBuild.Rect("PlayerRail", root);
+        UiBuild.Band(rail, 0f, BossY, RailW, RefH - BossY);
+        UiBuild.Fill(rail, GamePalette.PanelSunken);
 
-        float w = FieldW - 80f;
+        var label = UiBuild.Text("Label", rail, "TU", 17f, GamePalette.PlayerHp,
+                                 TextAlignmentOptions.Center, FontStyles.Bold);
+        UiBuild.Band(label.rectTransform, 0f, 14f, RailW, 22f);
 
-        var label = UiBuild.Text("Label", band, "TU", 18f, GamePalette.PlayerHp,
-                                 TextAlignmentOptions.Left, FontStyles.Bold);
-        UiBuild.Band(label.rectTransform, 18f, 14f, 60f, 24f);
+        hud.playerHpBar = UiBuild.Bar("HpBar", rail, GamePalette.PlayerHp, out var barRt, vertical: true);
+        UiBuild.Band(barRt, 30f, 44f, 36f, 420f);
 
-        hud.playerHpBar = UiBuild.Bar("HpBar", band, GamePalette.PlayerHp, out var barRt);
-        UiBuild.Band(barRt, 70f, 14f, 520f, 24f);
+        hud.playerHpText = UiBuild.Text("HpText", rail, "20/20", 16f, GamePalette.TextPrimary,
+                                        TextAlignmentOptions.Center, FontStyles.Bold);
+        UiBuild.Band(hud.playerHpText.rectTransform, 0f, 470f, RailW, 22f);
 
-        hud.playerHpText = UiBuild.Text("HpText", band, "20/20", 18f, GamePalette.TextPrimary,
-                                        TextAlignmentOptions.Left, FontStyles.Bold);
-        UiBuild.Band(hud.playerHpText.rectTransform, 604f, 14f, 120f, 24f);
+        var apLabel = UiBuild.Text("ApLabel", rail, "AP", 17f, GamePalette.Ap,
+                                   TextAlignmentOptions.Center, FontStyles.Bold);
+        UiBuild.Band(apLabel.rectTransform, 0f, 512f, RailW, 22f);
 
-        var apLabel = UiBuild.Text("ApLabel", band, "AP", 18f, GamePalette.Ap,
-                                   TextAlignmentOptions.Left, FontStyles.Bold);
-        UiBuild.Band(apLabel.rectTransform, 760f, 14f, 40f, 24f);
+        hud.apPipsRoot = UiBuild.Rect("ApPips", rail);
+        UiBuild.Band(hud.apPipsRoot, 30f, 540f, 36f, 230f);
 
-        hud.apPipsRoot = UiBuild.Rect("ApPips", band);
-        UiBuild.Band(hud.apPipsRoot, 796f, 14f, 180f, 24f);
+        hud.apText = UiBuild.Text("ApText", rail, "4/5", 16f, GamePalette.TextPrimary,
+                                  TextAlignmentOptions.Center, FontStyles.Bold);
+        UiBuild.Band(hud.apText.rectTransform, 0f, 776f, RailW, 22f);
 
-        hud.apText = UiBuild.Text("ApText", band, "4/5", 18f, GamePalette.TextPrimary,
-                                  TextAlignmentOptions.Left, FontStyles.Bold);
-        UiBuild.Band(hud.apText.rectTransform, 986f, 14f, 100f, 24f);
-
-        var costs = UiBuild.Text("Costs", band, "pescare · giocare · girare · scambiare = 1 AP",
-                                 14f, GamePalette.TextMuted, TextAlignmentOptions.Right);
-        UiBuild.Band(costs.rectTransform, w - 18f - 500f, 16f, 500f, 20f);
+        var costs = UiBuild.Text("Costs", rail, "ogni\nazione\n1 AP", 12f, GamePalette.TextMuted,
+                                 TextAlignmentOptions.Center);
+        UiBuild.Band(costs.rectTransform, 0f, 812f, RailW, 60f);
+        costs.textWrappingMode = TextWrappingModes.Normal;
     }
 
     static (Transform handRoot, Transform spawnPoint) BuildHandZone(RectTransform field)
     {
+        // Area di attivazione ancorata al fondo: cresce verso l'alto quando la
+        // mano sale, cosi il puntatore resta dentro mentre sceglie una carta.
+        // A riposo copre solo la fascia mano e non intercetta l'area di gioco.
         var zone = UiBuild.Rect("HandZone", field);
-        UiBuild.Band(zone, 0f, HandY, FieldW, HandH);
+        zone.anchorMin = zone.anchorMax = new Vector2(0f, 0f);
+        zone.pivot = new Vector2(0f, 0f);
+        zone.sizeDelta = new Vector2(FieldW, HandRestH);
+        zone.anchoredPosition = Vector2.zero;
+        UiBuild.Fill(zone, new Color(1f, 1f, 1f, 0f), raycast: true);
 
         // Niente LayoutGroup: HandManager riscrive container.localPosition ogni
         // frame e un gruppo attivo ci combatte.
         //
         // Il pivot DEVE stare al centro: HandManager posiziona i container con
         // localPosition simmetrica intorno allo zero (-spacing..+spacing), e lo
-        // zero locale e' il pivot del parent. Con pivot in alto a sinistra la mano
-        // finisce fuori dal campo.
+        // zero locale e' il pivot del parent.
         //
-        // Larghezza: spacing = handRect.width / maxHandSize, quindi la larghezza
-        // e' anche la regola di non sovrapposizione.
+        // Ancoraggio al fondo dell'area: cosi quando l'area cresce la mano non si
+        // sposta, la muove solo il tween di HandTray.
         var handRoot = UiBuild.Rect("PlayerHand", zone);
-        handRoot.anchorMin = handRoot.anchorMax = new Vector2(0f, 1f);
+        handRoot.anchorMin = handRoot.anchorMax = new Vector2(0.5f, 0f);
         handRoot.pivot = new Vector2(0.5f, 0.5f);
         handRoot.sizeDelta = new Vector2(HandRootW, CellH);
-        handRoot.anchoredPosition = new Vector2(FieldW * 0.5f, -CellH * 0.5f);
+        handRoot.anchoredPosition = new Vector2(0f, HandRestY);
 
         var spawn = UiBuild.Rect("spawnPoint", zone);
-        UiBuild.Band(spawn, FieldW - 160f, 0f, CellW, CellH);
+        spawn.anchorMin = spawn.anchorMax = new Vector2(1f, 0f);
+        spawn.pivot = new Vector2(0.5f, 0.5f);
+        spawn.sizeDelta = new Vector2(CellW, CellH);
+        spawn.anchoredPosition = new Vector2(-140f, HandRestY);
+
+        var tray = zone.gameObject.AddComponent<HandTray>();
+        tray.handRoot = handRoot;
+        tray.restY = HandRestY;
+        tray.raisedY = HandRaisedY;
+        tray.restHeight = HandRestH;
+        tray.raisedHeight = HandRaisedH;
 
         return (handRoot, spawn);
     }

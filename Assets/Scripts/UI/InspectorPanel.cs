@@ -72,6 +72,46 @@ public class InspectorPanel : MonoBehaviour
         SetHint("Doppio click per girare · 1 AP     Trascina su un'altra corsia per scambiare · 1 AP");
     }
 
+    /// <summary>
+    /// Carta in mano: non ha ancora una CardInstance — lato e cariche nascono
+    /// quando viene giocata — quindi la scheda si legge dalla Spec del prefab.
+    /// </summary>
+    public void ShowCardPreview(CardDefinition definition)
+    {
+        if (definition == null) return;
+        _source = definition;
+
+        var def = definition.BuildSpec();
+
+        if (titleText != null) titleText.text = def.cardName;
+        if (subtitleText != null) subtitleText.text = $"{def.cardClass}  ·  Fazione {def.faction}";
+        if (sideStrip != null) sideStrip.color = GamePalette.WithAlpha(GamePalette.Neutral, 0.7f);
+        if (sideText != null)
+        {
+            sideText.text = "IN MANO";
+            sideText.color = GamePalette.TextMuted;
+        }
+
+        _sb.Clear();
+        Stat("HP", $"{def.maxHealth}");
+        Stat("ATK Fronte", $"{def.frontDamage}");
+        Stat("BLOCK Fronte", $"{def.frontBlockValue}");
+        Stat("BLOCK Retro", $"{def.backBlockValue}");
+        Stat("Instabilita'", $"{Mathf.RoundToInt(def.endTurnFlipChance * 100f)}%  <color=#8888aa>(si gira da sola a fine turno)</color>");
+
+        Section("Passive in Retro");
+        bool anyPassive = false;
+        if (def.backDamageBonusSameFaction > 0) { Line($"+{def.backDamageBonusSameFaction} ATK alle carte {def.faction} in Fronte"); anyPassive = true; }
+        if (def.backBlockBonusSameFaction > 0)  { Line($"+{def.backBlockBonusSameFaction} BLOCK alle carte {def.faction}"); anyPassive = true; }
+        if (def.backBonusPAIfTwoRetroSameFaction > 0) { Line($"+{def.backBonusPAIfTwoRetroSameFaction} AP con due {def.faction} in Retro"); anyPassive = true; }
+        if (!anyPassive) Line("<color=#66667a>nessuna</color>");
+
+        AppendAbilities(definition.gameObject);
+
+        bodyText.text = _sb.ToString();
+        SetHint("Seleziona una casella libera, poi la carta · 1 AP     Oppure trascinala sulla casella.");
+    }
+
     // ── Slot ──────────────────────────────────────────────────────────────────
 
     public void ShowSlot(SlotView view)

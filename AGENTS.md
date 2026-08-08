@@ -1,5 +1,9 @@
 # Unity Project Development Guide for AI Agents
 
+> **FlipCards:** la parte specifica di questo progetto sta in fondo, in
+> [Guida operativa FlipCards](#guida-operativa-flipcards). I lavori aperti sono in
+> [ROADMAP.md](ROADMAP.md), la specifica di layout in [LAYOUT_SPEC.md](LAYOUT_SPEC.md).
+
 ## Project Context
 
 You are working on a **Unity project** used to build games or interactive experiences. Unity is a cross-platform game engine that uses C# for scripting and organizes content into scenes, prefabs, and assets.
@@ -166,3 +170,180 @@ Think of it like running lint after a coding session—not after every keystroke
 - **Simple request** ("create a blue sphere at 1,2,3") → Verify immediately after
 - **Multi-step task** → Verify after each logical phase completes
 - **Batch operations** (created 5 objects) → One screenshot at the end, not five
+
+---
+
+# Guida operativa FlipCards
+
+Tutto quello che segue è specifico di **questo** progetto. Serve a non ripagare
+il debug già pagato. Documenti collegati: [ROADMAP.md](ROADMAP.md) per i lavori
+aperti, [LAYOUT_SPEC.md](LAYOUT_SPEC.md) per la specifica di layout — il §7 di
+quel documento è l'elenco dei vincoli che, se violati, rompono la logica di gioco.
+
+## Il gioco in tre righe
+
+Duello a corsie, giocatore contro un boss a pattern deterministici, 12 turni.
+Ogni corsia ha una carta del giocatore in basso e uno slot nemico in alto; carte e
+slot hanno due lati (Fronte attacca, Retro blocca e accumula cariche). Il giocatore
+sceglie i lati spendendo AP, lo slot segue una `flipPattern` fissa. A fine turno
+tutti gli slot nemici vengono sostituiti con un'animazione da slot machine.
+
+## Mappa dei file
+
+**Logica** (`Assets/Scripts/`)
+- `Managers/GameManager.cs` — orchestratore: turni, AP, spawn, attacco, fine turno.
+  Espone `CurrentTurn`, `PlayerPhase`, `AwaitingEndTurn`, `InputLocked`,
+  `MatchEnded`, `MatchResult`, l'evento statico `LogChanged` e `HighlightFreeSpots`.
+- `Managers/LaneResolver.cs` — risoluzione di una corsia. `Managers/SynergyResolver.cs` — combo di adiacenza.
+- `Managers/HandManager.cs` — mano e mazzo. Espone `DeckCount`, `HandCount`, `MaxHandSize`.
+- `Managers/SlotBatchManager.cs` — reel di fine turno e respawn degli slot.
+- `Cards/CardDefinition.cs` — dati della carta **e** gestione dell'input (click, drag, hover).
+- `Cards/CardView.cs` — presentazione della carta: flip, hover, tilt, ombra, container.
+- `Slots/SlotView.cs`, `Slots/SlotInstance.cs` — slot; `SlotInstance` espone
+  `PatternLength`, `PatternStep`, `PatternSideAt(step)`.
+
+**Presentazione** (`Assets/Scripts/UI/`, tutta aggiunta per il layout)
+- `GamePalette.cs` — palette unica. Un colore = un significato. Fronte ambra, Retro blu.
+- `UiBuild.cs` — helper di costruzione. `Band(rt, x, y, w, h)` usa **coordinate
+  banda**: origine in alto a sinistra del parent, y verso il basso, come in
+  LAYOUT_SPEC. I numeri del documento finiscono nel codice invariati.
+- `UiBar.cs` — barra valore/massimo. Vedi la trappola su `fillAmount`.
+- `HudController.cs` — turno, fase, HP, AP, contatori, pannello di fine partita.
+  Legge lo stato **in polling** in `LateUpdate` e scrive solo quando un valore cambia.
+- `LaneAxisView.cs` — asse delle corsie: pronostico per corsia e connettori di combo.
+- `InspectorPanel.cs` + `AbilityCatalog.cs` — ispettore e testi delle abilità.
+- `CardOverlay.cs` / `SlotOverlay.cs` — chrome costruito a runtime sopra i prefab.
+- `LogPanel.cs` — autoscroll del log.
+
+**Costruzione della scena**
+- `Assets/Editor/FlipCardsLayoutBuilder.cs` — ricostruisce **tutto** il layout:
+  menu **FlipCards → Ricostruisci layout di gioco**. Due fasi: ridimensiona i
+  prefab alla cella 220×330, poi ricostruisce il Canvas a bande e ricabla
+  `GameManager` e `HandManager`. È idempotente. **Non modificare il layout a
+  mano nella scena**: al prossimo rebuild si perde. Si tocca il builder.
+
+## Ciclo di lavoro
+
+1. Modifica i file `.cs` con gli strumenti di editing normali.
+2. **Aspetta la ricompilazione** (~20–25 s). Durante il domain reload il gateway
+   MCP risponde `Unity not detected`: non è un errore, è Unity che ricarica. Aspetta e riprova.
+3. `Unity_GetConsoleLogs` con `logTypes: "Error"` per verificare che compili.
+4. Rilancia il builder: `FlipCardsLayoutBuilder.Rebuild()` da `Unity_RunCommand`.
+5. `EditorApplication.isPlaying = true`, aspetta ~14 s, poi verifica.
+
+Uscire da Play e ricostruire sono due comandi separati: `isPlaying = false` ha
+effetto solo alla fine del comando corrente, quindi il rebuild nello stesso
+`RunCommand` girerebbe ancora in Play.
+
+## Verifica visiva
+
+Usare `Unity_Camera_Capture` con l'**instance ID della Main Camera** (il Canvas è
+`Screen Space - Camera`, quindi la camera vede la UI). Senza ID si ottiene la
+Scene View, che è inquadrata dove capita e non serve.
+
+```csharp
+result.Log("MainCamera id=" + Camera.main.gameObject.GetInstanceID());
+```
+
+**Una cattura fatta subito dopo un `RunCommand` può essere indietro di un frame.**
+Gli oggetti istanziati e i `Destroy` differiti non sono ancora applicati: se il
+risultato sembra sbagliato, ricattura prima di indagare. È già successo di
+inseguire un bug inesistente per questo motivo.
+
+## Ricette di test
+
+Giocare carte in campo — **raccogliere le `CardView` prima del ciclo**: `Destroy`
+è differito a fine frame, quindi ricercare "la prima carta in mano" a ogni giro
+restituisce sempre la stessa e si finisce per giocarla tre volte.
+
+```csharp
+var gm = GameManager.Instance;
+var cards = new List<CardView>();
+foreach (Transform c in gm.HandManager.HandRoot) {
+    var cv = c.GetComponentInChildren<CardView>();
+    if (cv != null && cv.instance == null) cards.Add(cv);
+}
+int used = 0;
+for (int lane = 0; lane < gm.playerBoardRoot.childCount && used < cards.Count; lane++) {
+    var spot = gm.playerBoardRoot.GetChild(lane);
+    if (spot.name != gm.EmptySpot.name) continue;
+    gm.OnEmptySpotClicked(spot);
+    gm.OnCardClicked(cards[used++]);
+}
+```
+
+Altre scorciatoie: `gm.btnAttack.onClick.Invoke()` per attaccare,
+`gm.btnEndTurn.onClick.Invoke()` per chiudere il turno e far partire il reel,
+`gm.ai.hp = 0;` seguito da fine turno per il pannello di fine partita,
+`InspectorPanel.Instance.ShowCard(view)` / `ShowSlot(view)` per popolare
+l'ispettore senza muovere il mouse.
+
+## Trappole già pagate
+
+**`Image.fillAmount` non funziona senza sprite.** Un'`Image` con
+`type = Filled` ma `sprite = null` ignora del tutto `fillAmount` e disegna sempre
+il rect pieno. Per questo le barre usano `UiBar`, che muove `anchorMax.x` del
+rettangolo di riempimento.
+
+**In `Screen Space - Camera` la z conta.** L'ordine fra un sub-canvas (ogni carta
+ha un `Canvas` sul figlio `Visual`) e i suoi fratelli è deciso dalla distanza
+dalla camera, non dalla gerarchia. L'ombra della carta stava a z negativa, cioè
+più vicina alla camera: in Overlay la z era ignorata, passando a Camera l'ombra
+copriva la carta. Ora `CardView.UpdateShadow` usa `+Vector3.forward` e il prefab
+parte da z = +1. Se compaiono rettangoli neri sulle corsie, è questo.
+
+**Il pivot di `handRoot` deve stare al centro.** `HandManager.UpdateCardsPosition`
+posiziona i container con `localPosition` simmetrica intorno allo zero, e lo zero
+locale è il pivot del parent. Con pivot in alto a sinistra la mano finisce fuori
+dal campo. Inoltre `spacing = handRect.width / maxHandSize`: la larghezza di
+`handRoot` è anche la regola di sovrapposizione.
+
+**Nessun figlio di carta o slot deve essere `Raycast Target`.**
+`FindBoardCardUnderPointer` prende il risultato del raycast e ci cerca dentro un
+`CardView`: se il colpo va su un `Text` o sull'artwork, non lo trova e lo swap per
+trascinamento fallisce silenziosamente. `SilenceChildRaycasts` nel builder lo
+garantisce; gli helper di `UiBuild` nascono con `raycastTarget = false`.
+
+**Gli overlay coprono i `Text` del prefab.** I figli aggiunti dopo disegnano
+sopra. `CardOverlay` e `SlotOverlay` creano prima i fondi e poi rialzano i testi
+con `SetAsLastSibling()`.
+
+**I `Text` legacy scalati troncano.** Dopo il ridimensionamento dei prefab
+servono `horizontalOverflow` e `verticalOverflow` a `Overflow`, altrimenti
+"DEF 4" diventa "D". Lo fa `StyleText` nel builder.
+
+**Il font legacy non ha i glifi decorativi.** ⚔ 🛡 e simili escono come
+rettangoli vuoti. Usare testo semplice nei `Text` legacy; i simboli vanno bene
+nei TMP della UI nuova (▲ ▼ ◆ · — sono verificati).
+
+**Il clone della board deve essere invisibile.** `GameManager.Start` duplica
+`playerBoardRoot` come fantasma per il drag. Vanno spenti **tutti** i `Graphic`
+di ogni casella, non solo l'`Image` della radice: la cornice è fatta di figli.
+Se ne occupa `GameManager.SetSpotGraphicsVisible`.
+
+**`HorizontalLayoutGroup` con `childControl*` spento usa `sizeDelta`,** non il
+`LayoutElement`. È il motivo per cui le corsie funzionano con i `_BoardContainer`
+creati a runtime, che un `LayoutElement` non ce l'hanno.
+
+**API obsolete in Unity 6:** `Object.FindObjectOfType` → `FindAnyObjectByType`,
+`TMP_Text.enableWordWrapping` → `textWrappingMode`.
+
+**Nel codice di `Unity_RunCommand`:** la classe deve chiamarsi `CommandScript` ed
+essere `internal`. `Image` va scritto `UnityEngine.UI.Image` per intero, perché
+`Image` collide con un namespace nello scope del comando.
+
+## Invarianti da non rompere
+
+Oltre ai vincoli di LAYOUT_SPEC §7:
+
+- I numeri del layout stanno solo in `FlipCardsLayoutBuilder` (le costanti in
+  testa al file). Non duplicarli altrove.
+- `GameManager.hpText`, `apText` ed `EnemyHptxt` sono **null di proposito**: la HUD
+  la scrive `HudController`. Assegnarli farebbe lampeggiare i testi fra due
+  formati diversi.
+- Le corsie devono restare centrate a **x 432 / 720 / 1008** con tre corsie: celle
+  da 220 e passo 288 (`CellW` + `LaneGap`), cioè la colonna da 240 con gap 48
+  della specifica. Verificabile proiettando il centro delle corsie nello spazio
+  del Canvas.
+- `CardOverlay` e `SlotOverlay` costruiscono i figli **a runtime**, non nel
+  prefab. Non salvarli nell'asset.

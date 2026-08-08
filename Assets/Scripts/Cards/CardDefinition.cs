@@ -232,8 +232,8 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
         cardView.IsHovering = true;
         cardView.ApplyPointerEnter();
 
-        if (cardView.instance != null)
-            InspectorPanel.Instance?.ShowCard(cardView);
+        if (cardView.instance != null) InspectorPanel.Instance?.ShowCard(cardView);
+        else InspectorPanel.Instance?.ShowCardPreview(this);
     }
 
     public void OnPointerExit(PointerEventData eventData)
@@ -243,7 +243,7 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
         if (cardView == null) return;
         cardView.IsHovering = false;
         cardView.ResetHoverVisual();
-        InspectorPanel.Instance?.HideFor(cardView);
+        InspectorPanel.Instance?.HideFor(cardView.instance != null ? (object)cardView : this);
     }
 
     public void OnPointerClick(PointerEventData eventData)
