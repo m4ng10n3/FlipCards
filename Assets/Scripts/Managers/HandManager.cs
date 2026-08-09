@@ -4,7 +4,12 @@ using System.Collections.Generic;
 public class HandManager : MonoBehaviour
 {
     [Header("Hand settings")]
-    [SerializeField] private int maxHandSize = 5;
+    [SerializeField] private int maxHandSize = 8;
+    [Tooltip("Passo fra due carte in mano, in pixel di canvas. Piu' stretto della " +
+             "larghezza della carta: le carte in mano DEVONO sovrapporsi, e' il " +
+             "ventaglio. A 0 si torna al vecchio ripiego larghezza/maxHandSize, " +
+             "che dava un passo piu' largo della carta e quindi una fila staccata.")]
+    [SerializeField] private float handSpacing = 132f;
     [Header("Hierarchy")]
     [SerializeField] private Transform handRoot;
     [SerializeField] private Transform spawnPoint;
@@ -28,6 +33,17 @@ public class HandManager : MonoBehaviour
     public int HandCount => handCards.Count;
     public int DeckCount => deckInitialized ? deck.Count : CountDeckFromBindings();
     public bool HandIsFull => handCards.Count >= maxHandSize;
+
+    /// <summary>
+    /// Carte del giocatore uscite dal gioco: la pila degli scarti del tabellone.
+    /// Non e' una zona vera — una carta distrutta viene semplicemente rimossa —
+    /// ma il conteggio e' reale, e senza di esso non si sa quanto mazzo si e'
+    /// gia' bruciato in una partita che dura 12 turni.
+    /// </summary>
+    public int DiscardCount { get; private set; }
+
+    /// <summary>La chiama GameManager quando una carta del giocatore lascia il campo.</summary>
+    public void NotifyDiscarded() => DiscardCount++;
 
     /// <summary>Carte nel mazzo a inizio partita: e' il riferimento per lo spessore della pila.</summary>
     public int DeckStartCount => deckStartCount > 0 ? deckStartCount : CountDeckFromBindings();
@@ -231,7 +247,7 @@ public class HandManager : MonoBehaviour
         SortHandCardsBySlotIndex();
 
         float width = handRect != null ? handRect.rect.width : 600f;
-        float spacing = width / Mathf.Max(1, maxHandSize);
+        float spacing = handSpacing > 0f ? handSpacing : width / Mathf.Max(1, maxHandSize);
         float startX = -spacing * (handCards.Count - 1) * 0.5f;
 
         int slotCount = handCards.Count;

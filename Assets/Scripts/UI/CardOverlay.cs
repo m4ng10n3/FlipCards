@@ -8,9 +8,15 @@ using UnityEngine.UI;
 /// cariche, sottolineature delle statistiche e fascia di lato.
 ///
 /// Approccio simbolico: sulla cella non compaiono etichette testuali. Il ruolo di
-/// ogni numero e' dato dal colore (rosso attacco, verde vita, blu blocco) e dalla
+/// ogni numero e' dato dal colore (rosso attacco, verde vita, ciano blocco) e dalla
 /// sottolineatura dello stesso colore; classe e fazione sono pastiglie colorate.
 /// Tutto il dettaglio — passive, abilita', valori per lato — sta nell'ispettore.
+///
+/// **Il chrome e' traslucido di proposito.** Il Template della carta monta
+/// CardShaderGraph, che l'edizione POLYCHROME lega alla rotazione della carta
+/// (ShaderCode scrive <c>_Rotation</c> da <c>transform.parent.localRotation</c>):
+/// se i fondi fossero opachi, il riflesso che scorre al tilt resterebbe sotto e
+/// non lo vedrebbe nessuno. Nessun fondo di questa classe supera alpha ~0.55.
 ///
 /// Funziona anche sulle carte in mano, che non hanno ancora una CardInstance:
 /// in quel caso legge la Spec dal CardDefinition.
@@ -22,22 +28,40 @@ using UnityEngine.UI;
 [DisallowMultipleComponent]
 public class CardOverlay : MonoBehaviour
 {
-    // Bande della cella carta, coordinate dall'alto. Le legge anche il builder,
-    // che ci posiziona i Text del prefab: un solo posto per questi numeri.
-    public const float NameY = 2f, NameH = 26f;
-    public const float BadgeY = 212f, BadgeSize = 24f;
-    public const float ChargeY = 248f, ChargeH = 12f;
-    public const float StatY = 264f, StatH = 28f, StatW = 66f;
-    public const float RuleY = 292f, RuleH = 3f;
-    public const float SideBandY = 300f, SideBandH = 30f;
+    // ── Anatomia della cella carta ────────────────────────────────────────────
+    //
+    // Coordinate banda (origine in alto a sinistra), gia' in scala 2x: sono i
+    // numeri di `layouts.card` in flipcards_ui_manifest.json moltiplicati per 2,
+    // cioe' la cella 112x168 del kit portata a 224x336 sul canvas 1920x1080.
+    // Le legge anche il builder, che ci posiziona i Text del prefab: un solo
+    // posto per questi numeri.
 
-    public static float StatX(int index) => 8f + index * (StatW + 3f);
+    public const float CardW = 224f, CardH = 336f;
+
+    public const float NameX = 12f, NameY = 12f, NameW = 200f, NameH = 34f;
+    public const float ArtX = 32f, ArtY = 52f, ArtW = 160f, ArtH = 160f;
+
+    public const float StatY = 220f, StatH = 36f, StatW = 64f;
+    public const float RuleY = 256f, RuleH = 3f;
+    public const float ChargeY = 264f, ChargeH = 22f;
+    public const float StripY = 290f, StripH = 34f;
+
+    public const float BadgeSize = 26f;
+    public const float FactionBadgeX = NameX + NameW - BadgeSize - 2f;   // in coda alla barra nome
+    public const float FactionBadgeY = NameY + 4f;
+
+    /// <summary>Colonna dell'i-esimo numero: tre chip da 64 con 4 di gap dentro i 200 utili.</summary>
+    public static float StatX(int index) => NameX + index * (StatW + 4f);
+
+    // Alpha dei fondi. Tenerli bassi non e' un vezzo: sotto c'e' lo shader.
+    const float PlateAlpha = 0.46f;
+    const float StripAlpha = 0.55f;
 
     CardView _view;
     CardDefinition _definition;
     RectTransform _rt;
 
-    Image _sideBand;
+    Image _sideRule;
     TextMeshProUGUI _sideLabel;
     readonly List<Image> _chargeNotches = new List<Image>(CardInstance.MaxFlipCharge);
 
@@ -66,7 +90,8 @@ public class CardOverlay : MonoBehaviour
             if (_lastSide != (Side)(-2))
             {
                 _lastSide = (Side)(-2);
-                _sideBand.color = GamePalette.Neutral;
+                _sideRule.color = GamePalette.Neutral;
+                _sideLabel.color = GamePalette.TextMuted;
                 _sideLabel.text = "IN MANO";
             }
             return;
@@ -75,7 +100,9 @@ public class CardOverlay : MonoBehaviour
         if (inst.side != _lastSide)
         {
             _lastSide = inst.side;
-            _sideBand.color = GamePalette.SideColor(inst.side);
+            var color = GamePalette.SideColor(inst.side);
+            _sideRule.color = color;
+            _sideLabel.color = color;
             _sideLabel.text = inst.side == Side.Fronte ? "FRONTE" : "RETRO";
         }
 
@@ -85,7 +112,7 @@ public class CardOverlay : MonoBehaviour
             for (int i = 0; i < _chargeNotches.Count; i++)
                 _chargeNotches[i].color = i < inst.flipCharge
                     ? GamePalette.Charge
-                    : GamePalette.WithAlpha(GamePalette.Charge, 0.28f);
+                    : GamePalette.WithAlpha(GamePalette.Charge, 0.22f);
         }
     }
 
@@ -93,53 +120,60 @@ public class CardOverlay : MonoBehaviour
     {
         _built = true;
 
-        float w = _rt.rect.width;
         var def = _definition.BuildSpec();
 
         // I fondi vanno creati PRIMA di rialzare i Text del prefab, altrimenti li
         // coprirebbero: i figli aggiunti dopo disegnano sopra.
-        var nameBar = UiBuild.Rect("NameBar", _rt);
-        UiBuild.Band(nameBar, 4f, NameY, w - 8f, NameH);
-        UiBuild.Fill(nameBar, GamePalette.WithAlpha(Color.black, 0.66f));
+        Plate("NameBar", NameX, NameY, NameW, NameH);
 
         // Traccia cariche: tre tacche piene = tre cariche. Era testo "[2/3]" in 26 px.
-        var trackRt = UiBuild.Rect("ChargeTrack", _rt);
-        UiBuild.Band(trackRt, 8f, ChargeY, w - 16f, ChargeH);
-        UiBuild.Fill(trackRt, GamePalette.WithAlpha(Color.black, 0.66f));
+        var trackRt = Plate("ChargeTrack", NameX, ChargeY, NameW, ChargeH);
 
-        const float gap = 3f;
-        float notch = (w - 16f - gap * (CardInstance.MaxFlipCharge - 1)) / CardInstance.MaxFlipCharge;
+        const float gap = 4f;
+        float notch = (NameW - gap * (CardInstance.MaxFlipCharge - 1)) / CardInstance.MaxFlipCharge;
         for (int i = 0; i < CardInstance.MaxFlipCharge; i++)
         {
             var nRt = UiBuild.Rect($"Notch{i}", trackRt);
-            UiBuild.Band(nRt, i * (notch + gap), 2f, notch, ChargeH - 4f);
+            UiBuild.Band(nRt, i * (notch + gap), 3f, notch, ChargeH - 6f);
             _chargeNotches.Add(UiBuild.Fill(nRt, GamePalette.Charge));
         }
 
         // Fondo dietro i numeri, e la riga colorata che ne dichiara il ruolo.
-        var statBg = UiBuild.Rect("StatRow", _rt);
-        UiBuild.Band(statBg, 8f, StatY, w - 16f, StatH);
-        UiBuild.Fill(statBg, GamePalette.WithAlpha(Color.black, 0.66f));
+        Plate("StatRow", NameX, StatY, NameW, StatH);
 
         Rule(0, GamePalette.Danger);
         Rule(1, GamePalette.PlayerHp);
         Rule(2, GamePalette.Retro);
 
-        // Fascia di lato: a tutta larghezza sul bordo basso, il dato piu' letto.
-        var bandRt = UiBuild.Rect("SideBand", _rt);
-        UiBuild.Band(bandRt, 0f, SideBandY, w, SideBandH);
-        _sideBand = UiBuild.Fill(bandRt, GamePalette.Neutral);
+        // Fascia bassa: il lato, cioe' il dato piu' letto della cella. Fondo scuro
+        // e testo colorato invece di una fascia piena — una fascia opaca su tutta
+        // la larghezza spegnerebbe il riflesso dello shader proprio dove si vede
+        // meglio, sul bordo basso.
+        var strip = Plate("SideStrip", NameX, StripY, NameW, StripH, StripAlpha);
 
-        _sideLabel = UiBuild.Text("Label", bandRt, string.Empty, 15f, new Color(0.05f, 0.06f, 0.09f, 1f),
+        var ruleRt = UiBuild.Rect("Rule", strip);
+        UiBuild.Band(ruleRt, 0f, 0f, NameW, 3f);
+        _sideRule = UiBuild.Fill(ruleRt, GamePalette.Neutral);
+
+        _sideLabel = UiBuild.Text("Label", strip, string.Empty, 15f, GamePalette.TextMuted,
                                   TextAlignmentOptions.Center, FontStyles.Bold);
-        UiBuild.Stretch(_sideLabel.rectTransform);
+        UiBuild.Stretch(_sideLabel.rectTransform, 30f, 3f, 4f, 0f);
 
-        // Classe e fazione: pastiglie sugli angoli bassi dell'artwork. La classe
-        // guida le combo di adiacenza, quindi non puo' essere solo nell'ispettore.
-        Badge("ClassBadge", 6f, GamePalette.ClassColor(def.cardClass), Initial(def.cardClass.ToString()));
-        Badge("FactionBadge", w - 6f - BadgeSize, GamePalette.FactionColor(def.faction), def.faction.ToString());
+        // Classe e fazione: la classe in testa alla fascia bassa, la fazione in
+        // coda alla barra nome — come il tag di fazione del kit.
+        Badge("ClassBadge", strip, 4f, 4f, GamePalette.ClassColor(def.cardClass), Initial(def.cardClass.ToString()));
+        Badge("FactionBadge", _rt, FactionBadgeX, FactionBadgeY, GamePalette.FactionColor(def.faction), def.faction.ToString());
 
         RaisePrefabTexts();
+    }
+
+    /// <summary>Fondo scuro traslucido: sotto passa lo shader della carta.</summary>
+    RectTransform Plate(string name, float x, float y, float w, float h, float alpha = PlateAlpha)
+    {
+        var rt = UiBuild.Rect(name, _rt);
+        UiBuild.Band(rt, x, y, w, h);
+        UiBuild.Fill(rt, GamePalette.WithAlpha(GamePalette.PanelSunken, alpha));
+        return rt;
     }
 
     void Rule(int index, Color color)
@@ -149,13 +183,13 @@ public class CardOverlay : MonoBehaviour
         UiBuild.Fill(rt, color);
     }
 
-    void Badge(string name, float x, Color color, string label)
+    void Badge(string name, RectTransform parent, float x, float y, Color color, string label)
     {
-        var rt = UiBuild.Rect(name, _rt);
-        UiBuild.Band(rt, x, BadgeY, BadgeSize, BadgeSize);
+        var rt = UiBuild.Rect(name, parent);
+        UiBuild.Band(rt, x, y, BadgeSize, BadgeSize);
         UiBuild.Fill(rt, color);
 
-        var text = UiBuild.Text("Label", rt, label, 14f, new Color(0.05f, 0.06f, 0.09f, 1f),
+        var text = UiBuild.Text("Label", rt, label, 15f, GamePalette.Background,
                                 TextAlignmentOptions.Center, FontStyles.Bold);
         UiBuild.Stretch(text.rectTransform);
     }

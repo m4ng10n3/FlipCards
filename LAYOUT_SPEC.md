@@ -110,7 +110,7 @@ non può decidere se conviene flippare adesso o al turno dopo, e il gioco divent
 | AP | `player.actionPoints` / `MaxPlayerAP` (5) | `"ap/playerBaseAP"` → **stampa 5/4** | pallini spendibili, `ap/5` |
 | Turno | `currentTurn` / `turns` (12) | solo nel log | contatore in alto |
 | Mazzo residuo | `HandManager.deck.Count` | **no** | contatore |
-| Mano | `handCards.Count` / `maxHandSize` (5) | **no** | contatore |
+| Mano | `handCards.Count` / `maxHandSize` (8) | **no** | contatore |
 | Fase | `playerPhase`, `awaitingEndTurn`, `inputLocked`, `matchEnded` | solo bottoni grigi | etichetta di fase esplicita |
 | Log | `_logBuf` | `logText` | pannello con autoscroll e tetto righe |
 
@@ -169,7 +169,7 @@ Attaccare è gratis ma **si può fare una sola volta**: dopo `OnAttack` si entra
 `awaitingEndTurn` e restano solo le azioni a costo zero. Il layout deve rendere evidente
 che ATTACCA è irreversibile e chiude la fase di azione.
 
-Mano massima 5 carte (`maxHandSize`). Il mazzo è costruito una sola volta da
+Mano massima 8 carte (`maxHandSize`, misura di layout: vedi §7.7). Il mazzo è costruito una sola volta da
 `playerCards` meno le carte già in campo; a mazzo vuoto `DrawCard` esce in silenzio.
 
 ### 3.2 Sequenza del turno
@@ -315,97 +315,182 @@ disabilitato con contrasto reale. `Resolving` va controllato **prima** di
 
 ## 6. Layout proposto
 
+### 6.0 Da dove vengono i numeri
+
+Le misure **non sono scelte a mano**: sono `layouts.board` di
+`Assets/Graphics/FlipCards_ArcadeHorrorUI/ArcadeHorrorUI/flipcards_ui_manifest.json`
+(kit *Arcade Horror CRT*) moltiplicate per 2 — il tabellone 960 × 540 del kit
+portato sul canvas 1920 × 1080.
+
+Lo stesso kit fornisce `2x/board/board_bg.png`, un fondo 1920 × 1080 con **già
+disegnati i pozzetti di ogni zona**. `FlipCardsLayoutBuilder` lo usa come
+Backdrop quando lo trova: se le bande qui sotto e quelle del fondo coincidono, il
+tabellone si presenta come `preview_board@2x.png`. Se le fai divergere, i
+contenuti finiscono *accanto* ai pozzetti invece che dentro — è il modo più
+rapido di accorgersi che un numero è stato cambiato solo da una parte.
+
+Il fondo è opzionale: senza kit importato il builder ripiega su tinte piatte e il
+layout resta identico, cambia solo la pelle. Gli overlay CRT
+(`overlay_scanlines`, `overlay_vignette`) stanno sopra tutto, `Raycast Target`
+spento, e sono l'ultima cosa creata prima del pannello di fine partita.
+
 ### 6.1 Impostazione del Canvas
 
 - **Render Mode:** `Screen Space - Camera`, Render Camera = `Main Camera`
-  (oggi è `World Space`, per cui il `CanvasScaler` è inerte e sotto 16:9 il pannello
-  comandi finisce fuori schermo)
 - **CanvasScaler:** `Scale With Screen Size`, riferimento **1920 × 1080**, match **0.5**
-- **Scala:** `localScale = (1, 1, 1)` su tutte le radici (oggi diverse hanno `z = 0`, che
-  azzera la matematica 3D di ombra e tilt in `CardView`)
+- **Scala:** `localScale = (1, 1, 1)` su tutte le radici (una `z = 0` azzera la
+  matematica 3D di ombra e tilt in `CardView`)
 
 ### 6.2 Griglia
 
-Colonne effettive, come le costruisce `FlipCardsLayoutBuilder`:
-
 ```
-colonna corsia   L = 240 (cella 220 + gap 20)
-gap fra corsie   G = 48        ← deve ospitare il connettore di combo
-passo di corsia  288 = cella 220 + LaneGap 68
-larghezza board  n·220 + (n−1)·68       3 corsie = 796
-rail giocatore   x    0 …   96          HP e AP in verticale
-campo di gioco   x   96 … 1440          (1344)
-colonna destra   x 1440 … 1920          (480, contenuto 400 con 40 di padding)
-corsie centrate  x = 480 / 768 / 1056   (3 corsie)
+rail giocatore   x   12 …  306   (294)   stato, mazzo, legenda
+campo di gioco   x  316 … 1494  (1178)
+colonna destra   x 1504 … 1904   (400)
+passo di corsia  396            uguale per i due lati
+cella carta      224 × 330→336  gap fra corsie 172
+cella nemica     352 × 288      gap fra corsie  44
+corsie centrate  x = 508 / 904 / 1300   (3 corsie)
 ```
 
-Il rail verticale del giocatore è nato per togliere di mezzo la fascia
-orizzontale HP+AP da 52 px: in colonna costa larghezza, che c'era, invece di
-altezza, che serviva alle corsie e alla mano.
+Il passo è **unico per i due lati** anche se le celle hanno forme diverse: rullo,
+asse dei pronostici e corsie del giocatore devono stare sui medesimi tre centri,
+o l'asse punterebbe fra due corsie. Il gap del giocatore (172) è anche lo spazio
+che ospita i connettori di combo.
+
+La casella nemica è **orizzontale** e la carta **verticale**: il fronte nemico è
+un rullo da slot machine, non una fila di carte, e la forma lo dice prima di
+qualunque etichetta.
 
 ### 6.3 Bande verticali — campo di gioco
 
 | y | h | Zona | Contenuto |
 |---|---|---|---|
-| 0 | 52 | **Barra superiore** | `TURNO 4 / 12` · etichetta di fase |
-| 52 | 72 | **Fascia boss** | nome, barra HP `hp/maxHp`, preavviso del turno |
-| 124 | 358 | **Corsie nemiche** | celle slot 220 × 330 |
-| 482 | 64 | **Asse delle corsie** | bilancio previsto per corsia + connettori di combo nei gap |
-| 546 | 368 | **Corsie giocatore** | celle carta 220 × 330 |
-| 914 | 166 | **Mano** | fino a 5 carte 220 × 330; a riposo si vede solo la fascia alta, all'ingresso del puntatore la mano sale **in blocco** di 184 px e copre in parte le corsie |
+| 12 | 48 | **Targa turno** | `TURNO 4 / 12` (larga 400) |
+| 12 | 48 | **Banner di fase** | etichetta di fase (x 860 … 1494) |
+| 68 | 56 | **Fascia boss** | nome, preavviso, barra HP `hp/maxHp` |
+| 132 | 400 | **Cassa del rullo** | contiene le caselle e le fasce in cui scorrono quelle parziali |
+| 188 | 288 | **Corsie nemiche** | celle 352 × 288 |
+| 332 | 2 | **Payline** | riga ambra su cui la casella "si ferma"; disegnata **dopo** le corsie, deve attraversarle |
+| 528 | 48 | **Asse delle corsie** | bilancio previsto per corsia + connettori di combo nei gap |
+| 580 | 336 | **Corsie giocatore** | celle carta 224 × 336 |
+| 924 | 156 | **Mano** | fino a 8 carte; a riposo si vede solo la linguetta alta, all'ingresso del puntatore la mano sale **in blocco** a quota 208 e copre in parte le corsie |
 
 La mano sale tutta insieme, non carta per carta: l'area di attivazione contiene
 la mano come figlio, così passare da una carta all'altra non genera un
 `PointerExit`. Da alzata copre le corsie di proposito — è il momento in cui
 scegli cosa giocare, non quello in cui leggi il tavolo.
 
-### 6.4 Bande verticali — colonna destra
+### 6.3.1 Mano: sovrapposizione e pop-out
+
+**Le carte in mano si sovrappongono, ed è voluto.** Il passo è 132 contro carte
+da 224 — sono gli `hand_tab_slots` del kit, 8 linguette in 1148 px. È il
+contrario dell'invariante precedente (§7.7, riscritta), che imponeva un passo più
+largo della carta.
+
+Quello che rende leggibile una fila di carte che si coprono a vicenda sono tre
+cose, tutte in `CardView`:
+
+1. **La spline** (`EvaluateHandCurve`): arco di posizione e rotazione a ventaglio
+   presi da `CurveParameters`. L'ampiezza dell'arco cresce col numero di carte
+   fino a un tetto di 8. Prima c'era una soglia secca — sotto le 5 carte l'arco
+   era spento del tutto — e il ventaglio compariva di colpo alla quinta pesca,
+   mentre le rotazioni c'erano già: carte inclinate su una riga piatta.
+2. **Il pop-out**: la carta sotto il puntatore si solleva di `handHoverLift`,
+   scala a `scaleOnHover`, **raddrizza il proprio angolo di ventaglio** e passa
+   `overrideSorting` a un ordine superiore alle vicine. Senza l'ultimo punto si
+   sollevava restando sepolta sotto la carta di destra, e il pop-out non si
+   vedeva: è il pezzo che mancava.
+3. Il sollevamento muove il **figlio grafico**, non la radice: il bersaglio di
+   raycast resta fermo, quindi la carta non si sfila da sotto il puntatore.
+
+I numeri di regia (`handHoverLift`, `scaleOnHover`, `scaleOnSelect`) li scrive il
+builder sui prefab: dipendono da dove sta la mano, non dal gusto.
+
+### 6.4 Bande verticali — rail del giocatore (294 di larghezza)
 
 | y | h | Zona | Contenuto |
 |---|---|---|---|
-| 56 | 40 | Intestazione | `MANO 3/5` |
-| 96 | 424 | **Ispettore** | carta o slot sotto il puntatore: stat complete, passive, testo delle abilità |
-| 520 | 256 | **Log** | ~11 righe, autoscroll in fondo, tetto a 6000 caratteri |
-| 784 | 144 | **Mazzo** | pila di carte vere di dorso (132 di larghezza) + `MAZZO 9` e riga di stato |
-| 936 | 144 | **Comandi** | ATTACCA · CHIUDI TURNO, 400 × 56, gap 16, costo AP stampato |
+| 0 | 50 | Intestazione | `TU` |
+| 56 | 46 | **HP** | barra orizzontale + `hp/maxHp` |
+| 108 | 38 | **AP** | pallini spendibili + `ap/5` |
+| 152 | 34 | Costi | `OGNI AZIONE 1 AP · ATTACCA 0` |
+| 250 | 24 | Etichetta mazzo | `MAZZO` + conteggio a destra |
+| 280 | 368 | **Mazzo** | pila di carte vere di dorso, cliccabile |
+| 652 | 34 | Stato del mazzo | riga che dice perché il clic non fa nulla |
+| 688 | 368 | **Legenda** | chiave dei colori: lato, numeri, fazioni |
+
+Mazzo e legenda cadono nei due pozzetti a forma di carta che `board_bg` disegna
+nel rail (`deck_slot` e `discard_slot` del manifest): sono le due bande da 368.
+
+Il mazzo è passato dalla colonna destra al rail perché è un **oggetto del
+giocatore**, come i suoi HP e i suoi AP, non un comando. La pila si assottiglia
+con le carte che restano, il dorso in cima è quello della prossima carta (il
+mazzo è mescolato una volta sola e si pesca dalla cima) e passandoci sopra
+l'ispettore la mostra.
+
+La legenda esiste perché la cella carta è **simbolica per scelta** — nessuna
+etichetta testuale, solo numeri colorati e pastiglie. Senza una chiave, quella
+scelta la paga alla prima partita chi non ha scritto il codice.
+
+### 6.5 Bande verticali — colonna destra (400 di larghezza)
+
+| y | h | Zona | Contenuto |
+|---|---|---|---|
+| 12 | 52 | Intestazione | `MANO 3/8` · `SEED n` |
+| 72 | 528 | **Ispettore** | carta o slot sotto il puntatore: stat complete, passive, testo delle abilità |
+| 608 | 304 | **Log** | autoscroll in fondo, tetto a 6000 caratteri |
+| 920 | 148 | **Comandi** | ATTACCA · CHIUDI TURNO, 400 × 64, gap 20, costo AP stampato |
 
 L'ispettore risolve in un colpo solo il problema più grosso: **abilità e passive non
-hanno altrimenti nessuno spazio**, e la carta a 220 × 330 non può ospitarle. Mostrare i
-dettagli al passaggio del puntatore evita di gonfiare la cella.
+hanno altrimenti nessuno spazio**, e la carta a 224 × 336 non può ospitarle.
 
-Il mazzo non è un comando ma un oggetto: la pila si assottiglia con le carte che
-restano, il dorso in cima è quello della prossima carta (il mazzo è mescolato una
-volta sola e si pesca dalla cima), passandoci sopra l'ispettore la mostra, e a
-mazzo vuoto o mano piena la riga di stato dice perché il clic non fa nulla.
+Il seed è un'etichetta, non un valore che cambia: serve a poter ripetere una
+partita identica.
 
-### 6.5 Cella carta — 220 × 330
+### 6.6 Cella carta — 224 × 336
 
-| Elemento | Dimensione | Note |
+Anatomia da `layouts.card` del manifest, ×2. Le costanti stanno in `CardOverlay`,
+che è anche chi disegna i fondi: il builder le rilegge da lì per posizionare i
+`Text` del prefab, così i numeri vivono in un posto solo.
+
+| Elemento | Banda (x, y, w, h) | Note |
 |---|---|---|
-| Finestra artwork | 220 × 160 | solo in Fronte; in Retro il dorso a tutta cella |
-| Barra nome | 220 × 28 | |
-| Chip statistiche | 3 × (68 × 44) | ATK · HP · BLOCK, con delta dei bonus (`5 +1`) |
-| Traccia cariche | 220 × 16 | 3 tacche, piene = `flipCharge` |
-| Fascia di lato | 220 × 20 | ambra = Fronte, blu = Retro — leggibile a colpo d'occhio |
-| Badge classe + fazione | angolo | la classe guida le combo: deve essere visibile |
-| Icone abilità | fino a 3 × 24 | dettaglio nell'ispettore |
+| Template | 0, 0, 224, 336 | a tutta cella: è la cornice **e** il Graphic su cui gira `CardShaderGraph` |
+| Barra nome | 12, 12, 200, 34 | |
+| Badge fazione | 184, 16, 26, 26 | in coda alla barra nome |
+| Finestra artwork | 32, 52, 160, 160 | solo in Fronte; in Retro il dorso a tutta cella |
+| Chip statistiche | 3 × (64 × 36) a y 220 | ATK · HP · BLOCCO, con delta dei bonus (`5 +1`) |
+| Sottolineature | y 256, h 3 | rosso attacco, verde vita, ciano blocco |
+| Traccia cariche | 12, 264, 200, 22 | 3 tacche, piene = `flipCharge` |
+| Fascia bassa | 12, 290, 200, 34 | badge di classe + `FRONTE` / `RETRO` |
 | Overlay hint | fluttuante | **sopra** la carta, non nel flusso: non deve rimpaginare la cella |
 
-L'hint oggi concatena le righe (`text + "\n" + msg`) dentro un rect di 89 × 15.6 con
-Truncate: si vede una riga e il resto sparisce. Deve **sostituire**, non accodare.
+**Il chrome è traslucido di proposito** (alpha ≤ 0.55). Il Template monta
+`CardShaderGraph`, che nell'edizione POLYCHROME è legata alla rotazione della
+carta: `ShaderCode` scrive `_Rotation` da `transform.parent.localRotation`, cioè
+dal tilt che `CardView` anima. Con fondi opachi il riflesso che scorre al
+passaggio del puntatore resta sotto e non lo vede nessuno. Per lo stesso motivo
+la fascia bassa è un fondo scuro con testo colorato e non una fascia piena: una
+banda opaca a tutta larghezza spegnerebbe il riflesso proprio dove si legge
+meglio. Anche `_poly_power` conta: a 0.03 l'effetto era spento, il valore di
+progetto del subgraph è 0.3.
 
-### 6.6 Cella slot — 220 × 330
+### 6.7 Cella nemica — 352 × 288
 
-| Elemento | Dimensione | Note |
+Anatomia da `layouts.reel_cell` del manifest, ×2. Costanti in `SlotOverlay`.
+
+| Elemento | Banda (x, y, w, h) | Note |
 |---|---|---|
-| Finestra artwork | 220 × 220 | **figlio di nome `Sprite`** — il reel ne copia il rect |
-| Barra nome | 220 × 24 | |
-| Chip statistiche | 3 × (68 × 32) | ATK · HP · DEF, ATK sempre visibile, non solo durante l'attacco |
-| **Traccia pattern** | 220 × 20 | `flipPattern` come sequenza di caselle, indice corrente marcato |
-| Fascia di lato | 220 × 16 | stessa codifica delle carte |
-| Contatore furia | opzionale | se lo slot ha `SlotBerserker` |
+| Barra nome | 44, 6, 184, 28 | |
+| Badge fazione | 12, 7, 26, 26 | |
+| **Traccia pattern** | 232, 5, 112, 26 | `flipPattern` come sequenza di caselle, passo corrente pieno |
+| Finestra artwork | 80, 40, 192, 192 | **figlio di nome `Sprite`** — il reel ne copia il rect |
+| Chip statistiche | 3 × (108 × 32) a y 236 | ATK · HP · DEF, ATK sempre visibile, non solo durante l'attacco |
+| Fascia di lato | 0, 270, 352, 16 | stessa codifica delle carte |
+| Contatore furia | 12, 44, 130, 24 | se lo slot ha `SlotBerserker` |
 
-### 6.7 Asse delle corsie — 240 × 68 per corsia
+### 6.8 Asse delle corsie — 320 × 48 per corsia
 
 L'invenzione che rende leggibile l'intero gioco: per ogni corsia, l'esito previsto con i
 lati attuali.
@@ -418,8 +503,11 @@ lati attuali.
 | Slot Fronte, corsia tua vuota | `↓ 2 → HP` in rosso: è una falla |
 | Entrambi in Retro | `—` stallo |
 
-Nei **gap da 48** fra le colonne: badge dei connettori di combo (Blade Pair, Guard Link,
-Mystic Pulse) accesi quando la condizione di adiacenza è vera.
+Nei **gap da 172** fra le colonne del giocatore: badge dei connettori di combo
+(Blade Pair, Guard Link, Mystic Pulse) accesi quando la condizione di adiacenza è
+vera. Le quote interne della colonna seguono l'altezza reale della banda: l'asse
+si è già accorciato una volta col layout e le costanti tarate su 64 erano finite
+fuori dal rect.
 
 ---
 
@@ -450,17 +538,21 @@ Il layout non è libero: queste sono regole che, se violate, rompono la logica d
    non deve avere scala diversa dal fratello, altrimenti la copertura si disallinea.
 
 6. **`EmptySpot` ed `EmptySlot` devono avere lo stesso rect** della carta e dello slot che
-   sostituiscono, altrimenti le corsie saltano a ogni morte.
+   sostituiscono, altrimenti le corsie saltano a ogni morte. **Sono due misure
+   diverse**: 224 × 336 la casella del giocatore, 352 × 288 quella nemica.
 
 7. **Nessun `LayoutGroup` sulla mano.** `HandManager.Update()` riscrive
    `container.localPosition` ogni frame; un `HorizontalLayoutGroup` attivo su `handRoot`
    ci combatte e produce uno scatto a ogni pesca.
-   Inoltre `spacing = handRect.width / maxHandSize` → **`handRoot` deve essere largo
-   almeno `maxHandSize × larghezza carta`**, o le carte si sovrappongono coprendo
-   nome, HP e ATK di quelle a sinistra. Con `handRoot` a 1344 e carte da 220 il
-   massimo è 6; il builder scrive 5 (`MaxHandCards`), che lascia 48 di gap fra le
-   carte, lo stesso delle corsie. **`maxHandSize` è quindi una misura di layout**:
-   lo scrive `WireHandManager`, e modificarlo nell'Inspector non dura.
+   Il passo è il campo esplicito `handSpacing` (132), **non** più
+   `handRect.width / maxHandSize`: quel ripiego dava per forza un passo più largo
+   della carta, cioè una fila staccata, e la mano a ventaglio del kit vuole il
+   contrario. Passo e `maxHandSize` (8) restano **misure di layout** e li scrive
+   `WireHandManager` dagli `hand_tab_slots` del manifest: modificarli
+   nell'Inspector non dura oltre il prossimo rebuild.
+   La sovrapposizione è leggibile solo se restano in piedi le tre cose di §6.3.1
+   — arco, rotazione a ventaglio e pop-out con `overrideSorting`. Toglierne una
+   riporta le carte a coprirsi nome, vita e attacco a vicenda.
 
 11. **Il pivot di `handRoot` sta al centro** e la mano è figlia dell'area di
     attivazione (`HandTray`), non sua sorella. `HandManager` posiziona i
@@ -476,12 +568,15 @@ Il layout non è libero: queste sono regole che, se violate, rompono la logica d
 8. **Nessuna `Image` con `Raycast Target` attivo sopra l'area di gioco.**
    `FindEmptySpotUnderPointer` e `FindBoardCardUnderPointer` usano
    `EventSystem.RaycastAll` e risalgono i parent: un pannello di sfondo che intercetta
-   rompe drag-and-drop e swap. Oggi `PanelBoards` ha un'`Image` 1626 × 1080 ad alpha 0.06
-   con raycast acceso.
+   rompe drag-and-drop e swap. Vale anche per il fondo `board_bg` e per gli
+   overlay CRT, che coprono tutto lo schermo: nascono da `UiBuild.Fill`, che ha
+   il raycast spento di default, e devono restare così.
 
-9. **Durante il drag la carta forza `sortingOrder = 10`** sul proprio `Canvas`
-   (`overrideSorting = true`). Nessun pannello della colonna destra deve stare su un
-   Canvas con sorting superiore, o la carta trascinata ci finisce sotto.
+9. **Sorting delle carte.** Durante il drag la carta forza `sortingOrder = 10` sul
+   proprio `Canvas` (`overrideSorting = true`); in mano, sotto il puntatore, forza
+   `5` per stare sopra le vicine sovrapposte. Nessun pannello della colonna destra
+   deve stare su un Canvas con sorting superiore, o la carta trascinata ci finisce
+   sotto.
 
 10. **Gerarchia del prefab carta**, richiesta da `CardView`:
     `CardDefinition` (radice, gestisce l'input) → figlio con `CardView` (`RectTransform` +
@@ -509,7 +604,7 @@ elencati sotto sono **fatti**, tranne l'ultimo.
 | **Evidenziazione delle caselle libere** | `GameManager.HighlightFreeSpots`, accesa anche su clic a vuoto |
 | **Icone e testo delle abilità** | `AbilityCatalog` + `InspectorPanel`; i nomi finiscono anche nel log all'ingresso degli slot |
 | **Contatore furia del Berserker** | `SlotOverlay`, chip `FURIA n/soglia` |
-| **Contatori mazzo e mano** | `MANO n/5` in intestazione, `MAZZO n` sulla pila; `DrawCard` logga il rifiuto |
+| **Contatori mazzo e mano** | `MANO n/8` in intestazione della colonna destra, conteggio del mazzo sulla pila nel rail; `DrawCard` logga il rifiuto |
 | **Traccia cariche a 3 tacche** | `CardOverlay` |
 | **Barre HP con massimo** | `UiBar` — boss orizzontale, giocatore verticale sul rail |
 | **`ap/MaxPlayerAP`** | `HudController.UpdateAp`, pallini + `4/5` |

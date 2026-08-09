@@ -14,6 +14,14 @@ using UnityEngine.UI;
 /// devono restare coerenti fra loro. Rilanciarlo ricostruisce tutto dagli stessi
 /// numeri.
 ///
+/// **Da dove vengono i numeri.** Non sono inventati: sono `layouts.board` di
+/// `flipcards_ui_manifest.json` (kit Arcade Horror CRT) moltiplicati per 2, cioe'
+/// il tabellone 960x540 del kit portato sul canvas 1920x1080. Lo stesso file
+/// fornisce `board_bg`, un fondo 1920x1080 con gia' disegnati i pozzetti di ogni
+/// zona: se le nostre bande e le sue coincidono, il tabellone si presenta come il
+/// preview del kit. Se le fai divergere, i contenuti finiscono accanto ai
+/// pozzetti invece che dentro.
+///
 /// Due fasi indipendenti:
 ///  1. i prefab di carte e slot vengono portati alla dimensione della cella;
 ///  2. il Canvas viene ricostruito a bande e ricablato su GameManager/HandManager.
@@ -23,58 +31,100 @@ public static class FlipCardsLayoutBuilder
     // ── Misure (LAYOUT_SPEC §6.2 / §6.3 / §6.4) ───────────────────────────────
 
     const float RefW = 1920f, RefH = 1080f;
-    const float SideW = 480f, SidePad = 40f, SideContentW = 400f;
 
-    // Rail verticale del giocatore: HP e AP stavano su una banda orizzontale che
-    // costava 52 px di altezza al campo. In colonna costano solo larghezza.
-    const float RailW = 96f;
-    const float FieldX = RailW;
-    const float FieldW = RefW - SideW - RailW;   // 1344
+    // Tre colonne: rail del giocatore, campo, colonna destra.
+    const float RailX = 12f, RailY = 12f, RailW = 294f, RailH = 1056f;
+    const float FieldX = 316f, FieldW = 1178f;
+    const float SideX = 1504f, SideContentW = 400f;
 
-    const float CellW = 220f, CellH = 330f;   // carta e slot
-    const float LaneGap = 68f;                // colonna 240 - cella 220 + gap 48
-    const float LaneColumn = 240f;
+    // Celle. La carta e' verticale, la casella nemica orizzontale: il fronte
+    // nemico e' un rullo da slot machine, non una fila di carte, e la forma e'
+    // cio' che lo dice prima di qualunque etichetta.
+    const float CardW = CardOverlay.CardW, CardH = CardOverlay.CardH;   // 224 x 336
+    const float SlotW = SlotOverlay.CellW, SlotH = SlotOverlay.CellH;   // 352 x 288
 
-    // Bande del campo di gioco
-    const float TopBarY = 0f, TopBarH = 52f;
-    const float BossY = 52f, BossH = 72f;
-    const float EnemyY = 124f, EnemyH = 358f;
-    const float AxisY = 482f, AxisH = 64f;
-    const float PlayerY = 546f, PlayerH = 368f;
+    // Passo di corsia unico per i due lati: le colonne del rullo e le corsie del
+    // giocatore devono stare sugli stessi centri (508 / 904 / 1300 sul canvas),
+    // o l'asse dei pronostici punterebbe fra due corsie.
+    const float LanePitch = 396f;
+    const float PlayerLaneGap = LanePitch - CardW;   // 172
+    const float EnemyLaneGap = LanePitch - SlotW;    // 44
+    const int Lanes = 3;
 
-    // Mano: a riposo mostra solo la fascia alta delle carte, sollevata le mostra
-    // intere e copre in parte le corsie. Quote misurate dal fondo dello schermo.
-    const float HandY = 914f;
-    const float HandRestY = 1f;         // centro carta appena sotto il bordo
-    const float HandRaisedY = 185f;
-    const float HandRestH = RefH - HandY;   // 166
-    const float HandRaisedH = 380f;
-    const float HandRootW = 1344f;      // detta anche lo spacing: width / MaxHandCards
-    // 1344 / 5 = 268 di passo contro carte da 220: le carte in mano restano
-    // separate di 48, lo stesso gap delle corsie. A 6 il passo scenderebbe a 224
-    // e a mano piena si sfiorerebbero.
-    const int MaxHandCards = 5;
+    static float PlayerBoardW => Lanes * CardW + (Lanes - 1) * PlayerLaneGap;   // 1016
+    static float EnemyBoardW => Lanes * SlotW + (Lanes - 1) * EnemyLaneGap;     // 1144
 
-    // Bande della colonna destra. Il mazzo si e' preso lo spazio che era del
-    // bottone PESCA piu' un po' di log: e' un oggetto, non piu' un comando.
-    const float HeaderY = 56f, HeaderH = 40f;
-    const float InspectorY = 96f, InspectorH = 424f;
-    const float LogY = 520f, LogH = 256f;
-    const float DeckY = 784f, DeckH = 144f;
-    const float DeckStackW = 132f;
-    const float CommandsY = 936f, CommandsH = 144f;
-    const float CommandH = 56f, CommandGap = 16f;
+    // Bande del campo, in coordinate canvas (il rect Field parte a x = FieldX ma
+    // e' alto quanto lo schermo, quindi la y di banda e' gia' quella del canvas).
+    const float TurnPlateW = 400f, TopPlateY = 12f, TopPlateH = 48f;
+    const float PhaseX = 544f, PhaseW = 634f;
+    const float BossY = 68f, BossH = 56f;
+    const float ReelHousingY = 132f, ReelHousingH = 400f;
+    const float EnemyY = 188f;
+    const float PaylineY = 332f;
+    const float AxisY = 528f, AxisH = 48f;
+    const float PlayerY = 580f;
+
+    // Mano. A riposo il centro della carta sta SOTTO il bordo basso: si vede solo
+    // la fascia alta, cioe' la linguetta. All'ingresso del puntatore la mano sale
+    // in blocco e si vede intera.
+    const float HandDockY = 924f;
+    const float HandRestY = -28f;
+    const float HandRaisedY = 208f;
+    const float HandRestH = RefH - HandDockY;   // 156
+    const float HandRaisedH = 440f;
+    const float HandRootW = 1148f;
+
+    // Il passo della mano e' PIU' STRETTO della carta: le carte in mano si
+    // sovrappongono, ed e' voluto. 8 linguette da 132 coprono 1148, gli stessi
+    // hand_tab_slots del kit. La leggibilita' la danno l'arco della spline, la
+    // rotazione a ventaglio e il pop-out della carta sotto il puntatore, non lo
+    // spazio fra una carta e l'altra.
+    const int MaxHandCards = 8;
+    const float HandSpacing = 132f;
+
+    // Rail del giocatore, in coordinate relative al rail.
+    const float RailHpY = 56f, RailHpH = 46f;
+    const float RailApY = 108f, RailApH = 38f;
+    const float RailCostY = 152f, RailCostH = 34f;
+    // Mazzo e legenda cadono nei due pozzetti a forma di carta che board_bg
+    // disegna nel rail (`deck_slot` e `discard_slot` del manifest). Spostarli
+    // senza spostare il fondo si vede subito: la pila finisce accanto al riquadro.
+    const float RailDeckLabelY = 250f, RailDeckLabelH = 24f;
+    const float RailDeckX = 12f, RailDeckY = 280f, RailDeckW = 256f, RailDeckH = 368f;
+    const float RailDeckHintY = 652f, RailDeckHintH = 34f;
+    const float RailLegendY = 688f, RailLegendH = 368f;
+
+    // Colonna destra, relativa al rect Side.
+    const float HeaderY = 12f, HeaderH = 52f;
+    const float InspectorY = 72f, InspectorH = 528f;
+    const float LogY = 608f, LogH = 304f;
+    const float CommandsY = 920f, CommandH = 64f, CommandGap = 20f;
+
+    // Fondo e overlay CRT del kit. Assenti (kit non importato) si degrada a
+    // tinte piatte: il layout resta quello, cambia solo la pelle.
+    const string KitRoot = "Assets/Graphics/FlipCards_ArcadeHorrorUI/ArcadeHorrorUI/2x";
+
+    static Sprite _boardBg;
+    static bool HasBackdrop => _boardBg != null;
 
     [MenuItem("FlipCards/Ricostruisci layout di gioco")]
     public static void Rebuild()
     {
+        _boardBg = KitSprite("board/board_bg");
+
         ResizePrefabs();
         BuildScene();
 
         EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
         EditorSceneManager.SaveOpenScenes();
-        Debug.Log("[Layout] Ricostruito: campo 1440x1080, colonna destra 480, celle 220x330.");
+        Debug.Log($"[Layout] Ricostruito sul tabellone del kit: rail 294, campo 1178, colonna destra 400; " +
+                  $"carte {CardW}x{CardH}, caselle {SlotW}x{SlotH}, passo di corsia {LanePitch}. " +
+                  (HasBackdrop ? "Fondo board_bg del kit attivo." : "board_bg non trovato: fondi a tinta piatta."));
     }
+
+    static Sprite KitSprite(string relativePath)
+        => AssetDatabase.LoadAssetAtPath<Sprite>($"{KitRoot}/{relativePath}.png");
 
     // ══════════════════════════════════════════════════════════════════════════
     //  1. Prefab alla dimensione della cella
@@ -89,12 +139,13 @@ public static class FlipCardsLayoutBuilder
             ResizeSlotPrefab(path);
 
         // EmptySpot ed EmptySlot devono avere lo stesso rect di cio' che
-        // sostituiscono, altrimenti le corsie saltano a ogni morte.
+        // sostituiscono, altrimenti le corsie saltano a ogni morte. Le due misure
+        // sono diverse: la carta e' verticale, la casella nemica orizzontale.
         var gm = Object.FindAnyObjectByType<GameManager>();
         if (gm != null)
         {
-            ResizePlaceholder(gm.EmptySpot);
-            ResizePlaceholder(gm.EmptySlot);
+            ResizePlaceholder(gm.EmptySpot, CardW, CardH);
+            ResizePlaceholder(gm.EmptySlot, SlotW, SlotH);
         }
 
         AssetDatabase.SaveAssets();
@@ -115,8 +166,8 @@ public static class FlipCardsLayoutBuilder
             var rt = root.transform as RectTransform;
             if (rt == null) return;
 
-            ScaleTree(rt, CellW, CellH);
-            SetLayoutElement(root, CellW, CellH);
+            ScaleTree(rt, CardW, CardH);
+            SetLayoutElement(root, CardW, CardH);
             SilenceChildRaycasts(root);
 
             // L'ombra sta DIETRO la carta: in Screen Space - Camera la z decide
@@ -131,27 +182,29 @@ public static class FlipCardsLayoutBuilder
             {
                 var cell = (RectTransform)view.transform;
 
-                // Bande della cella carta (LAYOUT_SPEC §6.5). Il Template resta a
-                // tutta cella: e' la cornice.
+                // Bande della cella carta: le costanti stanno in CardOverlay, che
+                // e' anche chi disegna i fondi. Un solo posto per questi numeri.
                 //
-                // L'artwork torna al rect di progetto del prefab (89x95 dentro
-                // 100x154, riscalato): e' il buco trasparente del template, e
-                // comprimerlo per far posto ai chip lo aveva rimpicciolito troppo.
-                Place(cell, "Template", 0f, 0f, CellW, CellH);
-                Place(cell, "Name", 4f, 2f, CellW - 8f, 26f);
-                Place(cell, "imagecharacter", 11.2f, 39f, 195.8f, 203.6f);
+                // Il Template resta a tutta cella: e' la cornice, ed e' anche il
+                // Graphic su cui gira CardShaderGraph. Comprimerlo per far posto
+                // ai chip vorrebbe dire rimpicciolire lo shader.
+                Place(cell, "Template", 0f, 0f, CardW, CardH);
+                Place(cell, "Name", CardOverlay.NameX + 6f, CardOverlay.NameY + 3f,
+                                    CardOverlay.NameW - 34f, CardOverlay.NameH - 6f);
+                Place(cell, "imagecharacter", CardOverlay.ArtX, CardOverlay.ArtY,
+                                              CardOverlay.ArtW, CardOverlay.ArtH);
 
                 // Statistiche simboliche: solo il numero, colorato per ruolo, con
                 // sottolineatura dello stesso colore disegnata da CardOverlay.
-                // Niente etichette: rosso = attacco, verde = vita, blu = blocco.
+                // Niente etichette: rosso = attacco, verde = vita, ciano = blocco.
                 Place(cell, "FrontDamage", CardOverlay.StatX(0), CardOverlay.StatY, CardOverlay.StatW, CardOverlay.StatH);
                 Place(cell, "HP", CardOverlay.StatX(1), CardOverlay.StatY, CardOverlay.StatW, CardOverlay.StatH);
                 Place(cell, "BackBlock", CardOverlay.StatX(2), CardOverlay.StatY, CardOverlay.StatW, CardOverlay.StatH);
 
-                StyleText(cell, "Name", 19, TextAnchor.MiddleCenter, GamePalette.TextPrimary);
-                StyleText(cell, "FrontDamage", 24, TextAnchor.MiddleCenter, GamePalette.Danger);
-                StyleText(cell, "HP", 24, TextAnchor.MiddleCenter, GamePalette.PlayerHp);
-                StyleText(cell, "BackBlock", 24, TextAnchor.MiddleCenter, GamePalette.Retro);
+                StyleText(cell, "Name", 20, TextAnchor.MiddleLeft, GamePalette.TextPrimary);
+                StyleText(cell, "FrontDamage", 26, TextAnchor.MiddleCenter, GamePalette.Danger);
+                StyleText(cell, "HP", 26, TextAnchor.MiddleCenter, GamePalette.PlayerHp);
+                StyleText(cell, "BackBlock", 26, TextAnchor.MiddleCenter, GamePalette.Retro);
 
                 // Fazione e lato li disegna CardOverlay come badge e fascia colorata.
                 // I Text del prefab restano (CardView li scrive e usa sideText per
@@ -159,34 +212,8 @@ public static class FlipCardsLayoutBuilder
                 Hide(cell, "Faction");
                 Hide(cell, "Side");
 
-                // L'hint galleggia SOPRA la carta in z, sovrapposto all'artwork,
-                // e non nel flusso della cella: accodato dentro un rect da 89x16
-                // mostrava una riga e troncava il resto. Fuori dalla cella
-                // finirebbe addosso all'asse delle corsie.
-                var hint = cell.Find("HintText") as RectTransform;
-                if (hint != null)
-                {
-                    hint.anchorMin = hint.anchorMax = new Vector2(0.5f, 0.5f);
-                    hint.pivot = new Vector2(0.5f, 0.5f);
-                    hint.sizeDelta = new Vector2(CellW, 40f);
-                    hint.anchoredPosition = new Vector2(0f, CellH * 0.5f - 140f);
-
-                    var text = hint.GetComponent<Text>();
-                    if (text != null)
-                    {
-                        text.resizeTextForBestFit = false;
-                        text.fontSize = 22;
-                        text.alignment = TextAnchor.MiddleCenter;
-                        text.horizontalOverflow = HorizontalWrapMode.Overflow;
-                        text.verticalOverflow = VerticalWrapMode.Overflow;
-                        text.fontStyle = FontStyle.Bold;
-                        text.color = GamePalette.Fronte;
-                        var shadow = text.GetComponent<Shadow>();
-                        if (shadow == null) shadow = text.gameObject.AddComponent<Shadow>();
-                        shadow.effectColor = new Color(0f, 0f, 0f, 0.95f);
-                        shadow.effectDistance = new Vector2(2f, -2f);
-                    }
-                }
+                PlaceHint(cell, CardH * 0.5f - CardOverlay.ArtY - CardOverlay.ArtH * 0.5f, GamePalette.Fronte);
+                TuneCardView(view);
 
                 if (view.GetComponent<CardOverlay>() == null)
                     view.gameObject.AddComponent<CardOverlay>();
@@ -197,6 +224,30 @@ public static class FlipCardsLayoutBuilder
         finally { PrefabUtility.UnloadPrefabContents(root); }
     }
 
+    /// <summary>
+    /// Numeri di regia della carta in mano. Stanno qui e non nell'Inspector
+    /// perche' dipendono dal layout: <c>handHoverLift</c> era 190, tarato su una
+    /// mano che stava altrove, e con il dock in basso spediva la carta sotto il
+    /// puntatore fin dentro le corsie. Il sollevamento e' solo una parte del
+    /// pop-out — le altre sono la scala, il raddrizzamento del ventaglio e il
+    /// sorting, e stanno in CardView.
+    /// </summary>
+    static void TuneCardView(CardView view)
+    {
+        var so = new SerializedObject(view);
+        SetFloat(so, "handHoverLift", 80f);
+        SetFloat(so, "scaleOnHover", 1.18f);
+        SetFloat(so, "scaleOnSelect", 1.26f);
+        so.ApplyModifiedPropertiesWithoutUndo();
+    }
+
+    static void SetFloat(SerializedObject so, string property, float value)
+    {
+        var p = so.FindProperty(property);
+        if (p != null) p.floatValue = value;
+        else Debug.LogWarning($"[Layout] campo '{property}' non trovato su {so.targetObject.GetType().Name}");
+    }
+
     static void ResizeSlotPrefab(string path)
     {
         var root = PrefabUtility.LoadPrefabContents(path);
@@ -205,8 +256,8 @@ public static class FlipCardsLayoutBuilder
             var rt = root.transform as RectTransform;
             if (rt == null) return;
 
-            ScaleTree(rt, CellW, CellH);
-            SetLayoutElement(root, CellW, CellH);
+            ScaleTree(rt, SlotW, SlotH);
+            SetLayoutElement(root, SlotW, SlotH);
             SilenceChildRaycasts(root);
 
             var view = root.GetComponent<SlotView>();
@@ -214,57 +265,35 @@ public static class FlipCardsLayoutBuilder
             {
                 // Letto in Awake per il LayoutElement: se resta al vecchio valore
                 // l'HorizontalLayoutGroup impagina corsie di larghezza sbagliata.
-                view.preferredSize = new Vector2(CellW, CellH);
+                view.preferredSize = new Vector2(SlotW, SlotH);
                 EditorUtility.SetDirty(view);
             }
 
             // Fondo della cella: SlotView.Blink lo colora di giallo e lo rimette,
-            // quindi il colore base va impostato qui.
+            // quindi il colore base va impostato qui. Traslucido, cosi la colonna
+            // del rullo disegnata da board_bg resta visibile sotto.
             var bg = root.GetComponent<Image>();
-            if (bg != null) bg.color = new Color(0.129f, 0.145f, 0.192f, 1f);
+            if (bg != null) bg.color = GamePalette.WithAlpha(GamePalette.Panel, 0.88f);
 
             var cell = (RectTransform)root.transform;
 
-            // Bande della cella slot (LAYOUT_SPEC §6.6). Il figlio "Sprite" resta
-            // quadrato: il reel ne copia il rect e al reveal l'immagine non deve
-            // cambiare dimensione.
-            Place(cell, "Name", 8f, 2f, CellW - 44f, 28f);
-            Place(cell, "Sprite", 0f, 34f, CellW, CellW);
-            Place(cell, "HP", 76f, 258f, 68f, 30f);
-            Place(cell, "Def", 148f, 258f, 68f, 30f);
+            // Bande della cella del rullo: le costanti stanno in SlotOverlay.
+            // Il figlio "Sprite" resta quadrato e centrato: il reel ne copia il
+            // rect e al reveal l'immagine non deve cambiare dimensione.
+            Place(cell, "Name", SlotOverlay.NameX, SlotOverlay.NameY, SlotOverlay.NameW, SlotOverlay.NameH);
+            Place(cell, "Sprite", SlotOverlay.ArtX, SlotOverlay.ArtY, SlotOverlay.ArtSize, SlotOverlay.ArtSize);
+            Place(cell, "HP", SlotOverlay.ChipX(1), SlotOverlay.ChipY, SlotOverlay.ChipW, SlotOverlay.ChipH);
+            Place(cell, "Def", SlotOverlay.ChipX(2), SlotOverlay.ChipY, SlotOverlay.ChipW, SlotOverlay.ChipH);
 
-            StyleText(cell, "Name", 18, TextAnchor.MiddleLeft, GamePalette.TextPrimary);
-            StyleText(cell, "HP", 18, TextAnchor.MiddleCenter, GamePalette.TextPrimary);
-            StyleText(cell, "Def", 18, TextAnchor.MiddleCenter, GamePalette.TextPrimary);
+            StyleText(cell, "Name", 19, TextAnchor.MiddleLeft, GamePalette.TextPrimary);
+            StyleText(cell, "HP", 20, TextAnchor.MiddleCenter, GamePalette.PlayerHp);
+            StyleText(cell, "Def", 20, TextAnchor.MiddleCenter, GamePalette.Retro);
 
             // La fazione la disegna SlotOverlay come badge colorato, uguale a
             // quello delle carte: il Text del prefab conteneva un valore fisso.
             Hide(cell, "Faction");
 
-            var hint = cell.Find("HintText") as RectTransform;
-            if (hint != null)
-            {
-                hint.anchorMin = hint.anchorMax = new Vector2(0.5f, 0.5f);
-                hint.pivot = new Vector2(0.5f, 0.5f);
-                hint.sizeDelta = new Vector2(CellW, 40f);
-                hint.anchoredPosition = new Vector2(0f, CellH * 0.5f - 150f);
-
-                var text = hint.GetComponent<Text>();
-                if (text != null)
-                {
-                    text.resizeTextForBestFit = false;
-                    text.fontSize = 22;
-                    text.alignment = TextAnchor.MiddleCenter;
-                    text.horizontalOverflow = HorizontalWrapMode.Overflow;
-                    text.verticalOverflow = VerticalWrapMode.Overflow;
-                    text.fontStyle = FontStyle.Bold;
-                    text.color = GamePalette.Danger;
-                    var shadow = text.GetComponent<Shadow>();
-                    if (shadow == null) shadow = text.gameObject.AddComponent<Shadow>();
-                    shadow.effectColor = new Color(0f, 0f, 0f, 0.95f);
-                    shadow.effectDistance = new Vector2(2f, -2f);
-                }
-            }
+            PlaceHint(cell, SlotH * 0.5f - SlotOverlay.ArtY - SlotOverlay.ArtSize * 0.5f, GamePalette.Danger);
 
             if (root.GetComponent<SlotOverlay>() == null)
                 root.AddComponent<SlotOverlay>();
@@ -274,7 +303,38 @@ public static class FlipCardsLayoutBuilder
         finally { PrefabUtility.UnloadPrefabContents(root); }
     }
 
-    static void ResizePlaceholder(GameObject placeholder)
+    /// <summary>
+    /// L'hint galleggia SOPRA la cella in z, sovrapposto all'artwork, e non nel
+    /// flusso: accodato dentro il rect originale mostrava una riga e troncava il
+    /// resto, e fuori dalla cella finirebbe addosso all'asse delle corsie.
+    /// </summary>
+    static void PlaceHint(RectTransform cell, float dy, Color color)
+    {
+        var hint = cell.Find("HintText") as RectTransform;
+        if (hint == null) return;
+
+        hint.anchorMin = hint.anchorMax = new Vector2(0.5f, 0.5f);
+        hint.pivot = new Vector2(0.5f, 0.5f);
+        hint.sizeDelta = new Vector2(cell.rect.width, 40f);
+        hint.anchoredPosition = new Vector2(0f, dy);
+
+        var text = hint.GetComponent<Text>();
+        if (text == null) return;
+
+        text.resizeTextForBestFit = false;
+        text.fontSize = 22;
+        text.alignment = TextAnchor.MiddleCenter;
+        text.horizontalOverflow = HorizontalWrapMode.Overflow;
+        text.verticalOverflow = VerticalWrapMode.Overflow;
+        text.fontStyle = FontStyle.Bold;
+        text.color = color;
+
+        var shadow = text.GetComponent<Shadow>() ?? text.gameObject.AddComponent<Shadow>();
+        shadow.effectColor = new Color(0f, 0f, 0f, 0.95f);
+        shadow.effectDistance = new Vector2(2f, -2f);
+    }
+
+    static void ResizePlaceholder(GameObject placeholder, float w, float h)
     {
         if (placeholder == null) return;
 
@@ -282,7 +342,7 @@ public static class FlipCardsLayoutBuilder
         if (string.IsNullOrEmpty(path))
         {
             // Oggetto di scena: si modifica direttamente.
-            ApplyPlaceholder(placeholder);
+            ApplyPlaceholder(placeholder, w, h);
             EditorUtility.SetDirty(placeholder);
             return;
         }
@@ -290,19 +350,19 @@ public static class FlipCardsLayoutBuilder
         var root = PrefabUtility.LoadPrefabContents(path);
         try
         {
-            ApplyPlaceholder(root);
+            ApplyPlaceholder(root, w, h);
             PrefabUtility.SaveAsPrefabAsset(root, path);
         }
         finally { PrefabUtility.UnloadPrefabContents(root); }
     }
 
-    static void ApplyPlaceholder(GameObject go)
+    static void ApplyPlaceholder(GameObject go, float w, float h)
     {
         var rt = go.transform as RectTransform;
         if (rt == null) return;
 
-        ScaleTree(rt, CellW, CellH);
-        SetLayoutElement(go, CellW, CellH);
+        ScaleTree(rt, w, h);
+        SetLayoutElement(go, w, h);
 
         var outline = go.GetComponent<Outline>();
         if (outline != null)
@@ -495,17 +555,24 @@ public static class FlipCardsLayoutBuilder
         var root = (RectTransform)canvas.transform;
 
         // Sfondo: nessun Raycast Target sopra l'area di gioco, o drag-and-drop e
-        // swap smettono di funzionare.
+        // swap smettono di funzionare. Con il kit importato e' il tabellone del
+        // manifest, che disegna gia' i pozzetti di ogni zona.
         var backdrop = UiBuild.Rect("Backdrop", root);
         UiBuild.Band(backdrop, 0f, 0f, RefW, RefH);
-        UiBuild.Fill(backdrop, GamePalette.Background);
+        var backdropImg = UiBuild.Fill(backdrop, HasBackdrop ? Color.white : GamePalette.Background);
+        if (HasBackdrop)
+        {
+            backdropImg.sprite = _boardBg;
+            backdropImg.type = Image.Type.Simple;
+            backdropImg.preserveAspect = false;
+        }
 
         var field = UiBuild.Rect("Field", root);
         UiBuild.Band(field, FieldX, 0f, FieldW, RefH);
 
         var side = UiBuild.Rect("SidePanel", root);
-        UiBuild.Band(side, RefW - SideW, 0f, SideW, RefH);
-        UiBuild.Fill(side, GamePalette.Panel);
+        UiBuild.Band(side, SideX, 0f, RefW - SideX, RefH);
+        if (!HasBackdrop) UiBuild.Fill(side, GamePalette.Panel);
 
         var hud = canvasGO.GetComponent<HudController>() ?? canvasGO.AddComponent<HudController>();
 
@@ -517,12 +584,12 @@ public static class FlipCardsLayoutBuilder
         var playerBoardRoot = BuildPlayerLanes(field);
         var (handRoot, spawnPoint) = BuildHandZone(field);
 
-        BuildSideHeader(side, hud);
+        BuildSideHeader(side, hud, gm);
         BuildInspector(side);
         var logText = BuildLog(side);
-        BuildDeck(side, hud);
         var (btnAttack, btnEndTurn) = BuildCommands(side);
 
+        BuildCrtOverlay(root);
         BuildEndPanel(root, hud);
 
         // Le corsie del giocatore vanno riferite all'asse dopo la creazione.
@@ -537,90 +604,118 @@ public static class FlipCardsLayoutBuilder
         EditorUtility.SetDirty(hand);
     }
 
+    /// <summary>Pannello di zona: sopra board_bg basta un velo, senza il fondo si disegna la scatola.</summary>
+    static RectTransform Zone(string name, Transform parent, float x, float y, float w, float h)
+    {
+        var rt = HasBackdrop
+            ? UiBuild.Rect(name, parent)
+            : UiBuild.PanelBox(name, parent, GamePalette.PanelSunken);
+
+        if (HasBackdrop) UiBuild.Fill(rt, GamePalette.WithAlpha(GamePalette.PanelSunken, 0.55f));
+        UiBuild.Band(rt, x, y, w, h);
+        return rt;
+    }
+
     // ── Campo di gioco ────────────────────────────────────────────────────────
 
     static void BuildTopBar(RectTransform field, HudController hud)
     {
-        var bar = UiBuild.Rect("TopBar", field);
-        UiBuild.Band(bar, 0f, TopBarY, FieldW, TopBarH);
+        var plate = UiBuild.Rect("TurnPlate", field);
+        UiBuild.Band(plate, 0f, TopPlateY, TurnPlateW, TopPlateH);
 
-        hud.turnText = UiBuild.Text("Turn", bar, "TURNO 1 / 12", 26f, GamePalette.TextPrimary,
+        hud.turnText = UiBuild.Text("Turn", plate, "TURNO 1 / 12", 24f, GamePalette.TextPrimary,
                                     TextAlignmentOptions.Left, FontStyles.Bold);
-        UiBuild.Band(hud.turnText.rectTransform, 40f, 12f, 400f, 32f);
+        UiBuild.Stretch(hud.turnText.rectTransform, 22f, 0f, 12f, 0f);
+        hud.turnText.alignment = TextAlignmentOptions.Left;
 
-        var chip = UiBuild.Rect("PhaseChip", bar);
-        UiBuild.Band(chip, FieldW - 40f - 560f, 10f, 560f, 36f);
-        hud.phaseChip = UiBuild.Fill(chip, GamePalette.WithAlpha(GamePalette.Good, 0.16f));
+        var chip = UiBuild.Rect("PhaseChip", field);
+        UiBuild.Band(chip, PhaseX, TopPlateY, PhaseW, TopPlateH);
+        hud.phaseChip = UiBuild.Fill(chip, GamePalette.WithAlpha(GamePalette.Good, 0.12f));
 
-        hud.phaseText = UiBuild.Text("Phase", chip, "FASE AZIONI", 19f, GamePalette.Good,
+        hud.phaseText = UiBuild.Text("Phase", chip, "FASE AZIONI", 20f, GamePalette.Good,
                                      TextAlignmentOptions.Center, FontStyles.Bold);
         UiBuild.Stretch(hud.phaseText.rectTransform);
     }
 
     static void BuildBossBand(RectTransform field, HudController hud)
     {
-        var band = UiBuild.PanelBox("BossBand", field, GamePalette.PanelSunken);
-        UiBuild.Band(band, 40f, BossY, FieldW - 80f, BossH);
+        var band = Zone("BossBand", field, 0f, BossY, FieldW, BossH);
 
-        hud.bossNameText = UiBuild.Text("Name", band, "BOSS", 20f, GamePalette.BossHp,
+        hud.bossNameText = UiBuild.Text("Name", band, "BOSS", 19f, GamePalette.BossHp,
                                         TextAlignmentOptions.Left, FontStyles.Bold);
-        UiBuild.Band(hud.bossNameText.rectTransform, 18f, 10f, 300f, 26f);
+        UiBuild.Band(hud.bossNameText.rectTransform, 16f, 4f, 300f, 24f);
 
-        var note = UiBuild.Text("Note", band, "il fronte nemico viene sostituito a ogni fine turno",
-                                14f, GamePalette.TextMuted, TextAlignmentOptions.Right);
-        UiBuild.Band(note.rectTransform, FieldW - 80f - 18f - 620f, 12f, 620f, 22f);
+        var note = UiBuild.Text("Note", band, "sostituisce il fronte a fine turno",
+                                14f, GamePalette.TextMuted, TextAlignmentOptions.Left);
+        UiBuild.Band(note.rectTransform, 16f, 28f, 480f, 22f);
 
         hud.bossHpBar = UiBuild.Bar("HpBar", band, GamePalette.BossHp, out var barRt);
-        UiBuild.Band(barRt, 18f, 46f, FieldW - 80f - 36f - 140f, 28f);
+        UiBuild.Band(barRt, 520f, 14f, 520f, 28f);
 
         hud.bossHpText = UiBuild.Text("HpText", band, "24/24", 20f, GamePalette.TextPrimary,
                                       TextAlignmentOptions.Right, FontStyles.Bold);
-        UiBuild.Band(hud.bossHpText.rectTransform, FieldW - 80f - 18f - 130f, 46f, 130f, 28f);
+        UiBuild.Band(hud.bossHpText.rectTransform, 1046f, 14f, 116f, 28f);
     }
 
     static RectTransform BuildEnemyLanes(RectTransform field)
     {
+        // La cassa del rullo e' piu' alta delle caselle: sopra e sotto restano le
+        // fasce in cui il reel di fine turno fa scorrere le caselle parziali.
+        var housing = UiBuild.Rect("ReelHousing", field);
+        UiBuild.Band(housing, 0f, ReelHousingY, FieldW, ReelHousingH);
+        if (!HasBackdrop) UiBuild.Fill(housing, GamePalette.WithAlpha(Color.black, 0.35f));
+
         // Wrapper: _ReelOverlayLayer nasce come FRATELLO di AIBoardRoot, quindi il
         // board deve avere un parent proprio e nessuna scala diversa dal fratello.
         var zone = UiBuild.Rect("EnemyLanes", field);
-        UiBuild.Band(zone, 20f, EnemyY, FieldW - 40f, EnemyH);
+        UiBuild.Band(zone, (FieldW - EnemyBoardW) * 0.5f, EnemyY, EnemyBoardW, SlotH);
 
         var board = UiBuild.Rect("AIBoardRoot", zone);
         UiBuild.Stretch(board);
-        LaneGroup(board);
+        LaneGroup(board, EnemyLaneGap);
+
+        // Payline: la riga su cui la casella "si ferma". Nel gioco non decide
+        // nulla, ma dice a colpo d'occhio che quello e' un rullo. Creata DOPO le
+        // corsie: gli slot sono opachi e la coprirebbero, e la payline deve
+        // attraversarli, non passarci dietro.
+        var payline = UiBuild.Rect("Payline", field);
+        UiBuild.Band(payline, 8f, PaylineY - 1f, FieldW - 16f, 2f);
+        UiBuild.Fill(payline, GamePalette.Payline);
+
         return board;
     }
 
     static void BuildLaneAxis(RectTransform field)
     {
         var axis = UiBuild.Rect("LaneAxis", field);
-        UiBuild.Band(axis, 20f, AxisY, FieldW - 40f, AxisH);
+        UiBuild.Band(axis, 0f, AxisY, FieldW, AxisH);
 
         var view = axis.gameObject.AddComponent<LaneAxisView>();
-        view.columnWidth = LaneColumn;
+        view.columnWidth = LanePitch - 76f;
     }
 
     static RectTransform BuildPlayerLanes(RectTransform field)
     {
         var zone = UiBuild.Rect("PlayerLanes", field);
-        UiBuild.Band(zone, 20f, PlayerY, FieldW - 40f, PlayerH);
+        UiBuild.Band(zone, (FieldW - PlayerBoardW) * 0.5f, PlayerY, PlayerBoardW, CardH);
 
         var board = UiBuild.Rect("PlayerBoardRoot", zone);
         UiBuild.Stretch(board);
-        LaneGroup(board);
+        LaneGroup(board, PlayerLaneGap);
         return board;
     }
 
     /// <summary>
-    /// Colonne di corsia: le celle restano 220 e il passo diventa 220+68 = 288,
-    /// cioe' esattamente la colonna da 240 con il gap da 48 della specifica.
+    /// Colonne di corsia. Il gap e' diverso per i due lati perche' le celle lo
+    /// sono, ma il passo risultante e' lo stesso: 396. E' quello che tiene rullo,
+    /// asse e corsie sugli stessi tre centri.
     /// childControl spento: il gruppo posiziona ma non ridimensiona, cosi il rect
     /// della cella (da cui _BoardContainer prende la misura) resta quello del prefab.
     /// </summary>
-    static void LaneGroup(RectTransform board)
+    static void LaneGroup(RectTransform board, float gap)
     {
         var group = board.gameObject.AddComponent<HorizontalLayoutGroup>();
-        group.spacing = LaneGap;
+        group.spacing = gap;
         group.childAlignment = TextAnchor.MiddleCenter;
         group.childControlWidth = false;
         group.childControlHeight = false;
@@ -630,41 +725,43 @@ public static class FlipCardsLayoutBuilder
     }
 
     /// <summary>
-    /// Rail verticale del giocatore: HP e AP in colonna sul bordo sinistro.
-    /// In orizzontale costavano una banda intera al campo di gioco.
+    /// Rail verticale del giocatore: stato, mazzo e legenda in colonna sul bordo
+    /// sinistro. In orizzontale costavano una banda intera al campo di gioco.
     /// </summary>
     static void BuildPlayerRail(RectTransform root, HudController hud)
     {
         var rail = UiBuild.Rect("PlayerRail", root);
-        UiBuild.Band(rail, 0f, BossY, RailW, RefH - BossY);
-        UiBuild.Fill(rail, GamePalette.PanelSunken);
+        UiBuild.Band(rail, RailX, RailY, RailW, RailH);
+        if (!HasBackdrop) UiBuild.Fill(rail, GamePalette.PanelSunken);
 
-        var label = UiBuild.Text("Label", rail, "TU", 17f, GamePalette.PlayerHp,
-                                 TextAlignmentOptions.Center, FontStyles.Bold);
-        UiBuild.Band(label.rectTransform, 0f, 14f, RailW, 22f);
+        var label = UiBuild.Text("Label", rail, "TU", 18f, GamePalette.PlayerHp,
+                                 TextAlignmentOptions.Left, FontStyles.Bold);
+        UiBuild.Band(label.rectTransform, 12f, 12f, 120f, 26f);
 
-        hud.playerHpBar = UiBuild.Bar("HpBar", rail, GamePalette.PlayerHp, out var barRt, vertical: true);
-        UiBuild.Band(barRt, 30f, 44f, 36f, 420f);
+        hud.playerHpBar = UiBuild.Bar("HpBar", rail, GamePalette.PlayerHp, out var barRt);
+        UiBuild.Band(barRt, 0f, RailHpY + 8f, RailW, RailHpH - 16f);
 
         hud.playerHpText = UiBuild.Text("HpText", rail, "20/20", 16f, GamePalette.TextPrimary,
-                                        TextAlignmentOptions.Center, FontStyles.Bold);
-        UiBuild.Band(hud.playerHpText.rectTransform, 0f, 470f, RailW, 22f);
+                                        TextAlignmentOptions.Right, FontStyles.Bold);
+        UiBuild.Band(hud.playerHpText.rectTransform, RailW - 108f, RailHpY + 8f, 100f, RailHpH - 16f);
 
-        var apLabel = UiBuild.Text("ApLabel", rail, "AP", 17f, GamePalette.Ap,
-                                   TextAlignmentOptions.Center, FontStyles.Bold);
-        UiBuild.Band(apLabel.rectTransform, 0f, 512f, RailW, 22f);
+        var apLabel = UiBuild.Text("ApLabel", rail, "AP", 15f, GamePalette.Ap,
+                                   TextAlignmentOptions.Left, FontStyles.Bold);
+        UiBuild.Band(apLabel.rectTransform, 8f, RailApY + 6f, 40f, 26f);
 
         hud.apPipsRoot = UiBuild.Rect("ApPips", rail);
-        UiBuild.Band(hud.apPipsRoot, 30f, 540f, 36f, 230f);
+        UiBuild.Band(hud.apPipsRoot, 48f, RailApY + 8f, 176f, 22f);
 
         hud.apText = UiBuild.Text("ApText", rail, "4/5", 16f, GamePalette.TextPrimary,
-                                  TextAlignmentOptions.Center, FontStyles.Bold);
-        UiBuild.Band(hud.apText.rectTransform, 0f, 776f, RailW, 22f);
+                                  TextAlignmentOptions.Right, FontStyles.Bold);
+        UiBuild.Band(hud.apText.rectTransform, RailW - 68f, RailApY + 6f, 60f, 26f);
 
-        var costs = UiBuild.Text("Costs", rail, "ogni\nazione\n1 AP", 12f, GamePalette.TextMuted,
-                                 TextAlignmentOptions.Center);
-        UiBuild.Band(costs.rectTransform, 0f, 812f, RailW, 60f);
-        costs.textWrappingMode = TextWrappingModes.Normal;
+        var costs = UiBuild.Text("Costs", rail, "OGNI AZIONE 1 AP · ATTACCA 0", 13f, GamePalette.TextMuted,
+                                 TextAlignmentOptions.Left);
+        UiBuild.Band(costs.rectTransform, 10f, RailCostY + 6f, RailW - 20f, RailCostH - 12f);
+
+        BuildDeck(rail, hud);
+        BuildLegend(rail);
     }
 
     static (Transform handRoot, Transform spawnPoint) BuildHandZone(RectTransform field)
@@ -691,13 +788,13 @@ public static class FlipCardsLayoutBuilder
         var handRoot = UiBuild.Rect("PlayerHand", zone);
         handRoot.anchorMin = handRoot.anchorMax = new Vector2(0.5f, 0f);
         handRoot.pivot = new Vector2(0.5f, 0.5f);
-        handRoot.sizeDelta = new Vector2(HandRootW, CellH);
+        handRoot.sizeDelta = new Vector2(HandRootW, CardH);
         handRoot.anchoredPosition = new Vector2(0f, HandRestY);
 
         var spawn = UiBuild.Rect("spawnPoint", zone);
         spawn.anchorMin = spawn.anchorMax = new Vector2(1f, 0f);
         spawn.pivot = new Vector2(0.5f, 0.5f);
-        spawn.sizeDelta = new Vector2(CellW, CellH);
+        spawn.sizeDelta = new Vector2(CardW, CardH);
         spawn.anchoredPosition = new Vector2(-140f, HandRestY);
 
         var tray = zone.gameObject.AddComponent<HandTray>();
@@ -710,24 +807,127 @@ public static class FlipCardsLayoutBuilder
         return (handRoot, spawn);
     }
 
+    // ── Rail: mazzo e legenda ─────────────────────────────────────────────────
+
+    /// <summary>
+    /// Il mazzo: una pila di carte vere che si assottiglia, cliccabile.
+    /// Il bottone PESCA non diceva quante carte restassero ne' cosa stesse per
+    /// uscire, e a mazzo vuoto non faceva nulla senza spiegare perche'.
+    /// Sta nel rail, non nella colonna destra: e' un oggetto del giocatore, come
+    /// i suoi HP e i suoi AP.
+    /// </summary>
+    static void BuildDeck(RectTransform rail, HudController hud)
+    {
+        var label = UiBuild.Text("DeckLabel", rail, "MAZZO", 14f, GamePalette.TextMuted,
+                                 TextAlignmentOptions.Left, FontStyles.Bold);
+        UiBuild.Band(label.rectTransform, 12f, RailDeckLabelY, 120f, RailDeckLabelH);
+
+        hud.deckText = UiBuild.Text("DeckCount", rail, "MAZZO 0", 22f, GamePalette.TextPrimary,
+                                    TextAlignmentOptions.Right, FontStyles.Bold);
+        UiBuild.Band(hud.deckText.rectTransform, RailW - 140f, RailDeckLabelY - 2f, 128f, RailDeckLabelH + 4f);
+
+        var box = UiBuild.Rect("Deck", rail);
+        UiBuild.Band(box, RailDeckX, RailDeckY, RailDeckW, RailDeckH);
+
+        // Unico Raycast Target di questa banda, e sta fuori dall'area di gioco:
+        // e' il bersaglio del clic che pesca. I figli — le carte della pila —
+        // fanno risalire il proprio clic fin qui.
+        UiBuild.Fill(box, new Color(1f, 1f, 1f, 0.02f), raycast: true);
+
+        var view = box.gameObject.AddComponent<DeckView>();
+
+        var stack = UiBuild.Rect("Stack", box);
+        UiBuild.Stretch(stack);
+        view.stackRoot = stack;
+
+        view.hintText = UiBuild.Text("Hint", rail, "clic per pescare · 1 AP", 14f, GamePalette.TextMuted,
+                                     TextAlignmentOptions.Center);
+        UiBuild.Band(view.hintText.rectTransform, 12f, RailDeckHintY, RailW - 24f, RailDeckHintH);
+        view.hintText.textWrappingMode = TextWrappingModes.Normal;
+    }
+
+    /// <summary>
+    /// Legenda dei colori. La cella carta e' simbolica per scelta — nessuna
+    /// etichetta, solo numeri colorati e pastiglie — e senza una chiave quella
+    /// scelta si paga alla prima partita di chi non ha scritto il codice.
+    /// </summary>
+    static void BuildLegend(RectTransform rail)
+    {
+        var box = Zone("Legend", rail, 0f, RailLegendY, RailW, RailLegendH);
+
+        var title = UiBuild.Text("Title", box, "LEGENDA", 13f, GamePalette.TextMuted,
+                                 TextAlignmentOptions.Left, FontStyles.Bold);
+        UiBuild.Band(title.rectTransform, 12f, 10f, 200f, 20f);
+
+        float y = 38f;
+        y = LegendGroup(box, y, "LATO");
+        y = LegendRow(box, y, GamePalette.Fronte, "FRONTE", "attacca");
+        y = LegendRow(box, y, GamePalette.Retro, "RETRO", "blocca e carica");
+
+        y = LegendGroup(box, y + 6f, "NUMERI");
+        y = LegendRow(box, y, GamePalette.Danger, "ATK", "danno in Fronte");
+        y = LegendRow(box, y, GamePalette.PlayerHp, "HP", "vita");
+        y = LegendRow(box, y, GamePalette.Retro, "BLOCCO", "danno assorbito");
+        y = LegendRow(box, y, GamePalette.Charge, "CARICHE", "bonus al prossimo colpo");
+
+        y = LegendGroup(box, y + 6f, "FAZIONI");
+        y = LegendRow(box, y, GamePalette.FactionColor(Faction.A), "A", string.Empty);
+        y = LegendRow(box, y, GamePalette.FactionColor(Faction.B), "B", string.Empty);
+        LegendRow(box, y, GamePalette.FactionColor(Faction.C), "C", string.Empty);
+    }
+
+    static float LegendGroup(RectTransform box, float y, string label)
+    {
+        var text = UiBuild.Text($"Group_{label}", box, label, 11f, GamePalette.TextFaint,
+                                TextAlignmentOptions.Left, FontStyles.Bold);
+        UiBuild.Band(text.rectTransform, 12f, y, RailW - 24f, 16f);
+        return y + 20f;
+    }
+
+    static float LegendRow(RectTransform box, float y, Color color, string name, string note)
+    {
+        const float h = 22f;
+
+        var swatch = UiBuild.Rect($"Swatch_{name}", box);
+        UiBuild.Band(swatch, 14f, y + 5f, 12f, 12f);
+        UiBuild.Fill(swatch, color);
+
+        var text = UiBuild.Text($"Row_{name}", box, name, 13f, color,
+                                TextAlignmentOptions.Left, FontStyles.Bold);
+        UiBuild.Band(text.rectTransform, 34f, y, 90f, h);
+
+        if (!string.IsNullOrEmpty(note))
+        {
+            var noteText = UiBuild.Text($"Note_{name}", box, note, 12f, GamePalette.TextFaint);
+            UiBuild.Band(noteText.rectTransform, 122f, y, RailW - 134f, h);
+        }
+
+        return y + h;
+    }
+
     // ── Colonna destra ────────────────────────────────────────────────────────
 
-    static void BuildSideHeader(RectTransform side, HudController hud)
+    static void BuildSideHeader(RectTransform side, HudController hud, GameManager gm)
     {
         var header = UiBuild.Rect("Header", side);
-        UiBuild.Band(header, SidePad, HeaderY, SideContentW, HeaderH);
+        UiBuild.Band(header, 0f, HeaderY, SideContentW, HeaderH);
 
-        // Il conteggio del mazzo vive sulla pila, non qui: ripeterlo in cima alla
-        // colonna sarebbe lo stesso numero scritto due volte.
-        hud.handText = UiBuild.Text("Hand", header, "MANO 0/5", 17f, GamePalette.TextPrimary,
-                                    TextAlignmentOptions.Right, FontStyles.Bold);
-        UiBuild.Band(hud.handText.rectTransform, SideContentW - 200f, 8f, 200f, 24f);
+        // Il conteggio del mazzo vive sulla pila nel rail: ripeterlo qui sarebbe
+        // lo stesso numero scritto due volte.
+        hud.handText = UiBuild.Text("Hand", header, "MANO 0/8", 17f, GamePalette.TextPrimary,
+                                    TextAlignmentOptions.Left, FontStyles.Bold);
+        UiBuild.Band(hud.handText.rectTransform, 16f, 14f, 200f, 24f);
+
+        // Il seed non cambia mai in partita: e' un'etichetta, non un valore da
+        // aggiornare, e serve a poter ripetere una partita identica.
+        var seed = UiBuild.Text("Seed", header, $"SEED {gm.seed}", 14f, GamePalette.TextFaint,
+                                TextAlignmentOptions.Right);
+        UiBuild.Band(seed.rectTransform, SideContentW - 200f, 14f, 184f, 24f);
     }
 
     static void BuildInspector(RectTransform side)
     {
-        var box = UiBuild.PanelBox("Inspector", side, GamePalette.PanelSunken);
-        UiBuild.Band(box, SidePad, InspectorY, SideContentW, InspectorH);
+        var box = Zone("Inspector", side, 0f, InspectorY, SideContentW, InspectorH);
 
         var panel = box.gameObject.AddComponent<InspectorPanel>();
 
@@ -737,36 +937,35 @@ public static class FlipCardsLayoutBuilder
 
         panel.titleText = UiBuild.Text("Title", box, "ISPETTORE", 22f, GamePalette.TextPrimary,
                                        TextAlignmentOptions.Left, FontStyles.Bold);
-        UiBuild.Band(panel.titleText.rectTransform, 20f, 12f, 364f, 30f);
+        UiBuild.Band(panel.titleText.rectTransform, 20f, 14f, 364f, 30f);
 
         panel.subtitleText = UiBuild.Text("Subtitle", box, "", 14f, GamePalette.TextMuted);
-        UiBuild.Band(panel.subtitleText.rectTransform, 20f, 42f, 364f, 22f);
+        UiBuild.Band(panel.subtitleText.rectTransform, 20f, 44f, 364f, 22f);
 
         panel.sideText = UiBuild.Text("Side", box, "", 13f, GamePalette.TextMuted,
                                       TextAlignmentOptions.Left, FontStyles.Bold);
-        UiBuild.Band(panel.sideText.rectTransform, 20f, 64f, 364f, 20f);
+        UiBuild.Band(panel.sideText.rectTransform, 20f, 66f, 364f, 20f);
 
         panel.bodyText = UiBuild.Text("Body", box, "", 15f, GamePalette.TextPrimary);
-        UiBuild.Band(panel.bodyText.rectTransform, 20f, 92f, 364f, 288f);
+        UiBuild.Band(panel.bodyText.rectTransform, 20f, 96f, 364f, 384f);
         panel.bodyText.alignment = TextAlignmentOptions.TopLeft;
         panel.bodyText.textWrappingMode = TextWrappingModes.Normal;
         panel.bodyText.overflowMode = TextOverflowModes.Truncate;
         panel.bodyText.lineSpacing = 6f;
 
         panel.hintText = UiBuild.Text("Hint", box, "", 12f, GamePalette.TextMuted);
-        UiBuild.Band(panel.hintText.rectTransform, 20f, 384f, 364f, 34f);
+        UiBuild.Band(panel.hintText.rectTransform, 20f, 484f, 364f, 34f);
         panel.hintText.alignment = TextAlignmentOptions.TopLeft;
         panel.hintText.textWrappingMode = TextWrappingModes.Normal;
     }
 
     static TMP_Text BuildLog(RectTransform side)
     {
-        var box = UiBuild.PanelBox("Log", side, GamePalette.PanelSunken);
-        UiBuild.Band(box, SidePad, LogY, SideContentW, LogH);
+        var box = Zone("Log", side, 0f, LogY, SideContentW, LogH);
 
         var title = UiBuild.Text("Title", box, "LOG", 13f, GamePalette.TextMuted,
                                  TextAlignmentOptions.Left, FontStyles.Bold);
-        UiBuild.Band(title.rectTransform, 12f, 8f, 200f, 18f);
+        UiBuild.Band(title.rectTransform, 14f, 8f, 200f, 18f);
 
         var scrollRt = UiBuild.Rect("Scroll", box);
         UiBuild.Band(scrollRt, 8f, 30f, SideContentW - 16f, LogH - 38f);
@@ -836,65 +1035,55 @@ public static class FlipCardsLayoutBuilder
         return scrollbar;
     }
 
-    /// <summary>
-    /// Il mazzo: una pila di carte vere che si assottiglia, cliccabile.
-    /// Il bottone PESCA non diceva quante carte restassero ne' cosa stesse per
-    /// uscire, e a mazzo vuoto non faceva nulla senza spiegare perche'.
-    /// </summary>
-    static void BuildDeck(RectTransform side, HudController hud)
-    {
-        var box = UiBuild.PanelBox("Deck", side, GamePalette.PanelSunken);
-        UiBuild.Band(box, SidePad, DeckY, SideContentW, DeckH);
-
-        // Unico Raycast Target di questa banda, e sta fuori dall'area di gioco:
-        // e' il bersaglio del clic che pesca. I figli — le carte della pila —
-        // fanno risalire il proprio clic fin qui.
-        var boxImage = box.GetComponent<UnityEngine.UI.Image>();
-        if (boxImage != null) boxImage.raycastTarget = true;
-
-        var view = box.gameObject.AddComponent<DeckView>();
-
-        var stack = UiBuild.Rect("Stack", box);
-        UiBuild.Band(stack, 0f, 0f, DeckStackW, DeckH);
-        view.stackRoot = stack;
-
-        float textX = DeckStackW + 12f;
-        float textW = SideContentW - textX - 16f;
-
-        var label = UiBuild.Text("Label", box, "MAZZO", 13f, GamePalette.TextMuted,
-                                 TextAlignmentOptions.Left, FontStyles.Bold);
-        UiBuild.Band(label.rectTransform, textX, 26f, textW, 18f);
-
-        hud.deckText = UiBuild.Text("Count", box, "MAZZO 0", 30f, GamePalette.TextPrimary,
-                                    TextAlignmentOptions.Left, FontStyles.Bold);
-        UiBuild.Band(hud.deckText.rectTransform, textX, 46f, textW, 36f);
-
-        view.hintText = UiBuild.Text("Hint", box, "clic per pescare · 1 AP", 14f, GamePalette.TextMuted);
-        UiBuild.Band(view.hintText.rectTransform, textX, 88f, textW, 40f);
-        view.hintText.textWrappingMode = TextWrappingModes.Normal;
-    }
-
     static (Button attack, Button endTurn) BuildCommands(RectTransform side)
     {
         var box = UiBuild.Rect("Commands", side);
-        UiBuild.Band(box, SidePad, CommandsY, SideContentW, CommandsH);
+        UiBuild.Band(box, 0f, CommandsY, SideContentW, CommandH * 2f + CommandGap);
 
-        float y = 12f;
-        var attack = UiBuild.Command("BtnAttack", box, "ATTACCA", "0 AP · chiude la fase", GamePalette.Fronte, out _);
-        UiBuild.Band((RectTransform)attack.transform, 0f, y, SideContentW, CommandH);
+        var attack = UiBuild.Command("BtnAttack", box, "ATTACCA", "0 AP · chiude la fase", GamePalette.Danger, out _);
+        UiBuild.Band((RectTransform)attack.transform, 0f, 0f, SideContentW, CommandH);
 
-        y += CommandH + CommandGap;
-        var endTurn = UiBuild.Command("BtnEndTurn", box, "CHIUDI TURNO", "0 AP", GamePalette.Retro, out _);
-        UiBuild.Band((RectTransform)endTurn.transform, 0f, y, SideContentW, CommandH);
+        var endTurn = UiBuild.Command("BtnEndTurn", box, "CHIUDI TURNO", "0 AP", GamePalette.PlayerHp, out _);
+        UiBuild.Band((RectTransform)endTurn.transform, 0f, CommandH + CommandGap, SideContentW, CommandH);
 
         return (attack, endTurn);
+    }
+
+    /// <summary>
+    /// Scanline e vignetta sopra tutto, senza Raycast Target: sono la pelle CRT
+    /// del kit ed e' quello che fa leggere il tabellone come uno schermo invece
+    /// che come una pagina. Se il kit non e' importato, non succede niente.
+    /// </summary>
+    static void BuildCrtOverlay(RectTransform root)
+    {
+        var scanlines = KitSprite("board/overlay_scanlines");
+        var vignette = KitSprite("board/overlay_vignette");
+        if (scanlines == null && vignette == null) return;
+
+        var layer = UiBuild.Rect("CrtOverlay", root);
+        UiBuild.Band(layer, 0f, 0f, RefW, RefH);
+
+        CrtLayer(layer, "Scanlines", scanlines, 0.40f);
+        CrtLayer(layer, "Vignette", vignette, 0.75f);
+    }
+
+    static void CrtLayer(RectTransform parent, string name, Sprite sprite, float alpha)
+    {
+        if (sprite == null) return;
+
+        var rt = UiBuild.Rect(name, parent);
+        UiBuild.Stretch(rt);
+        var img = UiBuild.Fill(rt, new Color(1f, 1f, 1f, alpha));
+        img.sprite = sprite;
+        img.type = Image.Type.Simple;
+        img.preserveAspect = false;
     }
 
     static void BuildEndPanel(RectTransform root, HudController hud)
     {
         var panel = UiBuild.Rect("EndMatchPanel", root);
         UiBuild.Band(panel, 0f, 0f, RefW, RefH);
-        UiBuild.Fill(panel, new Color(0f, 0f, 0f, 0.78f), raycast: true);
+        UiBuild.Fill(panel, new Color(0f, 0f, 0f, 0.82f), raycast: true);
 
         var box = UiBuild.PanelBox("Box", panel, GamePalette.Panel);
         UiBuild.Centered(box, 760f, 340f);
@@ -936,12 +1125,12 @@ public static class FlipCardsLayoutBuilder
         so.FindProperty("spawnPoint").objectReferenceValue = spawnPoint;
         // La carta nasce gia' alla dimensione della cella: il moltiplicatore
         // serviva quando il prefab era 100x154 e ora la sparerebbe a 330x495.
-        so.FindProperty("spawnScaleMultiplier").floatValue = 1f;
-        // La mano massima e' una misura di layout, non di bilanciamento:
-        // HandManager usa spacing = handRoot.width / maxHandSize, quindi con 8
-        // carte il passo scendeva a 168 contro carte da 220 e a mano piena le
-        // carte si coprivano nome, vita e attacco a vicenda.
+        SetFloat(so, "spawnScaleMultiplier", 1f);
+        // Mano e passo sono misure di layout, non di bilanciamento: sono gli
+        // hand_tab_slots del kit, 8 linguette da 132. Il passo e' piu' stretto
+        // della carta perche' le carte in mano DEVONO sovrapporsi.
         so.FindProperty("maxHandSize").intValue = MaxHandCards;
+        SetFloat(so, "handSpacing", HandSpacing);
         so.ApplyModifiedPropertiesWithoutUndo();
     }
 }

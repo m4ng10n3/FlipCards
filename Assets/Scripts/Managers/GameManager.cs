@@ -876,6 +876,9 @@ public class GameManager : MonoBehaviour
 
         viewByInstance.Remove(card);
         owner.board.Remove(card);
+        // La pila degli scarti nel rail conta le carte del giocatore uscite dal
+        // gioco: e' l'unico posto in cui questa informazione esiste.
+        if (owner == player) HandManager?.NotifyDiscarded();
         card.Dispose();
         if (view.transform.parent != null) view.transform.SetParent(null, false);
         Destroy(view.gameObject);

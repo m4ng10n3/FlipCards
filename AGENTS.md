@@ -227,7 +227,9 @@ Chi non è un `Button` (il mazzo) non passa da `UpdateHUD` e guarda `CanAct`.
   `PatternLength`, `PatternStep`, `PatternSideAt(step)`.
 
 **Presentazione** (`Assets/Scripts/UI/`, tutta aggiunta per il layout)
-- `GamePalette.cs` — palette unica. Un colore = un significato. Fronte ambra, Retro blu.
+- `GamePalette.cs` — palette unica. Un colore = un significato. Fronte ambra,
+  Retro ciano. I valori sono quelli del kit *Arcade Horror CRT*
+  (`Assets/Graphics/FlipCards_ArcadeHorrorUI/.../README.md`).
 - `UiBuild.cs` — helper di costruzione. `Band(rt, x, y, w, h)` usa **coordinate
   banda**: origine in alto a sinistra del parent, y verso il basso, come in
   LAYOUT_SPEC. I numeri del documento finiscono nel codice invariati.
@@ -239,7 +241,8 @@ Chi non è un `Button` (il mazzo) non passa da `UpdateHUD` e guarda `CanAct`.
   fossero fratelli, passare da una carta all'altra genererebbe un `PointerExit`.
 - `DeckView.cs` — mazzo cliccabile: pila di prefab carta veri, di dorso, spessore
   proporzionale al residuo. Le copie sono decorative (`CardDefinition` e
-  `CardView` disabilitati) e il clic risale fino al box.
+  `CardView` disabilitati) e il clic risale fino al box. **Sta nel rail
+  sinistro**, non più nella colonna destra: è un oggetto del giocatore.
 - `LaneAxisView.cs` — asse delle corsie: pronostico per corsia e connettori di combo.
 - `InspectorPanel.cs` + `AbilityCatalog.cs` — ispettore e testi delle abilità.
 - `CardOverlay.cs` / `SlotOverlay.cs` — chrome costruito a runtime sopra i prefab.
@@ -248,9 +251,22 @@ Chi non è un `Button` (il mazzo) non passa da `UpdateHUD` e guarda `CanAct`.
 **Costruzione della scena**
 - `Assets/Editor/FlipCardsLayoutBuilder.cs` — ricostruisce **tutto** il layout:
   menu **FlipCards → Ricostruisci layout di gioco**. Due fasi: ridimensiona i
-  prefab alla cella 220×330, poi ricostruisce il Canvas a bande e ricabla
-  `GameManager` e `HandManager`. È idempotente. **Non modificare il layout a
-  mano nella scena**: al prossimo rebuild si perde. Si tocca il builder.
+  prefab (carta 224×336, casella nemica 352×288), poi ricostruisce il Canvas a
+  bande e ricabla `GameManager` e `HandManager`. È idempotente. **Non modificare
+  il layout a mano nella scena**: al prossimo rebuild si perde. Si tocca il builder.
+
+**Kit grafico** (`Assets/Graphics/FlipCards_ArcadeHorrorUI/ArcadeHorrorUI/`)
+- `flipcards_ui_manifest.json` → `layouts.board` è la **fonte delle misure** del
+  layout: i numeri del builder sono quelli ×2 (kit 960×540 → canvas 1920×1080).
+- `2x/board/board_bg.png` è un fondo con già disegnati i pozzetti di ogni zona.
+  Il builder lo carica come Backdrop se lo trova; se le bande del builder e i
+  pozzetti del fondo divergono, si vede subito perché i contenuti finiscono
+  accanto ai riquadri invece che dentro.
+- `Editor/FlipCardsAtlasImporter.cs` — menu **Tools → FlipCards → Import UI Kit**.
+  Imposta filtro Point, niente compressione, bordi 9-slice, taglio dell'atlante.
+  **Va lanciato una volta**: senza, gli sprite restano bilineari e senza bordi.
+  Il percorso del kit ora si ricava dal manifest, non da una costante scritta a
+  mano che puntava a una cartella inesistente.
 
 ## Ciclo di lavoro
 
@@ -381,8 +397,31 @@ parte da z = +1. Se compaiono rettangoli neri sulle corsie, è questo.
 **Il pivot di `handRoot` deve stare al centro.** `HandManager.UpdateCardsPosition`
 posiziona i container con `localPosition` simmetrica intorno allo zero, e lo zero
 locale è il pivot del parent. Con pivot in alto a sinistra la mano finisce fuori
-dal campo. Inoltre `spacing = handRect.width / maxHandSize`: la larghezza di
-`handRoot` è anche la regola di sovrapposizione.
+dal campo.
+
+**Le carte in mano si sovrappongono di proposito, e il passo è esplicito.**
+Il vecchio `spacing = handRect.width / maxHandSize` dava per forza un passo più
+largo della carta, cioè una fila staccata. Ora c'è il campo `handSpacing` (132
+contro carte da 224) che lo scrive il builder. La sovrapposizione è leggibile
+solo grazie a tre cose in `CardView`, e togliendone una le carte tornano a
+coprirsi nome, vita e attacco a vicenda:
+- l'arco della spline (`EvaluateHandCurve`) — aveva una soglia secca che sotto le
+  5 carte lo spegneva del tutto, lasciando le rotazioni su una riga piatta;
+- il raddrizzamento dell'angolo di ventaglio della carta sotto il puntatore;
+- `overrideSorting` con ordine 5 quando è in hover: senza, la carta si solleva
+  ma resta sepolta sotto la vicina di destra e il pop-out non si vede.
+
+Il sollevamento muove il **figlio grafico**, non la radice: il bersaglio di
+raycast resta fermo, quindi la carta non si sfila da sotto il puntatore. È il
+motivo per cui `handHoverLift` può essere grande senza far tremolare l'hover.
+
+**Lo shader della carta è legato alla rotazione, e va lasciato vedere.**
+Il `Template` monta `CardShaderGraph` (edizione POLYCHROME) e `ShaderCode` gli
+scrive `_Rotation` da `transform.parent.localRotation`, cioè dal tilt animato da
+`CardView`. Due modi di spegnerlo senza accorgersene: mettere fondi opachi in
+`CardOverlay` (per questo nessuno supera alpha 0.55) e abbassare `_poly_power`
+nel materiale — a 0.03 l'effetto non esisteva, il valore di progetto del subgraph
+è 0.3.
 
 **Nessun figlio di carta o slot deve essere `Raycast Target`.**
 `FindBoardCardUnderPointer` prende il risultato del raycast e ci cerca dentro un
@@ -423,12 +462,17 @@ essere `internal`. `Image` va scritto `UnityEngine.UI.Image` per intero, perché
 Oltre ai vincoli di LAYOUT_SPEC §7:
 
 - I numeri del layout stanno solo in `FlipCardsLayoutBuilder` (le costanti in
-  testa al file). Non duplicarli altrove.
-- **`maxHandSize` è una misura di layout**, e la scrive il builder
-  (`MaxHandCards = 5`). `HandManager` calcola `spacing = handRoot.width /
-  maxHandSize`: alzarlo restringe il passo sotto la larghezza della carta e le
-  carte in mano si coprono nome, vita e attacco a vicenda. Cambiarlo
-  nell'Inspector non serve, il prossimo rebuild lo riscrive.
+  testa al file) e, per l'anatomia delle celle, nelle costanti pubbliche di
+  `CardOverlay` e `SlotOverlay` — che il builder rilegge per posizionare i `Text`
+  dei prefab. Non duplicarli altrove. La fonte a monte è `layouts.board` del
+  manifest del kit, ×2.
+- **`maxHandSize` (8) e `handSpacing` (132) sono misure di layout**, e le scrive
+  il builder dagli `hand_tab_slots` del manifest. Cambiarle nell'Inspector non
+  serve, il prossimo rebuild le riscrive.
+- **Le due celle hanno misure diverse**: 224×336 la carta, 352×288 la casella
+  nemica. `EmptySpot` ed `EmptySlot` seguono ciascuno la propria, o le corsie
+  saltano a ogni morte. Il passo di corsia invece è lo stesso (396) per i due
+  lati: rullo, asse dei pronostici e corsie devono stare sui medesimi tre centri.
 - **Chi blocca l'input lo sblocca.** Le tre catene asincrone tengono
   `inputLocked = true` e lo rilasciano in fondo alla propria coroutine.
   Anticipare `awaitingEndTurn` o `SetButtonsInteractable(true)` permette di
@@ -436,10 +480,8 @@ Oltre ai vincoli di LAYOUT_SPEC §7:
 - `GameManager.hpText`, `apText` ed `EnemyHptxt` sono **null di proposito**: la HUD
   la scrive `HudController`. Assegnarli farebbe lampeggiare i testi fra due
   formati diversi.
-- Le corsie devono restare centrate a **x 480 / 768 / 1056** con tre corsie: celle
-  da 220 e passo 288 (`CellW` + `LaneGap`), cioè la colonna da 240 con gap 48
-  della specifica, centrate nel campo che parte a x 96 (dopo il rail del
-  giocatore). Verificabile proiettando il centro delle corsie nello spazio del
-  Canvas.
+- Le corsie devono restare centrate a **x 508 / 904 / 1300** con tre corsie: passo
+  396, celle da 224 con gap 172 sul lato giocatore e celle da 352 con gap 44 sul
+  rullo. Verificabile proiettando il centro delle corsie nello spazio del Canvas.
 - `CardOverlay` e `SlotOverlay` costruiscono i figli **a runtime**, non nel
   prefab. Non salvarli nell'asset.

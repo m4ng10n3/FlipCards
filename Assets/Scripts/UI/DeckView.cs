@@ -24,8 +24,12 @@ public class DeckView : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
     [Header("Riferimenti")]
     [Tooltip("Rect in cui viene impilata la pila. La scala delle carte si ricava dalla sua altezza.")]
     public RectTransform stackRoot;
-    [Tooltip("Riga di stato sotto il conteggio: mazzo vuoto, mano piena, costo.")]
+    [Tooltip("Riga di stato dentro la carta in cima: costo, mazzo vuoto, mano piena.")]
     public TMP_Text hintText;
+    [Tooltip("Immagine della pila del kit (deck_stack_N). Se assegnata sostituisce la pila di prefab veri.")]
+    public Image stackImage;
+    [Tooltip("Alone di 'puoi pescare' del kit (deck_pulse), acceso solo quando il clic farebbe davvero qualcosa.")]
+    public Image pulseImage;
 
     [Header("Pila")]
     [Tooltip("Quante carte si vedono al massimo nella pila, a mazzo pieno.")]
@@ -41,10 +45,13 @@ public class DeckView : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
     string _lastHint;
     GameObject _topPrefab;
     Tween _stackTween;
+    Tween _pulseTween;
+    bool _pulseOn;
 
     void LateUpdate()
     {
-        var hand = GameManager.Instance != null ? GameManager.Instance.HandManager : null;
+        var gm = GameManager.Instance;
+        var hand = gm != null ? gm.HandManager : null;
         if (hand == null) return;
 
         int count = hand.DeckCount;
@@ -55,6 +62,38 @@ public class DeckView : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
         }
 
         UpdateHint(hand, count);
+        UpdatePulse(gm, hand, count);
+    }
+
+    /// <summary>
+    /// L'alone del kit dice "questo clic pesca", non "qui c'e' un mazzo": si
+    /// accende solo quando pescare e' davvero possibile — fase giusta, carte nel
+    /// mazzo, mano non piena — cosi il rifiuto non arriva mai a sorpresa.
+    /// </summary>
+    void UpdatePulse(GameManager gm, HandManager hand, int count)
+    {
+        if (pulseImage == null) return;
+
+        bool canDraw = gm.CanAct && count > 0 && !hand.HandIsFull;
+        if (canDraw != _pulseOn)
+        {
+            _pulseOn = canDraw;
+            _pulseTween?.Kill();
+            if (!canDraw)
+            {
+                pulseImage.enabled = false;
+                return;
+            }
+
+            pulseImage.enabled = true;
+            var c = pulseImage.color;
+            _pulseTween = DOTween.To(() => c.a, a => { c.a = a; pulseImage.color = c; }, 1f, 0.9f)
+                                 .From(0.35f)
+                                 .SetLoops(-1, LoopType.Yoyo)
+                                 .SetEase(Ease.InOutSine)
+                                 .SetUpdate(true)
+                                 .SetLink(gameObject);
+        }
     }
 
     // ── Interazione ───────────────────────────────────────────────────────────
@@ -111,6 +150,22 @@ public class DeckView : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
 
     void RebuildStack(HandManager hand, int count)
     {
+        // Con la pila del kit lo spessore e' gia' negli sprite (deck_stack_0..5,
+        // per scaglioni di carte residue) e non serve impilare prefab veri: il
+        // dorso del kit e' generico, come nel tabellone di riferimento. La carta
+        // che sta per uscire resta leggibile passandoci sopra, dall'ispettore.
+        if (stackImage != null)
+        {
+            _topPrefab = null;
+            var peek = hand.PeekDeck(1);
+            if (peek.Count > 0) _topPrefab = peek[0];
+
+            var sprite = UiSkin.Sprite(UiSkin.DeckStack(count));
+            if (sprite != null) stackImage.sprite = sprite;
+            stackImage.enabled = count > 0 || sprite != null;
+            return;
+        }
+
         ClearLayers();
         if (stackRoot == null) return;
 

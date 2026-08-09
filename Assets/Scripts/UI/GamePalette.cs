@@ -4,45 +4,64 @@ using UnityEngine;
 /// Palette unica del layout. Ogni colore ha un solo significato: il lato di una
 /// carta e quello di uno slot usano la stessa codifica, altrimenti la lettura a
 /// colpo d'occhio del tavolo non funziona.
+///
+/// I valori vengono dalla palette del kit **Arcade Horror CRT**
+/// (Assets/Graphics/FlipCards_ArcadeHorrorUI/.../README.md): fondi quasi neri,
+/// accenti al neon saturi. E' quello che rende il tabellone simile al preview del
+/// kit anche prima di montarne gli sprite.
 /// </summary>
 public static class GamePalette
 {
-    public static readonly Color Background  = new Color(0.043f, 0.051f, 0.075f, 1f);
-    public static readonly Color Panel       = new Color(0.094f, 0.106f, 0.141f, 1f);
-    public static readonly Color PanelSunken = new Color(0.063f, 0.071f, 0.098f, 1f);
-    public static readonly Color Border      = new Color(0.196f, 0.227f, 0.298f, 1f);
+    /// <summary>Colore da esadecimale del kit ("#RRGGBB"), alpha piena.</summary>
+    static Color Hex(int rgb, float a = 1f) => new Color(
+        ((rgb >> 16) & 0xFF) / 255f,
+        ((rgb >> 8) & 0xFF) / 255f,
+        (rgb & 0xFF) / 255f,
+        a);
 
-    public static readonly Color TextPrimary = new Color(0.918f, 0.937f, 0.961f, 1f);
-    public static readonly Color TextMuted   = new Color(0.545f, 0.596f, 0.678f, 1f);
+    // Fondi: void / void2 / ink / steel del kit.
+    public static readonly Color Background  = Hex(0x040508);
+    public static readonly Color Panel       = Hex(0x0F121A);
+    public static readonly Color PanelSunken = Hex(0x090B10);
+    public static readonly Color Border      = Hex(0x262E3C);
+    public static readonly Color BorderHi    = Hex(0x3E4A5E);
 
-    /// Fronte = ambra (attacca), Retro = blu (blocca e carica).
-    public static readonly Color Fronte = new Color(0.980f, 0.722f, 0.220f, 1f);
-    public static readonly Color Retro  = new Color(0.353f, 0.616f, 0.980f, 1f);
+    public static readonly Color TextPrimary = Hex(0xD8E4D6);   // bone
+    public static readonly Color TextMuted   = Hex(0x8A988E);   // bone_dim
+    public static readonly Color TextFaint   = Hex(0x4E5854);   // bone_lo
 
-    public static readonly Color PlayerHp = new Color(0.361f, 0.804f, 0.451f, 1f);
-    public static readonly Color BossHp   = new Color(0.882f, 0.310f, 0.329f, 1f);
-    public static readonly Color Ap       = new Color(0.361f, 0.820f, 0.902f, 1f);
-    public static readonly Color Charge   = new Color(0.749f, 0.451f, 0.949f, 1f);
+    /// Fronte = ambra (attacca), Retro = ciano (blocca e carica).
+    public static readonly Color Fronte = Hex(0xFFB000);   // amber
+    public static readonly Color Retro  = Hex(0x38E8FF);   // cyan
 
-    public static readonly Color Danger  = new Color(0.902f, 0.298f, 0.322f, 1f);
-    public static readonly Color Good    = new Color(0.451f, 0.851f, 0.549f, 1f);
-    public static readonly Color Neutral = new Color(0.400f, 0.435f, 0.502f, 1f);
+    public static readonly Color PlayerHp = Hex(0x3DFF7A);  // phos
+    public static readonly Color BossHp   = Hex(0xFF2B3C);  // blood
+    public static readonly Color Ap       = Hex(0x1FBEE4);  // cyan spento: non si confonde con Retro
+    public static readonly Color Charge   = Hex(0xFF2FD0);  // mag
+
+    public static readonly Color Danger  = Hex(0xFF2B3C);
+    public static readonly Color Good    = Hex(0x3DFF7A);
+    public static readonly Color Neutral = Hex(0x6E7A74);
+
+    /// Alone della payline del rullo e delle cornici che marcano una corsia.
+    public static readonly Color Payline = Hex(0xFFB000, 0.55f);
 
     public static Color SideColor(Side side) => side == Side.Fronte ? Fronte : Retro;
 
+    /// Fazioni come nel kit: A sangue, B ciano, C fosforo.
     public static Color FactionColor(Faction f) => f switch
     {
-        Faction.A => new Color(0.925f, 0.463f, 0.365f, 1f),
-        Faction.B => new Color(0.400f, 0.753f, 0.898f, 1f),
-        _         => new Color(0.667f, 0.808f, 0.400f, 1f),
+        Faction.A => Hex(0xFF2B3C),
+        Faction.B => Hex(0x38E8FF),
+        _         => Hex(0x3DFF7A),
     };
 
     public static Color ClassColor(CardClass c) => c switch
     {
-        CardClass.Assalto => new Color(0.949f, 0.427f, 0.325f, 1f),
-        CardClass.Tecnico => new Color(0.941f, 0.788f, 0.353f, 1f),
-        CardClass.Mistico => new Color(0.749f, 0.518f, 0.949f, 1f),
-        _                 => new Color(0.400f, 0.741f, 0.941f, 1f),
+        CardClass.Assalto => Hex(0xFF8A8A),
+        CardClass.Tecnico => Hex(0xFFB000),
+        CardClass.Mistico => Hex(0x843ED2),
+        _                 => Hex(0x38E8FF),
     };
 
     public static Color WithAlpha(Color c, float a) { c.a = a; return c; }

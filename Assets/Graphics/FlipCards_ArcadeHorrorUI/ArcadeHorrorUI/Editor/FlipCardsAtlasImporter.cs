@@ -18,17 +18,35 @@ namespace FlipCards.UI.EditorTools
         }
         [System.Serializable] class Manifest { public List<SpriteEntry> sprites; }
 
-        const string KitRoot = "Assets/Graphics/ArcadeHorrorUI";
-        const string ManifestPath = KitRoot + "/flipcards_ui_manifest.json";
         const float PixelsPerUnit = 1f;   // UI: 1 px sprite = 1 px canvas
+
+        /// <summary>
+        /// Cartella del kit, trovata dal manifest invece che da una costante: il
+        /// percorso scritto a mano ("Assets/Graphics/ArcadeHorrorUI") non era
+        /// quello in cui il kit e' stato copiato, e l'import usciva subito con
+        /// "Manifest non trovato" senza applicare niente — filtro Point, bordi
+        /// 9-slice e taglio dell'atlante restavano tutti da fare.
+        /// </summary>
+        static string FindManifestPath()
+        {
+            foreach (var guid in AssetDatabase.FindAssets("flipcards_ui_manifest"))
+            {
+                var path = AssetDatabase.GUIDToAssetPath(guid);
+                if (path.EndsWith("flipcards_ui_manifest.json")) return path;
+            }
+            return null;
+        }
 
         [MenuItem("Tools/FlipCards/Import UI Kit")]
         public static void ImportAll()
         {
-            if (!File.Exists(ManifestPath))
-            { Debug.LogError("Manifest non trovato: " + ManifestPath); return; }
+            var manifestPath = FindManifestPath();
+            if (string.IsNullOrEmpty(manifestPath) || !File.Exists(manifestPath))
+            { Debug.LogError("flipcards_ui_manifest.json non trovato sotto Assets/"); return; }
 
-            var man = JsonUtility.FromJson<Manifest>(File.ReadAllText(ManifestPath));
+            string KitRoot = Path.GetDirectoryName(manifestPath).Replace('\\', '/');
+
+            var man = JsonUtility.FromJson<Manifest>(File.ReadAllText(manifestPath));
             var byName = new Dictionary<string, SpriteEntry>();
             foreach (var s in man.sprites) byName[s.name] = s;
 

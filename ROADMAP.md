@@ -25,6 +25,13 @@ swap di fine turno animato (D1); animazioni specifiche di attacco, parata e
 danno (D2); risoluzione a catena corsia per corsia (D3); ingresso degli slot uno
 per volta con le abilità raccontate (D4).
 
+**Tabellone rifatto sul kit Arcade Horror CRT** (E1): le misure vengono da
+`layouts.board` del manifest del kit ×2 — rail 294 con dentro stato, mazzo e
+legenda; campo 1178; colonna destra 400; caselle nemiche orizzontali 352×288 come
+caselle di un rullo, con cassa e payline; carte 224×336; mano a ventaglio da 8
+carte sovrapposte con pop-out all'hover. Il fondo `board_bg` del kit e gli
+overlay CRT si montano da soli se il kit è importato.
+
 Quello che segue è quel che resta, in ordine di quanto pesa sulla leggibilità.
 
 ---
@@ -107,12 +114,19 @@ Nessuna di queste è decisa: sono i buchi rimasti fra il codice e la specifica.
 
 ## Debito noto e decisioni prese
 
-- **`maxHandSize` lo detta il layout, non il bilanciamento.** `HandManager` usa
-  `spacing = handRoot.width / maxHandSize`: con 8 il passo scendeva a 168 contro
-  carte da 220 e a mano piena le carte si coprivano nome, vita e attacco a
-  vicenda. Ora lo scrive `FlipCardsLayoutBuilder.WireHandManager` dalla costante
-  `MaxHandCards = 5` — 1344 / 5 = 268 di passo, cioè 48 di gap, lo stesso delle
-  corsie. Cambiarlo a mano nell'Inspector viene sovrascritto al prossimo rebuild.
+- **`maxHandSize` e il passo della mano li detta il layout, non il bilanciamento.**
+  Erano legati da `spacing = handRoot.width / maxHandSize`, che produceva per
+  forza un passo più largo della carta: una fila staccata. Il kit vuole il
+  contrario — 8 linguette da 132 contro carte da 224, cioè carte che si coprono a
+  metà — quindi il passo è ora un campo esplicito (`handSpacing`) e la
+  leggibilità la danno l'arco della spline, la rotazione a ventaglio e il pop-out
+  della carta sotto il puntatore. Li scrive
+  `FlipCardsLayoutBuilder.WireHandManager`: cambiarli a mano nell'Inspector viene
+  sovrascritto al prossimo rebuild.
+- **Il kit va importato una volta.** `Tools → FlipCards → Import UI Kit` applica
+  filtro Point, niente compressione e bordi 9-slice. Finché non lo si lancia gli
+  sprite del kit restano bilineari: il fondo `board_bg` e gli overlay CRT si
+  vedono lo stesso (sono 1920×1080 a 1:1), i 9-slice no.
 - **Il mazzo è mescolato una volta sola e si pesca dalla cima.** Serviva a B1:
   con l'estrazione casuale a ogni pesca "la prossima carta" non esisteva e la
   pila non poteva mostrarla. La sequenza di pesca è quindi riproducibile a parità

@@ -112,6 +112,11 @@ public class CardView : MonoBehaviour
     // localPosition: FollowContainer la riscrive ogni frame e vincerebbe lui.
     // Si tweena un offset che FollowContainer somma al bersaglio, come gia'
     // fanno la curva della mano e il sollevamento da selezione.
+    // Misura originale della radice, cioe' del bersaglio di raycast. Si allarga
+    // solo mentre la carta e' sollevata in mano: vedi UpdateHoverBounds.
+    private Vector2 _baseRootSize;
+    private bool _hoverBoundsExpanded;
+
     private Vector3 _combatOffset;
     private Vector3 _combatOffsetApplied;
     private Tween _combatTween;
@@ -439,6 +444,13 @@ public class CardView : MonoBehaviour
         hintText.gameObject.SetActive(false);
     }
 
+    /// <summary>
+    /// La spline della mano: l'arco su cui si dispongono le carte e l'angolo con
+    /// cui si aprono a ventaglio. Le carte in mano si sovrappongono (il passo di
+    /// <see cref="HandManager"/> e' piu' stretto della carta), quindi l'arco e la
+    /// rotazione non sono decorazione: sono cio' che rende leggibile una fila di
+    /// carte che si coprono a vicenda.
+    /// </summary>
     public void EvaluateHandCurve(out Vector3 positionOffset, out Quaternion rotation)
     {
         positionOffset = Vector3.zero;
@@ -452,9 +464,13 @@ public class CardView : MonoBehaviour
         int slotIndex = _handContainer.GetSiblingIndex();
         float normalized = slotCount <= 1 ? 0.5f : (float)slotIndex / (slotCount - 1);
 
-        int siblings = Mathf.Max(0, slotCount);
-        float yOff = curveParameters.positioning.Evaluate(normalized) * curveParameters.positioningInfluence * siblings;
-        if (siblings < 5) yOff = 0f;
+        // Ampiezza dell'arco: cresce con le carte in mano, ma con un tetto.
+        // Prima c'era una soglia secca — sotto le 5 carte l'arco era spento del
+        // tutto — e il ventaglio compariva di colpo alla quinta pesca, mentre le
+        // rotazioni c'erano gia': carte inclinate su una riga piatta.
+        float span = Mathf.Min(slotCount, HandArcCardCeiling);
+        float yOff = curveParameters.positioning.Evaluate(normalized)
+                   * curveParameters.positioningInfluence * span;
         positionOffset = Vector3.up * yOff;
 
         float centered = normalized - 0.5f;
@@ -462,6 +478,20 @@ public class CardView : MonoBehaviour
         float rotZ = Mathf.Sign(centered) * curveParameters.rotation.Evaluate(symmetryT) * curveParameters.rotationInfluence;
         rotation = Quaternion.Euler(0f, 0f, rotZ);
     }
+
+    /// <summary>Oltre questo numero di carte l'arco non cresce piu': a mano piena resterebbe una gobba.</summary>
+    const float HandArcCardCeiling = 8f;
+
+    /// <summary>
+    /// Quanto la carta sotto il puntatore raddrizza il proprio angolo di ventaglio.
+    /// 1 = perfettamente verticale. E' meta' del "popping out": l'altra meta' sono
+    /// il sollevamento di <c>handHoverLift</c>, la scala di <c>scaleOnHover</c> e
+    /// il sorting che la porta sopra le vicine.
+    /// </summary>
+    const float HandHoverStraighten = 0.85f;
+
+    /// <summary>Sorting della carta in mano sotto il puntatore: sopra le vicine, sotto quella trascinata.</summary>
+    const int HandHoverSortingOrder = 5;
     private Quaternion GetAnchorRotation()
     {
         if (_handContainer == null && _playerBoardContainer == null) 
@@ -517,14 +547,58 @@ public class CardView : MonoBehaviour
             FollowContainer();
         }
         if (!doHover) CardTilt(anchorRotation);
+        UpdateHoverBounds(inHand);
         UpdateShadow();
+    }
+
+    /// <summary>
+    /// L'area di raycast della carta deve coprire la carta **dove si vede**, non
+    /// dove stava prima di sollevarsi.
+    ///
+    /// Il bersaglio del raycast e' la radice (`CardDefinition`), che resta ferma
+    /// sul container mentre a salire e' il figlio grafico. Con il rect della
+    /// radice fermo alla misura della carta, appena il puntatore seguiva la carta
+    /// sollevata usciva dal rect: PointerExit, la carta ricadeva, il puntatore
+    /// rientrava, e il pop-out sfarfallava sul bordo alto.
+    ///
+    /// Il margine si applica **solo in mano e solo mentre la carta e' sotto il
+    /// puntatore**. Fisso, coprirebbe le corsie: la radice di una carta in mano
+    /// arriverebbe sopra le carte in campo e ne ruberebbe i click.
+    /// </summary>
+    void UpdateHoverBounds(bool inHand)
+    {
+        var root = _rt != null ? _rt.parent as RectTransform : null;
+        if (root == null) return;
+
+        if (_baseRootSize.sqrMagnitude <= 0f) _baseRootSize = root.sizeDelta;
+
+        bool expand = inHand && _hovering && !_dragging;
+        if (expand == _hoverBoundsExpanded) return;
+        _hoverBoundsExpanded = expand;
+
+        if (!expand)
+        {
+            root.sizeDelta = _baseRootSize;
+            return;
+        }
+
+        // Il margine copre sollevamento e ingrandimento: la carta cresce di
+        // scaleOnHover intorno al proprio centro, quindi deborda anche di lato.
+        var card = _rt.rect.size;
+        float padY = handHoverLift + card.y * (scaleOnHover - 1f) * 0.5f;
+        float padX = card.x * (scaleOnHover - 1f) * 0.5f;
+        root.sizeDelta = _baseRootSize + new Vector2(padX * 2f, padY * 2f);
     }
 
     private void HoverMotion(Quaternion anchorRotation)
     {
         var baseRotation = anchorRotation;
 
-        if (_handContainer != null && _rt.parent.IsChildOf(_handContainer)) baseRotation *= _targetHandRotation;
+        // In mano la carta sotto il puntatore esce dal ventaglio: raddrizza il
+        // proprio angolo invece di restare inclinata come le vicine. E' il gesto
+        // che la stacca dalla fila anche quando le altre la coprono per meta'.
+        if (_handContainer != null && _rt.parent.IsChildOf(_handContainer))
+            baseRotation *= Quaternion.Slerp(_targetHandRotation, Quaternion.identity, HandHoverStraighten);
         else if (_playerBoardContainer!= null && _rt.parent.IsChildOf(_playerBoardContainer)) baseRotation *= _targetBoardRotation;
 
         float tiltX = 0f;
@@ -652,7 +726,19 @@ public class CardView : MonoBehaviour
         _combatOffsetApplied = _combatOffset;
         _rt.localPosition = basePos + _combatOffsetApplied;
 
-        if ((_rt.localPosition-targetPosLocal).magnitude > 0.5f && !inHand)
+        // Ordine di disegno. In mano le carte si sovrappongono: senza forzare il
+        // sorting, quella sotto il puntatore si solleva ma resta sepolta sotto le
+        // vicine di destra, e il "popping out" non si vede. Fuori dalla mano il
+        // sorting alto serve invece solo mentre la carta e' in viaggio.
+        bool popped = inHand && _hovering && !_dragging;
+        bool travelling = !inHand && (_rt.localPosition - targetPosLocal).magnitude > 0.5f;
+
+        if (popped)
+        {
+            _canvas.overrideSorting = true;
+            _canvas.sortingOrder = HandHoverSortingOrder;
+        }
+        else if (travelling)
         {
             _canvas.overrideSorting = true;
             _canvas.sortingOrder = 10;

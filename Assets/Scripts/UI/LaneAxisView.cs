@@ -20,7 +20,7 @@ public class LaneAxisView : MonoBehaviour
     public RectTransform laneReferenceRoot;   // di norma playerBoardRoot
 
     [Header("Geometria")]
-    public float columnWidth = 240f;
+    public float columnWidth = 320f;
 
     class Column
     {
@@ -210,17 +210,21 @@ public class LaneAxisView : MonoBehaviour
         col.root.pivot = new Vector2(0.5f, 0.5f);
         col.root.sizeDelta = new Vector2(columnWidth, _rt.rect.height);
 
+        // Le quote seguono l'altezza reale della banda: l'asse si e' gia'
+        // accorciato una volta col layout e le costanti erano tarate su 64.
+        float half = _rt.rect.height * 0.5f;
+
         var ruleRt = UiBuild.Rect("Rule", col.root);
-        UiBuild.Centered(ruleRt, columnWidth - 40f, 2f, 0f, 26f);
+        UiBuild.Centered(ruleRt, columnWidth - 60f, 2f, 0f, half - 6f);
         col.rule = UiBuild.Fill(ruleRt, GamePalette.Neutral);
 
-        col.main = UiBuild.Text("Main", col.root, "—", 26f, GamePalette.Neutral,
+        col.main = UiBuild.Text("Main", col.root, "—", 24f, GamePalette.Neutral,
                                 TextAlignmentOptions.Center, FontStyles.Bold);
-        UiBuild.Centered(col.main.rectTransform, columnWidth, 32f, 0f, 4f);
+        UiBuild.Centered(col.main.rectTransform, columnWidth, 28f, 0f, 2f);
 
-        col.counter = UiBuild.Text("Counter", col.root, string.Empty, 15f, GamePalette.TextMuted,
+        col.counter = UiBuild.Text("Counter", col.root, string.Empty, 14f, GamePalette.TextMuted,
                                    TextAlignmentOptions.Center);
-        UiBuild.Centered(col.counter.rectTransform, columnWidth, 18f, 0f, -18f);
+        UiBuild.Centered(col.counter.rectTransform, columnWidth, 16f, 0f, -half + 8f);
 
         return col;
     }
@@ -233,11 +237,12 @@ public class LaneAxisView : MonoBehaviour
         con.root.pivot = new Vector2(0.5f, 0.5f);
         con.root.sizeDelta = new Vector2(120f, _rt.rect.height);
 
-        const float h = 18f, gap = 3f;
+        const float h = 14f, gap = 2f;
+        float top = _rt.rect.height * 0.5f - h * 0.5f - 2f;
         for (int i = 0; i < 3; i++)
         {
             var chipRt = UiBuild.Rect($"Chip{i}", con.root);
-            UiBuild.Centered(chipRt, 116f, h, 0f, 24f - i * (h + gap));
+            UiBuild.Centered(chipRt, 116f, h, 0f, top - i * (h + gap));
             var chip = UiBuild.Fill(chipRt, GamePalette.WithAlpha(GamePalette.Charge, 0.22f));
 
             var label = UiBuild.Text("Label", chipRt, string.Empty, 12f, GamePalette.Charge,

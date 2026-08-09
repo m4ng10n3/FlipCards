@@ -82,6 +82,35 @@ public static class UiBuild
         return img;
     }
 
+    /// <summary>
+    /// Grafica presa dal kit, con ripiego a tinta piatta se la skin non c'e'.
+    /// Il tint resta bianco quando lo sprite esiste: i colori li porta lo sprite,
+    /// e moltiplicarli per una tinta piatta li spegnerebbe.
+    /// </summary>
+    public static Image Skinned(RectTransform rt, string key, Color fallback,
+                                Image.Type type = Image.Type.Sliced, bool raycast = false)
+    {
+        var sprite = UiSkin.Sprite(key);
+        var img = Fill(rt, sprite != null ? Color.white : fallback, raycast);
+        if (sprite == null) return img;
+
+        img.sprite = sprite;
+        img.type = type;
+        return img;
+    }
+
+    /// <summary>Come Skinned, ma se lo sprite manca non disegna nulla invece di un rettangolo.</summary>
+    public static Image SkinnedOrNothing(RectTransform rt, string key)
+    {
+        var sprite = UiSkin.Sprite(key);
+        if (sprite == null) return null;
+
+        var img = Fill(rt, Color.white);
+        img.sprite = sprite;
+        img.type = Image.Type.Simple;
+        return img;
+    }
+
     public static RectTransform PanelBox(string name, Transform parent, Color color, bool border = true)
     {
         var rt = Rect(name, parent);
@@ -114,17 +143,28 @@ public static class UiBuild
         return t;
     }
 
-    /// <summary>Barra valore/massimo: sfondo incassato + riempimento ad ancore.</summary>
+    /// <summary>
+    /// Barra valore/massimo: telaio + riempimento ad ancore.
+    /// Con <paramref name="kind"/> valorizzato (hp / ap / boss / shield / charge)
+    /// usa il telaio 9-slice e il riempimento tileable del kit; senza, resta la
+    /// coppia di rettangoli. Il riempimento e' <c>Tiled</c> perche' lo sprite del
+    /// kit e' una striscia di 8 px pensata per ripetersi mentre la barra cresce.
+    /// </summary>
     public static UiBar Bar(string name, Transform parent, Color fillColor, out RectTransform root,
-                            bool vertical = false)
+                            bool vertical = false, string kind = null)
     {
+        bool skinned = kind != null && UiSkin.Sprite(UiSkin.BarFrame(kind)) != null;
+
         root = Rect(name, parent);
-        Fill(root, GamePalette.PanelSunken);
+        if (skinned) Skinned(root, UiSkin.BarFrame(kind), GamePalette.PanelSunken);
+        else Fill(root, GamePalette.PanelSunken);
 
+        float pad = skinned ? 8f : 2f;
         var fillRt = Rect("Fill", root);
-        Stretch(fillRt, 2f, 2f, 2f, 2f);
+        Stretch(fillRt, pad, pad, pad, pad);
 
-        Fill(fillRt, fillColor);
+        if (skinned) Skinned(fillRt, UiSkin.BarFill(kind), fillColor, Image.Type.Tiled);
+        else Fill(fillRt, fillColor);
 
         var bar = root.gameObject.AddComponent<UiBar>();
         bar.fill = fillRt;
@@ -138,35 +178,65 @@ public static class UiBuild
     /// cui un comando non e' disponibile si leggono davvero.
     /// </summary>
     public static Button Command(string name, Transform parent, string label, string cost,
-                                 Color accent, out TextMeshProUGUI labelText)
+                                 Color accent, out TextMeshProUGUI labelText, string tone = null)
     {
         var rt = Rect(name, parent);
-        var img = Fill(rt, GamePalette.Panel, raycast: true);
 
-        var outline = rt.gameObject.AddComponent<Outline>();
-        outline.effectColor = accent;
-        outline.effectDistance = new Vector2(2f, -2f);
-        outline.useGraphicAlpha = false;
+        var idle = tone != null ? UiSkin.Sprite(UiSkin.Button(tone, "idle")) : null;
+        var img = idle != null
+            ? Skinned(rt, UiSkin.Button(tone, "idle"), GamePalette.Panel, Image.Type.Sliced, raycast: true)
+            : Fill(rt, GamePalette.Panel, raycast: true);
+
+        // L'Outline serve solo al ripiego: gli sprite del kit hanno gia' la loro
+        // cornice, e sommarne una seconda raddoppia il bordo.
+        if (idle == null)
+        {
+            var outline = rt.gameObject.AddComponent<Outline>();
+            outline.effectColor = accent;
+            outline.effectDistance = new Vector2(2f, -2f);
+            outline.useGraphicAlpha = false;
+        }
 
         var btn = rt.gameObject.AddComponent<Button>();
         btn.targetGraphic = img;
-        btn.transition = Selectable.Transition.ColorTint;
-        var colors = btn.colors;
-        colors.normalColor      = Color.white;
-        colors.highlightedColor = new Color(1.35f, 1.35f, 1.35f, 1f);
-        colors.pressedColor     = new Color(0.70f, 0.70f, 0.70f, 1f);
-        colors.selectedColor    = Color.white;
-        colors.disabledColor    = new Color(0.32f, 0.32f, 0.36f, 1f);
-        colors.colorMultiplier  = 1f;
-        colors.fadeDuration     = 0.08f;
-        btn.colors = colors;
 
+        if (idle != null)
+        {
+            // Quattro stati disegnati, non una tinta moltiplicata: il disabilitato
+            // del kit e' un altro sprite, quindi "comando non disponibile" si legge
+            // davvero invece di essere lo stesso bottone piu' scuro.
+            btn.transition = Selectable.Transition.SpriteSwap;
+            btn.spriteState = new SpriteState
+            {
+                highlightedSprite = UiSkin.Sprite(UiSkin.Button(tone, "hover")),
+                pressedSprite     = UiSkin.Sprite(UiSkin.Button(tone, "press")),
+                selectedSprite    = UiSkin.Sprite(UiSkin.Button(tone, "hover")),
+                disabledSprite    = UiSkin.Sprite(UiSkin.Button(tone, "disabled")),
+            };
+        }
+        else
+        {
+            btn.transition = Selectable.Transition.ColorTint;
+            var colors = btn.colors;
+            colors.normalColor      = Color.white;
+            colors.highlightedColor = new Color(1.35f, 1.35f, 1.35f, 1f);
+            colors.pressedColor     = new Color(0.70f, 0.70f, 0.70f, 1f);
+            colors.selectedColor    = Color.white;
+            colors.disabledColor    = new Color(0.32f, 0.32f, 0.36f, 1f);
+            colors.colorMultiplier  = 1f;
+            colors.fadeDuration     = 0.08f;
+            btn.colors = colors;
+        }
+
+        // Etichetta e costo si ancorano ai bordi invece di stare su bande fisse:
+        // l'altezza del bottone e' cambiata col layout e le bande da 56 lasciavano
+        // il testo fuori asse.
         labelText = Text("Label", rt, label, 24f, GamePalette.TextPrimary, TextAlignmentOptions.Left, FontStyles.Bold);
-        Band(labelText.rectTransform, 20f, 0f, 260f, 56f);
+        Stretch(labelText.rectTransform, 20f, 0f, 170f, 0f);
         labelText.alignment = TextAlignmentOptions.Left;
 
-        var costText = Text("Cost", rt, cost, 17f, GamePalette.TextMuted, TextAlignmentOptions.Right);
-        Band(costText.rectTransform, 100f, 0f, 280f, 56f);
+        var costText = Text("Cost", rt, cost, 16f, GamePalette.TextMuted, TextAlignmentOptions.Right);
+        Stretch(costText.rectTransform, 200f, 0f, 20f, 0f);
         costText.alignment = TextAlignmentOptions.Right;
 
         return btn;

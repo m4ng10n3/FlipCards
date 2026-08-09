@@ -5,8 +5,8 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 /// <summary>
-/// Chrome aggiunto alla cella slot: fascia di lato, ATK sempre visibile, traccia
-/// della flipPattern con il passo corrente marcato e contatore di furia.
+/// Chrome della casella nemica: barra nome, ATK sempre visibile, traccia della
+/// flipPattern con il passo corrente marcato e contatore di furia.
 ///
 /// La traccia del pattern e' l'informazione piu' importante del tavolo: lo slot
 /// non sceglie, segue una sequenza fissa che avanza a ogni fine turno. Senza
@@ -15,11 +15,26 @@ using UnityEngine.UI;
 [DisallowMultipleComponent]
 public class SlotOverlay : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
-    // Bande della cella slot (LAYOUT_SPEC §6.6), coordinate dall'alto.
-    const float NameH = 32f;
-    const float ChipY = 258f, ChipH = 30f, ChipW = 68f;
-    const float PatternY = 290f, PatternHeight = 22f;
-    const float SideBandY = 312f, SideBandHeight = 18f;
+    // ── Anatomia della casella del rullo ──────────────────────────────────────
+    //
+    // Coordinate banda in scala 2x: sono i numeri di `layouts.reel_cell` in
+    // flipcards_ui_manifest.json moltiplicati per 2, cioe' la casella 176x144 del
+    // kit portata a 352x288. La casella nemica e' orizzontale — e' un rullo da
+    // slot machine, non una carta — e questo e' cio' che la distingue a colpo
+    // d'occhio dalle corsie del giocatore.
+
+    public const float CellW = 352f, CellH = 288f;
+
+    public const float NameX = 44f, NameY = 6f, NameW = 184f, NameH = 28f;
+    public const float FactionX = 12f, FactionY = 7f, FactionSize = 26f;
+
+    public const float ArtX = 80f, ArtY = 40f, ArtSize = 192f;
+
+    public const float ChipY = 236f, ChipH = 32f, ChipW = 108f;
+    public static float ChipX(int index) => 10f + index * (ChipW + 4f);
+
+    const float PatternX = 232f, PatternTrackY = 5f, PatternW = 112f, PatternH = 26f;
+    const float SideBandY = 270f, SideBandHeight = 16f;
 
     SlotView _view;
     RectTransform _rt;
@@ -56,7 +71,7 @@ public class SlotOverlay : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         {
             _lastSide = inst.side;
             var color = GamePalette.SideColor(inst.side);
-            _sideBand.color = color;
+            _sideBand.color = GamePalette.WithAlpha(color, 0.85f);
             _sideLabel.text = inst.side == Side.Fronte ? "FRONTE · ATTACCA" : "RETRO · PASSIVO";
         }
 
@@ -65,8 +80,8 @@ public class SlotOverlay : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         {
             _lastAtk = atk;
             _atkLabel.text = inst.tempAtkBonus > 0
-                ? $"ATK {inst.def.atkDamage} <color=#f04d52>+{inst.tempAtkBonus}</color>"
-                : $"ATK {inst.def.atkDamage}";
+                ? $"{inst.def.atkDamage} <color=#FF8A8A>+{inst.tempAtkBonus}</color>"
+                : inst.def.atkDamage.ToString();
         }
 
         if (inst.PatternStep != _lastStep || _patternCells.Count != inst.PatternLength)
@@ -106,45 +121,42 @@ public class SlotOverlay : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         float w = _rt.rect.width;
 
         var nameBar = UiBuild.Rect("NameBar", _rt);
-        UiBuild.Band(nameBar, 0f, 0f, w, NameH);
-        UiBuild.Fill(nameBar, GamePalette.WithAlpha(Color.black, 0.55f));
+        UiBuild.Band(nameBar, 4f, 4f, w - 8f, NameH + 2f);
+        UiBuild.Fill(nameBar, GamePalette.WithAlpha(Color.black, 0.5f));
 
         var faction = _view.instance.def.faction;
         var facRt = UiBuild.Rect("FactionBadge", _rt);
-        UiBuild.Band(facRt, w - 30f, 4f, 26f, 24f);
+        UiBuild.Band(facRt, FactionX, FactionY, FactionSize, FactionSize);
         UiBuild.Fill(facRt, GamePalette.FactionColor(faction));
-        var facLabel = UiBuild.Text("Label", facRt, faction.ToString(), 14f,
-                                    new Color(0.05f, 0.06f, 0.09f, 1f), TextAlignmentOptions.Center, FontStyles.Bold);
+        var facLabel = UiBuild.Text("Label", facRt, faction.ToString(), 15f,
+                                    GamePalette.Background, TextAlignmentOptions.Center, FontStyles.Bold);
         UiBuild.Stretch(facLabel.rectTransform);
 
         // ATK e' sempre a schermo, non solo durante l'attacco: e' il numero su
         // cui il giocatore decide se coprire la corsia o lasciarla scoperta.
-        var atkRt = UiBuild.Rect("AtkChip", _rt);
-        UiBuild.Band(atkRt, 4f, ChipY, ChipW, ChipH);
-        UiBuild.Fill(atkRt, GamePalette.WithAlpha(GamePalette.Danger, 0.85f));
-        _atkLabel = UiBuild.Text("Label", atkRt, "ATK", 14f, GamePalette.TextPrimary,
+        var atkRt = ChipBg("AtkChip", ChipX(0), GamePalette.Danger);
+        _atkLabel = UiBuild.Text("Label", atkRt, "0", 20f, GamePalette.TextPrimary,
                                  TextAlignmentOptions.Center, FontStyles.Bold);
-        UiBuild.Stretch(_atkLabel.rectTransform);
+        UiBuild.Stretch(_atkLabel.rectTransform, 0f, 0f, 0f, 3f);
 
-        ChipBg("HpChipBg", 4f + ChipW + 4f, GamePalette.PlayerHp);
-        ChipBg("DefChipBg", 4f + (ChipW + 4f) * 2f, GamePalette.Retro);
+        ChipBg("HpChipBg", ChipX(1), GamePalette.PlayerHp);
+        ChipBg("DefChipBg", ChipX(2), GamePalette.Retro);
 
         _patternRoot = UiBuild.Rect("PatternTrack", _rt);
-        UiBuild.Band(_patternRoot, 0f, PatternY, w, PatternHeight);
-        UiBuild.Fill(_patternRoot, GamePalette.WithAlpha(Color.black, 0.55f));
+        UiBuild.Band(_patternRoot, PatternX, PatternTrackY, PatternW, PatternH);
 
         var bandRt = UiBuild.Rect("SideBand", _rt);
         UiBuild.Band(bandRt, 0f, SideBandY, w, SideBandHeight);
         _sideBand = UiBuild.Fill(bandRt, GamePalette.Fronte);
 
-        _sideLabel = UiBuild.Text("Label", bandRt, string.Empty, 11f, new Color(0.05f, 0.06f, 0.09f, 1f),
+        _sideLabel = UiBuild.Text("Label", bandRt, string.Empty, 11f, GamePalette.Background,
                                   TextAlignmentOptions.Center, FontStyles.Bold);
         UiBuild.Stretch(_sideLabel.rectTransform);
 
         if (_berserker != null)
         {
             var furyRt = UiBuild.Rect("FuryChip", _rt);
-            UiBuild.Band(furyRt, w - 104f, 226f, 100f, 24f);
+            UiBuild.Band(furyRt, 12f, ArtY + 4f, 130f, 24f);
             _furyChip = UiBuild.Fill(furyRt, GamePalette.WithAlpha(GamePalette.Danger, 0.45f));
             _furyLabel = UiBuild.Text("Label", furyRt, "FURIA", 12f, GamePalette.TextPrimary,
                                       TextAlignmentOptions.Center, FontStyles.Bold);
@@ -160,15 +172,16 @@ public class SlotOverlay : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         if (hint != null) hint.SetAsLastSibling();
     }
 
-    void ChipBg(string name, float x, Color accent)
+    RectTransform ChipBg(string name, float x, Color accent)
     {
         var rt = UiBuild.Rect(name, _rt);
         UiBuild.Band(rt, x, ChipY, ChipW, ChipH);
-        UiBuild.Fill(rt, GamePalette.WithAlpha(Color.black, 0.62f));
+        UiBuild.Fill(rt, GamePalette.WithAlpha(Color.black, 0.55f));
 
         var stripe = UiBuild.Rect("Accent", rt);
         UiBuild.Band(stripe, 0f, ChipH - 3f, ChipW, 3f);
         UiBuild.Fill(stripe, accent);
+        return rt;
     }
 
     /// <summary>Una casella per passo del pattern; quella corrente e' piena, le altre spente.</summary>
@@ -184,23 +197,22 @@ public class SlotOverlay : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
             if (len == 0)
             {
-                var none = UiBuild.Text("NoPattern", _patternRoot, "SEMPRE FRONTE", 11f, GamePalette.TextMuted,
+                var none = UiBuild.Text("NoPattern", _patternRoot, "FISSO", 11f, GamePalette.TextMuted,
                                         TextAlignmentOptions.Center, FontStyles.Bold);
                 UiBuild.Stretch(none.rectTransform);
                 return;
             }
 
-            float w = _patternRoot.rect.width;
-            const float pad = 6f, gap = 3f;
-            float cell = (w - pad * 2f - gap * (len - 1)) / len;
+            const float gap = 4f;
+            float cell = (PatternW - gap * (len - 1)) / len;
 
             for (int i = 0; i < len; i++)
             {
                 var cellRt = UiBuild.Rect($"Step{i}", _patternRoot);
-                UiBuild.Band(cellRt, pad + i * (cell + gap), 4f, cell, PatternHeight - 8f);
+                UiBuild.Band(cellRt, i * (cell + gap), 2f, cell, PatternH - 4f);
                 _patternCells.Add(UiBuild.Fill(cellRt, GamePalette.Neutral));
 
-                var label = UiBuild.Text("Label", cellRt, string.Empty, 11f, Color.black,
+                var label = UiBuild.Text("Label", cellRt, string.Empty, 13f, GamePalette.Background,
                                          TextAlignmentOptions.Center, FontStyles.Bold);
                 UiBuild.Stretch(label.rectTransform);
                 _patternLabels.Add(label);
@@ -213,9 +225,9 @@ public class SlotOverlay : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
             bool current = i == inst.PatternStep;
             _patternCells[i].color = current
                 ? GamePalette.SideColor(side)
-                : GamePalette.WithAlpha(GamePalette.SideColor(side), 0.28f);
+                : GamePalette.WithAlpha(GamePalette.SideColor(side), 0.22f);
             _patternLabels[i].text = side == Side.Fronte ? "F" : "R";
-            _patternLabels[i].color = current ? Color.black : GamePalette.WithAlpha(Color.white, 0.65f);
+            _patternLabels[i].color = current ? GamePalette.Background : GamePalette.WithAlpha(Color.white, 0.7f);
         }
     }
 }

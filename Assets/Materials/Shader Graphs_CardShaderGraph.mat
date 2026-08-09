@@ -55,7 +55,7 @@ Material:
     - _frequency: 1
     - _poly_brightness: 1
     - _poly_frequency: 1
-    - _poly_power: 0.03
+    - _poly_power: 0.28
     - _yDirection: 1
     m_Colors:
     - _Rotation: {r: 0, g: 0, b: 0, a: 0}

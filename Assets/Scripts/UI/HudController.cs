@@ -163,7 +163,10 @@ public class HudController : MonoBehaviour
             _lastDeck = hand.DeckCount;
             if (deckText != null)
             {
-                deckText.text = $"MAZZO {_lastDeck}";
+                // Solo il numero: la parola "MAZZO" e' l'etichetta accanto alla
+                // pila, scritta una volta dal builder. Scriverla anche qui la
+                // stampava due volte sulla stessa riga.
+                deckText.text = _lastDeck.ToString();
                 deckText.color = _lastDeck > 0 ? GamePalette.TextPrimary : GamePalette.Danger;
             }
         }
