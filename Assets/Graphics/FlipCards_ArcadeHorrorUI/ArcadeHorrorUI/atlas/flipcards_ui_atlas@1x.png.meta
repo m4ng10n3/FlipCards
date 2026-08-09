@@ -407,6 +407,516 @@ TextureImporter:
   - first:
       213: -991158048478376298
     second: flipcards_ui_atlas@1x_134
+  - first:
+      213: 4978118688169943654
+    second: ap_seg_empty
+  - first:
+      213: -7285957953720895442
+    second: ap_seg_full
+  - first:
+      213: 4753916607010668913
+    second: ap_seg_spent
+  - first:
+      213: -8292902939525631717
+    second: badge_atk
+  - first:
+      213: 5909333458535385580
+    second: badge_cost
+  - first:
+      213: -471748238632870148
+    second: badge_def
+  - first:
+      213: 4562623790846583578
+    second: badge_hp
+  - first:
+      213: 4667258591718436398
+    second: badge_neutral
+  - first:
+      213: -3774293860079131057
+    second: banner_enemy
+  - first:
+      213: -2569317386396843507
+    second: banner_flat
+  - first:
+      213: 3305132306830991502
+    second: banner_neutral
+  - first:
+      213: 1241154257821005687
+    second: banner_phase
+  - first:
+      213: -7129509984568013428
+    second: banner_warn
+  - first:
+      213: -4712655441946022440
+    second: bar_cap_ap
+  - first:
+      213: -8726485166725971571
+    second: bar_cap_boss
+  - first:
+      213: 7010009883793852120
+    second: bar_cap_charge
+  - first:
+      213: 8392580009513259636
+    second: bar_cap_hp
+  - first:
+      213: -4362502090017297037
+    second: bar_cap_shield
+  - first:
+      213: -8264904005581278472
+    second: bar_fill_ap
+  - first:
+      213: 6569314769896751245
+    second: bar_fill_boss
+  - first:
+      213: 643585571750369475
+    second: bar_fill_charge
+  - first:
+      213: 6617255700148288830
+    second: bar_fill_hp
+  - first:
+      213: 1373936045625767336
+    second: bar_fill_shield
+  - first:
+      213: 7912645319026970083
+    second: bar_frame_ap
+  - first:
+      213: 8593885032963801699
+    second: bar_frame_boss
+  - first:
+      213: 6163420820957748403
+    second: bar_frame_charge
+  - first:
+      213: 2978393802613341784
+    second: bar_frame_hp
+  - first:
+      213: -3421432048100319033
+    second: bar_frame_shield
+  - first:
+      213: -2638258907987278779
+    second: bar_tick
+  - first:
+      213: -8453425838503185611
+    second: btn_amber_disabled
+  - first:
+      213: 1318708729899941998
+    second: btn_amber_hover
+  - first:
+      213: 2659107702965459233
+    second: btn_amber_idle
+  - first:
+      213: -6614474087202776923
+    second: btn_amber_press
+  - first:
+      213: -1596221829465402063
+    second: btn_blood_disabled
+  - first:
+      213: 8709180613134109783
+    second: btn_blood_hover
+  - first:
+      213: 3877912134444562116
+    second: btn_blood_idle
+  - first:
+      213: -7444550745689911243
+    second: btn_blood_press
+  - first:
+      213: -485398794187122294
+    second: btn_phos_disabled
+  - first:
+      213: 3668417155836829232
+    second: btn_phos_hover
+  - first:
+      213: 2719595177979592515
+    second: btn_phos_idle
+  - first:
+      213: 7237332523876677371
+    second: btn_phos_press
+  - first:
+      213: -8494084814118761782
+    second: btn_steel_disabled
+  - first:
+      213: -9125186219042880008
+    second: btn_steel_hover
+  - first:
+      213: 3148399295065070806
+    second: btn_steel_idle
+  - first:
+      213: 253141938133189903
+    second: btn_steel_press
+  - first:
+      213: 3423644309929428380
+    second: card_back
+  - first:
+      213: -4761030931766596267
+    second: card_back_A
+  - first:
+      213: -5714841850417079627
+    second: card_back_B
+  - first:
+      213: -8955228698243875302
+    second: card_back_C
+  - first:
+      213: -8170936644531392243
+    second: card_back_plain
+  - first:
+      213: -8916852734902144664
+    second: card_front
+  - first:
+      213: -6793797249743550279
+    second: card_front_A
+  - first:
+      213: 6134703036752213437
+    second: card_front_B
+  - first:
+      213: 1041192360441320549
+    second: card_front_C
+  - first:
+      213: 8196924476995983195
+    second: card_front_neutral
+  - first:
+      213: -3948935476048610470
+    second: card_rim_A
+  - first:
+      213: 5513287530960050238
+    second: card_rim_B
+  - first:
+      213: 8104294793072084760
+    second: card_rim_C
+  - first:
+      213: -3923620828225965592
+    second: card_shadow
+  - first:
+      213: -3007678830365626164
+    second: card_slot_empty
+  - first:
+      213: 990616096746550590
+    second: decal_crack_a
+  - first:
+      213: -5062892241303868956
+    second: decal_crack_b
+  - first:
+      213: 5132993038576902463
+    second: decal_drip_a
+  - first:
+      213: -5925835536348096005
+    second: decal_drip_b
+  - first:
+      213: -7473703837812800119
+    second: decal_drip_c
+  - first:
+      213: -3073337876542433310
+    second: decal_scratch
+  - first:
+      213: 2277319797198720963
+    second: decal_sigil_a
+  - first:
+      213: -6027098334432316852
+    second: decal_sigil_b
+  - first:
+      213: -8481443246796085788
+    second: decal_stain_a
+  - first:
+      213: 3781567808536450517
+    second: decal_stain_b
+  - first:
+      213: -1139113469830777690
+    second: deck_pulse
+  - first:
+      213: -6760173836059513323
+    second: deck_stack_0
+  - first:
+      213: -3590186828226464293
+    second: deck_stack_1
+  - first:
+      213: 6440752683690505516
+    second: deck_stack_2
+  - first:
+      213: 3841344001644625979
+    second: deck_stack_3
+  - first:
+      213: 8028270577419109888
+    second: deck_stack_4
+  - first:
+      213: 1274961526231221109
+    second: deck_stack_5
+  - first:
+      213: 504875776498683784
+    second: discard_stack_0
+  - first:
+      213: 7766095783215475147
+    second: discard_stack_1
+  - first:
+      213: 7563116483566039534
+    second: discard_stack_2
+  - first:
+      213: -1496545024128398279
+    second: discard_stack_3
+  - first:
+      213: -3739566537847069740
+    second: divider_h
+  - first:
+      213: 7186810821462250113
+    second: divider_v
+  - first:
+      213: -8270977762001777124
+    second: enemy_medallion
+  - first:
+      213: -7477464936434505263
+    second: enemy_medallion_A
+  - first:
+      213: 2008819381495526932
+    second: enemy_medallion_B
+  - first:
+      213: -1425626554287282588
+    second: enemy_medallion_C
+  - first:
+      213: -6260982618662385636
+    second: flip_cell_back
+  - first:
+      213: 5901974684418899560
+    second: flip_cell_current
+  - first:
+      213: -4951802924264706392
+    second: flip_cell_front
+  - first:
+      213: 4933020001109891210
+    second: flip_cell_unknown
+  - first:
+      213: 1180799201586327065
+    second: fx_damage
+  - first:
+      213: 4928652962971810670
+    second: fx_flip
+  - first:
+      213: 1337602910050720888
+    second: fx_select
+  - first:
+      213: -616353334915738445
+    second: fx_target
+  - first:
+      213: 3921368466453242394
+    second: hand_lift
+  - first:
+      213: -1838764196696122102
+    second: hand_tab_A
+  - first:
+      213: 3654173534367537647
+    second: hand_tab_B
+  - first:
+      213: -8453075043578425730
+    second: hand_tab_C
+  - first:
+      213: -2280456341820093073
+    second: hand_tab_hover
+  - first:
+      213: -9127973261812030883
+    second: icon_arrow_down
+  - first:
+      213: 5598705432058067679
+    second: icon_arrow_up
+  - first:
+      213: 6828199953589703763
+    second: icon_bolt
+  - first:
+      213: -8942939682057505736
+    second: icon_clock
+  - first:
+      213: -911761841550792862
+    second: icon_deck
+  - first:
+      213: -984080876333796133
+    second: icon_diamond
+  - first:
+      213: 2553168919875886523
+    second: icon_drop
+  - first:
+      213: 4738114701985593178
+    second: icon_eye
+  - first:
+      213: 7801119769929137081
+    second: icon_flip
+  - first:
+      213: 7882890488382632291
+    second: icon_hand
+  - first:
+      213: 8084181144891495241
+    second: icon_heart
+  - first:
+      213: 5216794793642270991
+    second: icon_heart_green
+  - first:
+      213: -7614662209602743585
+    second: icon_lock
+  - first:
+      213: -2155689029651245592
+    second: icon_minus
+  - first:
+      213: 8926353547201437773
+    second: icon_plus
+  - first:
+      213: 7448635483698432202
+    second: icon_shield
+  - first:
+      213: -8959310386071179099
+    second: icon_shield_cyan
+  - first:
+      213: -606712836916652450
+    second: icon_skull
+  - first:
+      213: -864756941610753387
+    second: icon_star
+  - first:
+      213: -3974373203817810796
+    second: icon_swap
+  - first:
+      213: 2308765580234064941
+    second: icon_sword
+  - first:
+      213: 8211103637726648039
+    second: icon_sword_red
+  - first:
+      213: 5671965764122512287
+    second: icon_target
+  - first:
+      213: -6258801212540814005
+    second: mask_art_square
+  - first:
+      213: -2482147570691471606
+    second: mask_symbol_circle
+  - first:
+      213: -1548362999041471528
+    second: mask_symbol_square
+  - first:
+      213: -6496566683611624390
+    second: micro_atk
+  - first:
+      213: 5724632409343163432
+    second: micro_cost
+  - first:
+      213: -1666743353980063361
+    second: micro_def
+  - first:
+      213: -8610167332525836305
+    second: micro_hp
+  - first:
+      213: -1498950170632665236
+    second: micro_neutral
+  - first:
+      213: -3550164715259921497
+    second: panel_blood
+  - first:
+      213: -3927140052889764114
+    second: panel_console
+  - first:
+      213: -7251070039616881077
+    second: panel_dark
+  - first:
+      213: 3756620420755954925
+    second: panel_mag
+  - first:
+      213: -6120763654463073541
+    second: panel_phos
+  - first:
+      213: -8721565645156339745
+    second: panel_screen
+  - first:
+      213: 7685427533832978109
+    second: panel_well
+  - first:
+      213: -1719909977262939437
+    second: pip_ap_empty
+  - first:
+      213: -3384071120594005216
+    second: pip_ap_full
+  - first:
+      213: -812696746500582499
+    second: pip_ap_spent
+  - first:
+      213: -3851089910150689616
+    second: plate_counter
+  - first:
+      213: 5232960743501079227
+    second: plate_tooltip
+  - first:
+      213: 875150529457661325
+    second: readout_block
+  - first:
+      213: 506633184661104074
+    second: readout_down
+  - first:
+      213: -8206293789463791265
+    second: readout_up
+  - first:
+      213: 8392470384257773445
+    second: reel_cell
+  - first:
+      213: -130956988775538157
+    second: reel_cell_A
+  - first:
+      213: 2423813490033312512
+    second: reel_cell_B
+  - first:
+      213: 3532173477987987761
+    second: reel_cell_C
+  - first:
+      213: -2362119829479657325
+    second: reel_cell_empty
+  - first:
+      213: -4129446404664927993
+    second: reel_cell_locked
+  - first:
+      213: 3438388170458442894
+    second: reel_col_blur
+  - first:
+      213: 5829938222641803761
+    second: reel_col_highlight
+  - first:
+      213: -5128310649455172901
+    second: reel_pip_back
+  - first:
+      213: -8860816075792779920
+    second: reel_pip_current
+  - first:
+      213: -752079048118588749
+    second: reel_pip_front
+  - first:
+      213: 6169196296023493705
+    second: reel_pip_unknown
+  - first:
+      213: -5133232746580429949
+    second: reel_sliver_bottom
+  - first:
+      213: -4421080796338298526
+    second: reel_sliver_top
+  - first:
+      213: 392167860194178917
+    second: status_slot
+  - first:
+      213: 1684406484438907839
+    second: status_slot_active
+  - first:
+      213: -2785939000974672030
+    second: tag_faction_A
+  - first:
+      213: -1150437282282565311
+    second: tag_faction_B
+  - first:
+      213: 6819630955604685958
+    second: tag_faction_C
+  - first:
+      213: -7195942453275449096
+    second: tile_grid
+  - first:
+      213: 6328041544168986765
+    second: tile_hazard
+  - first:
+      213: 6637853244853004644
+    second: tile_noise
+  - first:
+      213: 8583549899432987490
+    second: tile_scanline
+  - first:
+      213: -1894244412101355002
+    second: tile_static
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -439,7 +949,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -450,10 +960,10 @@ TextureImporter:
   compressionQuality: 50
   spriteMode: 2
   spriteExtrude: 1
-  spriteMeshType: 1
+  spriteMeshType: 0
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 1
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -477,7 +987,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -502,2971 +1012,3741 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_0
+      name: ap_seg_empty
       rect:
         serializedVersion: 2
-        x: 0
-        y: 838
-        width: 130
-        height: 186
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 544a4c14f96f5f970800000000000000
-      internalID: 8788201411747030085
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_1
-      rect:
-        serializedVersion: 2
-        x: 131
-        y: 1001
-        width: 22
-        height: 22
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 42300ddbf14d7e1f0800000000000000
-      internalID: -1015609958155156700
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_2
-      rect:
-        serializedVersion: 2
-        x: 237
-        y: 1001
-        width: 22
-        height: 22
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: c5d22a24e8594bb30800000000000000
-      internalID: 4302227982281485660
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_3
-      rect:
-        serializedVersion: 2
-        x: 264
-        y: 842
-        width: 248
-        height: 178
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: d537fd7f8f44c3fa0800000000000000
-      internalID: -5819700782368328867
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_4
-      rect:
-        serializedVersion: 2
-        x: 511
-        y: 844
-        width: 133
-        height: 174
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 27dd67090a4f3a010800000000000000
-      internalID: 1199070896266337650
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_5
-      rect:
-        serializedVersion: 2
-        x: 646
-        y: 854
-        width: 114
-        height: 170
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 5afcb7671f7c24fb0800000000000000
-      internalID: -4664946424113541211
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_6
-      rect:
-        serializedVersion: 2
-        x: 760
-        y: 854
-        width: 114
-        height: 170
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: cc9490cb02a9360b0800000000000000
-      internalID: -5736572034955523636
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_7
-      rect:
-        serializedVersion: 2
-        x: 874
-        y: 854
-        width: 114
-        height: 170
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 8d0d83c18791cb0e0800000000000000
-      internalID: -2252897709931835176
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_8
-      rect:
-        serializedVersion: 2
-        x: 168
-        y: 903
-        width: 55
-        height: 55
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: ddfaa5d462d7f0710800000000000000
-      internalID: 1661684390983020509
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_9
-      rect:
-        serializedVersion: 2
-        x: 131
-        y: 839
-        width: 22
-        height: 22
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: ef695568095649520800000000000000
-      internalID: 2707900947359962878
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_10
-      rect:
-        serializedVersion: 2
-        x: 237
-        y: 839
-        width: 22
-        height: 22
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 042acdde050577200800000000000000
-      internalID: 177699018822689344
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_11
-      rect:
-        serializedVersion: 2
-        x: 2
-        y: 670
-        width: 110
-        height: 166
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 3542052ef4949a950800000000000000
-      internalID: 6460775747887834195
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_12
-      rect:
-        serializedVersion: 2
-        x: 114
-        y: 668
-        width: 114
-        height: 170
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: aba3b46e51fe3f8e0800000000000000
-      internalID: -1660720960232539462
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_13
-      rect:
-        serializedVersion: 2
-        x: 230
-        y: 670
-        width: 110
-        height: 166
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 6800235a986c73500800000000000000
-      internalID: 375987388393062534
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_14
-      rect:
-        serializedVersion: 2
-        x: 342
-        y: 668
-        width: 114
-        height: 170
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: bf765d174b0163760800000000000000
-      internalID: 7437150201838921723
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_15
-      rect:
-        serializedVersion: 2
-        x: 458
-        y: 670
-        width: 110
-        height: 166
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 5c85d2751898f7180800000000000000
-      internalID: -9115415932168218427
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_16
-      rect:
-        serializedVersion: 2
-        x: 570
-        y: 668
-        width: 114
-        height: 170
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 171602a123f348f90800000000000000
-      internalID: -6952362440333958799
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_17
-      rect:
-        serializedVersion: 2
-        x: 684
-        y: 668
-        width: 114
-        height: 170
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 22c39e16bb6b77260800000000000000
-      internalID: 7095340653863320610
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_18
-      rect:
-        serializedVersion: 2
-        x: 798
-        y: 668
-        width: 114
-        height: 170
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 1b60317df393bd490800000000000000
-      internalID: -7720514189842512207
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_19
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 432
-        width: 114
-        height: 236
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: ea9dd0939ac0582b0800000000000000
-      internalID: -5583042242109646418
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_20
-      rect:
-        serializedVersion: 2
-        x: 114
-        y: 498
-        width: 114
-        height: 170
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: ee1d9aaa813826de0800000000000000
-      internalID: -1341365597037276690
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_21
-      rect:
-        serializedVersion: 2
-        x: 229
-        y: 519
-        width: 16
-        height: 148
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 39b968984bd88f360800000000000000
-      internalID: 7203663410520038291
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_22
-      rect:
-        serializedVersion: 2
-        x: 246
-        y: 519
-        width: 95
-        height: 148
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: ba577cea2ac2c1930800000000000000
-      internalID: 4115213236738422187
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_23
-      rect:
-        serializedVersion: 2
-        x: 277
-        y: 574
+        x: 119
+        y: 800
         width: 17
-        height: 17
+        height: 13
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: e97b5a854d7582b50800000000000000
-      internalID: 6568596626051807134
+      spriteID: 6626a1a5294d51540800000000000000
+      internalID: 4978118688169943654
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_24
+      name: ap_seg_full
       rect:
         serializedVersion: 2
-        x: 343
-        y: 519
-        width: 16
-        height: 148
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 20c0705fbdc6d6c60800000000000000
-      internalID: 7813020620522195970
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_25
-      rect:
-        serializedVersion: 2
-        x: 360
-        y: 519
-        width: 95
-        height: 148
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: f725364a59197c370800000000000000
-      internalID: 8342796906621260415
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_26
-      rect:
-        serializedVersion: 2
-        x: 391
-        y: 574
+        x: 100
+        y: 800
         width: 17
-        height: 17
+        height: 13
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: dcd3d760dff3e8f30800000000000000
-      internalID: 4579668227050520013
+      spriteID: e28b80008d313ea90800000000000000
+      internalID: -7285957953720895442
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_27
-      rect:
-        serializedVersion: 2
-        x: 456
-        y: 570
-        width: 98
-        height: 98
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: b53bf73d1f529a530800000000000000
-      internalID: 3866663475639989083
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_28
-      rect:
-        serializedVersion: 2
-        x: 554
-        y: 570
-        width: 98
-        height: 98
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: eba5fec83348bddf0800000000000000
-      internalID: -154384405271455042
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_29
-      rect:
-        serializedVersion: 2
-        x: 652
-        y: 570
-        width: 98
-        height: 98
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: bc66f94df83f22360800000000000000
-      internalID: 7143539758036117195
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_30
-      rect:
-        serializedVersion: 2
-        x: 750
-        y: 570
-        width: 98
-        height: 98
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 5b7576ce15ac48390800000000000000
-      internalID: -7816900600000981067
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_31
-      rect:
-        serializedVersion: 2
-        x: 850
-        y: 585
-        width: 81
-        height: 81
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: d36345132f865b7a0800000000000000
-      internalID: -6362063509171980739
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_32
-      rect:
-        serializedVersion: 2
-        x: 932
-        y: 586
-        width: 82
-        height: 82
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 9721e04b971d77fb0800000000000000
-      internalID: -4650017769594678663
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_33
-      rect:
-        serializedVersion: 2
-        x: 229
-        y: 499
-        width: 16
-        height: 19
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: f5ecfad20adf39d90800000000000000
-      internalID: -7092046123775308193
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_34
-      rect:
-        serializedVersion: 2
-        x: 246
-        y: 499
-        width: 95
-        height: 19
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 83e5774f47320c0e0800000000000000
-      internalID: -2251760828460605896
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_35
-      rect:
-        serializedVersion: 2
-        x: 343
-        y: 499
-        width: 16
-        height: 19
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: a068fa5509bd8bb20800000000000000
-      internalID: 3150509352305001994
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_36
-      rect:
-        serializedVersion: 2
-        x: 360
-        y: 499
-        width: 95
-        height: 19
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 30bd8197cf59faf00800000000000000
-      internalID: 1130286943089253123
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_37
-      rect:
-        serializedVersion: 2
-        x: 83
-        y: 469
-        width: 17
-        height: 26
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 0f2a55794fdf40dc0800000000000000
-      internalID: -3673532169074662672
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_38
-      rect:
-        serializedVersion: 2
-        x: 130
-        y: 476
-        width: 12
-        height: 19
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: b585cb86daa637880800000000000000
-      internalID: -8614424369210566565
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_39
-      rect:
-        serializedVersion: 2
-        x: 140
-        y: 473
-        width: 12
-        height: 22
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: bdf2bc1c07e2902a0800000000000000
-      internalID: -6770829502952296485
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_40
-      rect:
-        serializedVersion: 2
-        x: 166
-        y: 467
-        width: 42
-        height: 31
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: e376547c378097ea0800000000000000
-      internalID: -5874654945570625730
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_41
-      rect:
-        serializedVersion: 2
-        x: 208
-        y: 463
-        width: 42
-        height: 35
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: e7a60683fa679f0b0800000000000000
-      internalID: -5694389758896084354
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_42
-      rect:
-        serializedVersion: 2
-        x: 250
-        y: 463
-        width: 42
-        height: 35
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 6b89620f63b180330800000000000000
-      internalID: 3677219018519255222
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_43
-      rect:
-        serializedVersion: 2
-        x: 292
-        y: 456
-        width: 66
-        height: 42
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 83f52b299ae24f8a0800000000000000
-      internalID: -6272337075174744264
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_44
-      rect:
-        serializedVersion: 2
-        x: 358
-        y: 456
-        width: 66
-        height: 42
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 291ebd0fbae747ed0800000000000000
-      internalID: -2417167823045664366
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_45
-      rect:
-        serializedVersion: 2
-        x: 427
-        y: 458
-        width: 37
-        height: 37
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: aaaa82dcd601953b0800000000000000
-      internalID: -5523365404213728598
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_46
-      rect:
-        serializedVersion: 2
-        x: 469
-        y: 458
-        width: 37
-        height: 37
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: d2ce201ceaa261b60800000000000000
-      internalID: 7716401941596793901
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_47
-      rect:
-        serializedVersion: 2
-        x: 508
-        y: 464
-        width: 34
-        height: 34
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: d39fa1cff9e74d660800000000000000
-      internalID: 7409686512525834557
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_48
-      rect:
-        serializedVersion: 2
-        x: 542
-        y: 464
-        width: 34
-        height: 34
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 0cae70a0f38c56ff0800000000000000
-      internalID: -43408448313365824
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_49
-      rect:
-        serializedVersion: 2
-        x: 576
-        y: 464
-        width: 34
-        height: 34
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 904e252bd5f0b51b0800000000000000
-      internalID: -5666918811017485303
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_50
-      rect:
-        serializedVersion: 2
-        x: 610
-        y: 464
-        width: 34
-        height: 34
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 11c401c8710ee3040800000000000000
-      internalID: 4629383858722196497
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_51
-      rect:
-        serializedVersion: 2
-        x: 644
-        y: 464
-        width: 34
-        height: 34
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 9cce515e6a587b4c0800000000000000
-      internalID: -4271798769683141431
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_52
-      rect:
-        serializedVersion: 2
-        x: 678
-        y: 464
-        width: 34
-        height: 34
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 5463c209dfe196d60800000000000000
-      internalID: 7883866697083139653
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_53
-      rect:
-        serializedVersion: 2
-        x: 712
-        y: 464
-        width: 40
-        height: 34
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 5928cbf5721aa1a50800000000000000
-      internalID: 6492679003289977493
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_54
-      rect:
-        serializedVersion: 2
-        x: 753
-        y: 464
-        width: 42
-        height: 34
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 4bc29417ed4f49590800000000000000
-      internalID: -7668235029284574028
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_55
-      rect:
-        serializedVersion: 2
-        x: 795
-        y: 464
-        width: 42
-        height: 34
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 0d46882bcb06a2880800000000000000
-      internalID: -8634982971964103472
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_56
-      rect:
-        serializedVersion: 2
-        x: 837
-        y: 464
-        width: 42
-        height: 34
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 6af371dbb3df75e20800000000000000
-      internalID: 3339416081735827366
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_57
-      rect:
-        serializedVersion: 2
-        x: 879
-        y: 464
-        width: 42
-        height: 34
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 52d5eced1b621ee10800000000000000
-      internalID: 2225102236286868773
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_58
-      rect:
-        serializedVersion: 2
-        x: 921
-        y: 464
-        width: 42
-        height: 34
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 151f1fa2ffe2376e0800000000000000
-      internalID: -1841076149192363695
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_59
-      rect:
-        serializedVersion: 2
-        x: 963
-        y: 464
-        width: 42
-        height: 34
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 1fed04b0d20da5340800000000000000
-      internalID: 4853420440326037233
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_60
-      rect:
-        serializedVersion: 2
-        x: 225
-        y: 456
-        width: 9
-        height: 9
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 18fbcf51c0e17ec40800000000000000
-      internalID: 5541430903760011137
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_61
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 398
-        width: 42
-        height: 34
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 5b3a26e9e7610c5c0800000000000000
-      internalID: -4197330119630347339
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_62
-      rect:
-        serializedVersion: 2
-        x: 33
-        y: 382
-        width: 55
-        height: 50
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: e1c14bfcfa4872d20800000000000000
-      internalID: 3253715146437303326
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_63
-      rect:
-        serializedVersion: 2
-        x: 84
-        y: 398
-        width: 42
-        height: 34
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 9537b2ea1c1df5630800000000000000
-      internalID: 3918080830616597337
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_64
-      rect:
-        serializedVersion: 2
-        x: 126
-        y: 398
-        width: 42
-        height: 34
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 0f81b8f02b8398520800000000000000
-      internalID: 2704755388628801776
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_65
-      rect:
-        serializedVersion: 2
-        x: 168
-        y: 398
-        width: 42
-        height: 34
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 9e5d0334b2138fe40800000000000000
-      internalID: 5690352191063250409
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_66
-      rect:
-        serializedVersion: 2
-        x: 210
-        y: 398
-        width: 42
-        height: 34
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 240950b1a19ac24b0800000000000000
-      internalID: -5463806318319660990
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_67
-      rect:
-        serializedVersion: 2
-        x: 252
-        y: 398
-        width: 42
-        height: 34
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: d54a48da3e3dadcd0800000000000000
-      internalID: -2532478865620294563
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_68
-      rect:
-        serializedVersion: 2
-        x: 294
-        y: 398
-        width: 42
-        height: 34
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: dcce3a7108e22cde0800000000000000
-      internalID: -1314437013551452979
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_69
-      rect:
-        serializedVersion: 2
-        x: 336
-        y: 398
-        width: 42
-        height: 34
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 2a296a4d8ec2dbf30800000000000000
-      internalID: 4592876573499495074
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_70
-      rect:
-        serializedVersion: 2
-        x: 378
-        y: 398
-        width: 42
-        height: 34
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 8bd2f38f82a2d22b0800000000000000
-      internalID: -5607779605554451016
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_71
-      rect:
-        serializedVersion: 2
-        x: 420
-        y: 398
-        width: 34
-        height: 34
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 253572cbe56219100800000000000000
-      internalID: 112913653986448210
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_72
-      rect:
-        serializedVersion: 2
-        x: 454
-        y: 398
-        width: 34
-        height: 34
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: e16ad74bba9f425d0800000000000000
-      internalID: -3088068928606460386
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_73
-      rect:
-        serializedVersion: 2
-        x: 488
-        y: 404
-        width: 50
-        height: 28
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 27318e34d5250a860800000000000000
-      internalID: 7539116336742929266
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_74
-      rect:
-        serializedVersion: 2
-        x: 538
-        y: 410
-        width: 34
-        height: 22
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 7af173e33e5afad00800000000000000
-      internalID: 986189238837387175
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_75
-      rect:
-        serializedVersion: 2
-        x: 572
-        y: 410
-        width: 11
-        height: 22
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 4a59b7e0a32dd5c10800000000000000
-      internalID: 2044020952688989604
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_76
-      rect:
-        serializedVersion: 2
-        x: 583
-        y: 412
-        width: 34
-        height: 20
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: f1b2312174cd17060800000000000000
-      internalID: 6949577897813420831
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_77
-      rect:
-        serializedVersion: 2
-        x: 617
-        y: 412
-        width: 34
-        height: 20
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 7bbfc95ba427cbd60800000000000000
-      internalID: 7907320710955858871
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_78
-      rect:
-        serializedVersion: 2
-        x: 651
-        y: 412
-        width: 34
-        height: 20
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: f8b6f7448d397d120800000000000000
-      internalID: 2438580280315833231
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_79
-      rect:
-        serializedVersion: 2
-        x: 685
-        y: 412
-        width: 34
-        height: 20
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: bcfe373428b56f0c0800000000000000
-      internalID: -4542342559121018933
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_80
-      rect:
-        serializedVersion: 2
-        x: 719
-        y: 412
-        width: 34
-        height: 20
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: a1c09d6087bbc7ff0800000000000000
-      internalID: -36948572740449254
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_81
-      rect:
-        serializedVersion: 2
-        x: 753
-        y: 413
-        width: 42
-        height: 19
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: b26b7f99d7df24e30800000000000000
-      internalID: 4486426894710322731
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_82
-      rect:
-        serializedVersion: 2
-        x: 795
-        y: 413
-        width: 42
-        height: 19
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 0c45ce7b9fb0895d0800000000000000
-      internalID: -3055679180010400576
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_83
-      rect:
-        serializedVersion: 2
-        x: 837
-        y: 413
-        width: 42
-        height: 19
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 0362628cda5dc9e60800000000000000
-      internalID: 7970480382902937136
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_84
-      rect:
-        serializedVersion: 2
-        x: 879
-        y: 413
-        width: 42
-        height: 19
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 6a2aea60dbc523af0800000000000000
-      internalID: -418169848461352282
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_85
-      rect:
-        serializedVersion: 2
-        x: 921
-        y: 413
-        width: 42
-        height: 19
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: f21287ef5a5d16340800000000000000
-      internalID: 4855396782197711151
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_86
-      rect:
-        serializedVersion: 2
-        x: 963
-        y: 392
-        width: 47
-        height: 40
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: bf9d161681004d970800000000000000
-      internalID: 8778641678364957179
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_87
-      rect:
-        serializedVersion: 2
-        x: 1005
-        y: 414
-        width: 18
-        height: 18
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 915b54f094e643800800000000000000
-      internalID: 591218711160272153
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_88
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 380
-        width: 18
-        height: 18
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 4fc1e8b6e622c3e50800000000000000
-      internalID: 6790340195814087924
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_89
-      rect:
-        serializedVersion: 2
-        x: 101
-        y: 380
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 2385797e97a02f200800000000000000
-      internalID: 212243651132610610
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_90
-      rect:
-        serializedVersion: 2
-        x: 118
-        y: 380
-        width: 17
-        height: 17
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 5ac80f9fbe5476200800000000000000
-      internalID: 173183990489975973
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_91
+      name: ap_seg_spent
       rect:
         serializedVersion: 2
         x: 138
-        y: 380
-        width: 14
-        height: 17
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: b9e11d9f117fbb240800000000000000
-      internalID: 4808708683725872795
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_92
-      rect:
-        serializedVersion: 2
-        x: 155
-        y: 381
-        width: 15
-        height: 17
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 9efc155e639bc12d0800000000000000
-      internalID: -3306564380970070039
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_93
-      rect:
-        serializedVersion: 2
-        x: 172
-        y: 382
-        width: 18
+        y: 800
+        width: 17
         height: 13
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 631b66bc631891870800000000000000
-      internalID: 8654090231309840694
+      spriteID: 17183bc77fd49f140800000000000000
+      internalID: 4753916607010668913
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_94
+      name: badge_atk
       rect:
         serializedVersion: 2
-        x: 191
-        y: 380
-        width: 16
-        height: 17
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 3171b08293e8ffad0800000000000000
-      internalID: -2666256078243948781
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_95
-      rect:
-        serializedVersion: 2
-        x: 208
-        y: 380
-        width: 17
-        height: 16
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: d32fd49787263a140800000000000000
-      internalID: 4729732303239901757
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_96
-      rect:
-        serializedVersion: 2
-        x: 228
-        y: 381
-        width: 13
-        height: 17
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: b8f86740fa3359ad0800000000000000
-      internalID: -2696191975124201589
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_97
-      rect:
-        serializedVersion: 2
-        x: 246
-        y: 380
-        width: 14
+        x: 709
+        y: 849
+        width: 49
         height: 18
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 8f3cc0ad357854850800000000000000
-      internalID: 6360638842940998648
+      spriteID: b1138c4d6b0b9ec80800000000000000
+      internalID: -8292902939525631717
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_98
+      name: badge_cost
       rect:
         serializedVersion: 2
-        x: 262
-        y: 382
-        width: 17
-        height: 16
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 6ff399c15cd9e3e90800000000000000
-      internalID: -7044019297246953482
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_99
-      rect:
-        serializedVersion: 2
-        x: 281
-        y: 380
-        width: 16
+        x: 57
+        y: 815
+        width: 49
         height: 18
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: c031d1b75e7487bd0800000000000000
-      internalID: -2632274931259469044
+      spriteID: ce90557b87b220250800000000000000
+      internalID: 5909333458535385580
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_100
+      name: badge_def
       rect:
         serializedVersion: 2
-        x: 298
-        y: 380
-        width: 18
+        x: 923
+        y: 849
+        width: 49
         height: 18
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 1043408d33ec6bf10800000000000000
-      internalID: 2285240582999913473
+      spriteID: cfe1fd4f9730479f0800000000000000
+      internalID: -471748238632870148
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_101
+      name: badge_hp
       rect:
         serializedVersion: 2
-        x: 317
-        y: 381
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 1aa9ef4b5a5559d80800000000000000
-      internalID: -8244589372637275487
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_102
-      rect:
-        serializedVersion: 2
-        x: 335
-        y: 381
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 8934d1b9f5a0f97f0800000000000000
-      internalID: -603752419303799912
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_103
-      rect:
-        serializedVersion: 2
-        x: 353
-        y: 381
-        width: 15
-        height: 17
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 4a6ecefa42ef4b220800000000000000
-      internalID: 2500903126621284004
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_104
-      rect:
-        serializedVersion: 2
-        x: 371
-        y: 380
-        width: 16
-        height: 17
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: ac3b057ed8bca8e80800000000000000
-      internalID: -8175498363206061110
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_105
-      rect:
-        serializedVersion: 2
-        x: 388
-        y: 381
-        width: 17
-        height: 17
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: dc2b901b4cd2e9770800000000000000
-      internalID: 8619377059640750797
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_106
-      rect:
-        serializedVersion: 2
-        x: 407
-        y: 381
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 0b599e0eac15be480800000000000000
-      internalID: -8868905109377411664
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_107
-      rect:
-        serializedVersion: 2
-        x: 425
-        y: 385
-        width: 16
-        height: 8
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: da6232383810986b0800000000000000
-      internalID: -5293698222644844883
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_108
-      rect:
-        serializedVersion: 2
-        x: 442
-        y: 380
-        width: 18
+        x: 816
+        y: 849
+        width: 49
         height: 18
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: e126c4ec7b17f1a80800000000000000
-      internalID: -8493945337943399906
+      spriteID: a132829f922b15f30800000000000000
+      internalID: 4562623790846583578
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_109
+      name: badge_neutral
       rect:
         serializedVersion: 2
-        x: 460
-        y: 380
-        width: 17
+        x: 164
+        y: 815
+        width: 49
+        height: 18
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e2e644206fe65c040800000000000000
+      internalID: 4667258591718436398
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: banner_enemy
+      rect:
+        serializedVersion: 2
+        x: 271
+        y: 816
+        width: 40
         height: 17
       alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 10, y: 4, z: 10, w: 4}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: c22d63ce44b74bb80800000000000000
-      internalID: -8379937470678642132
+      spriteID: f46ab083bb30f9bc0800000000000000
+      internalID: -3774293860079131057
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_110
+      name: banner_flat
       rect:
         serializedVersion: 2
-        x: 479
-        y: 380
-        width: 16
-        height: 16
+        x: 397
+        y: 816
+        width: 40
+        height: 17
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 8, y: 4, z: 8, w: 4}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d02c49c2373f75cd0800000000000000
+      internalID: -2569317386396843507
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: banner_neutral
+      rect:
+        serializedVersion: 2
+        x: 355
+        y: 816
+        width: 40
+        height: 17
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 10, y: 4, z: 10, w: 4}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e80245c52503edd20800000000000000
+      internalID: 3305132306830991502
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: banner_phase
+      rect:
+        serializedVersion: 2
+        x: 35
+        y: 841
+        width: 48
+        height: 26
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 14, y: 6, z: 14, w: 6}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 77772e8b837793110800000000000000
+      internalID: 1241154257821005687
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: banner_warn
+      rect:
+        serializedVersion: 2
+        x: 313
+        y: 816
+        width: 40
+        height: 17
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 10, y: 4, z: 10, w: 4}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c8d093b5174ee0d90800000000000000
+      internalID: -7129509984568013428
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bar_cap_ap
+      rect:
+        serializedVersion: 2
+        x: 35
+        y: 798
+        width: 5
+        height: 15
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: c6f4fc22b39d1f130800000000000000
-      internalID: 3598896425256046444
+      spriteID: 8ddeef128d8499eb0800000000000000
+      internalID: -4712655441946022440
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_111
+      name: bar_cap_boss
+      rect:
+        serializedVersion: 2
+        x: 657
+        y: 847
+        width: 5
+        height: 20
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d81459bc9fb45e680800000000000000
+      internalID: -8726485166725971571
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bar_cap_charge
+      rect:
+        serializedVersion: 2
+        x: 287
+        y: 801
+        width: 5
+        height: 12
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8d6828349de884160800000000000000
+      internalID: 7010009883793852120
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bar_cap_hp
+      rect:
+        serializedVersion: 2
+        x: 702
+        y: 848
+        width: 5
+        height: 19
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 47215188d0f687470800000000000000
+      internalID: 8392580009513259636
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bar_cap_shield
+      rect:
+        serializedVersion: 2
+        x: 201
+        y: 800
+        width: 5
+        height: 13
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 37dae9076774573c0800000000000000
+      internalID: -4362502090017297037
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bar_fill_ap
+      rect:
+        serializedVersion: 2
+        x: 430
+        y: 804
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8f2ff94a8992d4d80800000000000000
+      internalID: -8264904005581278472
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bar_fill_boss
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 799
+        width: 8
+        height: 14
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d804c6d3af4ea2b50800000000000000
+      internalID: 6569314769896751245
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bar_fill_charge
+      rect:
+        serializedVersion: 2
+        x: 500
+        y: 807
+        width: 8
+        height: 6
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3c85fbaeaa97ee800800000000000000
+      internalID: 643585571750369475
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bar_fill_hp
+      rect:
+        serializedVersion: 2
+        x: 157
+        y: 800
+        width: 8
+        height: 13
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e3d7443eff635db50800000000000000
+      internalID: 6617255700148288830
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bar_fill_shield
+      rect:
+        serializedVersion: 2
+        x: 490
+        y: 806
+        width: 8
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8a5f0a7dd83311310800000000000000
+      internalID: 1373936045625767336
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bar_frame_ap
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 798
+        width: 32
+        height: 15
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 6, y: 4, z: 6, w: 4}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3ed8242aefc5fcd60800000000000000
+      internalID: 7912645319026970083
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bar_frame_boss
+      rect:
+        serializedVersion: 2
+        x: 623
+        y: 847
+        width: 32
+        height: 20
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 8, y: 4, z: 8, w: 4}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3628a56b7ec934770800000000000000
+      internalID: 8593885032963801699
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bar_frame_charge
+      rect:
+        serializedVersion: 2
+        x: 253
+        y: 801
+        width: 32
+        height: 12
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 6, y: 4, z: 6, w: 4}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3bcde6ad49ed88550800000000000000
+      internalID: 6163420820957748403
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bar_frame_hp
+      rect:
+        serializedVersion: 2
+        x: 668
+        y: 848
+        width: 32
+        height: 19
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 8, y: 4, z: 8, w: 4}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 85e3efd1261655920800000000000000
+      internalID: 2978393802613341784
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bar_frame_shield
+      rect:
+        serializedVersion: 2
+        x: 167
+        y: 800
+        width: 32
+        height: 13
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 6, y: 4, z: 6, w: 4}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7c0e7d50ea1a480d0800000000000000
+      internalID: -3421432048100319033
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bar_tick
+      rect:
+        serializedVersion: 2
+        x: 664
+        y: 847
+        width: 2
+        height: 20
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 54488e35085036bd0800000000000000
+      internalID: -2638258907987278779
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: btn_amber_disabled
+      rect:
+        serializedVersion: 2
+        x: 918
+        y: 877
+        width: 40
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 12, y: 10, z: 12, w: 10}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 533b8e0fcf56faa80800000000000000
+      internalID: -8453425838503185611
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: btn_amber_hover
+      rect:
+        serializedVersion: 2
+        x: 834
+        y: 877
+        width: 40
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 12, y: 10, z: 12, w: 10}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e6084ef5a9efc4210800000000000000
+      internalID: 1318708729899941998
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: btn_amber_idle
+      rect:
+        serializedVersion: 2
+        x: 792
+        y: 877
+        width: 40
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 12, y: 10, z: 12, w: 10}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 129d2c60e5c07e420800000000000000
+      internalID: 2659107702965459233
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: btn_amber_press
+      rect:
+        serializedVersion: 2
+        x: 876
+        y: 877
+        width: 40
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 12, y: 10, z: 12, w: 10}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5a89048dcdaa434a0800000000000000
+      internalID: -6614474087202776923
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: btn_blood_disabled
+      rect:
+        serializedVersion: 2
+        x: 750
+        y: 877
+        width: 40
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 12, y: 10, z: 12, w: 10}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1359df704b419d9e0800000000000000
+      internalID: -1596221829465402063
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: btn_blood_hover
+      rect:
+        serializedVersion: 2
+        x: 666
+        y: 877
+        width: 40
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 12, y: 10, z: 12, w: 10}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 75cc39adf993dd870800000000000000
+      internalID: 8709180613134109783
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: btn_blood_idle
+      rect:
+        serializedVersion: 2
+        x: 624
+        y: 877
+        width: 40
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 12, y: 10, z: 12, w: 10}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4c6bebb4a8c11d530800000000000000
+      internalID: 3877912134444562116
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: btn_blood_press
+      rect:
+        serializedVersion: 2
+        x: 708
+        y: 877
+        width: 40
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 12, y: 10, z: 12, w: 10}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 53098ca2a84afa890800000000000000
+      internalID: -7444550745689911243
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: btn_phos_disabled
+      rect:
+        serializedVersion: 2
+        x: 582
+        y: 877
+        width: 40
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 12, y: 10, z: 12, w: 10}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a89d2125e548349f0800000000000000
+      internalID: -485398794187122294
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: btn_phos_hover
       rect:
         serializedVersion: 2
         x: 498
-        y: 380
-        width: 14
-        height: 17
+        y: 877
+        width: 40
+        height: 32
       alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 12, y: 10, z: 12, w: 10}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ca26c2304d1c8ca40800000000000000
-      internalID: 5388770070479266476
+      spriteID: 03e5a9597f5d8e230800000000000000
+      internalID: 3668417155836829232
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_112
+      name: btn_phos_idle
       rect:
         serializedVersion: 2
-        x: 515
-        y: 381
-        width: 16
-        height: 16
+        x: 456
+        y: 877
+        width: 40
+        height: 32
       alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 12, y: 10, z: 12, w: 10}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: bf14fe46eb8c6b6d0800000000000000
-      internalID: -2974969783768890885
+      spriteID: 34fb654c761fdb520800000000000000
+      internalID: 2719595177979592515
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_113
+      name: btn_phos_press
       rect:
         serializedVersion: 2
-        x: 533
-        y: 381
-        width: 16
-        height: 16
+        x: 540
+        y: 877
+        width: 40
+        height: 32
       alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 12, y: 10, z: 12, w: 10}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: c710fd40a82e3d8e0800000000000000
-      internalID: -1669741954409234052
+      spriteID: bf6fc0fd59b207460800000000000000
+      internalID: 7237332523876677371
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_114
+      name: btn_steel_disabled
       rect:
         serializedVersion: 2
-        x: 552
-        y: 380
-        width: 14
-        height: 17
+        x: 414
+        y: 877
+        width: 40
+        height: 32
       alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 12, y: 10, z: 12, w: 10}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 2314ebc8ebadfb8e0800000000000000
-      internalID: -1675380024418614990
+      spriteID: aca496a7dd2fe1a80800000000000000
+      internalID: -8494084814118761782
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_115
+      name: btn_steel_hover
       rect:
         serializedVersion: 2
-        x: 568
-        y: 382
-        width: 34
-        height: 16
+        x: 330
+        y: 877
+        width: 40
+        height: 32
       alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 12, y: 10, z: 12, w: 10}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 17c3a6f88377bb7c0800000000000000
-      internalID: -4054515954709021583
+      spriteID: 8f5c8a82b73dc5180800000000000000
+      internalID: -9125186219042880008
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_116
+      name: btn_steel_idle
       rect:
         serializedVersion: 2
-        x: 602
-        y: 382
-        width: 7
-        height: 16
+        x: 288
+        y: 877
+        width: 40
+        height: 32
       alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 12, y: 10, z: 12, w: 10}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 9bb2cd268b1a53100800000000000000
-      internalID: 87153581108243385
+      spriteID: 6dc91795a7c51bb20800000000000000
+      internalID: 3148399295065070806
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_117
+      name: btn_steel_press
       rect:
         serializedVersion: 2
-        x: 609
-        y: 382
-        width: 10
-        height: 16
+        x: 372
+        y: 877
+        width: 40
+        height: 32
       alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 12, y: 10, z: 12, w: 10}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: e0e9ab568b4e885f0800000000000000
-      internalID: -754101456952713714
+      spriteID: f05ce246047538300800000000000000
+      internalID: 253141938133189903
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_118
+      name: card_back
       rect:
         serializedVersion: 2
-        x: 619
-        y: 382
-        width: 16
-        height: 16
+        x: 793
+        y: 1495
+        width: 112
+        height: 168
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 9a7711d9cc1101b70800000000000000
-      internalID: 8867607236798674857
+      spriteID: c9581a25c5a338f20800000000000000
+      internalID: 3423644309929428380
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_119
+      name: card_back_A
       rect:
         serializedVersion: 2
-        x: 635
-        y: 382
-        width: 16
-        height: 16
+        x: 115
+        y: 1309
+        width: 112
+        height: 168
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 025fd08598ba87320800000000000000
-      internalID: 2555981394908935456
+      spriteID: 55da763b79b6dedb0800000000000000
+      internalID: -4761030931766596267
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_120
+      name: card_back_B
       rect:
         serializedVersion: 2
-        x: 651
-        y: 382
-        width: 16
-        height: 16
+        x: 457
+        y: 1309
+        width: 112
+        height: 168
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7fe5da91ee71eb270800000000000000
-      internalID: 8268072277299257079
+      spriteID: 5ba9a569d9dc0b0b0800000000000000
+      internalID: -5714841850417079627
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_121
+      name: card_back_C
+      rect:
+        serializedVersion: 2
+        x: 799
+        y: 1309
+        width: 112
+        height: 168
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a1e3ace12f2a8b380800000000000000
+      internalID: -8955228698243875302
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: card_back_plain
+      rect:
+        serializedVersion: 2
+        x: 907
+        y: 1495
+        width: 112
+        height: 168
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d01fb7cc9600b9e80800000000000000
+      internalID: -8170936644531392243
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: card_front
+      rect:
+        serializedVersion: 2
+        x: 565
+        y: 1495
+        width: 112
+        height: 168
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 861ffad5ea9f04480800000000000000
+      internalID: -8916852734902144664
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: card_front_A
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 1309
+        width: 112
+        height: 168
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9b8820d756597b1a0800000000000000
+      internalID: -6793797249743550279
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: card_front_B
+      rect:
+        serializedVersion: 2
+        x: 343
+        y: 1309
+        width: 112
+        height: 168
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: db5302ca8e7d22550800000000000000
+      internalID: 6134703036752213437
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: card_front_C
+      rect:
+        serializedVersion: 2
+        x: 685
+        y: 1309
+        width: 112
+        height: 168
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 56494f27fee037e00800000000000000
+      internalID: 1041192360441320549
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: card_front_neutral
+      rect:
+        serializedVersion: 2
+        x: 679
+        y: 1495
+        width: 112
+        height: 168
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b57dc06f16351c170800000000000000
+      internalID: 8196924476995983195
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: card_rim_A
+      rect:
+        serializedVersion: 2
+        x: 229
+        y: 1309
+        width: 112
+        height: 168
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a5b3f2d5b109239c0800000000000000
+      internalID: -3948935476048610470
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: card_rim_B
+      rect:
+        serializedVersion: 2
+        x: 571
+        y: 1309
+        width: 112
+        height: 168
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e38d67b7cc1238c40800000000000000
+      internalID: 5513287530960050238
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: card_rim_C
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 1139
+        width: 112
+        height: 168
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8170c180d2d387070800000000000000
+      internalID: 8104294793072084760
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: card_shadow
+      rect:
+        serializedVersion: 2
+        x: 439
+        y: 1483
+        width: 124
+        height: 180
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8e1744c15af7c89c0800000000000000
+      internalID: -3923620828225965592
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: card_slot_empty
+      rect:
+        serializedVersion: 2
+        x: 115
+        y: 1139
+        width: 112
+        height: 168
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cc038950a049246d0800000000000000
+      internalID: -3007678830365626164
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: decal_crack_a
+      rect:
+        serializedVersion: 2
+        x: 617
+        y: 943
+        width: 48
+        height: 48
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e35bc5b67106fbd00800000000000000
+      internalID: 990616096746550590
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: decal_crack_b
       rect:
         serializedVersion: 2
         x: 667
-        y: 383
-        width: 15
-        height: 15
+        y: 943
+        width: 48
+        height: 48
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 689c9cfce02c4d6c0800000000000000
-      internalID: -4119454390265722490
+      spriteID: 4e96005b45efcb9b0800000000000000
+      internalID: -5062892241303868956
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_122
+      name: decal_drip_a
       rect:
         serializedVersion: 2
-        x: 682
-        y: 383
-        width: 15
-        height: 15
+        x: 717
+        y: 947
+        width: 40
+        height: 44
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 2d3b55211db5a6540800000000000000
-      internalID: 5001911289662256082
+      spriteID: f31edea09fd0c3740800000000000000
+      internalID: 5132993038576902463
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_123
+      name: decal_drip_b
       rect:
         serializedVersion: 2
-        x: 697
-        y: 383
-        width: 15
-        height: 15
+        x: 759
+        y: 947
+        width: 40
+        height: 44
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: c6a692f567d5010b0800000000000000
-      internalID: -5760001160422790548
+      spriteID: bf9d592e9f333cda0800000000000000
+      internalID: -5925835536348096005
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_124
+      name: decal_drip_c
       rect:
         serializedVersion: 2
-        x: 712
-        y: 384
-        width: 34
+        x: 801
+        y: 947
+        width: 40
+        height: 44
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 985c1b6f4f1184890800000000000000
+      internalID: -7473703837812800119
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: decal_scratch
+      rect:
+        serializedVersion: 2
+        x: 475
+        y: 817
+        width: 80
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2e75fe90c7f4955d0800000000000000
+      internalID: -3073337876542433310
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: decal_sigil_a
+      rect:
+        serializedVersion: 2
+        x: 975
+        y: 951
+        width: 40
+        height: 40
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3cf8eff2a4aaa9f10800000000000000
+      internalID: 2277319797198720963
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: decal_sigil_b
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 869
+        width: 40
+        height: 40
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c4230dd6ff17b5ca0800000000000000
+      internalID: -6027098334432316852
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: decal_stain_a
+      rect:
+        serializedVersion: 2
+        x: 843
+        y: 951
+        width: 64
+        height: 40
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4e5651cbd4cdb4a80800000000000000
+      internalID: -8481443246796085788
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: decal_stain_b
+      rect:
+        serializedVersion: 2
+        x: 909
+        y: 951
+        width: 64
+        height: 40
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5d51ed1e2e3da7430800000000000000
+      internalID: 3781567808536450517
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deck_pulse
+      rect:
+        serializedVersion: 2
+        x: 521
+        y: 1665
+        width: 128
+        height: 184
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6a4bfdf955e0130f0800000000000000
+      internalID: -1139113469830777690
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deck_stack_0
+      rect:
+        serializedVersion: 2
+        x: 191
+        y: 1863
+        width: 128
+        height: 184
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 51e68c986b90f22a0800000000000000
+      internalID: -6760173836059513323
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deck_stack_1
+      rect:
+        serializedVersion: 2
+        x: 321
+        y: 1863
+        width: 128
+        height: 184
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bd57642f9181d2ec0800000000000000
+      internalID: -3590186828226464293
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deck_stack_2
+      rect:
+        serializedVersion: 2
+        x: 451
+        y: 1863
+        width: 128
+        height: 184
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c253485f076226950800000000000000
+      internalID: 6440752683690505516
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deck_stack_3
+      rect:
+        serializedVersion: 2
+        x: 581
+        y: 1863
+        width: 128
+        height: 184
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b300b1664023f4530800000000000000
+      internalID: 3841344001644625979
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deck_stack_4
+      rect:
+        serializedVersion: 2
+        x: 711
+        y: 1863
+        width: 128
+        height: 184
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 00649c7fd852a6f60800000000000000
+      internalID: 8028270577419109888
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deck_stack_5
+      rect:
+        serializedVersion: 2
+        x: 841
+        y: 1863
+        width: 128
+        height: 184
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5734d49c0c291b110800000000000000
+      internalID: 1274961526231221109
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: discard_stack_0
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 1665
+        width: 128
+        height: 184
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 88f47e108dda10700800000000000000
+      internalID: 504875776498683784
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: discard_stack_1
+      rect:
+        serializedVersion: 2
+        x: 131
+        y: 1665
+        width: 128
+        height: 184
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bc9a732e7f6b6cb60800000000000000
+      internalID: 7766095783215475147
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: discard_stack_2
+      rect:
+        serializedVersion: 2
+        x: 261
+        y: 1665
+        width: 128
+        height: 184
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ee1fad5ee5695f860800000000000000
+      internalID: 7563116483566039534
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: discard_stack_3
+      rect:
+        serializedVersion: 2
+        x: 391
+        y: 1665
+        width: 128
+        height: 184
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 93cc276ca343b3be0800000000000000
+      internalID: -1496545024128398279
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: divider_h
+      rect:
+        serializedVersion: 2
+        x: 510
+        y: 808
+        width: 32
+        height: 5
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 4, y: 0, z: 4, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4d320b10c046a1cc0800000000000000
+      internalID: -3739566537847069740
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: divider_v
+      rect:
+        serializedVersion: 2
+        x: 281
+        y: 877
+        width: 5
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 4, z: 0, w: 4}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 182d0316d5eacb360800000000000000
+      internalID: 7186810821462250113
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_medallion
+      rect:
+        serializedVersion: 2
+        x: 651
+        y: 1041
+        width: 96
+        height: 96
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c1e8ab60c85973d80800000000000000
+      internalID: -8270977762001777124
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_medallion_A
+      rect:
+        serializedVersion: 2
+        x: 357
+        y: 1041
+        width: 96
+        height: 96
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1d9e163f145ba3890800000000000000
+      internalID: -7477464936434505263
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_medallion_B
+      rect:
+        serializedVersion: 2
+        x: 455
+        y: 1041
+        width: 96
+        height: 96
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 416f5f39592c0eb10800000000000000
+      internalID: 2008819381495526932
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_medallion_C
+      rect:
+        serializedVersion: 2
+        x: 553
+        y: 1041
+        width: 96
+        height: 96
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 466a751c338273ce0800000000000000
+      internalID: -1425626554287282588
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: flip_cell_back
+      rect:
+        serializedVersion: 2
+        x: 328
+        y: 802
+        width: 32
+        height: 11
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c18cbbdfa758c19a0800000000000000
+      internalID: -6260982618662385636
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: flip_cell_current
+      rect:
+        serializedVersion: 2
+        x: 362
+        y: 802
+        width: 32
+        height: 11
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 86ef22a94b608e150800000000000000
+      internalID: 5901974684418899560
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: flip_cell_front
+      rect:
+        serializedVersion: 2
+        x: 294
+        y: 802
+        width: 32
+        height: 11
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8ae2675e979a74bb0800000000000000
+      internalID: -4951802924264706392
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: flip_cell_unknown
+      rect:
+        serializedVersion: 2
+        x: 396
+        y: 802
+        width: 32
+        height: 11
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a885d040e8b957440800000000000000
+      internalID: 4933020001109891210
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_damage
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 1479
+        width: 128
+        height: 184
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 91e2e912e9a036010800000000000000
+      internalID: 1180799201586327065
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip
+      rect:
+        serializedVersion: 2
+        x: 131
+        y: 1479
+        width: 128
+        height: 184
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e6b7c17b1c7166440800000000000000
+      internalID: 4928652962971810670
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_select
+      rect:
+        serializedVersion: 2
+        x: 651
+        y: 1665
+        width: 128
+        height: 184
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 87c1a1082ce109210800000000000000
+      internalID: 1337602910050720888
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_target
+      rect:
+        serializedVersion: 2
+        x: 781
+        y: 1665
+        width: 128
+        height: 184
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3b4583058e54277f0800000000000000
+      internalID: -616353334915738445
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hand_lift
+      rect:
+        serializedVersion: 2
+        x: 137
+        y: 845
+        width: 128
+        height: 22
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a122d5c08df7b6630800000000000000
+      internalID: 3921368466453242394
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hand_tab_A
+      rect:
+        serializedVersion: 2
+        x: 275
+        y: 935
+        width: 112
+        height: 56
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a0d983e84b56b76e0800000000000000
+      internalID: -1838764196696122102
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hand_tab_B
+      rect:
+        serializedVersion: 2
+        x: 389
+        y: 935
+        width: 112
+        height: 56
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fe95c97087b36b230800000000000000
+      internalID: 3654173534367537647
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hand_tab_C
+      rect:
+        serializedVersion: 2
+        x: 503
+        y: 935
+        width: 112
+        height: 56
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e7ec9cfb805a0ba80800000000000000
+      internalID: -8453075043578425730
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hand_tab_hover
+      rect:
+        serializedVersion: 2
+        x: 83
+        y: 923
+        width: 124
+        height: 68
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f6dc60c1a013a50e0800000000000000
+      internalID: -2280456341820093073
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icon_arrow_down
+      rect:
+        serializedVersion: 2
+        x: 791
+        y: 817
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d522e623eace25180800000000000000
+      internalID: -9127973261812030883
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icon_arrow_up
+      rect:
+        serializedVersion: 2
+        x: 773
+        y: 817
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fdafedf5de892bd40800000000000000
+      internalID: 5598705432058067679
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icon_bolt
+      rect:
+        serializedVersion: 2
+        x: 701
+        y: 817
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3549d013ea3a2ce50800000000000000
+      internalID: 6828199953589703763
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icon_clock
+      rect:
+        serializedVersion: 2
+        x: 845
+        y: 817
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 834b73badbb44e380800000000000000
+      internalID: -8942939682057505736
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icon_deck
+      rect:
+        serializedVersion: 2
+        x: 647
+        y: 817
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 267eb929f65c853f0800000000000000
+      internalID: -911761841550792862
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icon_diamond
+      rect:
+        serializedVersion: 2
+        x: 737
+        y: 817
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bd47ed728a7d752f0800000000000000
+      internalID: -984080876333796133
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icon_drop
+      rect:
+        serializedVersion: 2
+        x: 683
+        y: 817
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bbd15c8fa9dae6320800000000000000
+      internalID: 2553168919875886523
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icon_eye
+      rect:
+        serializedVersion: 2
+        x: 629
+        y: 817
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a5738e4c73a21c140800000000000000
+      internalID: 4738114701985593178
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icon_flip
+      rect:
+        serializedVersion: 2
+        x: 809
+        y: 817
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9bb37e04915234c60800000000000000
+      internalID: 7801119769929137081
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icon_hand
+      rect:
+        serializedVersion: 2
+        x: 665
+        y: 817
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3613a534227a56d60800000000000000
+      internalID: 7882890488382632291
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icon_heart
+      rect:
+        serializedVersion: 2
+        x: 557
+        y: 817
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9431b216be7c03070800000000000000
+      internalID: 8084181144891495241
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icon_heart_green
+      rect:
+        serializedVersion: 2
+        x: 935
+        y: 817
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f01a72d9937c56840800000000000000
+      internalID: 5216794793642270991
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icon_lock
+      rect:
+        serializedVersion: 2
+        x: 827
+        y: 817
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fd299088019435690800000000000000
+      internalID: -7614662209602743585
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icon_minus
+      rect:
+        serializedVersion: 2
+        x: 881
+        y: 817
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8e55e65bf347512e0800000000000000
+      internalID: -2155689029651245592
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icon_plus
+      rect:
+        serializedVersion: 2
+        x: 863
+        y: 817
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d406d70e147c0eb70800000000000000
+      internalID: 8926353547201437773
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icon_shield
+      rect:
+        serializedVersion: 2
+        x: 593
+        y: 817
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ac80733028ede5760800000000000000
+      internalID: 7448635483698432202
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icon_shield_cyan
+      rect:
+        serializedVersion: 2
+        x: 953
+        y: 817
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5a072cd1ca22aa380800000000000000
+      internalID: -8959310386071179099
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icon_skull
+      rect:
+        serializedVersion: 2
+        x: 611
+        y: 817
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e56d9eaa3e58497f0800000000000000
+      internalID: -606712836916652450
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icon_star
+      rect:
+        serializedVersion: 2
+        x: 719
+        y: 817
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 592ec3ea424cff3f0800000000000000
+      internalID: -864756941610753387
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icon_swap
+      rect:
+        serializedVersion: 2
+        x: 899
+        y: 817
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 494bb95d0a038d8c0800000000000000
+      internalID: -3974373203817810796
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icon_sword
+      rect:
+        serializedVersion: 2
+        x: 575
+        y: 817
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d24008710126a0020800000000000000
+      internalID: 2308765580234064941
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icon_sword_red
+      rect:
+        serializedVersion: 2
+        x: 917
+        y: 817
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7e65d941143b3f170800000000000000
+      internalID: 8211103637726648039
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icon_target
+      rect:
+        serializedVersion: 2
+        x: 755
+        y: 817
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f9b03b4afced6be40800000000000000
+      internalID: 5671965764122512287
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: mask_art_square
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 911
+        width: 80
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b4d78be25754429a0800000000000000
+      internalID: -6258801212540814005
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: mask_symbol_circle
+      rect:
+        serializedVersion: 2
+        x: 847
+        y: 1041
+        width: 96
+        height: 96
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a0706d87fe3ad8dd0800000000000000
+      internalID: -2482147570691471606
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: mask_symbol_square
+      rect:
+        serializedVersion: 2
+        x: 749
+        y: 1041
+        width: 96
+        height: 96
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8db46c25e0c138ae0800000000000000
+      internalID: -1548362999041471528
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: micro_atk
+      rect:
+        serializedVersion: 2
+        x: 760
+        y: 849
+        width: 54
+        height: 18
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a3c01b3850f87d5a0800000000000000
+      internalID: -6496566683611624390
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: micro_cost
+      rect:
+        serializedVersion: 2
+        x: 108
+        y: 815
+        width: 54
+        height: 18
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 82c769c88daf17f40800000000000000
+      internalID: 5724632409343163432
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: micro_def
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 815
+        width: 54
+        height: 18
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f71764610c98ed8e0800000000000000
+      internalID: -1666743353980063361
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: micro_hp
+      rect:
+        serializedVersion: 2
+        x: 867
+        y: 849
+        width: 54
+        height: 18
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fe7ff100e6a828880800000000000000
+      internalID: -8610167332525836305
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: micro_neutral
+      rect:
+        serializedVersion: 2
+        x: 215
+        y: 815
+        width: 54
+        height: 18
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c67cd67f2c8a23be0800000000000000
+      internalID: -1498950170632665236
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: panel_blood
+      rect:
+        serializedVersion: 2
+        x: 145
+        y: 877
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 10, y: 10, z: 10, w: 10}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7ab7ec440084bbec0800000000000000
+      internalID: -3550164715259921497
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: panel_console
+      rect:
+        serializedVersion: 2
+        x: 77
+        y: 877
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 10, y: 10, z: 10, w: 10}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eeefb44cdeeff79c0800000000000000
+      internalID: -3927140052889764114
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: panel_dark
+      rect:
+        serializedVersion: 2
+        x: 43
+        y: 877
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 10, y: 10, z: 10, w: 10}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b4e782f77360f5b90800000000000000
+      internalID: -7251070039616881077
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: panel_mag
+      rect:
+        serializedVersion: 2
+        x: 179
+        y: 877
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 10, y: 10, z: 10, w: 10}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dec13278e52322430800000000000000
+      internalID: 3756620420755954925
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: panel_phos
+      rect:
+        serializedVersion: 2
+        x: 111
+        y: 877
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 10, y: 10, z: 10, w: 10}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bf25b9da2edae0ba0800000000000000
+      internalID: -6120763654463073541
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: panel_screen
+      rect:
+        serializedVersion: 2
+        x: 247
+        y: 877
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 6, y: 6, z: 6, w: 6}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fdfa43b2146c6f680800000000000000
+      internalID: -8721565645156339745
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: panel_well
+      rect:
+        serializedVersion: 2
+        x: 213
+        y: 877
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 8, y: 8, z: 8, w: 8}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dbefe157f9f18aa60800000000000000
+      internalID: 7685427533832978109
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pip_ap_empty
+      rect:
+        serializedVersion: 2
+        x: 68
+        y: 799
+        width: 14
         height: 14
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0e7845c41274e5540800000000000000
-      internalID: 4998510844767930336
+      spriteID: 3d2a797fcf6a128e0800000000000000
+      internalID: -1719909977262939437
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_125
+      name: pip_ap_full
       rect:
         serializedVersion: 2
-        x: 746
-        y: 384
-        width: 7
+        x: 52
+        y: 799
+        width: 14
         height: 14
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: bb4fb7cbd9ad421d0800000000000000
-      internalID: -3376333449614068549
+      spriteID: 0231652de3d5901d0800000000000000
+      internalID: -3384071120594005216
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_126
+      name: pip_ap_spent
       rect:
         serializedVersion: 2
-        x: 753
-        y: 384
-        width: 34
+        x: 84
+        y: 799
+        width: 14
         height: 14
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 1155e55642729e960800000000000000
-      internalID: 7631674080829003025
+      spriteID: d9397ba6d98b8b4f0800000000000000
+      internalID: -812696746500582499
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_127
-      rect:
-        serializedVersion: 2
-        x: 787
-        y: 384
-        width: 7
-        height: 14
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 4a934980176900f60800000000000000
-      internalID: 7998558350429403556
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_128
-      rect:
-        serializedVersion: 2
-        x: 794
-        y: 385
-        width: 34
-        height: 13
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 287429f0f099ffac0800000000000000
-      internalID: -3819165669022087294
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_129
-      rect:
-        serializedVersion: 2
-        x: 828
-        y: 385
-        width: 34
-        height: 13
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 131cf9e95cc8738e0800000000000000
-      internalID: -1713746352793468623
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_130
-      rect:
-        serializedVersion: 2
-        x: 862
-        y: 385
-        width: 34
-        height: 13
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: bd516e3a79c8567b0800000000000000
-      internalID: -5231620809203247653
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_131
-      rect:
-        serializedVersion: 2
-        x: 896
-        y: 385
-        width: 44
-        height: 13
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 7e626b2a7b1135bf0800000000000000
-      internalID: -336906066716121369
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_132
-      rect:
-        serializedVersion: 2
-        x: 940
-        y: 388
-        width: 10
-        height: 10
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: a7a385030e648d950800000000000000
-      internalID: 6474002393042795130
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_133
-      rect:
-        serializedVersion: 2
-        x: 950
-        y: 390
-        width: 10
-        height: 8
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 5579d3b87a4e4bed0800000000000000
-      internalID: -2399041293234890923
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: flipcards_ui_atlas@1x_134
+      name: plate_counter
       rect:
         serializedVersion: 2
         x: 960
-        y: 390
-        width: 10
-        height: 8
+        y: 877
+        width: 32
+        height: 32
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 8, y: 8, z: 8, w: 8}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0bc8063712e2e8ac0800000000000000
+      internalID: -3851089910150689616
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: plate_tooltip
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 835
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 8, y: 8, z: 8, w: 8}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bb222ff12163f9840800000000000000
+      internalID: 5232960743501079227
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: readout_block
+      rect:
+        serializedVersion: 2
+        x: 1007
+        y: 817
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 69e4d2c9103be32f0800000000000000
-      internalID: -991158048478376298
+      spriteID: d85a15115c8252c00800000000000000
+      internalID: 875150529457661325
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: readout_down
+      rect:
+        serializedVersion: 2
+        x: 989
+        y: 817
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ac5662b723ce70700800000000000000
+      internalID: 506633184661104074
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: readout_up
+      rect:
+        serializedVersion: 2
+        x: 971
+        y: 817
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f59348cf6436d1e80800000000000000
+      internalID: -8206293789463791265
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: reel_cell
+      rect:
+        serializedVersion: 2
+        x: 407
+        y: 1163
+        width: 176
+        height: 144
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 58faba9695b087470800000000000000
+      internalID: 8392470384257773445
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: reel_cell_A
+      rect:
+        serializedVersion: 2
+        x: 585
+        y: 1163
+        width: 176
+        height: 144
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 312ed23005fbe2ef0800000000000000
+      internalID: -130956988775538157
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: reel_cell_B
+      rect:
+        serializedVersion: 2
+        x: 763
+        y: 1163
+        width: 176
+        height: 144
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0034c3bf68d13a120800000000000000
+      internalID: 2423813490033312512
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: reel_cell_C
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 993
+        width: 176
+        height: 144
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 131b780601dc40130800000000000000
+      internalID: 3532173477987987761
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: reel_cell_empty
+      rect:
+        serializedVersion: 2
+        x: 229
+        y: 1163
+        width: 176
+        height: 144
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 39075f6b780183fd0800000000000000
+      internalID: -2362119829479657325
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: reel_cell_locked
+      rect:
+        serializedVersion: 2
+        x: 179
+        y: 993
+        width: 176
+        height: 144
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 709deeaaf5241b6c0800000000000000
+      internalID: -4129446404664927993
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: reel_col_blur
+      rect:
+        serializedVersion: 2
+        x: 261
+        y: 1479
+        width: 176
+        height: 184
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e8ca41cd2db97bf20800000000000000
+      internalID: 3438388170458442894
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: reel_col_highlight
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 1851
+        width: 188
+        height: 196
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1f17907dce918e050800000000000000
+      internalID: 5829938222641803761
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: reel_pip_back
+      rect:
+        serializedVersion: 2
+        x: 460
+        y: 805
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bd22f51a2a494d8b0800000000000000
+      internalID: -5128310649455172901
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: reel_pip_current
+      rect:
+        serializedVersion: 2
+        x: 470
+        y: 805
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 075fc46c9be080580800000000000000
+      internalID: -8860816075792779920
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: reel_pip_front
+      rect:
+        serializedVersion: 2
+        x: 450
+        y: 805
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3baa0e527141095f0800000000000000
+      internalID: -752079048118588749
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: reel_pip_unknown
+      rect:
+        serializedVersion: 2
+        x: 480
+        y: 805
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 94cc22e68536d9550800000000000000
+      internalID: 6169196296023493705
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: reel_sliver_bottom
+      rect:
+        serializedVersion: 2
+        x: 445
+        y: 847
+        width: 176
+        height: 20
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 383bba6930813c8b0800000000000000
+      internalID: -5133232746580429949
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: reel_sliver_top
+      rect:
+        serializedVersion: 2
+        x: 267
+        y: 847
+        width: 176
+        height: 20
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 26164fa807a25a2c0800000000000000
+      internalID: -4421080796338298526
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: status_slot
+      rect:
+        serializedVersion: 2
+        x: 85
+        y: 843
+        width: 24
+        height: 24
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 567f23f4792417500800000000000000
+      internalID: 392167860194178917
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: status_slot_active
+      rect:
+        serializedVersion: 2
+        x: 111
+        y: 843
+        width: 24
+        height: 24
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fbb7852f5c6306710800000000000000
+      internalID: 1684406484438907839
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tag_faction_A
+      rect:
+        serializedVersion: 2
+        x: 208
+        y: 800
+        width: 13
+        height: 13
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 26f7ff83d3b5659d0800000000000000
+      internalID: -2785939000974672030
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tag_faction_B
+      rect:
+        serializedVersion: 2
+        x: 223
+        y: 800
+        width: 13
+        height: 13
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1419e251363d800f0800000000000000
+      internalID: -1150437282282565311
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tag_faction_C
+      rect:
+        serializedVersion: 2
+        x: 238
+        y: 800
+        width: 13
+        height: 13
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6843310e83234ae50800000000000000
+      internalID: 6819630955604685958
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tile_grid
+      rect:
+        serializedVersion: 2
+        x: 439
+        y: 817
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8f82d58e670e22c90800000000000000
+      internalID: -7195942453275449096
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tile_hazard
+      rect:
+        serializedVersion: 2
+        x: 457
+        y: 817
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d885b1cc148b1d750800000000000000
+      internalID: 6328041544168986765
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tile_noise
+      rect:
+        serializedVersion: 2
+        x: 209
+        y: 927
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 46923aa7b546e1c50800000000000000
+      internalID: 6637853244853004644
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tile_scanline
+      rect:
+        serializedVersion: 2
+        x: 544
+        y: 809
+        width: 4
+        height: 4
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 26b0b8be725ee1770800000000000000
+      internalID: 8583549899432987490
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tile_static
+      rect:
+        serializedVersion: 2
+        x: 440
+        y: 805
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 60a1eea4eba46b5e0800000000000000
+      internalID: -1894244412101355002
       vertices: []
       indices: 
       edges: []
@@ -3485,6 +4765,97 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
+      ap_seg_empty: 4978118688169943654
+      ap_seg_full: -7285957953720895442
+      ap_seg_spent: 4753916607010668913
+      badge_atk: -8292902939525631717
+      badge_cost: 5909333458535385580
+      badge_def: -471748238632870148
+      badge_hp: 4562623790846583578
+      badge_neutral: 4667258591718436398
+      banner_enemy: -3774293860079131057
+      banner_flat: -2569317386396843507
+      banner_neutral: 3305132306830991502
+      banner_phase: 1241154257821005687
+      banner_warn: -7129509984568013428
+      bar_cap_ap: -4712655441946022440
+      bar_cap_boss: -8726485166725971571
+      bar_cap_charge: 7010009883793852120
+      bar_cap_hp: 8392580009513259636
+      bar_cap_shield: -4362502090017297037
+      bar_fill_ap: -8264904005581278472
+      bar_fill_boss: 6569314769896751245
+      bar_fill_charge: 643585571750369475
+      bar_fill_hp: 6617255700148288830
+      bar_fill_shield: 1373936045625767336
+      bar_frame_ap: 7912645319026970083
+      bar_frame_boss: 8593885032963801699
+      bar_frame_charge: 6163420820957748403
+      bar_frame_hp: 2978393802613341784
+      bar_frame_shield: -3421432048100319033
+      bar_tick: -2638258907987278779
+      btn_amber_disabled: -8453425838503185611
+      btn_amber_hover: 1318708729899941998
+      btn_amber_idle: 2659107702965459233
+      btn_amber_press: -6614474087202776923
+      btn_blood_disabled: -1596221829465402063
+      btn_blood_hover: 8709180613134109783
+      btn_blood_idle: 3877912134444562116
+      btn_blood_press: -7444550745689911243
+      btn_phos_disabled: -485398794187122294
+      btn_phos_hover: 3668417155836829232
+      btn_phos_idle: 2719595177979592515
+      btn_phos_press: 7237332523876677371
+      btn_steel_disabled: -8494084814118761782
+      btn_steel_hover: -9125186219042880008
+      btn_steel_idle: 3148399295065070806
+      btn_steel_press: 253141938133189903
+      card_back: 3423644309929428380
+      card_back_A: -4761030931766596267
+      card_back_B: -5714841850417079627
+      card_back_C: -8955228698243875302
+      card_back_plain: -8170936644531392243
+      card_front: -8916852734902144664
+      card_front_A: -6793797249743550279
+      card_front_B: 6134703036752213437
+      card_front_C: 1041192360441320549
+      card_front_neutral: 8196924476995983195
+      card_rim_A: -3948935476048610470
+      card_rim_B: 5513287530960050238
+      card_rim_C: 8104294793072084760
+      card_shadow: -3923620828225965592
+      card_slot_empty: -3007678830365626164
+      decal_crack_a: 990616096746550590
+      decal_crack_b: -5062892241303868956
+      decal_drip_a: 5132993038576902463
+      decal_drip_b: -5925835536348096005
+      decal_drip_c: -7473703837812800119
+      decal_scratch: -3073337876542433310
+      decal_sigil_a: 2277319797198720963
+      decal_sigil_b: -6027098334432316852
+      decal_stain_a: -8481443246796085788
+      decal_stain_b: 3781567808536450517
+      deck_pulse: -1139113469830777690
+      deck_stack_0: -6760173836059513323
+      deck_stack_1: -3590186828226464293
+      deck_stack_2: 6440752683690505516
+      deck_stack_3: 3841344001644625979
+      deck_stack_4: 8028270577419109888
+      deck_stack_5: 1274961526231221109
+      discard_stack_0: 504875776498683784
+      discard_stack_1: 7766095783215475147
+      discard_stack_2: 7563116483566039534
+      discard_stack_3: -1496545024128398279
+      divider_h: -3739566537847069740
+      divider_v: 7186810821462250113
+      enemy_medallion: -8270977762001777124
+      enemy_medallion_A: -7477464936434505263
+      enemy_medallion_B: 2008819381495526932
+      enemy_medallion_C: -1425626554287282588
+      flip_cell_back: -6260982618662385636
+      flip_cell_current: 5901974684418899560
+      flip_cell_front: -4951802924264706392
+      flip_cell_unknown: 4933020001109891210
       flipcards_ui_atlas@1x_0: 8788201411747030085
       flipcards_ui_atlas@1x_1: -1015609958155156700
       flipcards_ui_atlas@1x_10: 177699018822689344
@@ -3620,6 +4991,85 @@ TextureImporter:
       flipcards_ui_atlas@1x_97: 6360638842940998648
       flipcards_ui_atlas@1x_98: -7044019297246953482
       flipcards_ui_atlas@1x_99: -2632274931259469044
+      fx_damage: 1180799201586327065
+      fx_flip: 4928652962971810670
+      fx_select: 1337602910050720888
+      fx_target: -616353334915738445
+      hand_lift: 3921368466453242394
+      hand_tab_A: -1838764196696122102
+      hand_tab_B: 3654173534367537647
+      hand_tab_C: -8453075043578425730
+      hand_tab_hover: -2280456341820093073
+      icon_arrow_down: -9127973261812030883
+      icon_arrow_up: 5598705432058067679
+      icon_bolt: 6828199953589703763
+      icon_clock: -8942939682057505736
+      icon_deck: -911761841550792862
+      icon_diamond: -984080876333796133
+      icon_drop: 2553168919875886523
+      icon_eye: 4738114701985593178
+      icon_flip: 7801119769929137081
+      icon_hand: 7882890488382632291
+      icon_heart: 8084181144891495241
+      icon_heart_green: 5216794793642270991
+      icon_lock: -7614662209602743585
+      icon_minus: -2155689029651245592
+      icon_plus: 8926353547201437773
+      icon_shield: 7448635483698432202
+      icon_shield_cyan: -8959310386071179099
+      icon_skull: -606712836916652450
+      icon_star: -864756941610753387
+      icon_swap: -3974373203817810796
+      icon_sword: 2308765580234064941
+      icon_sword_red: 8211103637726648039
+      icon_target: 5671965764122512287
+      mask_art_square: -6258801212540814005
+      mask_symbol_circle: -2482147570691471606
+      mask_symbol_square: -1548362999041471528
+      micro_atk: -6496566683611624390
+      micro_cost: 5724632409343163432
+      micro_def: -1666743353980063361
+      micro_hp: -8610167332525836305
+      micro_neutral: -1498950170632665236
+      panel_blood: -3550164715259921497
+      panel_console: -3927140052889764114
+      panel_dark: -7251070039616881077
+      panel_mag: 3756620420755954925
+      panel_phos: -6120763654463073541
+      panel_screen: -8721565645156339745
+      panel_well: 7685427533832978109
+      pip_ap_empty: -1719909977262939437
+      pip_ap_full: -3384071120594005216
+      pip_ap_spent: -812696746500582499
+      plate_counter: -3851089910150689616
+      plate_tooltip: 5232960743501079227
+      readout_block: 875150529457661325
+      readout_down: 506633184661104074
+      readout_up: -8206293789463791265
+      reel_cell: 8392470384257773445
+      reel_cell_A: -130956988775538157
+      reel_cell_B: 2423813490033312512
+      reel_cell_C: 3532173477987987761
+      reel_cell_empty: -2362119829479657325
+      reel_cell_locked: -4129446404664927993
+      reel_col_blur: 3438388170458442894
+      reel_col_highlight: 5829938222641803761
+      reel_pip_back: -5128310649455172901
+      reel_pip_current: -8860816075792779920
+      reel_pip_front: -752079048118588749
+      reel_pip_unknown: 6169196296023493705
+      reel_sliver_bottom: -5133232746580429949
+      reel_sliver_top: -4421080796338298526
+      status_slot: 392167860194178917
+      status_slot_active: 1684406484438907839
+      tag_faction_A: -2785939000974672030
+      tag_faction_B: -1150437282282565311
+      tag_faction_C: 6819630955604685958
+      tile_grid: -7195942453275449096
+      tile_hazard: 6328041544168986765
+      tile_noise: 6637853244853004644
+      tile_scanline: 8583549899432987490
+      tile_static: -1894244412101355002
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -1,0 +1,405 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ed1ad03edf55f142b3e7d6fc2a58011, type: 3}
+  m_Name: FlipCardsUiSkin
+  m_EditorClassIdentifier: Assembly-CSharp::UiSkin
+  entries:
+  - key: ap_seg_empty
+    sprite: {fileID: 21300000, guid: 61ea1e4eda34ef749b4ff446c50704a3, type: 3}
+  - key: ap_seg_full
+    sprite: {fileID: 21300000, guid: 26b78e99ebde92e4cbfd301299fbd5e3, type: 3}
+  - key: ap_seg_spent
+    sprite: {fileID: 21300000, guid: 036e383ea07a29949ac4be57b5ff4613, type: 3}
+  - key: badge_atk
+    sprite: {fileID: 21300000, guid: 615ac7d4bc9c2a04f9d763b2ed33dfe5, type: 3}
+  - key: badge_cost
+    sprite: {fileID: 21300000, guid: 488a1428a02b57745bb4f6b0637c8d0d, type: 3}
+  - key: badge_def
+    sprite: {fileID: 21300000, guid: bcdc1a2a47721894ba494ea536da65d2, type: 3}
+  - key: badge_hp
+    sprite: {fileID: 21300000, guid: 7723065e064d62d46ac8c60781444a04, type: 3}
+  - key: badge_neutral
+    sprite: {fileID: 21300000, guid: b40e49379512b0b49a1f3d0a8d43e4c2, type: 3}
+  - key: flip_cell_back
+    sprite: {fileID: 21300000, guid: e165094a2a347fc4e8ea7c482515431d, type: 3}
+  - key: flip_cell_current
+    sprite: {fileID: 21300000, guid: ee14ed5de293a58478c8007687ca32c1, type: 3}
+  - key: flip_cell_front
+    sprite: {fileID: 21300000, guid: 00a1fc79928fd8e41aef8f97f16cffb7, type: 3}
+  - key: flip_cell_unknown
+    sprite: {fileID: 21300000, guid: 67cbefbd6cbe40649a7f5863153d0f64, type: 3}
+  - key: micro_atk
+    sprite: {fileID: 21300000, guid: 21ffabbc2c569f349b8d70d0b5e37df1, type: 3}
+  - key: micro_cost
+    sprite: {fileID: 21300000, guid: 75536481228bf72449823e8e14f14ce4, type: 3}
+  - key: micro_def
+    sprite: {fileID: 21300000, guid: 04f1839d1b2f98749b1497ca8e6c3254, type: 3}
+  - key: micro_hp
+    sprite: {fileID: 21300000, guid: 0d8e8505eff6d2f43b858cd75c14c0e5, type: 3}
+  - key: micro_neutral
+    sprite: {fileID: 21300000, guid: 499e83a9c81a45d46ae3a5e9038cb338, type: 3}
+  - key: pip_ap_empty
+    sprite: {fileID: 21300000, guid: 0be36b22f25d8c44fbe5d0699b522c0c, type: 3}
+  - key: pip_ap_full
+    sprite: {fileID: 21300000, guid: 6b558aab525dcd443a4a536bd59b2e26, type: 3}
+  - key: pip_ap_spent
+    sprite: {fileID: 21300000, guid: 0ba9dec037ab6e14d9333fa1b3912c20, type: 3}
+  - key: status_slot
+    sprite: {fileID: 21300000, guid: 3acd2b4f0640ef648a58c8269fcf0e07, type: 3}
+  - key: status_slot_active
+    sprite: {fileID: 21300000, guid: a807074982e501c4d8561559d0ee0246, type: 3}
+  - key: tag_faction_A
+    sprite: {fileID: 21300000, guid: 0e45889cb05e16b4eb993f3bbb3bc494, type: 3}
+  - key: tag_faction_B
+    sprite: {fileID: 21300000, guid: e568afa804178b8499461a3ce924867e, type: 3}
+  - key: tag_faction_C
+    sprite: {fileID: 21300000, guid: 7c97f49d9f1e2d64590c9a405fb98356, type: 3}
+  - key: banner_back
+    sprite: {fileID: 21300000, guid: 155571a350a0e3e43a5769bd561ab9c0, type: 3}
+  - key: banner_enemy
+    sprite: {fileID: 21300000, guid: 865942c9296d41a479052dd23fe7aa92, type: 3}
+  - key: banner_flat
+    sprite: {fileID: 21300000, guid: a2d0b173b45fdf1439c9f0cbbd64e8d5, type: 3}
+  - key: banner_front
+    sprite: {fileID: 21300000, guid: a41f7ebee274ac641a1cf1b48dd21880, type: 3}
+  - key: banner_neutral
+    sprite: {fileID: 21300000, guid: 0099f1d1fde111e40832c9c885735e8c, type: 3}
+  - key: banner_phase
+    sprite: {fileID: 21300000, guid: 1bf137418624d7d45bedee9fe7be91d5, type: 3}
+  - key: banner_warn
+    sprite: {fileID: 21300000, guid: 876454a474fb953478c99740d6844c2b, type: 3}
+  - key: bar_cap_ap
+    sprite: {fileID: 21300000, guid: 10bea582691b82c4a8111ef7d8408ec7, type: 3}
+  - key: bar_cap_boss
+    sprite: {fileID: 21300000, guid: fd22b2dbb0d5e884ea0b371cb1c93cb6, type: 3}
+  - key: bar_cap_charge
+    sprite: {fileID: 21300000, guid: 39ab2dd54b301c84f8092c186e6e6cf3, type: 3}
+  - key: bar_cap_hp
+    sprite: {fileID: 21300000, guid: e9aa1f24c62a75040bfaa3966357c148, type: 3}
+  - key: bar_cap_shield
+    sprite: {fileID: 21300000, guid: 362e4ced65bdded4a91e7ace4c7bc9de, type: 3}
+  - key: bar_fill_ap
+    sprite: {fileID: 21300000, guid: 043973c537732ea4e83da3d2df39329a, type: 3}
+  - key: bar_fill_boss
+    sprite: {fileID: 21300000, guid: 2bd8ba19b79d0a143aab7654332f86e1, type: 3}
+  - key: bar_fill_charge
+    sprite: {fileID: 21300000, guid: 41512b999c2ad9a4bb2230ee21862fc4, type: 3}
+  - key: bar_fill_hp
+    sprite: {fileID: 21300000, guid: e71057e0d054b6a44b37500c78f9d41b, type: 3}
+  - key: bar_fill_shield
+    sprite: {fileID: 21300000, guid: faed96175e9639846a8b87cd8eed73d9, type: 3}
+  - key: bar_frame_ap
+    sprite: {fileID: 21300000, guid: 4c50e165137b6b3438eef738c5744604, type: 3}
+  - key: bar_frame_boss
+    sprite: {fileID: 21300000, guid: 894656e5d1000ea43b6e2d6792dc5f9c, type: 3}
+  - key: bar_frame_charge
+    sprite: {fileID: 21300000, guid: 613e473d516443e47b13eb9e67b2e5ae, type: 3}
+  - key: bar_frame_hp
+    sprite: {fileID: 21300000, guid: ac637e5a96ffac445b167d9ecd381422, type: 3}
+  - key: bar_frame_shield
+    sprite: {fileID: 21300000, guid: 349351a67c84a1a45a3f932b193b6373, type: 3}
+  - key: bar_tick
+    sprite: {fileID: 21300000, guid: 98c4e799af7768740a2d9c617339a1aa, type: 3}
+  - key: board_bg
+    sprite: {fileID: 21300000, guid: 14801457036e1134c83f917d23e68e48, type: 3}
+  - key: overlay_bezel
+    sprite: {fileID: 21300000, guid: 936a5bb28b679ad4cbbc2580b6d91fc8, type: 3}
+  - key: overlay_dim
+    sprite: {fileID: 21300000, guid: acdb9407af2a9b340b8fa5044af12482, type: 3}
+  - key: overlay_glitch
+    sprite: {fileID: 21300000, guid: d9b6c8e2d62c2774bab8033a5d41b5bb, type: 3}
+  - key: overlay_scanlines
+    sprite: {fileID: 21300000, guid: a9127e90953cfb74da7a5a49a86c06f1, type: 3}
+  - key: overlay_static
+    sprite: {fileID: 21300000, guid: 88d484fc83bb5d14fbae3d1461d2114a, type: 3}
+  - key: overlay_vignette
+    sprite: {fileID: 21300000, guid: 2195220348e04c94892f76a8db5173b7, type: 3}
+  - key: btn_amber_disabled
+    sprite: {fileID: 21300000, guid: 638ed1ff1e036f64ca021da2fac94fa7, type: 3}
+  - key: btn_amber_hover
+    sprite: {fileID: 21300000, guid: 8660f77600a150a42a59edd923b24f6d, type: 3}
+  - key: btn_amber_idle
+    sprite: {fileID: 21300000, guid: f308446655261034d8a16e12351cf7ea, type: 3}
+  - key: btn_amber_press
+    sprite: {fileID: 21300000, guid: e82d9dfc877c1904d9616fdaf47e8823, type: 3}
+  - key: btn_blood_disabled
+    sprite: {fileID: 21300000, guid: 80b5db719e9859d488e06e599c187e75, type: 3}
+  - key: btn_blood_hover
+    sprite: {fileID: 21300000, guid: 5318867d3f5b9534b8d922deb79a0e48, type: 3}
+  - key: btn_blood_idle
+    sprite: {fileID: 21300000, guid: e2532527d3beeaa44a5173d0ef4c0af9, type: 3}
+  - key: btn_blood_press
+    sprite: {fileID: 21300000, guid: 1cbedf945893ea2498140e203bfe604a, type: 3}
+  - key: btn_phos_disabled
+    sprite: {fileID: 21300000, guid: 4ce4273b7a0ff104aa6e3a013addf24c, type: 3}
+  - key: btn_phos_hover
+    sprite: {fileID: 21300000, guid: af5f3176d4fb9ff4283dd08801c0b185, type: 3}
+  - key: btn_phos_idle
+    sprite: {fileID: 21300000, guid: 61835e191c6210840a85e07462ea98c6, type: 3}
+  - key: btn_phos_press
+    sprite: {fileID: 21300000, guid: c60728d9687349347b7b18078deedf24, type: 3}
+  - key: btn_steel_disabled
+    sprite: {fileID: 21300000, guid: 8872fc53db6c7e548926ebf034b94979, type: 3}
+  - key: btn_steel_hover
+    sprite: {fileID: 21300000, guid: 036762a03b91c294e9b70917a4647d48, type: 3}
+  - key: btn_steel_idle
+    sprite: {fileID: 21300000, guid: 153b53235beda36409d59b95c885dafb, type: 3}
+  - key: btn_steel_press
+    sprite: {fileID: 21300000, guid: a57be200980f6ec47805b097cec006db, type: 3}
+  - key: card_back
+    sprite: {fileID: 21300000, guid: ba3886fcab2fd484fb43b850575f7c9c, type: 3}
+  - key: card_back_A
+    sprite: {fileID: 21300000, guid: 05bb5834552216441962930c63730b16, type: 3}
+  - key: card_back_B
+    sprite: {fileID: 21300000, guid: 3029f81a51dff4c40a139bf018b1d7cd, type: 3}
+  - key: card_back_C
+    sprite: {fileID: 21300000, guid: 2f7d95dff6337184f97a87ae0f2b3dc1, type: 3}
+  - key: card_back_plain
+    sprite: {fileID: 21300000, guid: 7d12ed091b480ee4db51f178d9c94b19, type: 3}
+  - key: card_front
+    sprite: {fileID: 21300000, guid: 5cc3793c524ea5e4198e79f534b1f483, type: 3}
+  - key: card_front_A
+    sprite: {fileID: 21300000, guid: f75d35a8ec392a342af69f7a994e9a6d, type: 3}
+  - key: card_front_B
+    sprite: {fileID: 21300000, guid: 55e9056b3008a7044a3edb2e7596224c, type: 3}
+  - key: card_front_C
+    sprite: {fileID: 21300000, guid: 184ebcd78e941204c81921ddcc366012, type: 3}
+  - key: card_front_neutral
+    sprite: {fileID: 21300000, guid: 76134c40a555ed049922c8265c62a353, type: 3}
+  - key: card_rim_A
+    sprite: {fileID: 21300000, guid: f744fbcd225012b478220cfa92fd5db3, type: 3}
+  - key: card_rim_B
+    sprite: {fileID: 21300000, guid: b8f5635bce38adc4da9e03820e6ef01c, type: 3}
+  - key: card_rim_C
+    sprite: {fileID: 21300000, guid: 8397a5e8ca11ffe419642b65178dc332, type: 3}
+  - key: card_shadow
+    sprite: {fileID: 21300000, guid: ce348aeda1b0a8245b4dea70fa3979b9, type: 3}
+  - key: decal_crack_a
+    sprite: {fileID: 21300000, guid: 79c2e0bb1e6782645a7e0ce7d7a0ec8f, type: 3}
+  - key: decal_crack_b
+    sprite: {fileID: 21300000, guid: 847d4a4e434c7c843926d2ea6f2bbb64, type: 3}
+  - key: decal_drip_a
+    sprite: {fileID: 21300000, guid: bb215acda91b3c742b3f8e4da21fd0c9, type: 3}
+  - key: decal_drip_b
+    sprite: {fileID: 21300000, guid: 96172b54402e9694da2db67c5ca2dd65, type: 3}
+  - key: decal_drip_c
+    sprite: {fileID: 21300000, guid: e74b85858d9154c41b514e6fbe652518, type: 3}
+  - key: decal_scratch
+    sprite: {fileID: 21300000, guid: f53c19e86602e4240b4026f4be5c64cd, type: 3}
+  - key: decal_sigil_a
+    sprite: {fileID: 21300000, guid: e9094369022ef3b4a82facd6c2b6a1ae, type: 3}
+  - key: decal_sigil_b
+    sprite: {fileID: 21300000, guid: bcf01e5808a0a254bbd79c07bee462a8, type: 3}
+  - key: decal_stain_a
+    sprite: {fileID: 21300000, guid: 2b9a47fd9b3fea34ab5c26b2d02f71b4, type: 3}
+  - key: decal_stain_b
+    sprite: {fileID: 21300000, guid: 03ba6647704071e439f53ade73331d7a, type: 3}
+  - key: deck_pulse
+    sprite: {fileID: 21300000, guid: 82add740d3a47d1448fd19ae3ddbdb38, type: 3}
+  - key: deck_stack_0
+    sprite: {fileID: 21300000, guid: aea9e6958ed403d4380afac64cd6cc35, type: 3}
+  - key: deck_stack_1
+    sprite: {fileID: 21300000, guid: 3a09f420de276dd4e8fe71b59da74466, type: 3}
+  - key: deck_stack_2
+    sprite: {fileID: 21300000, guid: adfe369ca66850f41a412f26591424ba, type: 3}
+  - key: deck_stack_3
+    sprite: {fileID: 21300000, guid: ca87de04fabd18a41b6774b9a044231a, type: 3}
+  - key: deck_stack_4
+    sprite: {fileID: 21300000, guid: fa2c2527c76c0ab40be593182b1507ef, type: 3}
+  - key: deck_stack_5
+    sprite: {fileID: 21300000, guid: 937ff4219d060f24b9f9e2b214c32e40, type: 3}
+  - key: discard_stack_0
+    sprite: {fileID: 21300000, guid: 4b35b891e9237764a847d26991722485, type: 3}
+  - key: discard_stack_1
+    sprite: {fileID: 21300000, guid: de4dd56d16007d24e8d618199497718c, type: 3}
+  - key: discard_stack_2
+    sprite: {fileID: 21300000, guid: f1063bb94b7fb5c4191afba4424fa5b1, type: 3}
+  - key: discard_stack_3
+    sprite: {fileID: 21300000, guid: f94a3cad1d2979e4085a6b495bc744ef, type: 3}
+  - key: enemy_medallion
+    sprite: {fileID: 21300000, guid: 4936b33c7fde16046a5dd98d02a4daa8, type: 3}
+  - key: enemy_medallion_A
+    sprite: {fileID: 21300000, guid: 1d10c5248b2299e4b82ce0f0a72706a7, type: 3}
+  - key: enemy_medallion_B
+    sprite: {fileID: 21300000, guid: 464eb6db87ee9ce49bf1b503fb2e3f7f, type: 3}
+  - key: enemy_medallion_C
+    sprite: {fileID: 21300000, guid: a78f068c030bb9149ae67a4d17a5f1c3, type: 3}
+  - key: enemy_panel
+    sprite: {fileID: 21300000, guid: 3ebfd0d199c99344ba19e428c89c107d, type: 3}
+  - key: enemy_panel_A
+    sprite: {fileID: 21300000, guid: 07b496ee5faa42f459e639b13da46be5, type: 3}
+  - key: enemy_panel_B
+    sprite: {fileID: 21300000, guid: 8c09f750f648d074aaba2b5367bdb1e5, type: 3}
+  - key: enemy_panel_C
+    sprite: {fileID: 21300000, guid: 0a89ce7bd248ad144af5b106d6f4e1b4, type: 3}
+  - key: fx_damage
+    sprite: {fileID: 21300000, guid: 2fd9305d3c7c12742a28086ef6a86816, type: 3}
+  - key: fx_flip
+    sprite: {fileID: 21300000, guid: 7a46dd97584475d41be287ad8e6e3c0e, type: 3}
+  - key: fx_select
+    sprite: {fileID: 21300000, guid: e855320448402d04287d1e40e14def22, type: 3}
+  - key: fx_target
+    sprite: {fileID: 21300000, guid: e4872f656eeeb8b40a319639ce1e0566, type: 3}
+  - key: hand_dock_low
+    sprite: {fileID: 21300000, guid: 3aa652b157ba3af46a2fcf3f876d25c5, type: 3}
+  - key: hand_dock_raised
+    sprite: {fileID: 21300000, guid: f9cadb31bcc6bf840ba080f73c4eb763, type: 3}
+  - key: hand_lift
+    sprite: {fileID: 21300000, guid: ce5b4fbeaf4444f4f817ae65486d486e, type: 3}
+  - key: hand_tab_A
+    sprite: {fileID: 21300000, guid: 2ca480e5b965ec8458ea8b9a5bf79c07, type: 3}
+  - key: hand_tab_B
+    sprite: {fileID: 21300000, guid: 0a31c8ab16fa8f74f88364ee2451b6ac, type: 3}
+  - key: hand_tab_C
+    sprite: {fileID: 21300000, guid: 2f2f2f2e170fc1d42b8a504ab892d288, type: 3}
+  - key: hand_tab_hover
+    sprite: {fileID: 21300000, guid: b4f04f520bb6031409290ba55bc711fe, type: 3}
+  - key: icon_arrow_down
+    sprite: {fileID: 21300000, guid: f11b5ae44474b434da39c257e7a79529, type: 3}
+  - key: icon_arrow_up
+    sprite: {fileID: 21300000, guid: f5c19f0a99fd7cb4593a2ab85e05b4fb, type: 3}
+  - key: icon_bolt
+    sprite: {fileID: 21300000, guid: 0b8d0c1ca83ed9643b90f259e6d55bf0, type: 3}
+  - key: icon_clock
+    sprite: {fileID: 21300000, guid: 0a42d0e552d91964dbd4bead0e68feb9, type: 3}
+  - key: icon_deck
+    sprite: {fileID: 21300000, guid: 5efdd457716ae9c42a5d4bded3bc61c1, type: 3}
+  - key: icon_diamond
+    sprite: {fileID: 21300000, guid: fb0297e1d06d6f34881dc1fc75ba5d13, type: 3}
+  - key: icon_drop
+    sprite: {fileID: 21300000, guid: 3d345616e58d4fa4eada7f9540b52c1e, type: 3}
+  - key: icon_eye
+    sprite: {fileID: 21300000, guid: 6a723d6174ea4af4fa42224f3d44f88b, type: 3}
+  - key: icon_flip
+    sprite: {fileID: 21300000, guid: 9a35b606e7c832841b2f56def6d9bad2, type: 3}
+  - key: icon_hand
+    sprite: {fileID: 21300000, guid: 0334d82b6731e424a9bdf65aaf36a52d, type: 3}
+  - key: icon_heart
+    sprite: {fileID: 21300000, guid: 1816f5f057189dc4589886a013301fd1, type: 3}
+  - key: icon_heart_green
+    sprite: {fileID: 21300000, guid: 927b532df83797544bcb2ab2ea79eb93, type: 3}
+  - key: icon_lock
+    sprite: {fileID: 21300000, guid: 6a4f7361040fb4b429ef78c98eec84c7, type: 3}
+  - key: icon_minus
+    sprite: {fileID: 21300000, guid: afaf0aaba65904341abf3a7c4943db76, type: 3}
+  - key: icon_plus
+    sprite: {fileID: 21300000, guid: 1575abd6df8802b49ba2798e6116e248, type: 3}
+  - key: icon_shield
+    sprite: {fileID: 21300000, guid: 147b2760a1344d04db4d8e99dfbace5b, type: 3}
+  - key: icon_shield_cyan
+    sprite: {fileID: 21300000, guid: 85285e896529ca1469f44244860bec8a, type: 3}
+  - key: icon_skull
+    sprite: {fileID: 21300000, guid: be4b3d1d52365ae44b7a18d6ff6fdb6e, type: 3}
+  - key: icon_star
+    sprite: {fileID: 21300000, guid: 746a477e3371a1946a7e76fcf5172cb0, type: 3}
+  - key: icon_swap
+    sprite: {fileID: 21300000, guid: cf766ceb3b6c47740837301b26f46dc5, type: 3}
+  - key: icon_sword
+    sprite: {fileID: 21300000, guid: 875bd312564e9484c93b666395d8fc0c, type: 3}
+  - key: icon_sword_red
+    sprite: {fileID: 21300000, guid: 9a21fafd31e47584a871a3700ea809a5, type: 3}
+  - key: icon_target
+    sprite: {fileID: 21300000, guid: eafcdbf1faac194419cd1be39de7929e, type: 3}
+  - key: readout_block
+    sprite: {fileID: 21300000, guid: 450929de5414d9a40a96079c5fa28b41, type: 3}
+  - key: readout_down
+    sprite: {fileID: 21300000, guid: c7ad54ac5c61c514cbb80d55a2ff632e, type: 3}
+  - key: readout_up
+    sprite: {fileID: 21300000, guid: c9ddf0fd0d1dd4d4d8743d6906507501, type: 3}
+  - key: mask_art_circle
+    sprite: {fileID: 21300000, guid: 2f3404eda033e6c42b7f74ffb1720a77, type: 3}
+  - key: mask_art_square
+    sprite: {fileID: 21300000, guid: 291fd01322dcc8e499f2046dc35b3efc, type: 3}
+  - key: mask_symbol_circle
+    sprite: {fileID: 21300000, guid: 4b9024a05ed4abf4ca54069c4658b34a, type: 3}
+  - key: mask_symbol_square
+    sprite: {fileID: 21300000, guid: 2a61f3976fb9cdd48b9e832ba744d464, type: 3}
+  - key: divider_h
+    sprite: {fileID: 21300000, guid: eb749b741faaf2d41a134d7ed20cd6f7, type: 3}
+  - key: divider_v
+    sprite: {fileID: 21300000, guid: 959e724bddfd84044aab7739a5a943fd, type: 3}
+  - key: panel_blood
+    sprite: {fileID: 21300000, guid: dcb98602f6c6afb438f01415f2ffb01d, type: 3}
+  - key: panel_console
+    sprite: {fileID: 21300000, guid: c182e18d90530074e8c79d2969e30323, type: 3}
+  - key: panel_dark
+    sprite: {fileID: 21300000, guid: 20eb798280ae8684a86c312984a94664, type: 3}
+  - key: panel_mag
+    sprite: {fileID: 21300000, guid: 629f80bb510d259438d1baac21b567b8, type: 3}
+  - key: panel_phos
+    sprite: {fileID: 21300000, guid: f9ddcea072dc63a499ea1931076e5e78, type: 3}
+  - key: panel_screen
+    sprite: {fileID: 21300000, guid: 3bf77b3848e3799438e2eed6cdcf96b0, type: 3}
+  - key: panel_well
+    sprite: {fileID: 21300000, guid: dbdf3e00a2c15b14ba43bf0b3c3cf9d3, type: 3}
+  - key: plate_counter
+    sprite: {fileID: 21300000, guid: 27a0c4c46c8ad6f43a08e9e3fbd50687, type: 3}
+  - key: plate_tooltip
+    sprite: {fileID: 21300000, guid: 6ba81db2442688946a20e6181fa20d55, type: 3}
+  - key: enemy_medallion
+    sprite: {fileID: 21300000, guid: 78f72190fbfbb8d4eb4eff1407b9d3a0, type: 3}
+  - key: enemy_medallion_A
+    sprite: {fileID: 21300000, guid: c58a9b56584852a4bbbfa923b03a37a3, type: 3}
+  - key: enemy_medallion_B
+    sprite: {fileID: 21300000, guid: baf0ceedb193e6b4f90c83fb30d416a9, type: 3}
+  - key: enemy_medallion_C
+    sprite: {fileID: 21300000, guid: 640eb69dbb7780b4698386b3bd0c7674, type: 3}
+  - key: reel_backing
+    sprite: {fileID: 21300000, guid: 7436c2cabdf6e3e46bdd7db205e943a3, type: 3}
+  - key: reel_cell
+    sprite: {fileID: 21300000, guid: 86785128738f9c444a0f80b558bbf219, type: 3}
+  - key: reel_cell_A
+    sprite: {fileID: 21300000, guid: 84655443c7a531545b089a7ec7ed40e5, type: 3}
+  - key: reel_cell_B
+    sprite: {fileID: 21300000, guid: e1253e2261ad20748a371ac9e03a49ff, type: 3}
+  - key: reel_cell_C
+    sprite: {fileID: 21300000, guid: 2d01454d2f159f446b1c373f4c45e930, type: 3}
+  - key: reel_cell_empty
+    sprite: {fileID: 21300000, guid: 1b033e924c7e08242908f34b81c0b4bf, type: 3}
+  - key: reel_cell_locked
+    sprite: {fileID: 21300000, guid: b0b9ebe519294f1449eec12d654f3d5b, type: 3}
+  - key: reel_col_blur
+    sprite: {fileID: 21300000, guid: 3652fe46e6e2bbe40a4013f8fa91f08c, type: 3}
+  - key: reel_col_highlight
+    sprite: {fileID: 21300000, guid: 09d71425cad841e498b0e5af5d4cb350, type: 3}
+  - key: reel_frame
+    sprite: {fileID: 21300000, guid: b62e92701f88fe64e97d6307879abed1, type: 3}
+  - key: reel_glass
+    sprite: {fileID: 21300000, guid: cda861f2581ea0f4696d4f8b3414be57, type: 3}
+  - key: reel_payline
+    sprite: {fileID: 21300000, guid: aa485473c82bfd64a8badc8d671ce203, type: 3}
+  - key: reel_pip_back
+    sprite: {fileID: 21300000, guid: fd58d898e53e95c42a7ed8003c50f7de, type: 3}
+  - key: reel_pip_current
+    sprite: {fileID: 21300000, guid: 868aa0484831c8940857209585a7d270, type: 3}
+  - key: reel_pip_front
+    sprite: {fileID: 21300000, guid: a6425668b71277248b1945c6ac464702, type: 3}
+  - key: reel_pip_unknown
+    sprite: {fileID: 21300000, guid: 655ad3e8a1f32cc4e9ae033af631a373, type: 3}
+  - key: reel_sliver_bottom
+    sprite: {fileID: 21300000, guid: 2a3cc806a70998d4e957f4845405fb31, type: 3}
+  - key: reel_sliver_top
+    sprite: {fileID: 21300000, guid: 3a1e76cac71ed2a4f90ea6d8aabc1d37, type: 3}
+  - key: card_slot_empty
+    sprite: {fileID: 21300000, guid: d2b2b6ee62d91fa4fa68bf3c852f4c49, type: 3}
+  - key: enemy_slot_empty
+    sprite: {fileID: 21300000, guid: 1397a488538ed154a9425cade48b093e, type: 3}
+  - key: tile_grid
+    sprite: {fileID: 21300000, guid: e2204c0b807b78a48a60a382159f146a, type: 3}
+  - key: tile_hazard
+    sprite: {fileID: 21300000, guid: 2363193f036c0804cb156300db9b0681, type: 3}
+  - key: tile_noise
+    sprite: {fileID: 21300000, guid: a8234ea7346dedd4f92d1d6276697170, type: 3}
+  - key: tile_scanline
+    sprite: {fileID: 21300000, guid: 4917496f79ba7e3499cdf5d755fcbbef, type: 3}
+  - key: tile_static
+    sprite: {fileID: 21300000, guid: 1a9bf579555778a47891a3ebf394b707, type: 3}

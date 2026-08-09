@@ -239,6 +239,26 @@ public class HandManager : MonoBehaviour
         }
     }
 
+    public int GetCardHandIndex(CardView cv)
+    {
+        if (cv == null) return 0;
+        int idx = handCards.IndexOf(cv);
+        return idx >= 0 ? idx : 0;
+    }
+
+    public void RestoreContainerSiblingIndices()
+    {
+        if (handCards.Count == 0 || handRoot == null) return;
+        for (int i = 0; i < handCards.Count; i++)
+        {
+            var card = handCards[i];
+            if (card != null && card.handContainer != null && card.handContainer.parent == handRoot)
+            {
+                card.handContainer.SetSiblingIndex(i);
+            }
+        }
+    }
+
     public void UpdateCardsPosition()
     {
         SyncHandCardsFromChildren();
@@ -258,8 +278,7 @@ public class HandManager : MonoBehaviour
             if (container == null) throw new System.InvalidOperationException("Hand container missing");
             if (container.parent != handRoot) container.SetParent(handRoot, true);
 
-            int slotIndex = container.GetSiblingIndex();
-            Vector3 finalLocalPos = new Vector3(startX + slotIndex * spacing, 0f, 0f);
+            Vector3 finalLocalPos = new Vector3(startX + i * spacing, 0f, 0f);
 
             bool needsMove = (container.localPosition - finalLocalPos).sqrMagnitude > PositionThresholdSqr;
             if (needsMove)

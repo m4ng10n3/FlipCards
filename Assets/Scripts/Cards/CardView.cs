@@ -459,9 +459,8 @@ public class CardView : MonoBehaviour
         if (curveParameters == null || _handContainer == null || _handContainer.parent == null)
             return;
 
-        var parent = _handContainer.parent as RectTransform;
-        int slotCount = parent != null ? parent.childCount : _handContainer.parent.childCount;
-        int slotIndex = _handContainer.GetSiblingIndex();
+        int slotCount = gm != null && gm.HandManager != null ? gm.HandManager.HandCount : (_handContainer.parent != null ? _handContainer.parent.childCount : 1);
+        int slotIndex = gm != null && gm.HandManager != null ? gm.HandManager.GetCardHandIndex(this) : _handContainer.GetSiblingIndex();
         float normalized = slotCount <= 1 ? 0.5f : (float)slotIndex / (slotCount - 1);
 
         // Ampiezza dell'arco: cresce con le carte in mano, ma con un tetto.
@@ -573,21 +572,40 @@ public class CardView : MonoBehaviour
         if (_baseRootSize.sqrMagnitude <= 0f) _baseRootSize = root.sizeDelta;
 
         bool expand = inHand && _hovering && !_dragging;
-        if (expand == _hoverBoundsExpanded) return;
+        if (expand == _hoverBoundsExpanded)
+        {
+            if (expand)
+            {
+                var center = _handCurveOffset + Vector3.up * handHoverLift;
+                root.anchoredPosition = center;
+            }
+            return;
+        }
         _hoverBoundsExpanded = expand;
 
         if (!expand)
         {
             root.sizeDelta = _baseRootSize;
+            root.anchoredPosition = Vector3.zero;
+            if (inHand && gm != null && gm.HandManager != null)
+            {
+                gm.HandManager.RestoreContainerSiblingIndices();
+            }
             return;
         }
 
-        // Il margine copre sollevamento e ingrandimento: la carta cresce di
-        // scaleOnHover intorno al proprio centro, quindi deborda anche di lato.
-        var card = _rt.rect.size;
-        float padY = handHoverLift + card.y * (scaleOnHover - 1f) * 0.5f;
-        float padX = card.x * (scaleOnHover - 1f) * 0.5f;
-        root.sizeDelta = _baseRootSize + new Vector2(padX * 2f, padY * 2f);
+        if (inHand && _handContainer != null)
+        {
+            _handContainer.SetAsLastSibling();
+        }
+
+        var card = _baseRootSize;
+        float scaledW = card.x * scaleOnHover;
+        float scaledH = card.y * scaleOnHover;
+        root.sizeDelta = new Vector2(scaledW, scaledH);
+
+        var targetCenter = _handCurveOffset + Vector3.up * handHoverLift;
+        root.anchoredPosition = targetCenter;
     }
 
     private void HoverMotion(Quaternion anchorRotation)
@@ -711,8 +729,14 @@ public class CardView : MonoBehaviour
         bool inHand = _handContainer != null && _rt != null && _rt.parent.IsChildOf(_handContainer);
         if (inHand)
         {
-            targetPosLocal = _handCurveOffset;
-            if (_hovering && !_dragging) targetPosLocal += Vector3.up * handHoverLift;
+            if (_hovering && !_dragging)
+            {
+                targetPosLocal = Vector3.zero;
+            }
+            else
+            {
+                targetPosLocal = _handCurveOffset;
+            }
         }
 
         if (_selected)
