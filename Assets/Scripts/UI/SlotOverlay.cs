@@ -5,46 +5,70 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 /// <summary>
-/// Chrome della casella nemica: barra nome, ATK sempre visibile, traccia della
-/// flipPattern con il passo corrente marcato e contatore di furia.
+/// Chrome della casella nemica, montato sull'anatomia del kit *Arcade Horror CRT*
+/// (`layouts.reel_cell` del manifest, ×2).
 ///
-/// La traccia del pattern e' l'informazione piu' importante del tavolo: lo slot
-/// non sceglie, segue una sequenza fissa che avanza a ogni fine turno. Senza
-/// mostrarla, decidere se flippare adesso o al turno dopo diventa un tiro di dado.
+/// **Il nemico non e' una carta e non ha due lati.** E' la casella di un rullo da
+/// slot machine: non si gira, non si trascina, non si scambia, e quello che fara'
+/// non lo decide nessuno al tavolo — lo decide il programma del rullo, che
+/// avanza da solo a ogni fine turno. Presentarlo come una carta faceva provare al
+/// giocatore tre azioni che non esistono.
+///
+/// Quindi al posto della fascia FRONTE/RETRO ci sono due stati del rullo:
+/// <list type="bullet">
+/// <item><b>carica</b> — <c>reel_cell_{fazione}</c>: questo giro colpisce, e la
+/// colonna si accende (<see cref="ReelChrome"/>).</item>
+/// <item><b>trattenuta</b> — <c>reel_cell_locked</c>: questo giro non colpisce,
+/// para e basta. E' l'"hold" della slot machine.</item>
+/// </list>
+///
+/// I tre pip in cima sono il **programma**: cosa fara' nei giri successivi, con
+/// il giro in corso marcato. E' l'informazione piu' importante del tavolo — senza,
+/// decidere se coprire una corsia adesso o al turno dopo e' un tiro di dado.
+///
+/// A differenza della carta, la casella mostra **tutti e tre i numeri insieme**
+/// (ATK, HP, DEF): non potendola girare, il giocatore deve poter fare il conto in
+/// una sola occhiata, e non c'e' una seconda faccia su cui distribuirli.
 /// </summary>
 [DisallowMultipleComponent]
-public class SlotOverlay : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+public class SlotOverlay : MonoBehaviour,
+    IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
     // ── Anatomia della casella del rullo ──────────────────────────────────────
     //
-    // Coordinate banda in scala 2x: sono i numeri di `layouts.reel_cell` in
-    // flipcards_ui_manifest.json moltiplicati per 2, cioe' la casella 176x144 del
-    // kit portata a 352x288. La casella nemica e' orizzontale — e' un rullo da
-    // slot machine, non una carta — e questo e' cio' che la distingue a colpo
-    // d'occhio dalle corsie del giocatore.
+    // Coordinate banda in scala 2x: i numeri di `layouts.reel_cell` moltiplicati
+    // per 2, cioe' la casella 176x144 del kit portata a 352x288. La casella e'
+    // orizzontale — e' un rullo, non una fila di carte — e la forma e' cio' che
+    // lo dice prima di qualunque etichetta.
 
     public const float CellW = 352f, CellH = 288f;
 
-    public const float NameX = 44f, NameY = 6f, NameW = 184f, NameH = 28f;
-    public const float FactionX = 12f, FactionY = 7f, FactionSize = 26f;
+    public const float NameX = 44f, NameY = 8f, NameW = 206f, NameH = 28f;
+    public const float FactionX = 12f, FactionY = 10f, FactionSize = 26f;
 
-    public const float ArtX = 80f, ArtY = 40f, ArtSize = 192f;
+    public const float ArtX = 80f, ArtY = 44f, ArtSize = 192f;
 
-    public const float ChipY = 236f, ChipH = 32f, ChipW = 108f;
-    public static float ChipX(int index) => 10f + index * (ChipW + 4f);
+    // Tre caselle statistica in fondo: ATK, HP, DEF. Il badge del kit ha l'icona
+    // a sinistra, quindi il numero parte dopo di lei.
+    public const float ChipY = 244f, ChipH = 36f, ChipW = 108f, ChipGap = 4f;
+    public const float ChipTextInset = 26f;
+    public static float ChipX(int index) => 10f + index * (ChipW + ChipGap);
+    public static float ChipTextX(int index) => ChipX(index) + ChipTextInset;
+    public const float ChipTextW = ChipW - ChipTextInset - 6f;
 
-    const float PatternX = 232f, PatternTrackY = 5f, PatternW = 112f, PatternH = 26f;
-    const float SideBandY = 270f, SideBandHeight = 16f;
+    // Pip del programma, in coda alla striscia del nome.
+    const float PipRight = 344f, PipY = 14f, PipSize = 16f, PipPitch = 26f;
+    const float PipMarkSize = 24f;
 
     SlotView _view;
     RectTransform _rt;
 
-    Image _sideBand;
-    TextMeshProUGUI _sideLabel;
+    Image _frame;            // cornice della casella: carica o trattenuta
+    Image _medallion;
     TextMeshProUGUI _atkLabel;
-    RectTransform _patternRoot;
-    readonly List<Image> _patternCells = new List<Image>();
-    readonly List<TextMeshProUGUI> _patternLabels = new List<TextMeshProUGUI>();
+    RectTransform _pipRoot;
+    readonly List<Image> _pips = new List<Image>();
+    readonly List<Image> _pipMarks = new List<Image>();
     Image _furyChip;
     TextMeshProUGUI _furyLabel;
     SlotBerserker _berserker;
@@ -52,6 +76,9 @@ public class SlotOverlay : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     Side _lastSide = (Side)(-1);
     int _lastStep = -1, _lastAtk = int.MinValue, _lastFury = int.MinValue;
     bool _built;
+
+    /// <summary>La casella colpisce in questo giro. La legge <see cref="ReelChrome"/>.</summary>
+    public bool Armed => _view != null && _view.instance != null && _view.instance.side == Side.Fronte;
 
     void Awake()
     {
@@ -70,9 +97,7 @@ public class SlotOverlay : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         if (inst.side != _lastSide)
         {
             _lastSide = inst.side;
-            var color = GamePalette.SideColor(inst.side);
-            _sideBand.color = GamePalette.WithAlpha(color, 0.85f);
-            _sideLabel.text = inst.side == Side.Fronte ? "FRONTE · ATTACCA" : "RETRO · PASSIVO";
+            ApplyReelState(inst.side);
         }
 
         int atk = inst.def.atkDamage + inst.tempAtkBonus;
@@ -84,10 +109,10 @@ public class SlotOverlay : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
                 : inst.def.atkDamage.ToString();
         }
 
-        if (inst.PatternStep != _lastStep || _patternCells.Count != inst.PatternLength)
+        if (inst.PatternStep != _lastStep || _pips.Count != PipCount(inst))
         {
             _lastStep = inst.PatternStep;
-            RefreshPattern(inst);
+            RefreshProgram(inst);
         }
 
         if (_berserker != null && _berserker.FuryStacks != _lastFury)
@@ -102,6 +127,34 @@ public class SlotOverlay : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         }
     }
 
+    /// <summary>
+    /// Carica o trattenuta. Senza kit la differenza la fa il colore della cornice:
+    /// il ripiego deve restare leggibile, e' l'unico segnale dello stato.
+    /// </summary>
+    void ApplyReelState(Side side)
+    {
+        bool armed = side == Side.Fronte;
+
+        var sprite = UiSkin.Sprite(armed
+            ? UiSkin.ReelCell(_view.instance.def.faction)
+            : UiSkin.ReelCellLocked);
+
+        if (sprite != null)
+        {
+            _frame.sprite = sprite;
+            _frame.color = Color.white;
+        }
+        else
+        {
+            _frame.color = GamePalette.WithAlpha(armed ? GamePalette.Fronte : GamePalette.Retro, 0.22f);
+        }
+
+        // Trattenuta, la casella si spegne: il simbolo resta leggibile ma non
+        // chiama l'attenzione, che deve andare alle colonne che colpiscono.
+        if (_medallion != null)
+            _medallion.color = GamePalette.WithAlpha(Color.white, armed ? 1f : 0.45f);
+    }
+
     // ── Ispettore ─────────────────────────────────────────────────────────────
 
     public void OnPointerEnter(PointerEventData eventData)
@@ -112,46 +165,59 @@ public class SlotOverlay : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     public void OnPointerExit(PointerEventData eventData) => InspectorPanel.Instance?.HideFor(_view);
 
+    /// <summary>
+    /// L'unica interazione possibile con un nemico: agganciare la sua scheda
+    /// nell'ispettore. Non si gira e non si sposta, quindi il clic e' libero per
+    /// fare l'unica cosa che serve — poter leggere ATK, DEF e programma senza
+    /// tenere il puntatore fermo sulla casella mentre si guarda dall'altra parte.
+    /// </summary>
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        if (_view != null && _view.instance != null)
+            InspectorPanel.Instance?.TogglePinSlot(_view);
+    }
+
     // ── Costruzione ───────────────────────────────────────────────────────────
 
     void Build()
     {
         _built = true;
 
-        float w = _rt.rect.width;
+        var def = _view.instance.def;
 
-        var nameBar = UiBuild.Rect("NameBar", _rt);
-        UiBuild.Band(nameBar, 4f, 4f, w - 8f, NameH + 2f);
-        UiBuild.Fill(nameBar, GamePalette.WithAlpha(Color.black, 0.5f));
+        // Ordine di disegno della casella (recipes.reel_cell del manifest):
+        // simbolo → medaglione → cornice → tag, pip, badge → nome.
+        // Il simbolo e' il figlio "Sprite" del prefab e deve stare sotto tutto:
+        // la cornice del kit ha la finestra trasparente ed e' lei a incorniciarlo.
+        var art = _rt.Find("Sprite") as RectTransform;
+        if (art != null) art.SetAsFirstSibling();
 
-        var faction = _view.instance.def.faction;
-        var facRt = UiBuild.Rect("FactionBadge", _rt);
-        UiBuild.Band(facRt, FactionX, FactionY, FactionSize, FactionSize);
-        UiBuild.Fill(facRt, GamePalette.FactionColor(faction));
-        var facLabel = UiBuild.Text("Label", facRt, faction.ToString(), 15f,
-                                    GamePalette.Background, TextAlignmentOptions.Center, FontStyles.Bold);
-        UiBuild.Stretch(facLabel.rectTransform);
+        BuildMedallion(def);
+        BuildFrame();
 
-        // ATK e' sempre a schermo, non solo durante l'attacco: e' il numero su
-        // cui il giocatore decide se coprire la corsia o lasciarla scoperta.
-        var atkRt = ChipBg("AtkChip", ChipX(0), GamePalette.Danger);
+        if (!Skinned)
+        {
+            var nameBar = UiBuild.Rect("NameBar", _rt);
+            UiBuild.Band(nameBar, 4f, 4f, CellW - 8f, NameH + 2f);
+            UiBuild.Fill(nameBar, GamePalette.WithAlpha(Color.black, 0.5f));
+        }
+
+        BuildFactionTag(def);
+
+        // ATK, HP e DEF sempre a schermo: sono i numeri su cui il giocatore
+        // decide se coprire la corsia o lasciarla scoperta, e la casella non ha
+        // una seconda faccia dove nasconderne uno.
+        var atkRt = Chip("AtkChip", 0, UiSkin.MicroAtk, GamePalette.Danger);
         _atkLabel = UiBuild.Text("Label", atkRt, "0", 20f, GamePalette.TextPrimary,
                                  TextAlignmentOptions.Center, FontStyles.Bold);
-        UiBuild.Stretch(_atkLabel.rectTransform, 0f, 0f, 0f, 3f);
+        UiBuild.Band(_atkLabel.rectTransform, ChipTextInset, 0f, ChipTextW, ChipH);
+        _atkLabel.alignment = TextAlignmentOptions.Center;
 
-        ChipBg("HpChipBg", ChipX(1), GamePalette.PlayerHp);
-        ChipBg("DefChipBg", ChipX(2), GamePalette.Retro);
+        Chip("HpChipBg", 1, UiSkin.MicroHp, GamePalette.PlayerHp);
+        Chip("DefChipBg", 2, UiSkin.MicroDef, GamePalette.Retro);
 
-        _patternRoot = UiBuild.Rect("PatternTrack", _rt);
-        UiBuild.Band(_patternRoot, PatternX, PatternTrackY, PatternW, PatternH);
-
-        var bandRt = UiBuild.Rect("SideBand", _rt);
-        UiBuild.Band(bandRt, 0f, SideBandY, w, SideBandHeight);
-        _sideBand = UiBuild.Fill(bandRt, GamePalette.Fronte);
-
-        _sideLabel = UiBuild.Text("Label", bandRt, string.Empty, 11f, GamePalette.Background,
-                                  TextAlignmentOptions.Center, FontStyles.Bold);
-        UiBuild.Stretch(_sideLabel.rectTransform);
+        _pipRoot = UiBuild.Rect("Program", _rt);
+        UiBuild.Band(_pipRoot, 0f, 0f, CellW, NameH + 16f);
 
         if (_berserker != null)
         {
@@ -172,62 +238,151 @@ public class SlotOverlay : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         if (hint != null) hint.SetAsLastSibling();
     }
 
-    RectTransform ChipBg(string name, float x, Color accent)
+    static bool Skinned => UiSkin.Sprite(UiSkin.ReelFrame) != null;
+
+    void BuildMedallion(SlotDefinition.Spec def)
+    {
+        var sprite = UiSkin.Sprite(UiSkin.EnemyMedallion(def.faction));
+        if (sprite == null) return;
+
+        var rt = UiBuild.Rect("Medallion", _rt);
+        UiBuild.Band(rt, ArtX, ArtY, ArtSize, ArtSize);
+        _medallion = UiBuild.Fill(rt, Color.white);
+        _medallion.sprite = sprite;
+        _medallion.type = Image.Type.Simple;
+        rt.SetSiblingIndex(1);   // sopra il simbolo, sotto la cornice
+    }
+
+    /// <summary>
+    /// La cornice della casella: e' lei a dire se il rullo e' carico o trattenuto.
+    /// Non puo' essere l'Image della radice — quella disegna per prima e finirebbe
+    /// sotto il simbolo, mentre la finestra della cornice del kit e' trasparente
+    /// apposta per incorniciarlo.
+    /// </summary>
+    void BuildFrame()
+    {
+        var rt = UiBuild.Rect("CellFrame", _rt);
+        UiBuild.Stretch(rt);
+
+        var sprite = UiSkin.Sprite(UiSkin.ReelCell(_view.instance.def.faction));
+        _frame = UiBuild.Fill(rt, sprite != null ? Color.white : GamePalette.WithAlpha(GamePalette.Fronte, 0.22f));
+        if (sprite != null)
+        {
+            _frame.sprite = sprite;
+            _frame.type = Image.Type.Simple;
+        }
+
+        rt.SetSiblingIndex(_medallion != null ? 2 : 1);
+    }
+
+    void BuildFactionTag(SlotDefinition.Spec def)
+    {
+        var rt = UiBuild.Rect("FactionTag", _rt);
+        UiBuild.Band(rt, FactionX, FactionY, FactionSize, FactionSize);
+
+        var sprite = UiSkin.Sprite(UiSkin.FactionTag(def.faction));
+        if (sprite != null)
+        {
+            var img = UiBuild.Fill(rt, Color.white);
+            img.sprite = sprite;
+            img.type = Image.Type.Simple;
+            return;
+        }
+
+        UiBuild.Fill(rt, GamePalette.FactionColor(def.faction));
+        var label = UiBuild.Text("Label", rt, def.faction.ToString(), 15f,
+                                 GamePalette.Background, TextAlignmentOptions.Center, FontStyles.Bold);
+        UiBuild.Stretch(label.rectTransform);
+    }
+
+    RectTransform Chip(string name, int index, string key, Color accent)
     {
         var rt = UiBuild.Rect(name, _rt);
-        UiBuild.Band(rt, x, ChipY, ChipW, ChipH);
-        UiBuild.Fill(rt, GamePalette.WithAlpha(Color.black, 0.55f));
+        UiBuild.Band(rt, ChipX(index), ChipY, ChipW, ChipH);
 
+        var sprite = UiSkin.Sprite(key);
+        if (sprite != null)
+        {
+            var img = UiBuild.Fill(rt, Color.white);
+            img.sprite = sprite;
+            img.type = Image.Type.Simple;
+            return rt;
+        }
+
+        UiBuild.Fill(rt, GamePalette.WithAlpha(Color.black, 0.55f));
         var stripe = UiBuild.Rect("Accent", rt);
         UiBuild.Band(stripe, 0f, ChipH - 3f, ChipW, 3f);
         UiBuild.Fill(stripe, accent);
         return rt;
     }
 
-    /// <summary>Una casella per passo del pattern; quella corrente e' piena, le altre spente.</summary>
-    void RefreshPattern(SlotInstance inst)
+    // ── Programma del rullo ───────────────────────────────────────────────────
+
+    static int PipCount(SlotInstance inst) => Mathf.Max(1, inst.PatternLength);
+
+    /// <summary>
+    /// Un pip per giro programmato, con il giro in corso marcato. Non sono lati da
+    /// girare: sono i colpi che arriveranno, in ordine. Ambra = colpisce,
+    /// ciano = trattiene.
+    /// </summary>
+    void RefreshProgram(SlotInstance inst)
     {
-        int len = inst.PatternLength;
+        int count = PipCount(inst);
 
-        if (_patternCells.Count != len)
+        if (_pips.Count != count)
         {
-            UiBuild.ClearChildren(_patternRoot);
-            _patternCells.Clear();
-            _patternLabels.Clear();
+            UiBuild.ClearChildren(_pipRoot);
+            _pips.Clear();
+            _pipMarks.Clear();
 
-            if (len == 0)
+            for (int i = 0; i < count; i++)
             {
-                var none = UiBuild.Text("NoPattern", _patternRoot, "FISSO", 11f, GamePalette.TextMuted,
-                                        TextAlignmentOptions.Center, FontStyles.Bold);
-                UiBuild.Stretch(none.rectTransform);
-                return;
-            }
+                float x = PipRight - (count - i) * PipPitch + (PipPitch - PipSize);
 
-            const float gap = 4f;
-            float cell = (PatternW - gap * (len - 1)) / len;
+                var markRt = UiBuild.Rect($"Mark{i}", _pipRoot);
+                UiBuild.Band(markRt, x - (PipMarkSize - PipSize) * 0.5f,
+                                     PipY - (PipMarkSize - PipSize) * 0.5f, PipMarkSize, PipMarkSize);
+                var mark = Sprited(markRt, UiSkin.ReelPipCurrent, GamePalette.WithAlpha(Color.white, 0.85f));
+                mark.enabled = false;
+                _pipMarks.Add(mark);
 
-            for (int i = 0; i < len; i++)
-            {
-                var cellRt = UiBuild.Rect($"Step{i}", _patternRoot);
-                UiBuild.Band(cellRt, i * (cell + gap), 2f, cell, PatternH - 4f);
-                _patternCells.Add(UiBuild.Fill(cellRt, GamePalette.Neutral));
-
-                var label = UiBuild.Text("Label", cellRt, string.Empty, 13f, GamePalette.Background,
-                                         TextAlignmentOptions.Center, FontStyles.Bold);
-                UiBuild.Stretch(label.rectTransform);
-                _patternLabels.Add(label);
+                var pipRt = UiBuild.Rect($"Pip{i}", _pipRoot);
+                UiBuild.Band(pipRt, x, PipY, PipSize, PipSize);
+                _pips.Add(Sprited(pipRt, UiSkin.ReelPip(Side.Fronte), GamePalette.Fronte));
             }
         }
 
-        for (int i = 0; i < _patternCells.Count; i++)
+        bool fixedProgram = inst.PatternLength == 0;
+
+        for (int i = 0; i < _pips.Count; i++)
         {
-            var side = inst.PatternSideAt(i);
-            bool current = i == inst.PatternStep;
-            _patternCells[i].color = current
-                ? GamePalette.SideColor(side)
-                : GamePalette.WithAlpha(GamePalette.SideColor(side), 0.22f);
-            _patternLabels[i].text = side == Side.Fronte ? "F" : "R";
-            _patternLabels[i].color = current ? GamePalette.Background : GamePalette.WithAlpha(Color.white, 0.7f);
+            var side = fixedProgram ? Side.Fronte : inst.PatternSideAt(i);
+            bool current = fixedProgram || i == inst.PatternStep;
+
+            var sprite = UiSkin.Sprite(UiSkin.ReelPip(side));
+            if (sprite != null)
+            {
+                _pips[i].sprite = sprite;
+                _pips[i].color = GamePalette.WithAlpha(Color.white, current ? 1f : 0.55f);
+            }
+            else
+            {
+                _pips[i].color = GamePalette.WithAlpha(GamePalette.SideColor(side), current ? 1f : 0.35f);
+            }
+
+            _pipMarks[i].enabled = current;
         }
+    }
+
+    static Image Sprited(RectTransform rt, string key, Color fallback)
+    {
+        var sprite = UiSkin.Sprite(key);
+        var img = UiBuild.Fill(rt, sprite != null ? Color.white : fallback);
+        if (sprite != null)
+        {
+            img.sprite = sprite;
+            img.type = Image.Type.Simple;
+        }
+        return img;
     }
 }

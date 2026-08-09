@@ -120,14 +120,30 @@ public class HudController : MonoBehaviour
         if (apText != null) apText.text = $"{ap}/{max}";
         BuildPips(max);
 
+        var full = UiSkin.Sprite(UiSkin.ApSegFull);
+        var spent = UiSkin.Sprite(UiSkin.ApSegSpent);
+
         for (int i = 0; i < _pips.Count; i++)
-            _pips[i].color = i < ap ? GamePalette.Ap : GamePalette.WithAlpha(GamePalette.Ap, 0.16f);
+        {
+            bool available = i < ap;
+
+            if (full != null && spent != null)
+            {
+                _pips[i].sprite = available ? full : spent;
+                _pips[i].color = Color.white;
+            }
+            else
+            {
+                _pips[i].color = available ? GamePalette.Ap : GamePalette.WithAlpha(GamePalette.Ap, 0.16f);
+            }
+        }
     }
 
     /// <summary>
-    /// Un pallino per AP disponibile: il costo delle azioni e' 1, quindi si
-    /// contano a occhio. La colonna si dispone da sola in verticale se il rect e'
-    /// piu' alto che largo.
+    /// Un segmento per AP disponibile: il costo delle azioni e' 1, quindi si
+    /// contano a occhio. Con il kit i segmenti hanno la forma del suo
+    /// <c>ap_seg_*</c>; senza, restano pallini quadrati. La colonna si dispone da
+    /// sola in verticale se il rect e' piu' alto che largo.
     /// </summary>
     void BuildPips(int max)
     {
@@ -136,20 +152,37 @@ public class HudController : MonoBehaviour
         UiBuild.ClearChildren(apPipsRoot);
         _pips.Clear();
 
+        var segment = UiSkin.Sprite(UiSkin.ApSegFull);
         bool vertical = apPipsRoot.rect.height > apPipsRoot.rect.width;
-        const float gap = 8f;
-        float size = vertical
-            ? Mathf.Min(apPipsRoot.rect.width, (apPipsRoot.rect.height - gap * (max - 1)) / max)
-            : Mathf.Min(apPipsRoot.rect.height, (apPipsRoot.rect.width - gap * (max - 1)) / max);
+        float gap = segment != null ? 4f : 8f;
+
+        float w, h;
+        if (segment != null)
+        {
+            // Le proporzioni le detta lo sprite; la larghezza si restringe solo
+            // se i segmenti non ci stanno.
+            h = Mathf.Min(apPipsRoot.rect.height, segment.rect.height);
+            w = Mathf.Min(segment.rect.width * (h / segment.rect.height),
+                          (apPipsRoot.rect.width - gap * (max - 1)) / max);
+        }
+        else
+        {
+            w = h = vertical
+                ? Mathf.Min(apPipsRoot.rect.width, (apPipsRoot.rect.height - gap * (max - 1)) / max)
+                : Mathf.Min(apPipsRoot.rect.height, (apPipsRoot.rect.width - gap * (max - 1)) / max);
+        }
 
         for (int i = 0; i < max; i++)
         {
             var rt = UiBuild.Rect($"Pip{i}", apPipsRoot);
-            if (vertical)
-                UiBuild.Band(rt, (apPipsRoot.rect.width - size) * 0.5f, i * (size + gap), size, size);
+            if (vertical && segment == null)
+                UiBuild.Band(rt, (apPipsRoot.rect.width - w) * 0.5f, i * (h + gap), w, h);
             else
-                UiBuild.Band(rt, i * (size + gap), (apPipsRoot.rect.height - size) * 0.5f, size, size);
-            _pips.Add(UiBuild.Fill(rt, GamePalette.Ap));
+                UiBuild.Band(rt, i * (w + gap), (apPipsRoot.rect.height - h) * 0.5f, w, h);
+
+            var img = UiBuild.Fill(rt, segment != null ? Color.white : GamePalette.Ap);
+            if (segment != null) { img.sprite = segment; img.type = Image.Type.Simple; }
+            _pips.Add(img);
         }
     }
 

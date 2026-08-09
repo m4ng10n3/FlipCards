@@ -144,8 +144,8 @@ public static class FlipCardsLayoutBuilder
         var gm = Object.FindAnyObjectByType<GameManager>();
         if (gm != null)
         {
-            ResizePlaceholder(gm.EmptySpot, CardW, CardH);
-            ResizePlaceholder(gm.EmptySlot, SlotW, SlotH);
+            ResizePlaceholder(gm.EmptySpot, CardW, CardH, "slot/card_slot_empty");
+            ResizePlaceholder(gm.EmptySlot, SlotW, SlotH, "slot/enemy_slot_empty");
         }
 
         AssetDatabase.SaveAssets();
@@ -189,21 +189,27 @@ public static class FlipCardsLayoutBuilder
                 // Graphic su cui gira CardShaderGraph. Comprimerlo per far posto
                 // ai chip vorrebbe dire rimpicciolire lo shader.
                 Place(cell, "Template", 0f, 0f, CardW, CardH);
-                Place(cell, "Name", CardOverlay.NameX + 6f, CardOverlay.NameY + 3f,
-                                    CardOverlay.NameW - 34f, CardOverlay.NameH - 6f);
+                Place(cell, "Name", CardOverlay.NameX + 10f, CardOverlay.NameY + 4f,
+                                    CardOverlay.NameW - 44f, CardOverlay.NameH - 8f);
                 Place(cell, "imagecharacter", CardOverlay.ArtX, CardOverlay.ArtY,
                                               CardOverlay.ArtW, CardOverlay.ArtH);
 
-                // Statistiche simboliche: solo il numero, colorato per ruolo, con
-                // sottolineatura dello stesso colore disegnata da CardOverlay.
-                // Niente etichette: rosso = attacco, verde = vita, ciano = blocco.
-                Place(cell, "FrontDamage", CardOverlay.StatX(0), CardOverlay.StatY, CardOverlay.StatW, CardOverlay.StatH);
-                Place(cell, "HP", CardOverlay.StatX(1), CardOverlay.StatY, CardOverlay.StatW, CardOverlay.StatH);
-                Place(cell, "BackBlock", CardOverlay.StatX(2), CardOverlay.StatY, CardOverlay.StatW, CardOverlay.StatH);
+                ApplyCardTemplate(root, cell);
+
+                // Due caselle statistica, non tre, e la prima cambia con la
+                // faccia: ATK in Fronte, BLOCCO in Retro. I due Text stanno nello
+                // stesso posto e CardView ne accende uno solo, quello che serve da
+                // quel lato. Il numero parte dopo l'icona del badge del kit.
+                Place(cell, "FrontDamage", CardOverlay.StatTextX(0), CardOverlay.StatY,
+                                           CardOverlay.StatTextW, CardOverlay.StatH);
+                Place(cell, "BackBlock", CardOverlay.StatTextX(0), CardOverlay.StatY,
+                                         CardOverlay.StatTextW, CardOverlay.StatH);
+                Place(cell, "HP", CardOverlay.StatTextX(1), CardOverlay.StatY,
+                                  CardOverlay.StatTextW, CardOverlay.StatH);
 
                 StyleText(cell, "Name", 20, TextAnchor.MiddleLeft, GamePalette.TextPrimary);
                 StyleText(cell, "FrontDamage", 26, TextAnchor.MiddleCenter, GamePalette.Danger);
-                StyleText(cell, "HP", 26, TextAnchor.MiddleCenter, GamePalette.PlayerHp);
+                StyleText(cell, "HP", 22, TextAnchor.MiddleCenter, GamePalette.PlayerHp);
                 StyleText(cell, "BackBlock", 26, TextAnchor.MiddleCenter, GamePalette.Retro);
 
                 // Fazione e lato li disegna CardOverlay come badge e fascia colorata.
@@ -222,6 +228,51 @@ public static class FlipCardsLayoutBuilder
             PrefabUtility.SaveAsPrefabAsset(root, path);
         }
         finally { PrefabUtility.UnloadPrefabContents(root); }
+    }
+
+    /// <summary>
+    /// Le due facce della carta, prese dal kit e scritte nel prefab.
+    ///
+    /// **E' il template a dire quale faccia sia**: <c>card_front_{fazione}</c> ha
+    /// la finestra del ritratto aperta, <c>card_back_{fazione}</c> e' cieca e
+    /// CardOverlay ci stampa sopra il sigillo. Sulla cella non c'e' nessuna
+    /// scritta che dichiari il lato, ed e' voluto: il lato di una carta e' quello
+    /// che si vede girandola.
+    ///
+    /// Vanno scritti nel prefab e non a runtime perche' <c>CardView.Init</c> legge
+    /// il fronte dallo sprite del Template in quel momento; <c>backImage</c> e' un
+    /// campo privato serializzato, quindi passa da SerializedObject.
+    /// </summary>
+    static void ApplyCardTemplate(GameObject root, RectTransform cell)
+    {
+        var definition = root.GetComponentInChildren<CardDefinition>(true);
+        if (definition == null) return;
+
+        var front = KitSprite($"card/card_front_{definition.faction}");
+        var back = KitSprite($"card/card_back_{definition.faction}");
+        if (front == null && back == null) return;
+
+        var template = cell.Find("Template");
+        var image = template != null ? template.GetComponent<Image>() : null;
+        if (image != null && front != null)
+        {
+            image.sprite = front;
+            image.type = Image.Type.Simple;
+            image.preserveAspect = false;
+            // La tinta la porta lo sprite: un colore diverso da bianco lo
+            // spegnerebbe, e FlashTemplate ci rientra sopra a ogni reazione.
+            image.color = Color.white;
+        }
+
+        if (back == null) return;
+
+        var view = root.GetComponentInChildren<CardView>(true);
+        if (view == null) return;
+
+        var so = new SerializedObject(view);
+        var property = so.FindProperty("backImage");
+        if (property != null) property.objectReferenceValue = back;
+        so.ApplyModifiedPropertiesWithoutUndo();
     }
 
     /// <summary>
@@ -270,8 +321,10 @@ public static class FlipCardsLayoutBuilder
             }
 
             // Fondo della cella: SlotView.Blink lo colora di giallo e lo rimette,
-            // quindi il colore base va impostato qui. Traslucido, cosi la colonna
-            // del rullo disegnata da board_bg resta visibile sotto.
+            // quindi il colore base va impostato qui. Resta un fondo scuro e non
+            // diventa la cornice del kit: la cornice deve stare SOPRA il simbolo
+            // (la sua finestra e' trasparente) e l'Image della radice disegna per
+            // prima. La monta SlotOverlay come figlio.
             var bg = root.GetComponent<Image>();
             if (bg != null) bg.color = GamePalette.WithAlpha(GamePalette.Panel, 0.88f);
 
@@ -282,8 +335,10 @@ public static class FlipCardsLayoutBuilder
             // rect e al reveal l'immagine non deve cambiare dimensione.
             Place(cell, "Name", SlotOverlay.NameX, SlotOverlay.NameY, SlotOverlay.NameW, SlotOverlay.NameH);
             Place(cell, "Sprite", SlotOverlay.ArtX, SlotOverlay.ArtY, SlotOverlay.ArtSize, SlotOverlay.ArtSize);
-            Place(cell, "HP", SlotOverlay.ChipX(1), SlotOverlay.ChipY, SlotOverlay.ChipW, SlotOverlay.ChipH);
-            Place(cell, "Def", SlotOverlay.ChipX(2), SlotOverlay.ChipY, SlotOverlay.ChipW, SlotOverlay.ChipH);
+            Place(cell, "HP", SlotOverlay.ChipTextX(1), SlotOverlay.ChipY,
+                              SlotOverlay.ChipTextW, SlotOverlay.ChipH);
+            Place(cell, "Def", SlotOverlay.ChipTextX(2), SlotOverlay.ChipY,
+                               SlotOverlay.ChipTextW, SlotOverlay.ChipH);
 
             StyleText(cell, "Name", 19, TextAnchor.MiddleLeft, GamePalette.TextPrimary);
             StyleText(cell, "HP", 20, TextAnchor.MiddleCenter, GamePalette.PlayerHp);
@@ -334,7 +389,7 @@ public static class FlipCardsLayoutBuilder
         shadow.effectDistance = new Vector2(2f, -2f);
     }
 
-    static void ResizePlaceholder(GameObject placeholder, float w, float h)
+    static void ResizePlaceholder(GameObject placeholder, float w, float h, string kitSprite)
     {
         if (placeholder == null) return;
 
@@ -342,7 +397,7 @@ public static class FlipCardsLayoutBuilder
         if (string.IsNullOrEmpty(path))
         {
             // Oggetto di scena: si modifica direttamente.
-            ApplyPlaceholder(placeholder, w, h);
+            ApplyPlaceholder(placeholder, w, h, kitSprite);
             EditorUtility.SetDirty(placeholder);
             return;
         }
@@ -350,13 +405,13 @@ public static class FlipCardsLayoutBuilder
         var root = PrefabUtility.LoadPrefabContents(path);
         try
         {
-            ApplyPlaceholder(root, w, h);
+            ApplyPlaceholder(root, w, h, kitSprite);
             PrefabUtility.SaveAsPrefabAsset(root, path);
         }
         finally { PrefabUtility.UnloadPrefabContents(root); }
     }
 
-    static void ApplyPlaceholder(GameObject go, float w, float h)
+    static void ApplyPlaceholder(GameObject go, float w, float h, string kitSprite)
     {
         var rt = go.transform as RectTransform;
         if (rt == null) return;
@@ -364,20 +419,45 @@ public static class FlipCardsLayoutBuilder
         ScaleTree(rt, w, h);
         SetLayoutElement(go, w, h);
 
+        var sprite = KitSprite(kitSprite);
+        var existingFrame = go.transform.Find("_Frame");
+
         var outline = go.GetComponent<Outline>();
         if (outline != null)
         {
             outline.effectColor = GamePalette.Fronte;
             outline.effectDistance = new Vector2(5f, -5f);
             outline.useGraphicAlpha = false;
+            outline.enabled = sprite == null;
         }
 
-        // Una corsia vuota e' una falla: lo slot in Fronte colpisce direttamente
+        // Una corsia vuota e' una falla: la casella carica colpisce direttamente
         // gli HP. La casella deve leggersi, non essere un rettangolo al 7%.
         var img = go.GetComponent<Image>();
-        if (img != null) img.color = new Color(1f, 1f, 1f, 0.045f);
+        if (img != null)
+        {
+            if (sprite != null)
+            {
+                img.sprite = sprite;
+                img.type = Image.Type.Simple;
+                img.color = Color.white;
+            }
+            else
+            {
+                img.sprite = null;
+                img.color = new Color(1f, 1f, 1f, 0.045f);
+            }
+        }
 
-        if (go.transform.Find("_Frame") != null) return;
+        if (sprite != null)
+        {
+            // Il pozzetto del kit ha gia' la sua cornice: sommarne una seconda la
+            // raddoppia. La striscia costruita da un rebuild precedente va via.
+            if (existingFrame != null) Object.DestroyImmediate(existingFrame.gameObject);
+            return;
+        }
+
+        if (existingFrame != null) return;
 
         // Cornice a quattro strisce: un Outline su un'Image trasparente non
         // disegnerebbe nulla, perche' duplica i vertici del grafico che decora.
@@ -622,19 +702,42 @@ public static class FlipCardsLayoutBuilder
     {
         var plate = UiBuild.Rect("TurnPlate", field);
         UiBuild.Band(plate, 0f, TopPlateY, TurnPlateW, TopPlateH);
+        Kit(plate, "banner/banner_flat", Image.Type.Sliced);
 
         hud.turnText = UiBuild.Text("Turn", plate, "TURNO 1 / 12", 24f, GamePalette.TextPrimary,
                                     TextAlignmentOptions.Left, FontStyles.Bold);
         UiBuild.Stretch(hud.turnText.rectTransform, 22f, 0f, 12f, 0f);
         hud.turnText.alignment = TextAlignmentOptions.Left;
 
-        var chip = UiBuild.Rect("PhaseChip", field);
+        var chip = UiBuild.Rect("PhaseBanner", field);
         UiBuild.Band(chip, PhaseX, TopPlateY, PhaseW, TopPlateH);
-        hud.phaseChip = UiBuild.Fill(chip, GamePalette.WithAlpha(GamePalette.Good, 0.12f));
+        Kit(chip, "banner/banner_phase", Image.Type.Sliced);
+
+        // Il velo colorato della fase sta su un figlio, non sul banner: HudController
+        // lo tinge con alpha 0.16 e su uno sprite quella tinta lo cancellerebbe.
+        var tint = UiBuild.Rect("Tint", chip);
+        UiBuild.Stretch(tint, 8f, 6f, 8f, 6f);
+        hud.phaseChip = UiBuild.Fill(tint, GamePalette.WithAlpha(GamePalette.Good, 0.12f));
 
         hud.phaseText = UiBuild.Text("Phase", chip, "FASE AZIONI", 20f, GamePalette.Good,
                                      TextAlignmentOptions.Center, FontStyles.Bold);
         UiBuild.Stretch(hud.phaseText.rectTransform);
+    }
+
+    /// <summary>
+    /// Pelle del kit su un rect gia' posizionato. Se lo sprite non c'e' non
+    /// disegna niente: il layout non deve dipendere dalla presenza del kit.
+    /// </summary>
+    static Image Kit(RectTransform rt, string relativePath, Image.Type type = Image.Type.Simple, float alpha = 1f)
+    {
+        var sprite = KitSprite(relativePath);
+        if (sprite == null) return null;
+
+        var img = UiBuild.Fill(rt, new Color(1f, 1f, 1f, alpha));
+        img.sprite = sprite;
+        img.type = type;
+        img.preserveAspect = false;
+        return img;
     }
 
     static void BuildBossBand(RectTransform field, HudController hud)
@@ -645,12 +748,12 @@ public static class FlipCardsLayoutBuilder
                                         TextAlignmentOptions.Left, FontStyles.Bold);
         UiBuild.Band(hud.bossNameText.rectTransform, 16f, 4f, 300f, 24f);
 
-        var note = UiBuild.Text("Note", band, "sostituisce il fronte a fine turno",
+        var note = UiBuild.Text("Note", band, "il rullo gira a fine turno e cambia tutte le caselle",
                                 14f, GamePalette.TextMuted, TextAlignmentOptions.Left);
         UiBuild.Band(note.rectTransform, 16f, 28f, 480f, 22f);
 
-        hud.bossHpBar = UiBuild.Bar("HpBar", band, GamePalette.BossHp, out var barRt);
-        UiBuild.Band(barRt, 520f, 14f, 520f, 28f);
+        hud.bossHpBar = UiBuild.Bar("HpBar", band, GamePalette.BossHp, out var barRt, kind: "boss");
+        UiBuild.Band(barRt, 520f, 8f, 520f, 40f);
 
         hud.bossHpText = UiBuild.Text("HpText", band, "24/24", 20f, GamePalette.TextPrimary,
                                       TextAlignmentOptions.Right, FontStyles.Bold);
@@ -674,13 +777,29 @@ public static class FlipCardsLayoutBuilder
         UiBuild.Stretch(board);
         LaneGroup(board, EnemyLaneGap);
 
-        // Payline: la riga su cui la casella "si ferma". Nel gioco non decide
-        // nulla, ma dice a colpo d'occhio che quello e' un rullo. Creata DOPO le
-        // corsie: gli slot sono opachi e la coprirebbero, e la payline deve
-        // attraversarli, non passarci dietro.
-        var payline = UiBuild.Rect("Payline", field);
-        UiBuild.Band(payline, 8f, PaylineY - 1f, FieldW - 16f, 2f);
-        UiBuild.Fill(payline, GamePalette.Payline);
+        // Cornice, payline e vetro vanno DOPO le corsie: le caselle sono opache e
+        // li coprirebbero, e la payline deve attraversarle, non passarci dietro.
+        // Il fondo della cassa e gli aloni di colonna stanno invece sotto, cioe'
+        // dentro housing: li monta ReelChrome, che ha i due strati.
+        var glassLayer = UiBuild.Rect("ReelGlass", field);
+        UiBuild.Band(glassLayer, 0f, ReelHousingY, FieldW, ReelHousingH);
+
+        var chrome = housing.gameObject.AddComponent<ReelChrome>();
+        chrome.underLayer = housing;
+        chrome.overLayer = glassLayer;
+        chrome.laneReferenceRoot = board;
+        chrome.cellTop = EnemyY - ReelHousingY;
+        chrome.cellWidth = SlotW;
+        chrome.cellHeight = SlotH;
+
+        // Senza il kit la cassa non si disegna: resta la riga della payline, che
+        // e' l'unica cosa che rende la fila un rullo anche a tinte piatte.
+        if (KitSprite("reel/reel_payline") == null)
+        {
+            var payline = UiBuild.Rect("PaylineFlat", field);
+            UiBuild.Band(payline, 8f, PaylineY - 1f, FieldW - 16f, 2f);
+            UiBuild.Fill(payline, GamePalette.Payline);
+        }
 
         return board;
     }
@@ -738,8 +857,8 @@ public static class FlipCardsLayoutBuilder
                                  TextAlignmentOptions.Left, FontStyles.Bold);
         UiBuild.Band(label.rectTransform, 12f, 12f, 120f, 26f);
 
-        hud.playerHpBar = UiBuild.Bar("HpBar", rail, GamePalette.PlayerHp, out var barRt);
-        UiBuild.Band(barRt, 0f, RailHpY + 8f, RailW, RailHpH - 16f);
+        hud.playerHpBar = UiBuild.Bar("HpBar", rail, GamePalette.PlayerHp, out var barRt, kind: "hp");
+        UiBuild.Band(barRt, 0f, RailHpY + 2f, RailW, RailHpH - 4f);
 
         hud.playerHpText = UiBuild.Text("HpText", rail, "20/20", 16f, GamePalette.TextPrimary,
                                         TextAlignmentOptions.Right, FontStyles.Bold);
@@ -775,6 +894,16 @@ public static class FlipCardsLayoutBuilder
         zone.sizeDelta = new Vector2(FieldW, HandRestH);
         zone.anchoredPosition = Vector2.zero;
         UiBuild.Fill(zone, new Color(1f, 1f, 1f, 0f), raycast: true);
+
+        // Binario della mano abbassata. Ancorato al fondo dell'area, che cresce
+        // verso l'alto quando la mano sale: senza, il binario salirebbe con lei.
+        // Creato prima di PlayerHand, cosi le carte gli passano davanti.
+        var dock = UiBuild.Rect("HandDock", zone);
+        dock.anchorMin = dock.anchorMax = new Vector2(0.5f, 0f);
+        dock.pivot = new Vector2(0.5f, 0f);
+        dock.sizeDelta = new Vector2(FieldW, RefH - HandDockY);
+        dock.anchoredPosition = Vector2.zero;
+        Kit(dock, "hand/hand_dock_low");
 
         // Niente LayoutGroup: HandManager riscrive container.localPosition ogni
         // frame e un gruppo attivo ci combatte.
@@ -840,6 +969,18 @@ public static class FlipCardsLayoutBuilder
         UiBuild.Stretch(stack);
         view.stackRoot = stack;
 
+        // Con il kit lo spessore e' gia' negli sprite (deck_stack_0..5) e non
+        // serve impilare prefab veri: sei carte vere nel rail costano sei Canvas
+        // annidati per una pila che non si puo' nemmeno leggere.
+        var stackRt = UiBuild.Rect("StackImage", stack);
+        UiBuild.Stretch(stackRt);
+        view.stackImage = Kit(stackRt, "deck/deck_stack_5");
+
+        var pulseRt = UiBuild.Rect("Pulse", stack);
+        UiBuild.Stretch(pulseRt, -8f, -8f, -8f, -8f);
+        view.pulseImage = Kit(pulseRt, "deck/deck_pulse");
+        if (view.pulseImage != null) view.pulseImage.enabled = false;
+
         view.hintText = UiBuild.Text("Hint", rail, "clic per pescare · 1 AP", 14f, GamePalette.TextMuted,
                                      TextAlignmentOptions.Center);
         UiBuild.Band(view.hintText.rectTransform, 12f, RailDeckHintY, RailW - 24f, RailDeckHintH);
@@ -847,9 +988,10 @@ public static class FlipCardsLayoutBuilder
     }
 
     /// <summary>
-    /// Legenda dei colori. La cella carta e' simbolica per scelta — nessuna
-    /// etichetta, solo numeri colorati e pastiglie — e senza una chiave quella
-    /// scelta si paga alla prima partita di chi non ha scritto il codice.
+    /// Legenda. Sulla cella carta non e' scritto niente per scelta — la faccia la
+    /// dice il template, il ruolo dei numeri lo dice il badge — e le caselle
+    /// nemiche non sono carte: senza una chiave, queste due scelte si pagano alla
+    /// prima partita di chi non ha scritto il codice.
     /// </summary>
     static void BuildLegend(RectTransform rail)
     {
@@ -860,15 +1002,20 @@ public static class FlipCardsLayoutBuilder
         UiBuild.Band(title.rectTransform, 12f, 10f, 200f, 20f);
 
         float y = 38f;
-        y = LegendGroup(box, y, "LATO");
-        y = LegendRow(box, y, GamePalette.Fronte, "FRONTE", "attacca");
-        y = LegendRow(box, y, GamePalette.Retro, "RETRO", "blocca e carica");
+        y = LegendGroup(box, y, "LE TUE CARTE");
+        y = LegendRow(box, y, GamePalette.Fronte, "RITRATTO", "attacca: ATK");
+        y = LegendRow(box, y, GamePalette.Retro, "SIGILLO", "blocca: BLOCCO");
+        y = LegendRow(box, y, GamePalette.Charge, "TACCHE", "cariche: bonus al colpo");
+
+        y = LegendGroup(box, y + 6f, "IL RULLO NEMICO");
+        y = LegendRow(box, y, GamePalette.Fronte, "CARICA", "colpisce questo giro");
+        y = LegendRow(box, y, GamePalette.Retro, "TRATTENUTA", "non colpisce, para");
+        y = LegendRow(box, y, GamePalette.TextMuted, "PIP", "i giri che verranno");
 
         y = LegendGroup(box, y + 6f, "NUMERI");
-        y = LegendRow(box, y, GamePalette.Danger, "ATK", "danno in Fronte");
+        y = LegendRow(box, y, GamePalette.Danger, "ATK", "danno");
         y = LegendRow(box, y, GamePalette.PlayerHp, "HP", "vita");
         y = LegendRow(box, y, GamePalette.Retro, "BLOCCO", "danno assorbito");
-        y = LegendRow(box, y, GamePalette.Charge, "CARICHE", "bonus al prossimo colpo");
 
         y = LegendGroup(box, y + 6f, "FAZIONI");
         y = LegendRow(box, y, GamePalette.FactionColor(Faction.A), "A", string.Empty);
@@ -1040,10 +1187,14 @@ public static class FlipCardsLayoutBuilder
         var box = UiBuild.Rect("Commands", side);
         UiBuild.Band(box, 0f, CommandsY, SideContentW, CommandH * 2f + CommandGap);
 
-        var attack = UiBuild.Command("BtnAttack", box, "ATTACCA", "0 AP · chiude la fase", GamePalette.Danger, out _);
+        // Quattro stati disegnati per tono, non una tinta moltiplicata: il rosso
+        // sangue attacca, il verde fosforo chiude il turno.
+        var attack = UiBuild.Command("BtnAttack", box, "ATTACCA", "0 AP · chiude la fase",
+                                     GamePalette.Danger, out _, tone: "blood");
         UiBuild.Band((RectTransform)attack.transform, 0f, 0f, SideContentW, CommandH);
 
-        var endTurn = UiBuild.Command("BtnEndTurn", box, "CHIUDI TURNO", "0 AP", GamePalette.PlayerHp, out _);
+        var endTurn = UiBuild.Command("BtnEndTurn", box, "CHIUDI TURNO", "0 AP",
+                                      GamePalette.PlayerHp, out _, tone: "phos");
         UiBuild.Band((RectTransform)endTurn.transform, 0f, CommandH + CommandGap, SideContentW, CommandH);
 
         return (attack, endTurn);

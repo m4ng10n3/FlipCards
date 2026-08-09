@@ -28,7 +28,11 @@ public class LaneAxisView : MonoBehaviour
         public TextMeshProUGUI main;
         public TextMeshProUGUI counter;
         public Image rule;
+        public Image readout;   // freccia del kit: chi colpisce, o parata
     }
+
+    /// <summary>Esito della corsia, nei tre indicatori che il kit disegna.</summary>
+    enum Readout { None, Up, Down, Block }
 
     class Connector
     {
@@ -43,8 +47,13 @@ public class LaneAxisView : MonoBehaviour
     readonly StringBuilder _sb = new StringBuilder(48);
 
     RectTransform _rt;
+    bool _skinnedReadout;
 
-    void Awake() => _rt = (RectTransform)transform;
+    void Awake()
+    {
+        _rt = (RectTransform)transform;
+        _skinnedReadout = UiSkin.Sprite(UiSkin.ReadoutUp) != null;
+    }
 
     void LateUpdate()
     {
@@ -79,6 +88,7 @@ public class LaneAxisView : MonoBehaviour
 
         string main, counter = string.Empty;
         Color color;
+        Readout readout;
 
         if (card != null && slot != null)
         {
@@ -89,8 +99,9 @@ public class LaneAxisView : MonoBehaviour
                 int net = Mathf.Max(0, atk - def);
                 main = Compose(true, atk, def, net);
                 color = net > 0 ? GamePalette.Good : GamePalette.Neutral;
+                readout = net > 0 ? Readout.Up : Readout.Block;
 
-                // La carta colpisce per prima; se lo slot sopravvive in Fronte, risponde.
+                // La carta colpisce per prima; se la casella sopravvive ed e' carica, risponde.
                 if (slot.side == Side.Fronte && net < slot.health)
                     counter = $"risposta {Mathf.Max(0, slot.def.atkDamage + slot.tempAtkBonus - CardBlock(card))}";
             }
@@ -101,50 +112,87 @@ public class LaneAxisView : MonoBehaviour
                 int net = Mathf.Max(0, atk - block);
                 main = Compose(false, atk, block, net);
                 color = net > 0 ? GamePalette.Danger : GamePalette.Neutral;
+                readout = net > 0 ? Readout.Down : Readout.Block;
             }
             else
             {
                 main = "—";
                 color = GamePalette.Neutral;
                 counter = "stallo";
+                readout = Readout.Block;
             }
         }
         else if (card != null)
         {
             if (card.side == Side.Fronte)
             {
-                main = $"{UiBuild.Arrow(true)} {card.ComputeAttackDamage()} → BOSS";
+                main = $"{Arrow(true)}{card.ComputeAttackDamage()} → BOSS";
                 color = GamePalette.Good;
+                readout = Readout.Up;
             }
-            else { main = "—"; color = GamePalette.Neutral; counter = "carica"; }
+            else { main = "—"; color = GamePalette.Neutral; counter = "carica"; readout = Readout.None; }
         }
         else if (slot != null)
         {
             if (slot.side == Side.Fronte)
             {
                 // Corsia vuota: il danno salta la board e arriva agli HP. E' una falla.
-                main = $"{UiBuild.Arrow(false)} {slot.def.atkDamage + slot.tempAtkBonus} → HP";
+                main = $"{Arrow(false)}{slot.def.atkDamage + slot.tempAtkBonus} → HP";
                 color = GamePalette.Danger;
                 counter = "corsia scoperta";
+                readout = Readout.Down;
             }
-            else { main = "—"; color = GamePalette.Neutral; }
+            else { main = "—"; color = GamePalette.Neutral; readout = Readout.None; }
         }
         else
         {
             main = "—";
             color = GamePalette.Neutral;
+            readout = Readout.None;
         }
 
         if (col.main.text != main) col.main.text = main;
         col.main.color = color;
         if (col.counter.text != counter) col.counter.text = counter;
         col.rule.color = GamePalette.WithAlpha(color, 0.45f);
+        ApplyReadout(col, readout, color);
     }
+
+    /// <summary>
+    /// L'indicatore del kit al posto del glifo: sale se colpisci tu, scende se
+    /// colpiscono te, diventa lo scudo quando il colpo viene assorbito.
+    /// </summary>
+    void ApplyReadout(Column col, Readout readout, Color color)
+    {
+        if (col.readout == null) return;
+
+        if (readout == Readout.None)
+        {
+            col.readout.enabled = false;
+            return;
+        }
+
+        var sprite = UiSkin.Sprite(readout switch
+        {
+            Readout.Up => UiSkin.ReadoutUp,
+            Readout.Down => UiSkin.ReadoutDown,
+            _ => UiSkin.ReadoutBlock,
+        });
+
+        if (sprite == null) { col.readout.enabled = false; return; }
+
+        col.readout.enabled = true;
+        col.readout.sprite = sprite;
+        col.readout.color = color;
+    }
+
+    /// <summary>Freccia testuale: serve solo dove non c'e' lo sprite del kit.</summary>
+    string Arrow(bool up) => _skinnedReadout ? string.Empty : UiBuild.Arrow(up) + " ";
 
     string Compose(bool up, int power, int mitigation, int net)
     {
         _sb.Clear();
-        _sb.Append(UiBuild.Arrow(up)).Append(' ').Append(power)
+        _sb.Append(Arrow(up)).Append(power)
            .Append(" − ").Append(mitigation).Append(" = ").Append(net);
         return _sb.ToString();
     }
@@ -220,7 +268,17 @@ public class LaneAxisView : MonoBehaviour
 
         col.main = UiBuild.Text("Main", col.root, "—", 24f, GamePalette.Neutral,
                                 TextAlignmentOptions.Center, FontStyles.Bold);
-        UiBuild.Centered(col.main.rectTransform, columnWidth, 28f, 0f, 2f);
+        UiBuild.Centered(col.main.rectTransform, columnWidth, 28f, _skinnedReadout ? 16f : 0f, 2f);
+
+        if (_skinnedReadout)
+        {
+            var iconRt = UiBuild.Rect("Readout", col.root);
+            UiBuild.Centered(iconRt, 28f, 28f, -columnWidth * 0.5f + 40f, 2f);
+            col.readout = UiBuild.Fill(iconRt, GamePalette.Neutral);
+            col.readout.sprite = UiSkin.Sprite(UiSkin.ReadoutUp);
+            col.readout.type = Image.Type.Simple;
+            col.readout.enabled = false;
+        }
 
         col.counter = UiBuild.Text("Counter", col.root, string.Empty, 14f, GamePalette.TextMuted,
                                    TextAlignmentOptions.Center);

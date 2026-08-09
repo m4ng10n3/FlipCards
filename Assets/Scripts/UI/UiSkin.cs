@@ -94,10 +94,13 @@ public class UiSkin : ScriptableObject
     public const string PanelConsole = "panel_console";
     public const string PanelScreen = "panel_screen";
     public const string PanelDark = "panel_dark";
+    public const string PanelBlood = "panel_blood";
     public const string PlateCounter = "plate_counter";
+    public const string PlateTooltip = "plate_tooltip";
     public const string BannerPhase = "banner_phase";
     public const string BannerFlat = "banner_flat";
     public const string BannerEnemy = "banner_enemy";
+    public const string DividerH = "divider_h";
 
     public const string BadgeAtk = "badge_atk";
     public const string BadgeHp = "badge_hp";
@@ -117,7 +120,25 @@ public class UiSkin : ScriptableObject
     public const string ReelFrame = "reel_frame";
     public const string ReelGlass = "reel_glass";
     public const string ReelPayline = "reel_payline";
+    public const string ReelCellLocked = "reel_cell_locked";
+    public const string ReelCellEmpty = "reel_cell_empty";
+    public const string ReelColBlur = "reel_col_blur";
+    public const string ReelColHighlight = "reel_col_highlight";
+    public const string ReelSliverTop = "reel_sliver_top";
+    public const string ReelSliverBottom = "reel_sliver_bottom";
+    public const string ReelPipUnknown = "reel_pip_unknown";
+
     public const string DeckPulse = "deck_pulse";
+    public const string HandDockLow = "hand_dock_low";
+    public const string HandLift = "hand_lift";
+
+    public const string CardSlotEmpty = "card_slot_empty";
+    public const string EnemySlotEmpty = "enemy_slot_empty";
+
+    // Frecce del pronostico di corsia: il kit ne ha tre, una per esito.
+    public const string ReadoutUp = "readout_up";
+    public const string ReadoutDown = "readout_down";
+    public const string ReadoutBlock = "readout_block";
 
     public static string BarFrame(string kind) => "bar_frame_" + kind;
     public static string BarFill(string kind) => "bar_fill_" + kind;
@@ -128,7 +149,25 @@ public class UiSkin : ScriptableObject
     public static string FlipCell(Side side) => side == Side.Fronte ? "flip_cell_front" : "flip_cell_back";
     public static string ReelPip(Side side) => side == Side.Fronte ? "reel_pip_front" : "reel_pip_back";
     public const string FlipCellCurrent = "flip_cell_current";
+    public const string FlipCellUnknown = "flip_cell_unknown";
     public const string ReelPipCurrent = "reel_pip_current";
+
+    /// <summary>Icona 16x16 del kit: <c>Icon("sword")</c> → <c>icon_sword</c>.</summary>
+    public static string Icon(string name) => "icon_" + name;
+
+    // ── Carta ─────────────────────────────────────────────────────────────────
+    //
+    // La faccia della carta E' il template: non c'e' nessuna etichetta che la
+    // dichiari. Fronte = cornice con la finestra del ritratto aperta, Retro =
+    // cornice cieca su cui si stampa il sigillo.
+
+    public static string CardFront(Faction f) => "card_front_" + f;
+    public static string CardBack(Faction f) => "card_back_" + f;
+    public static string CardRim(Faction f) => "card_rim_" + f;
+    public const string CardShadow = "card_shadow";
+
+    /// <summary>Sigillo della faccia Retro: due disegni, alternati per fazione.</summary>
+    public static string Sigil(Faction f) => f == Faction.B ? "decal_sigil_b" : "decal_sigil_a";
 
     /// <summary>Pila del mazzo per carte residue, secondo gli scaglioni del kit.</summary>
     public static string DeckStack(int count)

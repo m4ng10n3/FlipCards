@@ -26,6 +26,14 @@ public class InspectorPanel : MonoBehaviour
     readonly StringBuilder _sb = new StringBuilder(512);
     object _source;
 
+    /// <summary>
+    /// Scheda agganciata con un clic. Serve ai nemici: non si girano e non si
+    /// spostano, quindi l'unica interazione che ha senso su una casella del rullo
+    /// e' tenerne aperta la scheda mentre si guarda il resto del tavolo. Finche'
+    /// qualcosa e' agganciato, l'hover non cambia piu' quello che si legge.
+    /// </summary>
+    object _pinned;
+
     void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(this); return; }
@@ -35,11 +43,29 @@ public class InspectorPanel : MonoBehaviour
 
     void OnDestroy() { if (Instance == this) Instance = null; }
 
+    /// <summary>
+    /// L'hover puo' scrivere solo se non c'e' niente di agganciato. Un oggetto
+    /// agganciato che viene distrutto — una casella che muore o che il rullo
+    /// sostituisce — libera il pannello da solo: senza questo controllo
+    /// l'ispettore resterebbe bloccato sulla scheda di un morto.
+    /// </summary>
+    bool Locked(object source)
+    {
+        DropDeadPin();
+        return _pinned != null && !ReferenceEquals(_pinned, source);
+    }
+
+    /// <summary>Una casella agganciata che muore, o che il rullo sostituisce, libera il pannello.</summary>
+    void DropDeadPin()
+    {
+        if (_pinned is Object unityObject && unityObject == null) _pinned = null;
+    }
+
     // ── Carta ─────────────────────────────────────────────────────────────────
 
     public void ShowCard(CardView view)
     {
-        if (view == null || view.instance == null) return;
+        if (view == null || view.instance == null || Locked(view)) return;
         _source = view;
 
         var inst = view.instance;
@@ -78,7 +104,7 @@ public class InspectorPanel : MonoBehaviour
     /// </summary>
     public void ShowCardPreview(CardDefinition definition)
     {
-        if (definition == null) return;
+        if (definition == null || Locked(definition)) return;
         _source = definition;
 
         var def = definition.BuildSpec();
@@ -114,27 +140,36 @@ public class InspectorPanel : MonoBehaviour
 
     // ── Slot ──────────────────────────────────────────────────────────────────
 
+    /// <summary>
+    /// Scheda di una casella del rullo. Il vocabolario e' quello del rullo, non
+    /// quello delle carte: un nemico non ha un fronte e un retro da girare, ha un
+    /// giro **carico** (colpisce) o **trattenuto** (para e basta) e un programma
+    /// che avanza da solo. Chiamarlo Fronte/Retro come le carte faceva credere
+    /// che si potesse girare.
+    /// </summary>
     public void ShowSlot(SlotView view)
     {
-        if (view == null || view.instance == null) return;
+        if (view == null || view.instance == null || Locked(view)) return;
         _source = view;
 
         var inst = view.instance;
         var def = inst.def;
+        bool armed = inst.side == Side.Fronte;
 
-        SetHeader(def.SlotName, $"Slot nemico  ·  Fazione {def.faction}", inst.side);
+        SetHeader(def.SlotName, $"Casella del rullo  ·  Fazione {def.faction}", inst.side);
+        if (sideText != null) sideText.text = armed ? "CARICA — COLPISCE" : "TRATTENUTA — NON COLPISCE";
 
         _sb.Clear();
         Stat("HP", $"{inst.health} / {def.maxHealth}");
         Stat("ATK", Delta(def.atkDamage, inst.tempAtkBonus));
-        Stat("DEF Fronte", $"{def.blockFront}");
-        Stat("DEF Retro", $"{def.blockRetro}");
-        Stat("DEF attuale", $"{inst.ComputeSelfBlock()}");
+        Stat("DEF da carica", $"{def.blockFront}");
+        Stat("DEF trattenuta", $"{def.blockRetro}");
+        Stat("DEF adesso", $"{inst.ComputeSelfBlock()}");
 
-        Section("Pattern di flip");
+        Section("Programma del rullo");
         if (inst.PatternLength == 0)
         {
-            Line("<color=#66667a>nessuno: sempre in Fronte</color>");
+            Line("<color=#66667a>fisso: colpisce a ogni giro</color>");
         }
         else
         {
@@ -142,14 +177,15 @@ public class InspectorPanel : MonoBehaviour
             for (int i = 0; i < inst.PatternLength; i++)
             {
                 var side = inst.PatternSideAt(i);
-                string label = side == Side.Fronte ? "F" : "R";
+                string label = side == Side.Fronte ? "COLPISCE" : "TRATTIENE";
                 string hex = ColorUtility.ToHtmlStringRGB(GamePalette.SideColor(side));
                 line.Append(i == inst.PatternStep
-                    ? $"<b><color=#{hex}>[{label}]</color></b> "
+                    ? $"<b><color=#{hex}>[{label}]</color></b>  "
                     : $"<color=#{hex}>{label}</color>  ");
             }
             Line(line.ToString());
-            Line($"<color=#8888aa>prossimo: {inst.PatternSideAt(inst.PatternStep + 1)}</color>");
+            Line($"<color=#8888aa>prossimo giro: " +
+                 $"{(inst.PatternSideAt(inst.PatternStep + 1) == Side.Fronte ? "colpisce" : "trattiene")}</color>");
         }
 
         var berserker = view.GetComponent<SlotBerserker>();
@@ -164,13 +200,42 @@ public class InspectorPanel : MonoBehaviour
         AppendAbilities(view.gameObject);
 
         bodyText.text = _sb.ToString();
-        SetHint("Il fronte nemico viene sostituito a fine turno: vale solo per questo turno.");
+        SetHint(ReferenceEquals(_pinned, view)
+            ? "Scheda agganciata · clic sulla casella per sganciarla"
+            : "Non si gira e non si sposta: clic per agganciare la scheda.\n" +
+              "Il rullo gira a fine turno e sostituisce tutto il fronte.");
+    }
+
+    /// <summary>
+    /// Aggancia o sgancia la scheda di una casella. E' l'unica azione che il
+    /// giocatore ha su un nemico, ed e' apposta: sul rullo non si interviene, lo
+    /// si legge.
+    /// </summary>
+    public void TogglePinSlot(SlotView view)
+    {
+        if (view == null || view.instance == null) return;
+
+        bool wasPinned = ReferenceEquals(_pinned, view);
+
+        // Si sgancia sempre prima di ridisegnare: ShowSlot rifiuta di scrivere
+        // se qualcosa e' agganciato, compresa la casella su cui si e' cliccato.
+        _pinned = null;
+        ShowSlot(view);
+
+        if (wasPinned) return;
+
+        _pinned = view;
+        SetHint("Scheda agganciata · clic sulla casella per sganciarla");
     }
 
     // ── Chiusura ──────────────────────────────────────────────────────────────
 
     public void HideFor(object source)
     {
+        // Una scheda agganciata non la chiude l'uscita del puntatore: e' il
+        // motivo per cui e' agganciata.
+        DropDeadPin();
+        if (_pinned != null) return;
         if (source != null && !ReferenceEquals(source, _source)) return;
         Clear();
     }
@@ -178,6 +243,7 @@ public class InspectorPanel : MonoBehaviour
     public void Clear()
     {
         _source = null;
+        _pinned = null;
         if (titleText != null) titleText.text = "ISPETTORE";
         if (subtitleText != null) subtitleText.text = "passa il puntatore su una carta o su uno slot";
         if (sideStrip != null) sideStrip.color = GamePalette.WithAlpha(GamePalette.Neutral, 0.35f);

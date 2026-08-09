@@ -65,7 +65,7 @@ public class SlotView : MonoBehaviour
         var def = inline.BuildSpec();
         if (nameText != null) nameText.text = def.SlotName;
         if (hpText   != null) hpText.text   = $"{def.maxHealth}/{def.maxHealth}";
-        if (defText != null) defText.text = $"DEF {def.blockFront}";
+        if (defText != null) defText.text = def.blockFront.ToString();
     }
 
     public void Init(GameManager gm, PlayerState owner, SlotInstance instance)
@@ -110,8 +110,11 @@ public class SlotView : MonoBehaviour
         if (nameText     != null) nameText.text = def.SlotName;
         if (hpText       != null) hpText.text   = $"{instance.health}/{def.maxHealth}";
 
+        // Solo il numero: il ruolo lo dichiara il badge del kit sotto (scudo),
+        // come per ATK e HP. La parola "DEF" ripetuta tre volte sul rullo e'
+        // rumore, e in 108 px si mangia lo spazio della cifra.
         if (defText != null)
-            defText.text = $"DEF {instance.ComputeSelfBlock()}";
+            defText.text = instance.ComputeSelfBlock().ToString();
 
         _lastHp = instance.health;
     }

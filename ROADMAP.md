@@ -36,6 +36,132 @@ Quello che segue è quel che resta, in ordine di quanto pesa sulla leggibilità.
 
 ---
 
+## E — Kit Arcade Horror v2: dagli sprite alla logica di lettura
+
+Il kit è passato alla **v2** (`ArcadeHorrorUI/README.md`, `changelog_v2` del
+manifest): 191 sprite in `2x/`, tutti già importati e registrati in
+`Assets/Resources/FlipCardsUiSkin.asset` (`UiSkin.Sprite(nome)`). Finora ne
+usavamo tre — `board_bg` e i due overlay CRT — e tutto il resto del tabellone era
+disegnato a tinte piatte. Le tre voci che seguono non sono "attaccare le
+immagini": la v2 porta con sé **tre decisioni di lettura** che cambiano dove
+stanno le informazioni.
+
+### E2. La faccia della carta si vede, non si legge
+
+**Obiettivo.** Sulla cella carta non compare più la parola FRONTE o RETRO. La
+faccia si riconosce dal **template**: `card_front_{fazione}` con il ritratto nella
+finestra, `card_back_{fazione}` con il sigillo. La fascia bassa che oggi scrive il
+lato diventa la striscia dell'abilità (`ability_strip` del manifest).
+
+**Perché.** È una carta: il lato è la cosa che si vede girando, non un'etichetta
+da rileggere. Scriverlo costa la banda più preziosa della cella — quella bassa,
+l'unica libera per l'abilità — per un dato che l'immagine già dà. Ed è anche
+l'unico modo di far leggere il tavolo a colpo d'occhio: sei ritratti in alto e due
+sigilli in basso si contano senza leggere niente.
+
+**Le informazioni si dividono fra le due facce.** È la parte che conta, non lo
+sprite: la cella ha **due** caselle statistica, non tre, e la prima cambia
+significato con la faccia. Quello che non è utile *adesso* non sta sulla carta;
+sta nell'ispettore, che è la superficie fatta per il dettaglio.
+
+| dato | in mano | Fronte | Retro | ispettore |
+|---|---|---|---|---|
+| nome, fazione | sì | sì | sì | sì |
+| ritratto | sì | sì | — (sigillo) | — |
+| ATK (+ cariche) | sì | **sì** | no | sì |
+| BLOCCO | no | no | **sì** | sì (tutti e due i lati) |
+| HP | sì (massimo) | sì | sì | sì |
+| cariche di flip | no | sì | sì | sì |
+| abilità | icona + nome | icona + nome | icona + nome | testo completo |
+| instabilità, passive | no | no | no | sì |
+
+**Dove.** `Assets/Scripts/UI/CardOverlay.cs` (ancore di `layouts.card` ×2, badge
+`badge_atk`/`badge_def`/`badge_hp`, `tag_faction_*`, `flip_cell_*`, sigillo
+`decal_sigil_*`), `Assets/Scripts/Cards/CardView.cs` (`RefreshStatTexts`:
+il numero della prima casella cambia con il lato, e l'altro Text si spegne),
+`FlipCardsLayoutBuilder.ResizeCardPrefab` (assegna al `Template` del prefab lo
+sprite di fronte del kit e il campo `backImage`, per fazione).
+
+**Fatto quando.** Girando una carta cambiano template, ritratto→sigillo e il
+numero della prima casella; da nessuna parte sulla cella compaiono le parole
+FRONTE o RETRO.
+
+**Trappole note.** Il `Template` è il `Graphic` su cui gira `CardShaderGraph`:
+cambiargli lo sprite va bene, sostituire il componente no. `CardView.Init` legge
+`frontImage` dallo sprite del Template al momento dell'Init, quindi il fronte va
+scritto nel prefab e non a runtime.
+
+### E3. I nemici sono rulli, non carte
+
+**Obiettivo.** La casella nemica smette di presentarsi come una carta a due lati.
+Non ha fronte e retro: ha uno **stato del rullo**, e una logica di interazione e
+di attacco tutta sua.
+
+- **Stato**: `reel_cell_{fazione}` quando la casella è **carica** (questo giro
+  colpisce) e `reel_cell_locked` quando è **trattenuta** (questo giro non
+  colpisce, para e basta). La colonna che sta per colpire si accende con
+  `reel_col_highlight`: è il preavviso d'attacco, e non ha un equivalente sul
+  lato del giocatore.
+- **Programma**: i tre `reel_pip_*` in cima alla casella sono i giri futuri, con
+  `reel_pip_current` sul giro in corso. Non è un "lato" da girare: è la sequenza
+  che il rullo esegue da solo.
+- **Interazione**: sul nemico non si flippa, non si trascina, non si scambia.
+  L'unica azione è **guardarlo**: hover mostra la scheda, clic la **aggancia**
+  nell'ispettore così si può leggere senza tenere il mouse fermo (chiude la voce
+  "slot nemico cliccabile" della sezione C).
+- **Vocabolario**: nell'interfaccia il nemico non dice mai FRONTE/RETRO ma
+  **CARICO** / **TRATTENUTO**, e il pattern si chiama *programma del rullo*.
+  Nel codice `SlotInstance.side` resta `Side`: è la stessa macchina, cambia come
+  la si racconta.
+- **Cassa**: `reel_backing` sotto, `reel_sliver_top/bottom` sopra e sotto ogni
+  casella, poi `reel_frame` → `reel_payline` → `reel_glass` davanti a tutto, e
+  `reel_col_blur` sulle colonne mentre il rullo gira.
+
+**Perché.** Erano due carte grandi in cima allo schermo, quindi il giocatore
+provava a ragionarci come sulle proprie: girarle, spostarle, contarci sopra il
+blocco. Non si può fare nessuna delle tre. La forma da rullo e il preavviso di
+colonna dicono la regola vera — *arriva da solo, tu puoi solo pararlo* — senza una
+riga di tutorial.
+
+**Dove.** `Assets/Scripts/UI/SlotOverlay.cs` (ancore di `layouts.reel_cell` ×2,
+`micro_atk`/`micro_hp`/`micro_def`, pip, medaglione, clic che aggancia),
+`Assets/Scripts/UI/ReelChrome.cs` (nuovo: cassa, vetro, payline, evidenziazione
+di colonna, blur mentre `SlotBatchManager.IsRolling`), `InspectorPanel.ShowSlot`
+(vocabolario del rullo), `FlipCardsLayoutBuilder.BuildEnemyLanes`.
+
+**Fatto quando.** Guardando il fronte nemico si vede quale colonna colpirà questo
+turno prima di leggere qualunque numero; da nessuna parte compaiono le parole
+FRONTE o RETRO riferite a un nemico; il clic su una casella tiene la scheda
+nell'ispettore.
+
+**Trappole note.** Il vetro e la cornice vanno creati **dopo** `AIBoardRoot` e
+sempre senza Raycast Target: le caselle sono opache e li coprirebbero, e un
+Raycast Target sopra il campo rompe hover e swap. `_ReelOverlayLayer` di
+`SlotBatchManager` nasce come fratello di `AIBoardRoot`: la cassa deve stargli
+sotto e il vetro sopra, o il reel di fine turno scorre davanti alla cornice.
+
+### E4. Il resto del tabellone prende la pelle del kit
+
+**Obiettivo.** Barre (`bar_frame_*` + `bar_fill_*`), bottoni (`btn_{tono}_{stato}`
+a quattro stati disegnati), pannelli (`panel_*`, `plate_counter`), banner di turno
+e fase, caselle vuote (`card_slot_empty`, `enemy_slot_empty`), segmenti AP
+(`ap_seg_*`), pila del mazzo (`deck_stack_*` + `deck_pulse`), binario della mano
+(`hand_dock_low`), frecce del pronostico (`readout_up`/`readout_block`).
+
+**Perché.** Gli helper per farlo esistono già e sono inutilizzati: `UiBuild.Bar`
+accetta un `kind`, `UiBuild.Command` un `tone`, `DeckView` uno `stackImage`, e il
+builder non passa nessuno dei tre. Finché non li passa, il kit è importato ma non
+si vede: il tabellone resta a rettangoli tinti.
+
+**Dove.** `FlipCardsLayoutBuilder` (quasi tutto), `HudController.BuildPips`,
+`LaneAxisView.CreateColumn`.
+
+**Fatto quando.** Il tabellone in Play somiglia a `preview_board@2x.png` del kit,
+e spegnendo la skin (`UiSkin` assente) resta esattamente il layout di prima a
+tinte piatte.
+
+---
+
 ## A — Cambiamenti che il giocatore subisce
 
 ### A5. I cambiamenti di fine turno si vedono, non solo si leggono

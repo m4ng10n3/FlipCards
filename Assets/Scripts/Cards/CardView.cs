@@ -167,6 +167,16 @@ public class CardView : MonoBehaviour
         hpText.text = def.maxHealth.ToString();
         AttackPwrText.text = def.frontDamage.ToString();
         BlockPwrText.text = def.frontBlockValue.ToString();
+
+        // In mano la carta si presenta di fronte: ATK e vita, niente blocco.
+        // Le due caselle statistica della cella sono due, e la prima e' occupata
+        // da ATK — vedi CardOverlay per come le informazioni si dividono fra le
+        // facce. Le carte in mano non passano da ApplySideVisuals, quindi lo
+        // stato acceso/spento va scritto qui.
+        nameText.enabled = true;
+        hpText.enabled = true;
+        AttackPwrText.enabled = true;
+        BlockPwrText.enabled = false;
     }
 
     public void Init(GameManager gm, PlayerState owner, CardInstance instance)
@@ -229,11 +239,21 @@ public class CardView : MonoBehaviour
         }
     }
 
-    /// <summary>Aggiorna ATK e BLOCK in base al lato corrente e alle flipCharge.</summary>
+    /// <summary>
+    /// La prima casella statistica della cella cambia significato con la faccia:
+    /// in Fronte e' l'attacco, in Retro e' il blocco. Non e' una scelta grafica —
+    /// e' quello che la carta sa fare da quel lato, e l'altro numero in quel
+    /// momento non serve a decidere niente. Il valore dell'altra faccia si legge
+    /// nell'ispettore. Le cariche non hanno un numero: sono le tre tacche che
+    /// disegna CardOverlay, e in Fronte sono gia' sommate nell'ATK.
+    /// </summary>
     public void RefreshStatTexts()
     {
         if (instance == null) return;
         bool isFront = instance.side == Side.Fronte;
+
+        AttackPwrText.enabled = isFront;
+        BlockPwrText.enabled = !isFront;
 
         if (isFront)
         {
@@ -241,15 +261,10 @@ public class CardView : MonoBehaviour
             AttackPwrText.text = instance.flipCharge > 0
                 ? $"{atk}+{instance.flipCharge}"
                 : atk.ToString();
-            BlockPwrText.text = instance.def.frontBlockValue.ToString();
         }
         else
         {
-            // In Retro: nessun attacco, ma mostra block e charge
-            AttackPwrText.text = instance.flipCharge > 0
-                ? $"[{instance.flipCharge}/3]"
-                : "—";
-            BlockPwrText.text = instance.def.backBlockValue.ToString();
+            BlockPwrText.text = (instance.def.backBlockValue + instance.tempBlockBonus).ToString();
         }
     }
 
@@ -293,15 +308,15 @@ public class CardView : MonoBehaviour
         img.preserveAspect = false;
         img.sprite         = isFront ? frontImage : (backImage != null ? backImage : frontImage);
 
-        // Nome, HP sempre visibili; artwork solo in Fronte
+        // Nome e HP sempre visibili; il ritratto solo in Fronte, perche' in Retro
+        // la finestra ospita il sigillo (CardOverlay). E' l'unico segnale del
+        // lato: sulla cella non c'e' nessuna scritta che lo dica.
         nameText.enabled       = true;
         hpText.enabled         = true;
         artworkMonster.enabled = isFront;
         hintText.enabled       = true;
 
-        // ATK e BLOCK sempre visibili ma con valori diversi per lato
-        AttackPwrText.enabled = true;
-        BlockPwrText.enabled  = true;
+        // ATK o BLOCCO, mai tutti e due: le caselle sono due e la prima cambia.
         RefreshStatTexts();
     }
 
