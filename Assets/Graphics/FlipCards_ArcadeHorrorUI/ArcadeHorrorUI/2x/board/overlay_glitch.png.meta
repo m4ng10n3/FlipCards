@@ -1,0 +1,585 @@
+fileFormatVersion: 2
+guid: d9b6c8e2d62c2774bab8033a5d41b5bb
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -748150515620920611
+    second: overlay_glitch_0
+  - first:
+      213: 5181171099264040561
+    second: overlay_glitch_1
+  - first:
+      213: 7083044085417231924
+    second: overlay_glitch_2
+  - first:
+      213: -1340985547951203212
+    second: overlay_glitch_3
+  - first:
+      213: 2809567416425538793
+    second: overlay_glitch_4
+  - first:
+      213: -7186739170636174335
+    second: overlay_glitch_5
+  - first:
+      213: -1399685332523738731
+    second: overlay_glitch_6
+  - first:
+      213: -5479413037496491300
+    second: overlay_glitch_7
+  - first:
+      213: 3953846154838718747
+    second: overlay_glitch_8
+  - first:
+      213: 6436587301734803837
+    second: overlay_glitch_9
+  - first:
+      213: 4875277151970862756
+    second: overlay_glitch_10
+  - first:
+      213: 8570925388841382104
+    second: overlay_glitch_11
+  - first:
+      213: -2232038979057435445
+    second: overlay_glitch_12
+  - first:
+      213: -6753129955390553568
+    second: overlay_glitch_13
+  - first:
+      213: -8503067102119843876
+    second: overlay_glitch_14
+  - first:
+      213: -3500333343195686928
+    second: overlay_glitch_15
+  - first:
+      213: 7476691472712465982
+    second: overlay_glitch_16
+  - first:
+      213: -6622259867019970212
+    second: overlay_glitch_17
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: overlay_glitch_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1005
+        width: 1920
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dd2c3e5e1190e95f0800000000000000
+      internalID: -748150515620920611
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: overlay_glitch_1
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 991
+        width: 1920
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 17e372ce9a737e740800000000000000
+      internalID: 5181171099264040561
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: overlay_glitch_2
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 919
+        width: 1920
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 436c9bf61170c4260800000000000000
+      internalID: 7083044085417231924
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: overlay_glitch_3
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 835
+        width: 1920
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 47c9f6dbfbcd36de0800000000000000
+      internalID: -1340985547951203212
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: overlay_glitch_4
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 823
+        width: 1920
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9e46e84fda69df620800000000000000
+      internalID: 2809567416425538793
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: overlay_glitch_5
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 681
+        width: 1920
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 10c68d02dc2934c90800000000000000
+      internalID: -7186739170636174335
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: overlay_glitch_6
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 659
+        width: 1920
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 599199d1b91539ce0800000000000000
+      internalID: -1399685332523738731
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: overlay_glitch_7
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 637
+        width: 1920
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cd2a062afd635f3b0800000000000000
+      internalID: -5479413037496491300
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: overlay_glitch_8
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 611
+        width: 1920
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b19b4b32122eed630800000000000000
+      internalID: 3953846154838718747
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: overlay_glitch_9
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 587
+        width: 1920
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d7961b56c0a535950800000000000000
+      internalID: 6436587301734803837
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: overlay_glitch_10
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 567
+        width: 1920
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4a62dc84db678a340800000000000000
+      internalID: 4875277151970862756
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: overlay_glitch_11
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 535
+        width: 1920
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8d0744efa3b02f670800000000000000
+      internalID: 8570925388841382104
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: overlay_glitch_12
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 513
+        width: 1920
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bccb478df543601e0800000000000000
+      internalID: -2232038979057435445
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: overlay_glitch_13
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 279
+        width: 1920
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 02285eec5101842a0800000000000000
+      internalID: -6753129955390553568
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: overlay_glitch_14
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 241
+        width: 1920
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cd726d495890ff980800000000000000
+      internalID: -8503067102119843876
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: overlay_glitch_15
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 131
+        width: 1920
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0f79d53be515c6fc0800000000000000
+      internalID: -3500333343195686928
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: overlay_glitch_16
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 75
+        width: 1920
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e3ef73ef74b82c760800000000000000
+      internalID: 7476691472712465982
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: overlay_glitch_17
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 51
+        width: 1920
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c59f2f7bcb10914a0800000000000000
+      internalID: -6622259867019970212
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      overlay_glitch_0: -748150515620920611
+      overlay_glitch_1: 5181171099264040561
+      overlay_glitch_10: 4875277151970862756
+      overlay_glitch_11: 8570925388841382104
+      overlay_glitch_12: -2232038979057435445
+      overlay_glitch_13: -6753129955390553568
+      overlay_glitch_14: -8503067102119843876
+      overlay_glitch_15: -3500333343195686928
+      overlay_glitch_16: 7476691472712465982
+      overlay_glitch_17: -6622259867019970212
+      overlay_glitch_2: 7083044085417231924
+      overlay_glitch_3: -1340985547951203212
+      overlay_glitch_4: 2809567416425538793
+      overlay_glitch_5: -7186739170636174335
+      overlay_glitch_6: -1399685332523738731
+      overlay_glitch_7: -5479413037496491300
+      overlay_glitch_8: 3953846154838718747
+      overlay_glitch_9: 6436587301734803837
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

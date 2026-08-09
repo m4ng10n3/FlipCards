@@ -222,6 +222,7 @@ public class InspectorPanel : MonoBehaviour
 
         Section("Abilita'");
         foreach (var ability in abilities)
-            Line($"<color=#d9b25a>◆</color> {AbilityCatalog.Describe(ability)}");
+            // U+2666: il rombo U+25C6 non esiste in LiberationSans ne' nei suoi fallback
+            Line($"<color=#d9b25a>♦</color> {AbilityCatalog.Describe(ability)}");
     }
 }

@@ -54,8 +54,14 @@ namespace FlipCards.UI.EditorTools
                     ti.filterMode = FilterMode.Point;
                     ti.mipmapEnabled = false;
                     ti.alphaIsTransparency = true;
-                    ti.spriteMeshType = SpriteMeshType.FullRect;
                     ti.wrapMode = (e != null && e.tileable) ? TextureWrapMode.Repeat : TextureWrapMode.Clamp;
+
+                    // spriteMeshType non e' esposto su TextureImporter: passa da TextureImporterSettings
+                    var tis = new TextureImporterSettings();
+                    ti.ReadTextureSettings(tis);
+                    tis.spriteMeshType = SpriteMeshType.FullRect;
+                    ti.SetTextureSettings(tis);
+
                     var ps = ti.GetDefaultPlatformTextureSettings();
                     ps.textureCompression = TextureImporterCompression.Uncompressed;
                     ti.SetPlatformTextureSettings(ps);

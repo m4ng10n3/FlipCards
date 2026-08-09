@@ -1,0 +1,2795 @@
+fileFormatVersion: 2
+guid: 7f986020d52746a408ea8ec116ba66a2
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 432621664844770392
+    second: fx_flip_0
+  - first:
+      213: 520991415409280437
+    second: fx_flip_1
+  - first:
+      213: -2899869667491709867
+    second: fx_flip_2
+  - first:
+      213: 4758030133584893767
+    second: fx_flip_3
+  - first:
+      213: -4065978491093058016
+    second: fx_flip_4
+  - first:
+      213: -4216055450967797919
+    second: fx_flip_5
+  - first:
+      213: 1867841644273527436
+    second: fx_flip_6
+  - first:
+      213: -1769725252882492044
+    second: fx_flip_7
+  - first:
+      213: -342176333965014174
+    second: fx_flip_8
+  - first:
+      213: -4280809995394704542
+    second: fx_flip_9
+  - first:
+      213: -7356313991762180098
+    second: fx_flip_10
+  - first:
+      213: -8913963116420917505
+    second: fx_flip_11
+  - first:
+      213: 6286194958846567581
+    second: fx_flip_12
+  - first:
+      213: -6961996817378854210
+    second: fx_flip_13
+  - first:
+      213: -3374397818310223687
+    second: fx_flip_14
+  - first:
+      213: -7786463928445869592
+    second: fx_flip_15
+  - first:
+      213: 5591405513398267737
+    second: fx_flip_16
+  - first:
+      213: -3103627785107886962
+    second: fx_flip_17
+  - first:
+      213: 7466314804022957988
+    second: fx_flip_18
+  - first:
+      213: -8971211826197074793
+    second: fx_flip_19
+  - first:
+      213: -1596917531304795335
+    second: fx_flip_20
+  - first:
+      213: 7465265573214430133
+    second: fx_flip_21
+  - first:
+      213: 1080769434549966456
+    second: fx_flip_22
+  - first:
+      213: -522249363276447665
+    second: fx_flip_23
+  - first:
+      213: -8996365986871839178
+    second: fx_flip_24
+  - first:
+      213: 5708917724299846538
+    second: fx_flip_25
+  - first:
+      213: -5219290792788546885
+    second: fx_flip_26
+  - first:
+      213: -1738020623442275332
+    second: fx_flip_27
+  - first:
+      213: 8027099212621680114
+    second: fx_flip_28
+  - first:
+      213: 5911665655132568557
+    second: fx_flip_29
+  - first:
+      213: 4809302291458981541
+    second: fx_flip_30
+  - first:
+      213: -5399995546282789191
+    second: fx_flip_31
+  - first:
+      213: -2598154539895076178
+    second: fx_flip_32
+  - first:
+      213: 246407470386959804
+    second: fx_flip_33
+  - first:
+      213: 8030526298557807359
+    second: fx_flip_34
+  - first:
+      213: 4131707075577749362
+    second: fx_flip_35
+  - first:
+      213: 7925575246220967435
+    second: fx_flip_36
+  - first:
+      213: 3407295199143425508
+    second: fx_flip_37
+  - first:
+      213: -5778918641184846971
+    second: fx_flip_38
+  - first:
+      213: -6087569564867195632
+    second: fx_flip_39
+  - first:
+      213: 6404734540158086806
+    second: fx_flip_40
+  - first:
+      213: -1960324917841817386
+    second: fx_flip_41
+  - first:
+      213: -4368251364550280996
+    second: fx_flip_42
+  - first:
+      213: 1898714225421598486
+    second: fx_flip_43
+  - first:
+      213: -619758642661104733
+    second: fx_flip_44
+  - first:
+      213: 5036694844676702729
+    second: fx_flip_45
+  - first:
+      213: 2916042975064697157
+    second: fx_flip_46
+  - first:
+      213: 7867338588800672382
+    second: fx_flip_47
+  - first:
+      213: 1311236822247059762
+    second: fx_flip_48
+  - first:
+      213: -3584730266542968029
+    second: fx_flip_49
+  - first:
+      213: 2978487826392740694
+    second: fx_flip_50
+  - first:
+      213: 7917106353163681623
+    second: fx_flip_51
+  - first:
+      213: 514836749633909650
+    second: fx_flip_52
+  - first:
+      213: -859446815706868648
+    second: fx_flip_53
+  - first:
+      213: -3117820152614668374
+    second: fx_flip_54
+  - first:
+      213: -251915491821739796
+    second: fx_flip_55
+  - first:
+      213: -2763470608623416330
+    second: fx_flip_56
+  - first:
+      213: 8784401249944665792
+    second: fx_flip_57
+  - first:
+      213: 7798405239484717057
+    second: fx_flip_58
+  - first:
+      213: 1077046054977312089
+    second: fx_flip_59
+  - first:
+      213: -5630568828204495790
+    second: fx_flip_60
+  - first:
+      213: -1556336550700778772
+    second: fx_flip_61
+  - first:
+      213: 828566559948445910
+    second: fx_flip_62
+  - first:
+      213: 2762553921540135026
+    second: fx_flip_63
+  - first:
+      213: 3553055961348131776
+    second: fx_flip_64
+  - first:
+      213: 6948668146988560984
+    second: fx_flip_65
+  - first:
+      213: 1906703415669751564
+    second: fx_flip_66
+  - first:
+      213: 8999097581772386560
+    second: fx_flip_67
+  - first:
+      213: 8245949931719436151
+    second: fx_flip_68
+  - first:
+      213: 7402925872758549260
+    second: fx_flip_69
+  - first:
+      213: -6423228229930693194
+    second: fx_flip_70
+  - first:
+      213: -6977167423431423977
+    second: fx_flip_71
+  - first:
+      213: -4685029111743991305
+    second: fx_flip_72
+  - first:
+      213: 951080643457628836
+    second: fx_flip_73
+  - first:
+      213: 2026384844068816725
+    second: fx_flip_74
+  - first:
+      213: -4336438963667783769
+    second: fx_flip_75
+  - first:
+      213: -6507073495245217019
+    second: fx_flip_76
+  - first:
+      213: 6583774435783919418
+    second: fx_flip_77
+  - first:
+      213: -7806586638417574469
+    second: fx_flip_78
+  - first:
+      213: 4491110212259448634
+    second: fx_flip_79
+  - first:
+      213: 894293550301193340
+    second: fx_flip_80
+  - first:
+      213: 3115508687679041942
+    second: fx_flip_81
+  - first:
+      213: 3354788693952357574
+    second: fx_flip_82
+  - first:
+      213: -2063225632159002931
+    second: fx_flip_83
+  - first:
+      213: 9092567039285016
+    second: fx_flip_84
+  - first:
+      213: -4082490851003572824
+    second: fx_flip_85
+  - first:
+      213: 7311273624837171084
+    second: fx_flip_86
+  - first:
+      213: 3835768044726461065
+    second: fx_flip_87
+  - first:
+      213: 7379445404882663394
+    second: fx_flip_88
+  - first:
+      213: 2611840102256650298
+    second: fx_flip_89
+  - first:
+      213: -8403622566294823654
+    second: fx_flip_90
+  - first:
+      213: -4738499048840100019
+    second: fx_flip_91
+  - first:
+      213: 3456659582117639529
+    second: fx_flip_92
+  - first:
+      213: 3860801927004760160
+    second: fx_flip_93
+  - first:
+      213: -2672150953735284890
+    second: fx_flip_94
+  - first:
+      213: 1049750009321640224
+    second: fx_flip_95
+  - first:
+      213: -5559525028044119824
+    second: fx_flip_96
+  - first:
+      213: -7825228066553752868
+    second: fx_flip_97
+  - first:
+      213: -1783540891403978431
+    second: fx_flip_98
+  - first:
+      213: 7511502211770345491
+    second: fx_flip_99
+  - first:
+      213: 6698884502369306696
+    second: fx_flip_100
+  - first:
+      213: -7559050279847381172
+    second: fx_flip_101
+  - first:
+      213: -5843162649525443702
+    second: fx_flip_102
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: fx_flip_0
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 699
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 85ce53fac1bf00600800000000000000
+      internalID: 432621664844770392
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_1
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 699
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5b58f769eeeea3700800000000000000
+      internalID: 520991415409280437
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_2
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 679
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 55cf93ec6e791c7d0800000000000000
+      internalID: -2899869667491709867
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_3
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 679
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7479ee6823be70240800000000000000
+      internalID: 4758030133584893767
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_4
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 667
+        width: 434
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 02ef406da1eb297c0800000000000000
+      internalID: -4065978491093058016
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_5
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 659
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 16f07bba7ef8d75c0800000000000000
+      internalID: -4216055450967797919
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_6
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 659
+        width: 434
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c8aea974418ebe910800000000000000
+      internalID: 1867841644273527436
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_7
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 659
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 47596e7424ca077e0800000000000000
+      internalID: -1769725252882492044
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_8
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 651
+        width: 434
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 26b487bef68504bf0800000000000000
+      internalID: -342176333965014174
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_9
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 639
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 26b9e896df18794c0800000000000000
+      internalID: -4280809995394704542
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_10
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 643
+        width: 434
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ef787c0666f19e990800000000000000
+      internalID: -7356313991762180098
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_11
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 639
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ff61cc816cd3b4480800000000000000
+      internalID: -8913963116420917505
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_12
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 635
+        width: 434
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d94a6e6620d0d3750800000000000000
+      internalID: 6286194958846567581
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_13
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 627
+        width: 434
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ebabbb4e7c4026f90800000000000000
+      internalID: -6961996817378854210
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_14
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 619
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9b814c4001bbb21d0800000000000000
+      internalID: -3374397818310223687
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_15
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 619
+        width: 434
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8e16790cf4ce0f390800000000000000
+      internalID: -7786463928445869592
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_16
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 619
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 95fa34d90b9a89d40800000000000000
+      internalID: 5591405513398267737
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_17
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 611
+        width: 434
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e8cac9129f2bde4d0800000000000000
+      internalID: -3103627785107886962
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_18
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 599
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4a7570b81cdad9760800000000000000
+      internalID: 7466314804022957988
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_19
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 603
+        width: 434
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 79c6db6206adf7380800000000000000
+      internalID: -8971211826197074793
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_20
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 599
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 933ebf257fb96d9e0800000000000000
+      internalID: -1596917531304795335
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_21
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 595
+        width: 434
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5b326657c73f99760800000000000000
+      internalID: 7465265573214430133
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_22
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 587
+        width: 434
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8765376131aaffe00800000000000000
+      internalID: 1080769434549966456
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_23
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 579
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f40cbb998f890c8f0800000000000000
+      internalID: -522249363276447665
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_24
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 579
+        width: 434
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 636f81bbccc762380800000000000000
+      internalID: -8996365986871839178
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_25
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 579
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a83e2d05c662a3f40800000000000000
+      internalID: 5708917724299846538
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_26
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 559
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bba2f5c4daa5197b0800000000000000
+      internalID: -5219290792788546885
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_27
+      rect:
+        serializedVersion: 2
+        x: 31
+        y: 563
+        width: 450
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cf39b6f837f41e7e0800000000000000
+      internalID: -1738020623442275332
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_28
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 559
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2fd0229543cf56f60800000000000000
+      internalID: 8027099212621680114
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_29
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 555
+        width: 434
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: debbd0d87947a0250800000000000000
+      internalID: 5911665655132568557
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_30
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 547
+        width: 434
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5ae72eb04f21eb240800000000000000
+      internalID: 4809302291458981541
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_31
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 539
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9b67f1b39ac5f05b0800000000000000
+      internalID: -5399995546282789191
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_32
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 539
+        width: 434
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eaa4cf9263081fbd0800000000000000
+      internalID: -2598154539895076178
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_33
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 539
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cb5da6ee94a6b6300800000000000000
+      internalID: 246407470386959804
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_34
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 531
+        width: 434
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ffa78f8fe19227f60800000000000000
+      internalID: 8030526298557807359
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_35
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 519
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 27f97cbc1b5c65930800000000000000
+      internalID: 4131707075577749362
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_36
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 523
+        width: 434
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b0e31a7e1bc4dfd60800000000000000
+      internalID: 7925575246220967435
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_37
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 519
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4e576d55ee4294f20800000000000000
+      internalID: 3407295199143425508
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_38
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 515
+        width: 434
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 58b4b462d182dcfa0800000000000000
+      internalID: -5778918641184846971
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_39
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 507
+        width: 434
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 01d8c9cebbb948ba0800000000000000
+      internalID: -6087569564867195632
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_40
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 499
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 69e2cca612032e850800000000000000
+      internalID: 6404734540158086806
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_41
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 499
+        width: 434
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6d011bb9fd68bc4e0800000000000000
+      internalID: -1960324917841817386
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_42
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 499
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cd87d56278ad063c0800000000000000
+      internalID: -4368251364550280996
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_43
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 491
+        width: 434
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 61f3c383786995a10800000000000000
+      internalID: 1898714225421598486
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_44
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 479
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3a3e4b15ccc2667f0800000000000000
+      internalID: -619758642661104733
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_45
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 483
+        width: 434
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9020ff2964fe5e540800000000000000
+      internalID: 5036694844676702729
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_46
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 479
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 549218ec2add77820800000000000000
+      internalID: 2916042975064697157
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_47
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 475
+        width: 434
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e72ef2973c66e2d60800000000000000
+      internalID: 7867338588800672382
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_48
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 467
+        width: 434
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 231b27e41f2723210800000000000000
+      internalID: 1311236822247059762
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_49
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 459
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3237d17b0da704ec0800000000000000
+      internalID: -3584730266542968029
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_50
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 459
+        width: 434
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 653f6fbb5e6b55920800000000000000
+      internalID: 2978487826392740694
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_51
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 459
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 75f3f4518463fdd60800000000000000
+      internalID: 7917106353163681623
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_52
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 451
+        width: 434
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 293fe3bcb41152700800000000000000
+      internalID: 514836749633909650
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_53
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 439
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8549376bca1a214f0800000000000000
+      internalID: -859446815706868648
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_54
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 443
+        width: 434
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aa739d117174bb4d0800000000000000
+      internalID: -3117820152614668374
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_55
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 439
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ce02c84e134018cf0800000000000000
+      internalID: -251915491821739796
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_56
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 435
+        width: 434
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6fbc4c97f1e26a9d0800000000000000
+      internalID: -2763470608623416330
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_57
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 427
+        width: 434
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0cef273256678e970800000000000000
+      internalID: 8784401249944665792
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_58
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 419
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 10818026f30893c60800000000000000
+      internalID: 7798405239484717057
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_59
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 419
+        width: 434
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 95598a93eaf62fe00800000000000000
+      internalID: 1077046054977312089
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_60
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 419
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 25ccb779b733cd1b0800000000000000
+      internalID: -5630568828204495790
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_61
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 411
+        width: 434
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ceaf5882728c66ae0800000000000000
+      internalID: -1556336550700778772
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_62
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 399
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6d89e7675e8af7b00800000000000000
+      internalID: 828566559948445910
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_63
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 403
+        width: 434
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 278134ea720965620800000000000000
+      internalID: 2762553921540135026
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_64
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 399
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0cb4d3b629dfe4130800000000000000
+      internalID: 3553055961348131776
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_65
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 395
+        width: 434
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 85233533dd0ae6060800000000000000
+      internalID: 6948668146988560984
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_66
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 387
+        width: 434
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c0ff40787a8f57a10800000000000000
+      internalID: 1906703415669751564
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_67
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 379
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 001be94429733ec70800000000000000
+      internalID: 8999097581772386560
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_68
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 379
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7772bc326cf7f6270800000000000000
+      internalID: 8245949931719436151
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_69
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 359
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c0b6250ebd97cb660800000000000000
+      internalID: 7402925872758549260
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_70
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 359
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6bd48b3e4fb1cd6a0800000000000000
+      internalID: -6423228229930693194
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_71
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 339
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 71841fbe13f1c2f90800000000000000
+      internalID: -6977167423431423977
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_72
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 339
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7f1b22068de6bfeb0800000000000000
+      internalID: -4685029111743991305
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_73
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 319
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4aaba026ecae23d00800000000000000
+      internalID: 951080643457628836
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_74
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 319
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 55705f8874a2f1c10800000000000000
+      internalID: 2026384844068816725
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_75
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 299
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7af2b6cecbfd1d3c0800000000000000
+      internalID: -4336438963667783769
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_76
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 299
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 503ac8cc12b32b5a0800000000000000
+      internalID: -6507073495245217019
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_77
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 279
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a37c23e87f34e5b50800000000000000
+      internalID: 6583774435783919418
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_78
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 279
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bb54fcc30de69a390800000000000000
+      internalID: -7806586638417574469
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_79
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 259
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a378ad071f0a35e30800000000000000
+      internalID: 4491110212259448634
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_80
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 259
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c7420aeee3b296c00800000000000000
+      internalID: 894293550301193340
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_81
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 239
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 691b0cf05a28c3b20800000000000000
+      internalID: 3115508687679041942
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_82
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 239
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6c4e68fea8a9e8e20800000000000000
+      internalID: 3354788693952357574
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_83
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 219
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dce8eaf0833fd53e0800000000000000
+      internalID: -2063225632159002931
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_84
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 219
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 817197c34ad402000800000000000000
+      internalID: 9092567039285016
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_85
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 199
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8ad562373341857c0800000000000000
+      internalID: -4082490851003572824
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_86
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 199
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c872a1000acd67560800000000000000
+      internalID: 7311273624837171084
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_87
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 179
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 98227b2c6b26b3530800000000000000
+      internalID: 3835768044726461065
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_88
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 179
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2e77b6d6f7e096660800000000000000
+      internalID: 7379445404882663394
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_89
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 159
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a38a0212cbe1f3420800000000000000
+      internalID: 2611840102256650298
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_90
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 159
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a1d5a8ddcc5506b80800000000000000
+      internalID: -8403622566294823654
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_91
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 139
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d470c5188387d3eb0800000000000000
+      internalID: -4738499048840100019
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_92
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 139
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9657295639588ff20800000000000000
+      internalID: 3456659582117639529
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_93
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 119
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 068234fa5e2549530800000000000000
+      internalID: 3860801927004760160
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_94
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 119
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 66713608ddc9aead0800000000000000
+      internalID: -2672150953735284890
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_95
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 99
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 02154985216719e00800000000000000
+      internalID: 1049750009321640224
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_96
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 99
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0f0698f417998d2b0800000000000000
+      internalID: -5559525028044119824
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_97
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 79
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cd295a68884376390800000000000000
+      internalID: -7825228066553752868
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_98
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 79
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1497b7542079f37e0800000000000000
+      internalID: -1783540891403978431
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_99
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 59
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 318e126c6773e3860800000000000000
+      internalID: 7511502211770345491
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_100
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 59
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 848871376f737fc50800000000000000
+      internalID: 6698884502369306696
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_101
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 39
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c47316ee1dbd81790800000000000000
+      internalID: -7559050279847381172
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_flip_102
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 39
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a83a436578ae8eea0800000000000000
+      internalID: -5843162649525443702
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      fx_flip_0: 432621664844770392
+      fx_flip_1: 520991415409280437
+      fx_flip_10: -7356313991762180098
+      fx_flip_100: 6698884502369306696
+      fx_flip_101: -7559050279847381172
+      fx_flip_102: -5843162649525443702
+      fx_flip_11: -8913963116420917505
+      fx_flip_12: 6286194958846567581
+      fx_flip_13: -6961996817378854210
+      fx_flip_14: -3374397818310223687
+      fx_flip_15: -7786463928445869592
+      fx_flip_16: 5591405513398267737
+      fx_flip_17: -3103627785107886962
+      fx_flip_18: 7466314804022957988
+      fx_flip_19: -8971211826197074793
+      fx_flip_2: -2899869667491709867
+      fx_flip_20: -1596917531304795335
+      fx_flip_21: 7465265573214430133
+      fx_flip_22: 1080769434549966456
+      fx_flip_23: -522249363276447665
+      fx_flip_24: -8996365986871839178
+      fx_flip_25: 5708917724299846538
+      fx_flip_26: -5219290792788546885
+      fx_flip_27: -1738020623442275332
+      fx_flip_28: 8027099212621680114
+      fx_flip_29: 5911665655132568557
+      fx_flip_3: 4758030133584893767
+      fx_flip_30: 4809302291458981541
+      fx_flip_31: -5399995546282789191
+      fx_flip_32: -2598154539895076178
+      fx_flip_33: 246407470386959804
+      fx_flip_34: 8030526298557807359
+      fx_flip_35: 4131707075577749362
+      fx_flip_36: 7925575246220967435
+      fx_flip_37: 3407295199143425508
+      fx_flip_38: -5778918641184846971
+      fx_flip_39: -6087569564867195632
+      fx_flip_4: -4065978491093058016
+      fx_flip_40: 6404734540158086806
+      fx_flip_41: -1960324917841817386
+      fx_flip_42: -4368251364550280996
+      fx_flip_43: 1898714225421598486
+      fx_flip_44: -619758642661104733
+      fx_flip_45: 5036694844676702729
+      fx_flip_46: 2916042975064697157
+      fx_flip_47: 7867338588800672382
+      fx_flip_48: 1311236822247059762
+      fx_flip_49: -3584730266542968029
+      fx_flip_5: -4216055450967797919
+      fx_flip_50: 2978487826392740694
+      fx_flip_51: 7917106353163681623
+      fx_flip_52: 514836749633909650
+      fx_flip_53: -859446815706868648
+      fx_flip_54: -3117820152614668374
+      fx_flip_55: -251915491821739796
+      fx_flip_56: -2763470608623416330
+      fx_flip_57: 8784401249944665792
+      fx_flip_58: 7798405239484717057
+      fx_flip_59: 1077046054977312089
+      fx_flip_6: 1867841644273527436
+      fx_flip_60: -5630568828204495790
+      fx_flip_61: -1556336550700778772
+      fx_flip_62: 828566559948445910
+      fx_flip_63: 2762553921540135026
+      fx_flip_64: 3553055961348131776
+      fx_flip_65: 6948668146988560984
+      fx_flip_66: 1906703415669751564
+      fx_flip_67: 8999097581772386560
+      fx_flip_68: 8245949931719436151
+      fx_flip_69: 7402925872758549260
+      fx_flip_7: -1769725252882492044
+      fx_flip_70: -6423228229930693194
+      fx_flip_71: -6977167423431423977
+      fx_flip_72: -4685029111743991305
+      fx_flip_73: 951080643457628836
+      fx_flip_74: 2026384844068816725
+      fx_flip_75: -4336438963667783769
+      fx_flip_76: -6507073495245217019
+      fx_flip_77: 6583774435783919418
+      fx_flip_78: -7806586638417574469
+      fx_flip_79: 4491110212259448634
+      fx_flip_8: -342176333965014174
+      fx_flip_80: 894293550301193340
+      fx_flip_81: 3115508687679041942
+      fx_flip_82: 3354788693952357574
+      fx_flip_83: -2063225632159002931
+      fx_flip_84: 9092567039285016
+      fx_flip_85: -4082490851003572824
+      fx_flip_86: 7311273624837171084
+      fx_flip_87: 3835768044726461065
+      fx_flip_88: 7379445404882663394
+      fx_flip_89: 2611840102256650298
+      fx_flip_9: -4280809995394704542
+      fx_flip_90: -8403622566294823654
+      fx_flip_91: -4738499048840100019
+      fx_flip_92: 3456659582117639529
+      fx_flip_93: 3860801927004760160
+      fx_flip_94: -2672150953735284890
+      fx_flip_95: 1049750009321640224
+      fx_flip_96: -5559525028044119824
+      fx_flip_97: -7825228066553752868
+      fx_flip_98: -1783540891403978431
+      fx_flip_99: 7511502211770345491
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
