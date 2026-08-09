@@ -1,0 +1,4301 @@
+{
+  "meta": {
+    "name": "FlipCards - Arcade Horror CRT UI Kit",
+    "generated": "2026-08-08",
+    "authoringGrid": "1x = 1 pixel logico; export NEAREST a 2x e 4x",
+    "board": [
+      960,
+      540
+    ],
+    "card": [
+      112,
+      168
+    ],
+    "artWindow": [
+      80,
+      80
+    ],
+    "scales": [
+      1,
+      2,
+      4
+    ],
+    "recommended": {
+      "canvasReference": [
+        1920,
+        1080
+      ],
+      "spriteScale": 2,
+      "pixelsPerUnit": 1,
+      "filterMode": "Point",
+      "compression": "None",
+      "meshType": "FullRect",
+      "wrapMode": "Clamp (Repeat per i tile_*)"
+    },
+    "atlas": {
+      "file": "atlas/flipcards_ui_atlas@1x.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "rectOrigin": "top-left (converti in Unity: y_unity = atlasH - y - h)"
+    },
+    "palette": {
+      "void": "#040508",
+      "void2": "#090B10",
+      "ink": "#0F121A",
+      "ink2": "#161B26",
+      "steel": "#262E3C",
+      "steel_hi": "#3E4A5E",
+      "steel_lo": "#181D28",
+      "bone": "#D8E4D6",
+      "bone_dim": "#8A988E",
+      "bone_lo": "#4E5854",
+      "phos": "#3DFF7A",
+      "phos_hi": "#AAFFC4",
+      "phos_mid": "#1AA84E",
+      "phos_lo": "#0A4A26",
+      "phos_vlo": "#062616",
+      "blood": "#FF2B3C",
+      "blood_hi": "#FF8A8A",
+      "blood_mid": "#AA1422",
+      "blood_lo": "#560812",
+      "blood_vlo": "#2C060C",
+      "mag": "#FF2FD0",
+      "mag_hi": "#FF9EEC",
+      "mag_mid": "#AC188A",
+      "mag_lo": "#520A42",
+      "amber": "#FFB000",
+      "amber_mid": "#B07000",
+      "amber_lo": "#563600",
+      "cyan": "#38E8FF",
+      "cyan_mid": "#1884A8",
+      "cyan_lo": "#0A3A4E",
+      "purple": "#843ED2",
+      "purple_lo": "#36165C"
+    },
+    "factionColors": {
+      "A": "#FF2B3C",
+      "B": "#38E8FF",
+      "C": "#3DFF7A"
+    }
+  },
+  "layouts": {
+    "card": {
+      "size": [
+        112,
+        168
+      ],
+      "name_plate": [
+        6,
+        6,
+        100,
+        17
+      ],
+      "art_window": [
+        16,
+        26,
+        80,
+        80
+      ],
+      "stat_row": [
+        6,
+        110,
+        100,
+        18
+      ],
+      "stat_slots": [
+        [
+          6,
+          110,
+          32,
+          18
+        ],
+        [
+          40,
+          110,
+          32,
+          18
+        ],
+        [
+          74,
+          110,
+          32,
+          18
+        ]
+      ],
+      "flip_strip": [
+        6,
+        131,
+        100,
+        11
+      ],
+      "flip_cells": [
+        [
+          6,
+          131,
+          32,
+          11
+        ],
+        [
+          40,
+          131,
+          32,
+          11
+        ],
+        [
+          74,
+          131,
+          32,
+          11
+        ]
+      ],
+      "state_banner": [
+        6,
+        145,
+        100,
+        17
+      ],
+      "faction_tag": [
+        92,
+        8,
+        13,
+        13
+      ],
+      "cost_stud": [
+        6,
+        26,
+        12,
+        12
+      ]
+    },
+    "enemy": {
+      "size": [
+        112,
+        168
+      ],
+      "name_plate": [
+        6,
+        6,
+        100,
+        17
+      ],
+      "art_window": [
+        16,
+        26,
+        80,
+        80
+      ],
+      "stat_row": [
+        6,
+        110,
+        100,
+        18
+      ],
+      "stat_slots": [
+        [
+          6,
+          110,
+          32,
+          18
+        ],
+        [
+          40,
+          110,
+          32,
+          18
+        ],
+        [
+          74,
+          110,
+          32,
+          18
+        ]
+      ],
+      "flip_strip": [
+        6,
+        131,
+        100,
+        11
+      ],
+      "flip_cells": [
+        [
+          6,
+          131,
+          32,
+          11
+        ],
+        [
+          40,
+          131,
+          32,
+          11
+        ],
+        [
+          74,
+          131,
+          32,
+          11
+        ]
+      ],
+      "state_banner": [
+        6,
+        145,
+        100,
+        17
+      ],
+      "faction_tag": [
+        92,
+        8,
+        13,
+        13
+      ],
+      "cost_stud": [
+        6,
+        26,
+        12,
+        12
+      ]
+    },
+    "board": {
+      "size": [
+        960,
+        540
+      ],
+      "safe_margin": 8,
+      "main_area": [
+        8,
+        8,
+        736,
+        524
+      ],
+      "sidebar": [
+        752,
+        8,
+        200,
+        524
+      ],
+      "turn_plate": [
+        8,
+        10,
+        201,
+        31
+      ],
+      "phase_banner": [
+        470,
+        10,
+        275,
+        31
+      ],
+      "boss_panel": [
+        8,
+        46,
+        737,
+        53
+      ],
+      "enemy_slots": [
+        [
+          168,
+          106,
+          112,
+          168
+        ],
+        [
+          320,
+          106,
+          112,
+          168
+        ],
+        [
+          472,
+          106,
+          112,
+          168
+        ]
+      ],
+      "combat_readout": [
+        [
+          168,
+          280,
+          112,
+          20
+        ],
+        [
+          320,
+          280,
+          112,
+          20
+        ],
+        [
+          472,
+          280,
+          112,
+          20
+        ]
+      ],
+      "player_slots": [
+        [
+          168,
+          304,
+          112,
+          168
+        ],
+        [
+          320,
+          304,
+          112,
+          168
+        ],
+        [
+          472,
+          304,
+          112,
+          168
+        ]
+      ],
+      "player_bar": [
+        8,
+        480,
+        737,
+        39
+      ],
+      "side_counters": [
+        752,
+        10,
+        201,
+        27
+      ],
+      "side_inspector": [
+        752,
+        42,
+        201,
+        259
+      ],
+      "side_log": [
+        752,
+        306,
+        201,
+        109
+      ],
+      "side_buttons": [
+        752,
+        420,
+        201,
+        113
+      ],
+      "button_size": [
+        200,
+        32
+      ],
+      "button_gap": 6
+    }
+  },
+  "recipes": {
+    "player_card": {
+      "footprint": [
+        112,
+        168
+      ],
+      "layers": [
+        {
+          "z": 0,
+          "sprite": "card_shadow",
+          "anchor": "offset",
+          "rect": [
+            -6,
+            -4,
+            124,
+            180
+          ]
+        },
+        {
+          "z": 10,
+          "sprite": "card_art_slot",
+          "anchor": "art_window",
+          "source": "data.portrait",
+          "mask": "mask_art_square",
+          "note": "il ritratto va SOTTO la cornice: la finestra della cornice e' trasparente"
+        },
+        {
+          "z": 20,
+          "sprite": "card_front_{faction}",
+          "anchor": "size"
+        },
+        {
+          "z": 30,
+          "sprite": "tag_faction_{faction}",
+          "anchor": "faction_tag"
+        },
+        {
+          "z": 30,
+          "sprite": "badge_atk",
+          "anchor": "stat_slots[0]",
+          "text": "data.atk"
+        },
+        {
+          "z": 30,
+          "sprite": "badge_hp",
+          "anchor": "stat_slots[1]",
+          "text": "data.hp"
+        },
+        {
+          "z": 30,
+          "sprite": "badge_def",
+          "anchor": "stat_slots[2]",
+          "text": "data.def"
+        },
+        {
+          "z": 30,
+          "sprite": "flip_cell_{pattern[i]}",
+          "anchor": "flip_cells[i]",
+          "repeat": 3
+        },
+        {
+          "z": 30,
+          "sprite": "banner_{face}",
+          "anchor": "state_banner",
+          "text": "FRONTE|RETRO"
+        },
+        {
+          "z": 40,
+          "text": "data.name",
+          "anchor": "name_plate",
+          "style": "title"
+        },
+        {
+          "z": 50,
+          "sprite": "fx_select",
+          "anchor": "bleed8",
+          "state": "selected"
+        },
+        {
+          "z": 50,
+          "sprite": "fx_target",
+          "anchor": "bleed8",
+          "state": "targeted"
+        },
+        {
+          "z": 50,
+          "sprite": "fx_damage",
+          "anchor": "bleed8",
+          "state": "damaged"
+        }
+      ]
+    },
+    "enemy_card": {
+      "footprint": [
+        112,
+        168
+      ],
+      "layers": [
+        {
+          "z": 10,
+          "sprite": "enemy_art_slot",
+          "anchor": "art_window",
+          "source": "data.portrait",
+          "mask": "mask_art_square"
+        },
+        {
+          "z": 15,
+          "sprite": "enemy_medallion_{faction}",
+          "anchor": "art_window_expanded",
+          "optional": true,
+          "note": "opzionale: incornicia il ritratto in tondo"
+        },
+        {
+          "z": 20,
+          "sprite": "enemy_panel_{faction}",
+          "anchor": "size"
+        },
+        {
+          "z": 30,
+          "sprite": "tag_faction_{faction}",
+          "anchor": "faction_tag"
+        },
+        {
+          "z": 30,
+          "sprite": "badge_atk",
+          "anchor": "stat_slots[0]",
+          "text": "data.atk"
+        },
+        {
+          "z": 30,
+          "sprite": "badge_hp",
+          "anchor": "stat_slots[1]",
+          "text": "data.hp"
+        },
+        {
+          "z": 30,
+          "sprite": "badge_def",
+          "anchor": "stat_slots[2]",
+          "text": "data.def"
+        },
+        {
+          "z": 30,
+          "sprite": "flip_cell_{pattern[i]}",
+          "anchor": "flip_cells[i]",
+          "repeat": 3
+        },
+        {
+          "z": 30,
+          "sprite": "banner_enemy",
+          "anchor": "state_banner"
+        },
+        {
+          "z": 40,
+          "text": "data.name",
+          "anchor": "name_plate",
+          "style": "title"
+        }
+      ]
+    },
+    "board": {
+      "footprint": [
+        960,
+        540
+      ],
+      "layers": [
+        {
+          "z": 0,
+          "sprite": "board_bg",
+          "anchor": "size"
+        },
+        {
+          "z": 10,
+          "sprite": "panel_blood",
+          "anchor": "boss_panel",
+          "nineSlice": true
+        },
+        {
+          "z": 12,
+          "sprite": "bar_frame_boss",
+          "anchor": "boss_panel.inner",
+          "nineSlice": true
+        },
+        {
+          "z": 13,
+          "sprite": "bar_fill_boss",
+          "anchor": "boss_panel.fill",
+          "tile": true
+        },
+        {
+          "z": 20,
+          "sprite": "enemy_slot_empty",
+          "anchor": "enemy_slots[i]",
+          "repeat": 3
+        },
+        {
+          "z": 20,
+          "sprite": "card_slot_empty",
+          "anchor": "player_slots[i]",
+          "repeat": 3
+        },
+        {
+          "z": 30,
+          "sprite": "banner_phase",
+          "anchor": "phase_banner",
+          "nineSlice": true
+        },
+        {
+          "z": 30,
+          "sprite": "banner_flat",
+          "anchor": "turn_plate",
+          "nineSlice": true
+        },
+        {
+          "z": 30,
+          "sprite": "panel_phos",
+          "anchor": "player_bar",
+          "nineSlice": true
+        },
+        {
+          "z": 32,
+          "sprite": "bar_frame_hp",
+          "anchor": "player_bar.inner",
+          "nineSlice": true
+        },
+        {
+          "z": 33,
+          "sprite": "bar_fill_hp",
+          "anchor": "player_bar.fill",
+          "tile": true
+        },
+        {
+          "z": 34,
+          "sprite": "pip_ap_{state}",
+          "anchor": "player_bar.pips",
+          "repeat": "ap_max"
+        },
+        {
+          "z": 40,
+          "sprite": "plate_counter",
+          "anchor": "side_counters",
+          "nineSlice": true
+        },
+        {
+          "z": 40,
+          "sprite": "panel_dark",
+          "anchor": "side_inspector",
+          "nineSlice": true
+        },
+        {
+          "z": 41,
+          "sprite": "panel_screen",
+          "anchor": "side_inspector.inner",
+          "nineSlice": true
+        },
+        {
+          "z": 40,
+          "sprite": "panel_dark",
+          "anchor": "side_log",
+          "nineSlice": true
+        },
+        {
+          "z": 41,
+          "sprite": "panel_screen",
+          "anchor": "side_log.inner",
+          "nineSlice": true
+        },
+        {
+          "z": 50,
+          "sprite": "btn_{tone}_{state}",
+          "anchor": "side_buttons[i]",
+          "repeat": 3
+        },
+        {
+          "z": 90,
+          "sprite": "overlay_scanlines",
+          "anchor": "size",
+          "blend": "multiply/overlay"
+        },
+        {
+          "z": 95,
+          "sprite": "overlay_vignette",
+          "anchor": "size"
+        },
+        {
+          "z": 99,
+          "sprite": "overlay_bezel",
+          "anchor": "size"
+        }
+      ]
+    }
+  },
+  "sprites": [
+    {
+      "name": "badge_atk",
+      "group": "badge",
+      "size": [
+        32,
+        18
+      ],
+      "atlasRect": [
+        584,
+        593,
+        32,
+        18
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "badge statistica ATK 32x18 (numero via TMP a destra)"
+    },
+    {
+      "name": "badge_cost",
+      "group": "badge",
+      "size": [
+        32,
+        18
+      ],
+      "atlasRect": [
+        686,
+        593,
+        32,
+        18
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "badge statistica COST 32x18 (numero via TMP a destra)"
+    },
+    {
+      "name": "badge_def",
+      "group": "badge",
+      "size": [
+        32,
+        18
+      ],
+      "atlasRect": [
+        652,
+        593,
+        32,
+        18
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "badge statistica DEF 32x18 (numero via TMP a destra)"
+    },
+    {
+      "name": "badge_hp",
+      "group": "badge",
+      "size": [
+        32,
+        18
+      ],
+      "atlasRect": [
+        618,
+        593,
+        32,
+        18
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "badge statistica HP 32x18 (numero via TMP a destra)"
+    },
+    {
+      "name": "badge_neutral",
+      "group": "badge",
+      "size": [
+        32,
+        18
+      ],
+      "atlasRect": [
+        720,
+        593,
+        32,
+        18
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "badge statistica NEUTRAL 32x18 (numero via TMP a destra)"
+    },
+    {
+      "name": "banner_back",
+      "group": "banner",
+      "size": [
+        40,
+        17
+      ],
+      "atlasRect": [
+        796,
+        593,
+        40,
+        17
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        10,
+        4,
+        10,
+        4
+      ],
+      "tileable": false,
+      "nineSlice": true,
+      "note": "banner stato back 9-slice (chevron)"
+    },
+    {
+      "name": "banner_enemy",
+      "group": "banner",
+      "size": [
+        40,
+        17
+      ],
+      "atlasRect": [
+        838,
+        593,
+        40,
+        17
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        10,
+        4,
+        10,
+        4
+      ],
+      "tileable": false,
+      "nineSlice": true,
+      "note": "banner stato enemy 9-slice (chevron)"
+    },
+    {
+      "name": "banner_flat",
+      "group": "banner",
+      "size": [
+        40,
+        17
+      ],
+      "atlasRect": [
+        964,
+        593,
+        40,
+        17
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        8,
+        4,
+        8,
+        4
+      ],
+      "tileable": false,
+      "nineSlice": true,
+      "note": "targhetta rettangolare 9-slice"
+    },
+    {
+      "name": "banner_front",
+      "group": "banner",
+      "size": [
+        40,
+        17
+      ],
+      "atlasRect": [
+        754,
+        593,
+        40,
+        17
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        10,
+        4,
+        10,
+        4
+      ],
+      "tileable": false,
+      "nineSlice": true,
+      "note": "banner stato front 9-slice (chevron)"
+    },
+    {
+      "name": "banner_neutral",
+      "group": "banner",
+      "size": [
+        40,
+        17
+      ],
+      "atlasRect": [
+        922,
+        593,
+        40,
+        17
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        10,
+        4,
+        10,
+        4
+      ],
+      "tileable": false,
+      "nineSlice": true,
+      "note": "banner stato neutral 9-slice (chevron)"
+    },
+    {
+      "name": "banner_phase",
+      "group": "banner",
+      "size": [
+        48,
+        26
+      ],
+      "atlasRect": [
+        489,
+        593,
+        48,
+        26
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        14,
+        6,
+        14,
+        6
+      ],
+      "tileable": false,
+      "nineSlice": true,
+      "note": "banner di fase grande 9-slice"
+    },
+    {
+      "name": "banner_warn",
+      "group": "banner",
+      "size": [
+        40,
+        17
+      ],
+      "atlasRect": [
+        880,
+        593,
+        40,
+        17
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        10,
+        4,
+        10,
+        4
+      ],
+      "tileable": false,
+      "nineSlice": true,
+      "note": "banner stato warn 9-slice (chevron)"
+    },
+    {
+      "name": "bar_cap_boss",
+      "group": "bar",
+      "size": [
+        5,
+        20
+      ],
+      "atlasRect": [
+        573,
+        593,
+        5,
+        20
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "terminale barra boss"
+    },
+    {
+      "name": "bar_cap_charge",
+      "group": "bar",
+      "size": [
+        5,
+        12
+      ],
+      "atlasRect": [
+        788,
+        627,
+        5,
+        12
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "terminale barra charge"
+    },
+    {
+      "name": "bar_cap_hp",
+      "group": "bar",
+      "size": [
+        5,
+        14
+      ],
+      "atlasRect": [
+        603,
+        627,
+        5,
+        14
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "terminale barra hp"
+    },
+    {
+      "name": "bar_cap_shield",
+      "group": "bar",
+      "size": [
+        5,
+        12
+      ],
+      "atlasRect": [
+        747,
+        627,
+        5,
+        12
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "terminale barra shield"
+    },
+    {
+      "name": "bar_fill_boss",
+      "group": "bar",
+      "size": [
+        8,
+        14
+      ],
+      "atlasRect": [
+        610,
+        627,
+        8,
+        14
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": true,
+      "nineSlice": false,
+      "note": "riempimento barra boss, tileable in orizzontale"
+    },
+    {
+      "name": "bar_fill_charge",
+      "group": "bar",
+      "size": [
+        8,
+        6
+      ],
+      "atlasRect": [
+        961,
+        627,
+        8,
+        6
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": true,
+      "nineSlice": false,
+      "note": "riempimento barra charge, tileable in orizzontale"
+    },
+    {
+      "name": "bar_fill_hp",
+      "group": "bar",
+      "size": [
+        8,
+        8
+      ],
+      "atlasRect": [
+        941,
+        627,
+        8,
+        8
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": true,
+      "nineSlice": false,
+      "note": "riempimento barra hp, tileable in orizzontale"
+    },
+    {
+      "name": "bar_fill_shield",
+      "group": "bar",
+      "size": [
+        8,
+        6
+      ],
+      "atlasRect": [
+        951,
+        627,
+        8,
+        6
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": true,
+      "nineSlice": false,
+      "note": "riempimento barra shield, tileable in orizzontale"
+    },
+    {
+      "name": "bar_frame_boss",
+      "group": "bar",
+      "size": [
+        32,
+        20
+      ],
+      "atlasRect": [
+        539,
+        593,
+        32,
+        20
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        8,
+        4,
+        8,
+        4
+      ],
+      "tileable": false,
+      "nineSlice": true,
+      "note": "telaio barra boss 9-slice"
+    },
+    {
+      "name": "bar_frame_charge",
+      "group": "bar",
+      "size": [
+        32,
+        12
+      ],
+      "atlasRect": [
+        754,
+        627,
+        32,
+        12
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        6,
+        4,
+        6,
+        4
+      ],
+      "tileable": false,
+      "nineSlice": true,
+      "note": "telaio barra charge 9-slice"
+    },
+    {
+      "name": "bar_frame_hp",
+      "group": "bar",
+      "size": [
+        32,
+        14
+      ],
+      "atlasRect": [
+        569,
+        627,
+        32,
+        14
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        6,
+        4,
+        6,
+        4
+      ],
+      "tileable": false,
+      "nineSlice": true,
+      "note": "telaio barra hp 9-slice"
+    },
+    {
+      "name": "bar_frame_shield",
+      "group": "bar",
+      "size": [
+        32,
+        12
+      ],
+      "atlasRect": [
+        713,
+        627,
+        32,
+        12
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        6,
+        4,
+        6,
+        4
+      ],
+      "tileable": false,
+      "nineSlice": true,
+      "note": "telaio barra shield 9-slice"
+    },
+    {
+      "name": "bar_tick",
+      "group": "bar",
+      "size": [
+        2,
+        20
+      ],
+      "atlasRect": [
+        580,
+        593,
+        2,
+        20
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "tacca divisoria barra"
+    },
+    {
+      "name": "board_bg",
+      "group": "board",
+      "size": [
+        960,
+        540
+      ],
+      "atlasRect": null,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "sfondo tabellone completo 960x540 (1x) / 1920x1080 (2x)"
+    },
+    {
+      "name": "btn_amber_disabled",
+      "group": "button",
+      "size": [
+        40,
+        32
+      ],
+      "atlasRect": [
+        379,
+        593,
+        40,
+        32
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        12,
+        10,
+        12,
+        10
+      ],
+      "tileable": false,
+      "nineSlice": true,
+      "note": "bottone amber stato disabled 9-slice"
+    },
+    {
+      "name": "btn_amber_hover",
+      "group": "button",
+      "size": [
+        40,
+        32
+      ],
+      "atlasRect": [
+        295,
+        593,
+        40,
+        32
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        12,
+        10,
+        12,
+        10
+      ],
+      "tileable": false,
+      "nineSlice": true,
+      "note": "bottone amber stato hover 9-slice"
+    },
+    {
+      "name": "btn_amber_idle",
+      "group": "button",
+      "size": [
+        40,
+        32
+      ],
+      "atlasRect": [
+        253,
+        593,
+        40,
+        32
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        12,
+        10,
+        12,
+        10
+      ],
+      "tileable": false,
+      "nineSlice": true,
+      "note": "bottone amber stato idle 9-slice"
+    },
+    {
+      "name": "btn_amber_press",
+      "group": "button",
+      "size": [
+        40,
+        32
+      ],
+      "atlasRect": [
+        337,
+        593,
+        40,
+        32
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        12,
+        10,
+        12,
+        10
+      ],
+      "tileable": false,
+      "nineSlice": true,
+      "note": "bottone amber stato press 9-slice"
+    },
+    {
+      "name": "btn_blood_disabled",
+      "group": "button",
+      "size": [
+        40,
+        32
+      ],
+      "atlasRect": [
+        211,
+        593,
+        40,
+        32
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        12,
+        10,
+        12,
+        10
+      ],
+      "tileable": false,
+      "nineSlice": true,
+      "note": "bottone blood stato disabled 9-slice"
+    },
+    {
+      "name": "btn_blood_hover",
+      "group": "button",
+      "size": [
+        40,
+        32
+      ],
+      "atlasRect": [
+        127,
+        593,
+        40,
+        32
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        12,
+        10,
+        12,
+        10
+      ],
+      "tileable": false,
+      "nineSlice": true,
+      "note": "bottone blood stato hover 9-slice"
+    },
+    {
+      "name": "btn_blood_idle",
+      "group": "button",
+      "size": [
+        40,
+        32
+      ],
+      "atlasRect": [
+        85,
+        593,
+        40,
+        32
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        12,
+        10,
+        12,
+        10
+      ],
+      "tileable": false,
+      "nineSlice": true,
+      "note": "bottone blood stato idle 9-slice"
+    },
+    {
+      "name": "btn_blood_press",
+      "group": "button",
+      "size": [
+        40,
+        32
+      ],
+      "atlasRect": [
+        169,
+        593,
+        40,
+        32
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        12,
+        10,
+        12,
+        10
+      ],
+      "tileable": false,
+      "nineSlice": true,
+      "note": "bottone blood stato press 9-slice"
+    },
+    {
+      "name": "btn_phos_disabled",
+      "group": "button",
+      "size": [
+        40,
+        32
+      ],
+      "atlasRect": [
+        43,
+        593,
+        40,
+        32
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        12,
+        10,
+        12,
+        10
+      ],
+      "tileable": false,
+      "nineSlice": true,
+      "note": "bottone phos stato disabled 9-slice"
+    },
+    {
+      "name": "btn_phos_hover",
+      "group": "button",
+      "size": [
+        40,
+        32
+      ],
+      "atlasRect": [
+        964,
+        527,
+        40,
+        32
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        12,
+        10,
+        12,
+        10
+      ],
+      "tileable": false,
+      "nineSlice": true,
+      "note": "bottone phos stato hover 9-slice"
+    },
+    {
+      "name": "btn_phos_idle",
+      "group": "button",
+      "size": [
+        40,
+        32
+      ],
+      "atlasRect": [
+        922,
+        527,
+        40,
+        32
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        12,
+        10,
+        12,
+        10
+      ],
+      "tileable": false,
+      "nineSlice": true,
+      "note": "bottone phos stato idle 9-slice"
+    },
+    {
+      "name": "btn_phos_press",
+      "group": "button",
+      "size": [
+        40,
+        32
+      ],
+      "atlasRect": [
+        1,
+        593,
+        40,
+        32
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        12,
+        10,
+        12,
+        10
+      ],
+      "tileable": false,
+      "nineSlice": true,
+      "note": "bottone phos stato press 9-slice"
+    },
+    {
+      "name": "btn_steel_disabled",
+      "group": "button",
+      "size": [
+        40,
+        32
+      ],
+      "atlasRect": [
+        880,
+        527,
+        40,
+        32
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        12,
+        10,
+        12,
+        10
+      ],
+      "tileable": false,
+      "nineSlice": true,
+      "note": "bottone steel stato disabled 9-slice"
+    },
+    {
+      "name": "btn_steel_hover",
+      "group": "button",
+      "size": [
+        40,
+        32
+      ],
+      "atlasRect": [
+        796,
+        527,
+        40,
+        32
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        12,
+        10,
+        12,
+        10
+      ],
+      "tileable": false,
+      "nineSlice": true,
+      "note": "bottone steel stato hover 9-slice"
+    },
+    {
+      "name": "btn_steel_idle",
+      "group": "button",
+      "size": [
+        40,
+        32
+      ],
+      "atlasRect": [
+        754,
+        527,
+        40,
+        32
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        12,
+        10,
+        12,
+        10
+      ],
+      "tileable": false,
+      "nineSlice": true,
+      "note": "bottone steel stato idle 9-slice"
+    },
+    {
+      "name": "btn_steel_press",
+      "group": "button",
+      "size": [
+        40,
+        32
+      ],
+      "atlasRect": [
+        838,
+        527,
+        40,
+        32
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        12,
+        10,
+        12,
+        10
+      ],
+      "tileable": false,
+      "nineSlice": true,
+      "note": "bottone steel stato press 9-slice"
+    },
+    {
+      "name": "card_back",
+      "group": "card",
+      "size": [
+        112,
+        168
+      ],
+      "atlasRect": [
+        115,
+        357,
+        112,
+        168
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "retro carta (opaco)"
+    },
+    {
+      "name": "card_front",
+      "group": "card",
+      "size": [
+        112,
+        168
+      ],
+      "atlasRect": [
+        647,
+        1,
+        112,
+        168
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "cornice carta giocatore - finestra arte 80x80 trasparente"
+    },
+    {
+      "name": "card_front_A",
+      "group": "card",
+      "size": [
+        112,
+        168
+      ],
+      "atlasRect": [
+        875,
+        1,
+        112,
+        168
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "cornice carta fazione A"
+    },
+    {
+      "name": "card_front_B",
+      "group": "card",
+      "size": [
+        112,
+        168
+      ],
+      "atlasRect": [
+        115,
+        187,
+        112,
+        168
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "cornice carta fazione B"
+    },
+    {
+      "name": "card_front_C",
+      "group": "card",
+      "size": [
+        112,
+        168
+      ],
+      "atlasRect": [
+        343,
+        187,
+        112,
+        168
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "cornice carta fazione C"
+    },
+    {
+      "name": "card_front_neutral",
+      "group": "card",
+      "size": [
+        112,
+        168
+      ],
+      "atlasRect": [
+        761,
+        1,
+        112,
+        168
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "cornice carta neutra da tingere a runtime"
+    },
+    {
+      "name": "card_rim_A",
+      "group": "card",
+      "size": [
+        112,
+        168
+      ],
+      "atlasRect": [
+        1,
+        187,
+        112,
+        168
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "solo rim fazione A, da sovrapporre alla cornice neutra"
+    },
+    {
+      "name": "card_rim_B",
+      "group": "card",
+      "size": [
+        112,
+        168
+      ],
+      "atlasRect": [
+        229,
+        187,
+        112,
+        168
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "solo rim fazione B, da sovrapporre alla cornice neutra"
+    },
+    {
+      "name": "card_rim_C",
+      "group": "card",
+      "size": [
+        112,
+        168
+      ],
+      "atlasRect": [
+        457,
+        187,
+        112,
+        168
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "solo rim fazione C, da sovrapporre alla cornice neutra"
+    },
+    {
+      "name": "card_shadow",
+      "group": "card",
+      "size": [
+        124,
+        180
+      ],
+      "atlasRect": [
+        521,
+        1,
+        124,
+        180
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "ombra proiettata carta"
+    },
+    {
+      "name": "card_slot_empty",
+      "group": "slot",
+      "size": [
+        112,
+        168
+      ],
+      "atlasRect": [
+        229,
+        357,
+        112,
+        168
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "slot carta vuoto"
+    },
+    {
+      "name": "decal_crack_a",
+      "group": "decal",
+      "size": [
+        48,
+        48
+      ],
+      "atlasRect": [
+        67,
+        527,
+        48,
+        48
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "crepe sullo schermo"
+    },
+    {
+      "name": "decal_crack_b",
+      "group": "decal",
+      "size": [
+        48,
+        48
+      ],
+      "atlasRect": [
+        117,
+        527,
+        48,
+        48
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "crepe sullo schermo"
+    },
+    {
+      "name": "decal_drip_a",
+      "group": "decal",
+      "size": [
+        40,
+        44
+      ],
+      "atlasRect": [
+        167,
+        527,
+        40,
+        44
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "colata di sangue - da appendere sotto un bordo"
+    },
+    {
+      "name": "decal_drip_b",
+      "group": "decal",
+      "size": [
+        40,
+        44
+      ],
+      "atlasRect": [
+        209,
+        527,
+        40,
+        44
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "colata di sangue - da appendere sotto un bordo"
+    },
+    {
+      "name": "decal_drip_c",
+      "group": "decal",
+      "size": [
+        40,
+        44
+      ],
+      "atlasRect": [
+        251,
+        527,
+        40,
+        44
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "colata di sangue - da appendere sotto un bordo"
+    },
+    {
+      "name": "decal_scratch",
+      "group": "decal",
+      "size": [
+        80,
+        16
+      ],
+      "atlasRect": [
+        19,
+        627,
+        80,
+        16
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "graffi sul vetro"
+    },
+    {
+      "name": "decal_sigil_a",
+      "group": "decal",
+      "size": [
+        40,
+        40
+      ],
+      "atlasRect": [
+        425,
+        527,
+        40,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "sigillo occulto luminoso"
+    },
+    {
+      "name": "decal_sigil_b",
+      "group": "decal",
+      "size": [
+        40,
+        40
+      ],
+      "atlasRect": [
+        467,
+        527,
+        40,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "sigillo occulto luminoso"
+    },
+    {
+      "name": "decal_stain_a",
+      "group": "decal",
+      "size": [
+        64,
+        40
+      ],
+      "atlasRect": [
+        293,
+        527,
+        64,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "macchia/sporcizia"
+    },
+    {
+      "name": "decal_stain_b",
+      "group": "decal",
+      "size": [
+        64,
+        40
+      ],
+      "atlasRect": [
+        359,
+        527,
+        64,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "macchia/sporcizia"
+    },
+    {
+      "name": "divider_h",
+      "group": "panel",
+      "size": [
+        32,
+        5
+      ],
+      "atlasRect": [
+        971,
+        627,
+        32,
+        5
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        4,
+        0,
+        4,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": true,
+      "note": "divisore orizzontale 9-slice"
+    },
+    {
+      "name": "divider_v",
+      "group": "panel",
+      "size": [
+        5,
+        32
+      ],
+      "atlasRect": [
+        747,
+        527,
+        5,
+        32
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        4,
+        0,
+        4
+      ],
+      "tileable": false,
+      "nineSlice": true,
+      "note": "divisore verticale 9-slice"
+    },
+    {
+      "name": "enemy_medallion",
+      "group": "enemy",
+      "size": [
+        96,
+        96
+      ],
+      "atlasRect": [
+        751,
+        357,
+        96,
+        96
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "medaglione nemico neutro - apertura circolare trasparente"
+    },
+    {
+      "name": "enemy_medallion_A",
+      "group": "enemy",
+      "size": [
+        96,
+        96
+      ],
+      "atlasRect": [
+        457,
+        357,
+        96,
+        96
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "medaglione nemico fazione A - apertura circolare trasparente"
+    },
+    {
+      "name": "enemy_medallion_B",
+      "group": "enemy",
+      "size": [
+        96,
+        96
+      ],
+      "atlasRect": [
+        555,
+        357,
+        96,
+        96
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "medaglione nemico fazione B - apertura circolare trasparente"
+    },
+    {
+      "name": "enemy_medallion_C",
+      "group": "enemy",
+      "size": [
+        96,
+        96
+      ],
+      "atlasRect": [
+        653,
+        357,
+        96,
+        96
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "medaglione nemico fazione C - apertura circolare trasparente"
+    },
+    {
+      "name": "enemy_panel",
+      "group": "enemy",
+      "size": [
+        112,
+        168
+      ],
+      "atlasRect": [
+        571,
+        187,
+        112,
+        168
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "pannello nemico corrotto - stessa anatomia della carta"
+    },
+    {
+      "name": "enemy_panel_A",
+      "group": "enemy",
+      "size": [
+        112,
+        168
+      ],
+      "atlasRect": [
+        685,
+        187,
+        112,
+        168
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "pannello nemico corrotto fazione A"
+    },
+    {
+      "name": "enemy_panel_B",
+      "group": "enemy",
+      "size": [
+        112,
+        168
+      ],
+      "atlasRect": [
+        799,
+        187,
+        112,
+        168
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "pannello nemico corrotto fazione B"
+    },
+    {
+      "name": "enemy_panel_C",
+      "group": "enemy",
+      "size": [
+        112,
+        168
+      ],
+      "atlasRect": [
+        1,
+        357,
+        112,
+        168
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "pannello nemico corrotto fazione C"
+    },
+    {
+      "name": "enemy_slot_empty",
+      "group": "slot",
+      "size": [
+        112,
+        168
+      ],
+      "atlasRect": [
+        343,
+        357,
+        112,
+        168
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "slot nemico vuoto"
+    },
+    {
+      "name": "flip_cell_back",
+      "group": "badge",
+      "size": [
+        32,
+        11
+      ],
+      "atlasRect": [
+        829,
+        627,
+        32,
+        11
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "cella pattern di flip back 32x11"
+    },
+    {
+      "name": "flip_cell_current",
+      "group": "badge",
+      "size": [
+        32,
+        11
+      ],
+      "atlasRect": [
+        863,
+        627,
+        32,
+        11
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "cella pattern di flip current 32x11"
+    },
+    {
+      "name": "flip_cell_front",
+      "group": "badge",
+      "size": [
+        32,
+        11
+      ],
+      "atlasRect": [
+        795,
+        627,
+        32,
+        11
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "cella pattern di flip front 32x11"
+    },
+    {
+      "name": "flip_cell_unknown",
+      "group": "badge",
+      "size": [
+        32,
+        11
+      ],
+      "atlasRect": [
+        897,
+        627,
+        32,
+        11
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "cella pattern di flip unknown 32x11"
+    },
+    {
+      "name": "fx_damage",
+      "group": "fx",
+      "size": [
+        128,
+        184
+      ],
+      "atlasRect": [
+        261,
+        1,
+        128,
+        184
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "crepe/danno (bleed 8px)"
+    },
+    {
+      "name": "fx_flip",
+      "group": "fx",
+      "size": [
+        128,
+        184
+      ],
+      "atlasRect": [
+        391,
+        1,
+        128,
+        184
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "scia di flip (bleed 8px)"
+    },
+    {
+      "name": "fx_select",
+      "group": "fx",
+      "size": [
+        128,
+        184
+      ],
+      "atlasRect": [
+        1,
+        1,
+        128,
+        184
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "glow selezione (bleed 8px)"
+    },
+    {
+      "name": "fx_target",
+      "group": "fx",
+      "size": [
+        128,
+        184
+      ],
+      "atlasRect": [
+        131,
+        1,
+        128,
+        184
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "mirino bersaglio (bleed 8px)"
+    },
+    {
+      "name": "icon_arrow_down",
+      "group": "icon",
+      "size": [
+        16,
+        16
+      ],
+      "atlasRect": [
+        335,
+        627,
+        16,
+        16
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "icona arrow_down 16x16"
+    },
+    {
+      "name": "icon_arrow_up",
+      "group": "icon",
+      "size": [
+        16,
+        16
+      ],
+      "atlasRect": [
+        317,
+        627,
+        16,
+        16
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "icona arrow_up 16x16"
+    },
+    {
+      "name": "icon_bolt",
+      "group": "icon",
+      "size": [
+        16,
+        16
+      ],
+      "atlasRect": [
+        245,
+        627,
+        16,
+        16
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "icona bolt 16x16"
+    },
+    {
+      "name": "icon_clock",
+      "group": "icon",
+      "size": [
+        16,
+        16
+      ],
+      "atlasRect": [
+        389,
+        627,
+        16,
+        16
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "icona clock 16x16"
+    },
+    {
+      "name": "icon_deck",
+      "group": "icon",
+      "size": [
+        16,
+        16
+      ],
+      "atlasRect": [
+        191,
+        627,
+        16,
+        16
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "icona deck 16x16"
+    },
+    {
+      "name": "icon_diamond",
+      "group": "icon",
+      "size": [
+        16,
+        16
+      ],
+      "atlasRect": [
+        281,
+        627,
+        16,
+        16
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "icona diamond 16x16"
+    },
+    {
+      "name": "icon_drop",
+      "group": "icon",
+      "size": [
+        16,
+        16
+      ],
+      "atlasRect": [
+        227,
+        627,
+        16,
+        16
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "icona drop 16x16"
+    },
+    {
+      "name": "icon_eye",
+      "group": "icon",
+      "size": [
+        16,
+        16
+      ],
+      "atlasRect": [
+        173,
+        627,
+        16,
+        16
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "icona eye 16x16"
+    },
+    {
+      "name": "icon_flip",
+      "group": "icon",
+      "size": [
+        16,
+        16
+      ],
+      "atlasRect": [
+        353,
+        627,
+        16,
+        16
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "icona flip 16x16"
+    },
+    {
+      "name": "icon_hand",
+      "group": "icon",
+      "size": [
+        16,
+        16
+      ],
+      "atlasRect": [
+        209,
+        627,
+        16,
+        16
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "icona hand 16x16"
+    },
+    {
+      "name": "icon_heart",
+      "group": "icon",
+      "size": [
+        16,
+        16
+      ],
+      "atlasRect": [
+        101,
+        627,
+        16,
+        16
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "icona heart 16x16"
+    },
+    {
+      "name": "icon_heart_green",
+      "group": "icon",
+      "size": [
+        16,
+        16
+      ],
+      "atlasRect": [
+        479,
+        627,
+        16,
+        16
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": ""
+    },
+    {
+      "name": "icon_lock",
+      "group": "icon",
+      "size": [
+        16,
+        16
+      ],
+      "atlasRect": [
+        371,
+        627,
+        16,
+        16
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "icona lock 16x16"
+    },
+    {
+      "name": "icon_minus",
+      "group": "icon",
+      "size": [
+        16,
+        16
+      ],
+      "atlasRect": [
+        425,
+        627,
+        16,
+        16
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "icona minus 16x16"
+    },
+    {
+      "name": "icon_plus",
+      "group": "icon",
+      "size": [
+        16,
+        16
+      ],
+      "atlasRect": [
+        407,
+        627,
+        16,
+        16
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "icona plus 16x16"
+    },
+    {
+      "name": "icon_shield",
+      "group": "icon",
+      "size": [
+        16,
+        16
+      ],
+      "atlasRect": [
+        137,
+        627,
+        16,
+        16
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "icona shield 16x16"
+    },
+    {
+      "name": "icon_shield_cyan",
+      "group": "icon",
+      "size": [
+        16,
+        16
+      ],
+      "atlasRect": [
+        497,
+        627,
+        16,
+        16
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": ""
+    },
+    {
+      "name": "icon_skull",
+      "group": "icon",
+      "size": [
+        16,
+        16
+      ],
+      "atlasRect": [
+        155,
+        627,
+        16,
+        16
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "icona skull 16x16"
+    },
+    {
+      "name": "icon_star",
+      "group": "icon",
+      "size": [
+        16,
+        16
+      ],
+      "atlasRect": [
+        263,
+        627,
+        16,
+        16
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "icona star 16x16"
+    },
+    {
+      "name": "icon_swap",
+      "group": "icon",
+      "size": [
+        16,
+        16
+      ],
+      "atlasRect": [
+        443,
+        627,
+        16,
+        16
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "icona swap 16x16"
+    },
+    {
+      "name": "icon_sword",
+      "group": "icon",
+      "size": [
+        16,
+        16
+      ],
+      "atlasRect": [
+        119,
+        627,
+        16,
+        16
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "icona sword 16x16"
+    },
+    {
+      "name": "icon_sword_red",
+      "group": "icon",
+      "size": [
+        16,
+        16
+      ],
+      "atlasRect": [
+        461,
+        627,
+        16,
+        16
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": ""
+    },
+    {
+      "name": "icon_target",
+      "group": "icon",
+      "size": [
+        16,
+        16
+      ],
+      "atlasRect": [
+        299,
+        627,
+        16,
+        16
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "icona target 16x16"
+    },
+    {
+      "name": "mask_art_circle",
+      "group": "mask",
+      "size": [
+        82,
+        82
+      ],
+      "atlasRect": [
+        849,
+        357,
+        82,
+        82
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "maschera circolare per medaglione nemico"
+    },
+    {
+      "name": "mask_art_square",
+      "group": "mask",
+      "size": [
+        80,
+        80
+      ],
+      "atlasRect": [
+        933,
+        357,
+        80,
+        80
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "maschera 80x80 per il ritratto di carta"
+    },
+    {
+      "name": "overlay_bezel",
+      "group": "board",
+      "size": [
+        960,
+        540
+      ],
+      "atlasRect": null,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "cornice CRT con centro trasparente"
+    },
+    {
+      "name": "overlay_glitch",
+      "group": "board",
+      "size": [
+        960,
+        540
+      ],
+      "atlasRect": null,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "bande di glitch a schermo intero"
+    },
+    {
+      "name": "overlay_scanlines",
+      "group": "board",
+      "size": [
+        960,
+        540
+      ],
+      "atlasRect": null,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "overlay scanline a schermo intero"
+    },
+    {
+      "name": "overlay_static",
+      "group": "board",
+      "size": [
+        960,
+        540
+      ],
+      "atlasRect": null,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "statica CRT a schermo intero"
+    },
+    {
+      "name": "overlay_vignette",
+      "group": "board",
+      "size": [
+        960,
+        540
+      ],
+      "atlasRect": null,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "vignettatura CRT a schermo intero"
+    },
+    {
+      "name": "panel_blood",
+      "group": "panel",
+      "size": [
+        32,
+        32
+      ],
+      "atlasRect": [
+        611,
+        527,
+        32,
+        32
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        10,
+        10,
+        10,
+        10
+      ],
+      "tileable": false,
+      "nineSlice": true,
+      "note": "pannello sangue (nemico/boss) 9-slice"
+    },
+    {
+      "name": "panel_console",
+      "group": "panel",
+      "size": [
+        32,
+        32
+      ],
+      "atlasRect": [
+        543,
+        527,
+        32,
+        32
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        10,
+        10,
+        10,
+        10
+      ],
+      "tileable": false,
+      "nineSlice": true,
+      "note": "pannello console chiaro 9-slice"
+    },
+    {
+      "name": "panel_dark",
+      "group": "panel",
+      "size": [
+        32,
+        32
+      ],
+      "atlasRect": [
+        509,
+        527,
+        32,
+        32
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        10,
+        10,
+        10,
+        10
+      ],
+      "tileable": false,
+      "nineSlice": true,
+      "note": "pannello base scuro 9-slice (bordo 10)"
+    },
+    {
+      "name": "panel_mag",
+      "group": "panel",
+      "size": [
+        32,
+        32
+      ],
+      "atlasRect": [
+        645,
+        527,
+        32,
+        32
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        10,
+        10,
+        10,
+        10
+      ],
+      "tileable": false,
+      "nineSlice": true,
+      "note": "pannello magenta (evento/bersaglio) 9-slice"
+    },
+    {
+      "name": "panel_phos",
+      "group": "panel",
+      "size": [
+        32,
+        32
+      ],
+      "atlasRect": [
+        577,
+        527,
+        32,
+        32
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        10,
+        10,
+        10,
+        10
+      ],
+      "tileable": false,
+      "nineSlice": true,
+      "note": "pannello fosforo (giocatore) 9-slice"
+    },
+    {
+      "name": "panel_screen",
+      "group": "panel",
+      "size": [
+        32,
+        32
+      ],
+      "atlasRect": [
+        713,
+        527,
+        32,
+        32
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        6,
+        6,
+        6,
+        6
+      ],
+      "tileable": false,
+      "nineSlice": true,
+      "note": "campo schermo verde per LOG / inspector 9-slice (bordo 6)"
+    },
+    {
+      "name": "panel_well",
+      "group": "panel",
+      "size": [
+        32,
+        32
+      ],
+      "atlasRect": [
+        679,
+        527,
+        32,
+        32
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        8,
+        8,
+        8,
+        8
+      ],
+      "tileable": false,
+      "nineSlice": true,
+      "note": "incavo/alloggiamento carta 9-slice (bordo 8)"
+    },
+    {
+      "name": "pip_ap_empty",
+      "group": "badge",
+      "size": [
+        14,
+        14
+      ],
+      "atlasRect": [
+        636,
+        627,
+        14,
+        14
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "pip AP empty"
+    },
+    {
+      "name": "pip_ap_full",
+      "group": "badge",
+      "size": [
+        14,
+        14
+      ],
+      "atlasRect": [
+        620,
+        627,
+        14,
+        14
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "pip AP full"
+    },
+    {
+      "name": "pip_ap_spent",
+      "group": "badge",
+      "size": [
+        14,
+        14
+      ],
+      "atlasRect": [
+        652,
+        627,
+        14,
+        14
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "pip AP spent"
+    },
+    {
+      "name": "plate_counter",
+      "group": "panel",
+      "size": [
+        32,
+        32
+      ],
+      "atlasRect": [
+        421,
+        593,
+        32,
+        32
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        8,
+        8,
+        8,
+        8
+      ],
+      "tileable": false,
+      "nineSlice": true,
+      "note": "targhetta contatore (MAZZO / MANO) 9-slice"
+    },
+    {
+      "name": "plate_tooltip",
+      "group": "panel",
+      "size": [
+        32,
+        32
+      ],
+      "atlasRect": [
+        455,
+        593,
+        32,
+        32
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        8,
+        8,
+        8,
+        8
+      ],
+      "tileable": false,
+      "nineSlice": true,
+      "note": "tooltip / riquadro abilita' 9-slice"
+    },
+    {
+      "name": "readout_block",
+      "group": "icon",
+      "size": [
+        16,
+        16
+      ],
+      "atlasRect": [
+        551,
+        627,
+        16,
+        16
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "indicatore calcolo combattimento readout_block"
+    },
+    {
+      "name": "readout_down",
+      "group": "icon",
+      "size": [
+        16,
+        16
+      ],
+      "atlasRect": [
+        533,
+        627,
+        16,
+        16
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "indicatore calcolo combattimento readout_down"
+    },
+    {
+      "name": "readout_up",
+      "group": "icon",
+      "size": [
+        16,
+        16
+      ],
+      "atlasRect": [
+        515,
+        627,
+        16,
+        16
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "indicatore calcolo combattimento readout_up"
+    },
+    {
+      "name": "tag_faction_A",
+      "group": "badge",
+      "size": [
+        13,
+        13
+      ],
+      "atlasRect": [
+        668,
+        627,
+        13,
+        13
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "tag fazione A"
+    },
+    {
+      "name": "tag_faction_B",
+      "group": "badge",
+      "size": [
+        13,
+        13
+      ],
+      "atlasRect": [
+        683,
+        627,
+        13,
+        13
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "tag fazione B"
+    },
+    {
+      "name": "tag_faction_C",
+      "group": "badge",
+      "size": [
+        13,
+        13
+      ],
+      "atlasRect": [
+        698,
+        627,
+        13,
+        13
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": false,
+      "nineSlice": false,
+      "note": "tag fazione C"
+    },
+    {
+      "name": "tile_grid",
+      "group": "tile",
+      "size": [
+        16,
+        16
+      ],
+      "atlasRect": [
+        1006,
+        593,
+        16,
+        16
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": true,
+      "nineSlice": false,
+      "note": "griglia arena 16px tileable"
+    },
+    {
+      "name": "tile_hazard",
+      "group": "tile",
+      "size": [
+        16,
+        16
+      ],
+      "atlasRect": [
+        1,
+        627,
+        16,
+        16
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": true,
+      "nineSlice": false,
+      "note": "strisce di pericolo 16px tileable"
+    },
+    {
+      "name": "tile_noise",
+      "group": "tile",
+      "size": [
+        64,
+        64
+      ],
+      "atlasRect": [
+        1,
+        527,
+        64,
+        64
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": true,
+      "nineSlice": false,
+      "note": "grana CRT 64px tileable"
+    },
+    {
+      "name": "tile_scanline",
+      "group": "tile",
+      "size": [
+        4,
+        4
+      ],
+      "atlasRect": [
+        1005,
+        627,
+        4,
+        4
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": true,
+      "nineSlice": false,
+      "note": "scanline 4px tileable, moltiplica/overlay sopra la UI"
+    },
+    {
+      "name": "tile_static",
+      "group": "tile",
+      "size": [
+        8,
+        8
+      ],
+      "atlasRect": [
+        931,
+        627,
+        8,
+        8
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tileable": true,
+      "nineSlice": false,
+      "note": "statica/interferenza 8px"
+    }
+  ]
+}
