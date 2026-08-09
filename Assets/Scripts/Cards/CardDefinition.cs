@@ -385,22 +385,41 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
 
         switch (t)
         {
+            // La vittima pubblica AttackResolved dentro la stessa chiamata che ha
+            // pubblicato AttackDeclared: senza sfasare la reazione, colpo e
+            // incasso partirebbero nello stesso istante e non si leggerebbe chi
+            // ha cominciato.
             case GameEventType.AttackResolved:
-                if (ctx.target == cardView.instance && ctx.amount > 0)
+                if (ctx.target == cardView.instance)
                 {
-                    cardView.ShowHint($"-{ctx.amount}HP");
-                    cardView.UpdateHpOnly();
-                    cardView.Blink();
+                    if (ctx.amount > 0)
+                    {
+                        cardView.ShowHint($"-{ctx.amount} HP");
+                        cardView.UpdateHpOnly();
+                        cardView.PlayHit();
+                    }
+                    else
+                    {
+                        cardView.ShowHint("PARATO");
+                        cardView.PlayBlock();
+                    }
                 }
                 if (ctx.source == cardView.instance && ctx.amount > 0)
                 {
-                    cardView.ShowHint($"Dealt {ctx.amount}");
+                    cardView.ShowHint($"-{ctx.amount}");
                 }
                 break;
 
             case GameEventType.AttackDeclared:
-                if (ctx.source == cardView.instance) cardView.ShowHint("Attack!");
-                else if (ctx.target == cardView.instance) cardView.ShowHint("Under attack!");
+                if (ctx.source == cardView.instance)
+                {
+                    cardView.ShowHint($"COLPISCE {ctx.amount}");
+                    cardView.PlayAttack();
+                }
+                else if (ctx.target == cardView.instance)
+                {
+                    cardView.ShowHint("SOTTO ATTACCO");
+                }
                 break;
 
             case GameEventType.TurnEnd:

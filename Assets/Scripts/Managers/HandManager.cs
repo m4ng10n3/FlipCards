@@ -1,6 +1,5 @@
 using UnityEngine;
 using System.Collections.Generic;
-using UnityEngine.UI;
 
 public class HandManager : MonoBehaviour
 {
@@ -10,14 +9,13 @@ public class HandManager : MonoBehaviour
     [SerializeField] private Transform handRoot;
     [SerializeField] private Transform spawnPoint;
     [SerializeField] private float spawnScaleMultiplier = 1.5f;
-    [Header("UI")]
-    [SerializeField] public Button btnDraw;
     [Header("Runtime debug")]
     [SerializeField] private CardView selectedCard;
 
     private readonly List<CardView> handCards = new();
     private readonly List<GameObject> deck = new();
     private bool deckInitialized;
+    private int deckStartCount;
     private RectTransform handRect;
     private const float PositionThresholdSqr = 0.0001f;
     private const float RotationThreshold = 0.1f;
@@ -25,11 +23,28 @@ public class HandManager : MonoBehaviour
     public Transform HandRoot => handRoot;
     private CardView draggingCard;
 
-    // Contatori per la HUD: DrawCard esce in silenzio a mazzo vuoto o mano piena,
-    // quindi senza questi numeri il bottone PESCA sembra rotto.
+    // Contatori per la HUD e per la pila del mazzo.
     public int MaxHandSize => maxHandSize;
     public int HandCount => handCards.Count;
     public int DeckCount => deckInitialized ? deck.Count : CountDeckFromBindings();
+    public bool HandIsFull => handCards.Count >= maxHandSize;
+
+    /// <summary>Carte nel mazzo a inizio partita: e' il riferimento per lo spessore della pila.</summary>
+    public int DeckStartCount => deckStartCount > 0 ? deckStartCount : CountDeckFromBindings();
+
+    /// <summary>
+    /// I prossimi prefab in ordine di pesca. Ha senso solo perche' il mazzo e'
+    /// mescolato una volta sola e si pesca dalla cima: con la pesca casuale a ogni
+    /// estrazione "la prossima carta" non esisterebbe.
+    /// </summary>
+    public IReadOnlyList<GameObject> PeekDeck(int count)
+    {
+        EnsureDeck();
+        var top = new List<GameObject>(Mathf.Max(0, count));
+        for (int i = 0; i < count && i < deck.Count; i++)
+            top.Add(deck[i]);
+        return top;
+    }
 
     /// <summary>Conteggio del mazzo prima della prima pesca, senza costruirlo.</summary>
     private int CountDeckFromBindings()
@@ -49,10 +64,9 @@ public class HandManager : MonoBehaviour
 
     private void Awake()
     {
-        if (btnDraw == null || handRoot == null || spawnPoint == null)
+        if (handRoot == null || spawnPoint == null)
             throw new System.InvalidOperationException("HandManager references not assigned");
 
-        btnDraw.onClick.AddListener(DrawCard);
         handRect = handRoot as RectTransform;
     }
 
@@ -117,27 +131,54 @@ public class HandManager : MonoBehaviour
             if (!remainingByName.TryGetValue(name, out int remaining) || remaining <= 0) continue;
             for (int i = 0; i < remaining; i++) deck.Add(binding.prefab);
         }
+
+        // Si mescola qui, una volta sola, e si pesca dalla cima. Estrarre a caso a
+        // ogni pesca rendeva "la prossima carta" inesistente, e senza prossima
+        // carta la pila del mazzo non puo' mostrare cosa sta per arrivare.
+        var rng = gm.Rng ?? new System.Random();
+        for (int i = deck.Count - 1; i > 0; i--)
+        {
+            int j = rng.Next(i + 1);
+            (deck[i], deck[j]) = (deck[j], deck[i]);
+        }
+
+        deckStartCount = deck.Count;
     }
 
-    public void DrawCard()
+    private void EnsureDeck()
+    {
+        if (deckInitialized) return;
+        RebuildDeckFromBindings();
+        deckInitialized = true;
+    }
+
+    /// <summary>
+    /// Pesca dalla cima. Ritorna false e lo dice nel log quando non si puo':
+    /// uscire in silenzio faceva sembrare rotto il comando.
+    /// </summary>
+    public bool DrawCard()
     {
         var gm = GameManager.Instance ?? throw new System.InvalidOperationException("GameManager missing");
 
-        if (!deckInitialized)
+        EnsureDeck();
+
+        if (deck.Count == 0)
         {
-            RebuildDeckFromBindings();
-            deckInitialized = true;
+            Logger.Info("Pesca: il mazzo e' vuoto");
+            return false;
         }
 
-        if (deck.Count == 0 || handCards.Count >= maxHandSize)
-            return;
+        if (handCards.Count >= maxHandSize)
+        {
+            Logger.Info($"Pesca: mano piena ({handCards.Count}/{maxHandSize})");
+            return false;
+        }
 
         if (!gm.TrySpendPlayerAP(gm.drawCardCost, "Draw"))
-            return;
+            return false;
 
-        int deckIndex = Random.Range(0, deck.Count);
-        GameObject cardPrefabToSpawn = deck[deckIndex];
-        deck.RemoveAt(deckIndex);
+        GameObject cardPrefabToSpawn = deck[0];
+        deck.RemoveAt(0);
 
         GameObject go = Instantiate(cardPrefabToSpawn, handRoot);
         go.name = cardPrefabToSpawn.name;
@@ -153,6 +194,7 @@ public class HandManager : MonoBehaviour
         RegisterHandCard(cv);
         Logger.Info($"Draw: {cv.GetComponentInParent<CardDefinition>()?.cardName ?? cv.gameObject.name}");
         UpdateCardsPosition();
+        return true;
     }
 
     private void RegisterHandCard(CardView cv)

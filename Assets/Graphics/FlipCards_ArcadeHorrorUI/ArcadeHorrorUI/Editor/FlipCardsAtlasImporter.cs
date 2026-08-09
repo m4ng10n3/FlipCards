@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace FlipCards.UI.EditorTools
 {
-    public class FlipCardsAtlasImporter : EditorWindow
+    public static class FlipCardsAtlasImporter
     {
         [System.Serializable] public class SpriteEntry
         {
@@ -18,7 +18,6 @@ namespace FlipCards.UI.EditorTools
         }
         [System.Serializable] class Manifest { public List<SpriteEntry> sprites; }
 
-        // percorso della cartella del kit, relativo al progetto
         const string KitRoot = "Assets/Graphics/ArcadeHorrorUI";
         const string ManifestPath = KitRoot + "/flipcards_ui_manifest.json";
         const float PixelsPerUnit = 1f;   // UI: 1 px sprite = 1 px canvas
@@ -33,7 +32,6 @@ namespace FlipCards.UI.EditorTools
             var byName = new Dictionary<string, SpriteEntry>();
             foreach (var s in man.sprites) byName[s.name] = s;
 
-            // 1) sprite singoli
             var guids = AssetDatabase.FindAssets("t:Texture2D", new[] { KitRoot });
             int done = 0;
             try
@@ -47,7 +45,7 @@ namespace FlipCards.UI.EditorTools
 
                     var file = Path.GetFileNameWithoutExtension(path);
                     bool isAtlas = file.StartsWith("flipcards_ui_atlas");
-                    SpriteEntry e = null; byName.TryGetValue(file, out e);
+                    SpriteEntry e; byName.TryGetValue(file, out e);
 
                     ti.textureType = TextureImporterType.Sprite;
                     ti.spritePixelsPerUnit = PixelsPerUnit;
@@ -56,7 +54,7 @@ namespace FlipCards.UI.EditorTools
                     ti.alphaIsTransparency = true;
                     ti.wrapMode = (e != null && e.tileable) ? TextureWrapMode.Repeat : TextureWrapMode.Clamp;
 
-                    // spriteMeshType non e' esposto su TextureImporter: passa da TextureImporterSettings
+                    // spriteMeshType non e' esposto su TextureImporter: passa da TextureImporterSettings.
                     var tis = new TextureImporterSettings();
                     ti.ReadTextureSettings(tis);
                     tis.spriteMeshType = SpriteMeshType.FullRect;
@@ -83,7 +81,7 @@ namespace FlipCards.UI.EditorTools
             }
             finally { EditorUtility.ClearProgressBar(); }
             AssetDatabase.Refresh();
-            Debug.Log($"[FlipCards] importate {done} texture con Point filter, no compression, bordi 9-slice.");
+            Debug.Log($"[FlipCards] importate {done} texture (Point, no compression, bordi 9-slice).");
         }
 
         static int ScaleOfPath(string path)
@@ -93,7 +91,6 @@ namespace FlipCards.UI.EditorTools
             return 1;
         }
 
-        // taglia l'atlante in sprite multipli leggendo i rect dal manifest
         static void ApplyAtlas(TextureImporter ti, string path, Manifest man, int k)
         {
             ti.spriteImportMode = SpriteImportMode.Multiple;
@@ -106,17 +103,16 @@ namespace FlipCards.UI.EditorTools
                 if (e.atlasRect == null || e.atlasRect.Length != 4) continue;
                 int x = e.atlasRect[0] * k, y = e.atlasRect[1] * k;
                 int w = e.atlasRect[2] * k, h = e.atlasRect[3] * k;
-                var md = new SpriteMetaData
+                list.Add(new SpriteMetaData
                 {
                     name = e.name,
-                    // il manifest usa origine in alto a sinistra, Unity in basso a sinistra
+                    // manifest: origine in alto a sinistra. Unity: in basso a sinistra.
                     rect = new Rect(x, atlasH - y - h, w, h),
                     alignment = (int)SpriteAlignment.Center,
                     pivot = new Vector2(e.pivot[0], e.pivot[1]),
                     border = new Vector4(e.border[0] * k, e.border[1] * k,
                                          e.border[2] * k, e.border[3] * k)
-                };
-                list.Add(md);
+                });
             }
 #pragma warning disable 0618
             ti.spritesheet = list.ToArray();

@@ -1,6 +1,6 @@
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
 
 public class SlotView : MonoBehaviour
 {
@@ -24,6 +24,17 @@ public class SlotView : MonoBehaviour
     private Button _btn;
     private Outline _highlight;
 
+    // Le reazioni si animano sull'artwork, non sulla radice della cella: la
+    // radice e' figlia diretta dell'HorizontalLayoutGroup e a ogni layout pass
+    // (una morte, un respawn) il gruppo le riscrive l'anchoredPosition e il tween
+    // salterebbe. Il figlio "Sprite" non lo tocca nessuno.
+    private RectTransform _art;
+    private Image _bg;
+    private Tween _motionTween;
+    private Tween _flashTween;
+    private Color _bgBaseColor;
+    private bool _bgBaseColorRead;
+
     // ── Lifecycle ────────────────────────────────────────────────────────────
 
     void Awake()
@@ -35,6 +46,9 @@ public class SlotView : MonoBehaviour
         if (_btn == null) _btn = gameObject.AddComponent<Button>();
         if (bg   == null) bg   = gameObject.AddComponent<Image>();
         if (_btn.targetGraphic == null) _btn.targetGraphic = bg;
+
+        _bg = bg;
+        _art = transform.Find("Sprite") as RectTransform;
         if (le   == null) le   = gameObject.AddComponent<LayoutElement>();
         le.preferredWidth  = preferredSize.x;
         le.preferredHeight = preferredSize.y;
@@ -119,6 +133,7 @@ public class SlotView : MonoBehaviour
                     // Questo slot attacca una carta player
                     int atk = instance.def.atkDamage + instance.tempAtkBonus;
                     ShowHint($"ATTACCA {atk}");
+                    PlayAttack();
                 }
                 else if (ctx.target == instance)
                 {
@@ -137,12 +152,13 @@ public class SlotView : MonoBehaviour
                         ClearHint();
                         ShowHint($"-{ctx.amount} HP");
                         UpdateHpOnly();
-                        Blink();
+                        PlayHit();
                     }
                     else
                     {
                         ClearHint();
-                        ShowHint("bloccato");
+                        ShowHint("BLOCCATO");
+                        PlayBlock();
                     }
                 }
                 break;
@@ -178,15 +194,111 @@ public class SlotView : MonoBehaviour
         _lastHp = instance.health;
     }
 
-    public void Blink() { StartCoroutine(BlinkRoutine()); }
-    IEnumerator BlinkRoutine()
+    public void Blink() => Flash(Color.yellow, 0.18f);
+
+    // ── Reazioni di combattimento ─────────────────────────────────────────────
+    //
+    // Stesso vocabolario delle carte (CardView.PlayAttack / PlayBlock / PlayHit),
+    // specchiato: lo slot sta in alto, quindi attacca verso il basso.
+
+    /// <summary>Attacca: scatto verso la corsia del giocatore, cioe' in basso.</summary>
+    public void PlayAttack()
     {
-        var img = GetComponent<Image>();
-        if (img == null) yield break;
-        Color c = img.color;
-        img.color = Color.yellow;
-        yield return new WaitForSeconds(0.08f);
-        img.color = c;
+        Punch(Vector3.down * 40f, 0.34f, 0f);
+        Flash(GamePalette.Danger, 0.30f, 0f);
+    }
+
+    /// <summary>Para: rimbalzo all'indietro e tinta del lato che ha bloccato.</summary>
+    public void PlayBlock(float delay = CardView.ReactionDelay)
+    {
+        Punch(Vector3.up * 16f, 0.30f, delay);
+        Flash(instance != null ? GamePalette.SideColor(instance.side) : GamePalette.Retro, 0.26f, delay);
+    }
+
+    /// <summary>Incassa: scossa e lampo rosso.</summary>
+    public void PlayHit(float delay = CardView.ReactionDelay)
+    {
+        if (_art != null)
+        {
+            _motionTween?.Kill(complete: true);
+            _motionTween = _art.DOShakeAnchorPos(0.34f, 26f, 20, 90f, false, false)
+                               .SetDelay(delay)
+                               .SetUpdate(true)
+                               .SetLink(gameObject);
+        }
+
+        Flash(GamePalette.Danger, 0.32f, delay);
+    }
+
+    /// <summary>
+    /// Ingresso in campo dopo il rullo: la cella si assesta con uno scatto, cosi
+    /// gli slot si leggono uno per volta invece di comparire tutti insieme gia'
+    /// coi valori finali.
+    /// </summary>
+    public void PlayEnter()
+    {
+        transform.DOKill(complete: true);
+        transform.localScale = Vector3.one;
+        transform.DOPunchScale(Vector3.one * 0.09f, 0.34f, 6, 0.7f)
+                 .SetUpdate(true)
+                 .SetLink(gameObject);
+
+        Flash(GamePalette.SideColor(instance != null ? instance.side : Side.Fronte), 0.34f);
+    }
+
+    /// <summary>
+    /// Evidenzia un valore che e' appena cambiato per effetto di un'abilita': la
+    /// statistica finale da sola non dice da dove viene.
+    /// </summary>
+    public void PulseStat(Color accent)
+    {
+        Flash(accent, 0.42f);
+        if (_art == null) return;
+
+        _motionTween?.Kill(complete: true);
+        _motionTween = _art.DOPunchAnchorPos(Vector2.up * 10f, 0.36f, 5, 0.7f)
+                           .SetUpdate(true)
+                           .SetLink(gameObject);
+    }
+
+    void Punch(Vector3 direction, float duration, float delay)
+    {
+        if (_art == null) return;
+
+        _motionTween?.Kill(complete: true);
+        _motionTween = _art.DOPunchAnchorPos(direction, duration, 4, 0.55f)
+                           .SetDelay(delay)
+                           .SetUpdate(true)
+                           .SetLink(gameObject);
+    }
+
+    /// <summary>
+    /// Scarto di colore sul fondo della cella. Il colore base si legge una volta
+    /// sola: un flash che parte mentre il precedente e' in corso ripristinerebbe
+    /// un colore gia' alterato e la cella resterebbe tinta.
+    /// </summary>
+    public void Flash(Color tint, float duration = 0.28f, float delay = 0f)
+    {
+        if (_bg == null) _bg = GetComponent<Image>();
+        if (_bg == null) return;
+
+        if (!_bgBaseColorRead)
+        {
+            _bgBaseColor = _bg.color;
+            _bgBaseColorRead = true;
+        }
+
+        Color from = Color.Lerp(_bgBaseColor, tint, 0.8f);
+        Color to = _bgBaseColor;
+        var img = _bg;
+
+        _flashTween?.Kill();
+        _flashTween = DOTween.To(() => 0f, v => img.color = Color.Lerp(from, to, v), 1f, duration)
+                             .SetDelay(delay)
+                             .SetEase(Ease.OutQuad)
+                             .OnKill(() => { if (img != null) img.color = to; })
+                             .SetUpdate(true)
+                             .SetLink(gameObject);
     }
 
     /// <summary>L'hint sostituisce il precedente: vedi CardView.ShowHint.</summary>

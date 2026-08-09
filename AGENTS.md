@@ -188,18 +188,42 @@ slot hanno due lati (Fronte attacca, Retro blocca e accumula cariche). Il giocat
 sceglie i lati spendendo AP, lo slot segue una `flipPattern` fissa. A fine turno
 tutti gli slot nemici vengono sostituiti con un'animazione da slot machine.
 
+## Le tre catene asincrone
+
+Tre pezzi del gioco non succedono in un frame ma su una sequenza temporizzata.
+Chi tocca il flusso di turno deve sapere quali sono, perché tutte e tre tengono
+`inputLocked = true` per la loro durata e la rilasciano **solo in fondo**:
+
+| Catena | Dove | Cosa fa |
+|---|---|---|
+| Risoluzione dell'attacco | `GameManager.ResolveAttackRoutine` | una corsia per volta, poi `awaitingEndTurn = true` |
+| Rullo di fine turno | `SlotBatchManager.RollCoroutine` | copre, ri-spawna sotto, rivela |
+| Ingresso degli slot | `GameManager.EnterEnemySlotsRoutine` | `StartTurn`, poi uno slot per volta, poi `SetButtonsInteractable(true)` |
+
+`Resolving` e `InputLocked` sono due stati diversi apposta: la HUD deve poter
+dire "risoluzione in corso" e "nuovi slot in arrivo" con due etichette distinte.
+Chi non è un `Button` (il mazzo) non passa da `UpdateHUD` e guarda `CanAct`.
+
 ## Mappa dei file
 
 **Logica** (`Assets/Scripts/`)
 - `Managers/GameManager.cs` — orchestratore: turni, AP, spawn, attacco, fine turno.
   Espone `CurrentTurn`, `PlayerPhase`, `AwaitingEndTurn`, `InputLocked`,
-  `MatchEnded`, `MatchResult`, l'evento statico `LogChanged` e `HighlightFreeSpots`.
+  `Resolving`, `MatchEnded`, `MatchResult`, `CanAct`, `Rng`, l'evento statico
+  `LogChanged` e `HighlightFreeSpots`.
 - `Managers/LaneResolver.cs` — risoluzione di una corsia. `Managers/SynergyResolver.cs` — combo di adiacenza.
-- `Managers/HandManager.cs` — mano e mazzo. Espone `DeckCount`, `HandCount`, `MaxHandSize`.
-- `Managers/SlotBatchManager.cs` — reel di fine turno e respawn degli slot.
+- `Managers/HandManager.cs` — mano e mazzo. Espone `DeckCount`, `DeckStartCount`,
+  `HandCount`, `MaxHandSize`, `HandIsFull`, `PeekDeck(n)`. Il mazzo è mescolato
+  una volta sola con `GameManager.Rng` e si pesca dalla cima: `PeekDeck` ha senso
+  solo grazie a questo. `DrawCard()` ritorna `bool` e logga il motivo del rifiuto.
+- `Managers/SlotBatchManager.cs` — reel di fine turno e respawn degli slot. Il
+  rullo è fatto con gli **artwork dei prefab candidati**, non con uno sprite
+  sheet: è ciò che garantisce che l'immagine al settle sia quella che entra.
 - `Cards/CardDefinition.cs` — dati della carta **e** gestione dell'input (click, drag, hover).
-- `Cards/CardView.cs` — presentazione della carta: flip, hover, tilt, ombra, container.
-- `Slots/SlotView.cs`, `Slots/SlotInstance.cs` — slot; `SlotInstance` espone
+- `Cards/CardView.cs` — presentazione della carta: flip, hover, tilt, ombra,
+  container, e le reazioni di combattimento `PlayAttack` / `PlayBlock` / `PlayHit`.
+- `Slots/SlotView.cs`, `Slots/SlotInstance.cs` — slot; stesse tre reazioni
+  specchiate più `PlayEnter` e `PulseStat`. `SlotInstance` espone
   `PatternLength`, `PatternStep`, `PatternSideAt(step)`.
 
 **Presentazione** (`Assets/Scripts/UI/`, tutta aggiunta per il layout)
@@ -207,9 +231,15 @@ tutti gli slot nemici vengono sostituiti con un'animazione da slot machine.
 - `UiBuild.cs` — helper di costruzione. `Band(rt, x, y, w, h)` usa **coordinate
   banda**: origine in alto a sinistra del parent, y verso il basso, come in
   LAYOUT_SPEC. I numeri del documento finiscono nel codice invariati.
-- `UiBar.cs` — barra valore/massimo. Vedi la trappola su `fillAmount`.
+- `UiBar.cs` — barra valore/massimo, orizzontale o verticale. Vedi la trappola su `fillAmount`.
 - `HudController.cs` — turno, fase, HP, AP, contatori, pannello di fine partita.
   Legge lo stato **in polling** in `LateUpdate` e scrive solo quando un valore cambia.
+- `HandTray.cs` — la mano sale in blocco quando il puntatore entra nell'area.
+  Il componente sta sull'**area di attivazione**, e la mano è un suo figlio: se
+  fossero fratelli, passare da una carta all'altra genererebbe un `PointerExit`.
+- `DeckView.cs` — mazzo cliccabile: pila di prefab carta veri, di dorso, spessore
+  proporzionale al residuo. Le copie sono decorative (`CardDefinition` e
+  `CardView` disabilitati) e il clic risale fino al box.
 - `LaneAxisView.cs` — asse delle corsie: pronostico per corsia e connettori di combo.
 - `InspectorPanel.cs` + `AbilityCatalog.cs` — ispettore e testi delle abilità.
 - `CardOverlay.cs` / `SlotOverlay.cs` — chrome costruito a runtime sopra i prefab.
@@ -250,6 +280,11 @@ Gli oggetti istanziati e i `Destroy` differiti non sono ancora applicati: se il
 risultato sembra sbagliato, ricattura prima di indagare. È già successo di
 inseguire un bug inesistente per questo motivo.
 
+**Non si catturano le animazioni.** Il giro completo `RunCommand` → risposta →
+`Camera_Capture` → immagine dura svariati secondi: un tween da 0.3 s è sempre
+già finito, e anche allungare i ritardi della risoluzione a 2-3 s non basta.
+Le animazioni si verificano **campionando**, vedi la ricetta più sotto.
+
 ## Ricette di test
 
 Giocare carte in campo — **raccogliere le `CardView` prima del ciclo**: `Destroy`
@@ -263,6 +298,7 @@ foreach (Transform c in gm.HandManager.HandRoot) {
     var cv = c.GetComponentInChildren<CardView>();
     if (cv != null && cv.instance == null) cards.Add(cv);
 }
+gm.player.actionPoints = 5;
 int used = 0;
 for (int lane = 0; lane < gm.playerBoardRoot.childCount && used < cards.Count; lane++) {
     var spot = gm.playerBoardRoot.GetChild(lane);
@@ -272,9 +308,36 @@ for (int lane = 0; lane < gm.playerBoardRoot.childCount && used < cards.Count; l
 }
 ```
 
-Altre scorciatoie: `gm.btnAttack.onClick.Invoke()` per attaccare,
-`gm.btnEndTurn.onClick.Invoke()` per chiudere il turno e far partire il reel,
-`gm.ai.hp = 0;` seguito da fine turno per il pannello di fine partita,
+Pescare — non c'è più un bottone: si simula il clic sul mazzo.
+
+```csharp
+var deck = Object.FindAnyObjectByType<DeckView>();
+deck.OnPointerClick(new PointerEventData(EventSystem.current));
+```
+
+**Verificare un'animazione: si campiona, non si guarda.** Una coroutine avviata
+su `GameManager` sopravvive al `RunCommand`; scrive con `Debug.Log` e il
+risultato si rilegge con `Unity_GetConsoleLogs`. **Bruciare ~20 frame prima di
+far partire il tween**: i primi frame dopo un `RunCommand` durano 0.2 s l'uno
+(l'editor si sta riassestando), quindi un tween da 0.34 s finirebbe dentro il
+primo frame e il campione risulterebbe piatto. Assestato, l'editor sta a 60 fps.
+
+```csharp
+IEnumerator Trace(CardView card) {
+    for (int i = 0; i < 20; i++) yield return null;   // assestamento
+    var rt = card.RectTransform;
+    float y0 = rt.localPosition.y;
+    var sb = new System.Text.StringBuilder("[D2] dy:");
+    card.PlayAttack();
+    for (int i = 0; i < 14; i++) { yield return null; sb.Append(' ').Append((rt.localPosition.y - y0).ToString("F1")); }
+    Debug.Log(sb.ToString());
+}
+```
+
+Altre scorciatoie: `gm.btnAttack.onClick.Invoke()` per attaccare (parte la
+coroutine di risoluzione, ~1.5 s), `gm.btnEndTurn.onClick.Invoke()` per chiudere
+il turno e far partire il reel (~5 s fino a `FASE AZIONI`), `gm.ai.hp = 0;`
+seguito da fine turno per il pannello di fine partita,
 `InspectorPanel.Instance.ShowCard(view)` / `ShowSlot(view)` per popolare
 l'ispettore senza muovere il mouse.
 
@@ -283,7 +346,30 @@ l'ispettore senza muovere il mouse.
 **`Image.fillAmount` non funziona senza sprite.** Un'`Image` con
 `type = Filled` ma `sprite = null` ignora del tutto `fillAmount` e disegna sempre
 il rect pieno. Per questo le barre usano `UiBar`, che muove `anchorMax.x` del
-rettangolo di riempimento.
+rettangolo di riempimento (o `.y` se `vertical`).
+
+**`ContentSizeFitter` misura sé stesso, non i figli.** Il log aveva un rect
+`Content` con il fitter e il testo dentro: il fitter cercava un `ILayoutElement`
+sul **proprio** GameObject, non ne trovava, e `Content` restava alto zero. Lo
+`ScrollRect` non aveva quindi niente da scorrere (`verticalNormalizedPosition`
+inchiodata a 1) e il `RectMask2D` tagliava tutte le righe oltre la prima
+schermata: il log sembrava fermarsi a metà partita. Ora il `TMP_Text` **è** il
+content dello `ScrollRect`, con il proprio fitter. Se serve un contenitore con
+più figli, ci vuole un `LayoutGroup` che li aggreghi.
+
+**Un tween sulla posizione di una carta lo mangia `FollowContainer`.**
+`CardView.Update` riscrive `_rt.localPosition` ogni frame inseguendo il
+container: un `DOLocalMove` sulla carta non si vede. Le reazioni di combattimento
+tweenano invece un campo `_combatOffset` che `FollowContainer` somma al
+bersaglio, sottraendo prima quello applicato al frame precedente — lerpare sulla
+posizione che contiene già l'offset farebbe mangiare il tween da sé stesso.
+Stesso motivo per cui lo swap di corsia non tweena il container ma rimette
+indietro la grafica (`AnimateLaneSwap`).
+
+**Per gli slot vale il contrario: mai animare la radice.** La radice della cella
+slot è figlia diretta dell'`HorizontalLayoutGroup`, che a ogni layout pass — una
+morte, un respawn — le riscrive l'`anchoredPosition` e fa saltare il tween.
+`SlotView` anima il figlio `Sprite`, che non tocca nessuno.
 
 **In `Screen Space - Camera` la z conta.** L'ordine fra un sub-canvas (ogni carta
 ha un `Canvas` sul figlio `Visual`) e i suoi fratelli è deciso dalla distanza
@@ -338,12 +424,22 @@ Oltre ai vincoli di LAYOUT_SPEC §7:
 
 - I numeri del layout stanno solo in `FlipCardsLayoutBuilder` (le costanti in
   testa al file). Non duplicarli altrove.
+- **`maxHandSize` è una misura di layout**, e la scrive il builder
+  (`MaxHandCards = 5`). `HandManager` calcola `spacing = handRoot.width /
+  maxHandSize`: alzarlo restringe il passo sotto la larghezza della carta e le
+  carte in mano si coprono nome, vita e attacco a vicenda. Cambiarlo
+  nell'Inspector non serve, il prossimo rebuild lo riscrive.
+- **Chi blocca l'input lo sblocca.** Le tre catene asincrone tengono
+  `inputLocked = true` e lo rilasciano in fondo alla propria coroutine.
+  Anticipare `awaitingEndTurn` o `SetButtonsInteractable(true)` permette di
+  attaccare due volte o di chiudere il turno a metà risoluzione.
 - `GameManager.hpText`, `apText` ed `EnemyHptxt` sono **null di proposito**: la HUD
   la scrive `HudController`. Assegnarli farebbe lampeggiare i testi fra due
   formati diversi.
-- Le corsie devono restare centrate a **x 432 / 720 / 1008** con tre corsie: celle
+- Le corsie devono restare centrate a **x 480 / 768 / 1056** con tre corsie: celle
   da 220 e passo 288 (`CellW` + `LaneGap`), cioè la colonna da 240 con gap 48
-  della specifica. Verificabile proiettando il centro delle corsie nello spazio
-  del Canvas.
+  della specifica, centrate nel campo che parte a x 96 (dopo il rail del
+  giocatore). Verificabile proiettando il centro delle corsie nello spazio del
+  Canvas.
 - `CardOverlay` e `SlotOverlay` costruiscono i figli **a runtime**, non nel
   prefab. Non salvarli nell'asset.

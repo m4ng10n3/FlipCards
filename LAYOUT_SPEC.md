@@ -1,7 +1,12 @@
 # FlipCards — descrizione del gioco e specifica di layout
 
 Documento di riferimento per costruire il layout di gioco. Tutto quello che segue è
-ricavato dal codice in `Assets/Scripts` allo stato attuale (`f35ffe5` + working copy).
+ricavato dal codice in `Assets/Scripts`.
+
+Le sezioni 1–5 descrivono il gioco e non cambiano con il layout. Le sezioni 6–8
+descrivono il layout **come è costruito oggi** da
+`Assets/Editor/FlipCardsLayoutBuilder.cs`: se i numeri qui e le costanti in testa
+a quel file divergono, il file ha ragione e questo documento va corretto.
 
 Indice:
 1. [Il gioco](#1-il-gioco)
@@ -53,8 +58,10 @@ risultato confronta gli HP residui: *Player ahead / Boss ahead / Tie*.
 
 ## 2. Entità e dati
 
-Inventario completo dei dati esistenti. La colonna **Oggi** dice se il dato è già a
-schermo; la colonna **Serve** è la raccomandazione per il layout nuovo.
+Inventario completo dei dati esistenti. La colonna **Oggi** è la fotografia di
+*prima* del layout a bande — la tengo perché spiega il perché di ogni scelta
+della colonna **Serve**, che è quella realizzata. Per lo stato attuale di ogni
+voce vedi §8.
 
 ### 2.1 Carta del giocatore — `CardDefinition.Spec` + `CardInstance`
 
@@ -265,9 +272,9 @@ Lo spazio tra le colonne deve essere abbastanza largo da ospitare un connettore 
 | Girare una carta | **doppio click** entro 0.3 s | 1 AP | `OnCardDoubleClicked` → `TryFlipCard` | il primo click seleziona anche |
 | Scambiare due corsie | trascinare una carta in campo su un'altra | 1 AP | `HandleBoardDrop` → `SwapCardPositions` | |
 | Riordinare la mano | trascinare dentro la mano | 0 | `ReorderHandDuringDrag` | |
-| Pescare | bottone PESCA | 1 AP | `HandManager.DrawCard` | silenzioso a mazzo vuoto o mano piena |
-| Attaccare | bottone ATTACCA | 0 | `OnAttack` | una sola volta per turno |
-| Chiudere il turno | bottone CHIUDI TURNO | 0 | `OnEndTurn` | |
+| Pescare | clic sul **mazzo** nella colonna destra | 1 AP | `DeckView` → `HandManager.DrawCard` | ritorna `false` e scrive il motivo nel log a mazzo vuoto o mano piena |
+| Attaccare | bottone ATTACCA | 0 | `OnAttack` → `ResolveAttackRoutine` | una sola volta per turno; la risoluzione dura ~1.5 s e blocca l'input |
+| Chiudere il turno | bottone CHIUDI TURNO | 0 | `OnEndTurn` | fa partire rullo e ingresso degli slot, ~5 s di input bloccato |
 | Slot nemico | — | — | — | **non cliccabile**: `Button` presente ma senza listener |
 
 Due sequenze non scopribili da correggere nel layout:
@@ -285,21 +292,24 @@ Due sequenze non scopribili da correggere nel layout:
 
 Il layout deve avere una resa dichiarata per ciascuno di questi nove stati.
 
-| # | Stato | Condizione | Cosa deve leggersi |
-|---|---|---|---|
-| 1 | **Riposo** | nessuna selezione | corsie leggibili, bilancio previsto per corsia, AP disponibili |
-| 2 | **Casella selezionata** | `SelectedEmptySpot != null` | casella marcata; carte in mano segnalate come giocabili |
-| 3 | **Carta in mano presa** | drag o selezione | **tutte** le caselle libere evidenziate; anteprima di destinazione |
-| 4 | **Carta in campo selezionata** | `SelectedOwned != null` | carta sollevata; bersaglio di flip col costo; corsia nemica affacciata evidenziata |
-| 5 | **Scambio armato** | `IsSwapArmed` | sorgente marcata, destinazioni valide marcate |
-| 6 | **Risoluzione** | durante `OnAttack` | ordine corsia per corsia, numeri del danno, combo che scattano |
-| 7 | **Attacco fatto** | `awaitingEndTurn` | fase esplicita: *"attacco risolto — chiudi il turno"*; PESCA e ATTACCA spenti |
-| 8 | **Reel in corso** | `inputLocked` | corsie nemiche coperte, tutti i comandi spenti, nessun click accettato |
-| 9 | **Fine partita** | `matchEnded` | pannello di risultato con HP finali e turni giocati |
+| # | Stato | Condizione | Cosa deve leggersi | Etichetta di fase |
+|---|---|---|---|---|
+| 1 | **Riposo** | nessuna selezione | corsie leggibili, bilancio previsto per corsia, AP disponibili | `FASE AZIONI` |
+| 2 | **Casella selezionata** | `SelectedEmptySpot != null` | casella marcata; carte in mano segnalate come giocabili | `FASE AZIONI` |
+| 3 | **Carta in mano presa** | drag o selezione | **tutte** le caselle libere evidenziate; anteprima di destinazione | `FASE AZIONI` |
+| 4 | **Carta in campo selezionata** | `SelectedOwned != null` | carta sollevata; bersaglio di flip col costo; corsia nemica affacciata evidenziata | `FASE AZIONI` |
+| 5 | **Scambio armato** | `IsSwapArmed` | sorgente marcata, destinazioni valide marcate | `FASE AZIONI` |
+| 6 | **Risoluzione** | `Resolving` | una corsia per volta: chi attacca scatta in avanti, chi para rimbalza, chi incassa trema; ogni riga di log cade quando succede | `RISOLUZIONE IN CORSO` |
+| 7 | **Attacco fatto** | `awaitingEndTurn` | mazzo e ATTACCA spenti | `ATTACCO RISOLTO — CHIUDI IL TURNO` |
+| 8 | **Reel e ingresso slot** | `inputLocked` | corsie nemiche coperte, poi gli slot entrano uno per volta con le abilità che li modificano; tutti i comandi spenti | `NUOVI SLOT IN ARRIVO` |
+| 9 | **Fine partita** | `matchEnded` | pannello di risultato con HP finali e turni giocati | `PARTITA FINITA` |
 
-Stati 7 e 8 oggi si distinguono solo per il grigio dei bottoni, con
-`DisabledColor = (0.784, 0.784, 0.784, 0.5)` su `Image` bianche: praticamente invisibile.
-Servono una **etichetta di fase** e un trattamento di disabilitazione con contrasto reale.
+Gli stati 6, 7 e 8 hanno tutti l'input bloccato e prima si distinguevano solo per
+il grigio dei bottoni — con `DisabledColor = (0.784, 0.784, 0.784, 0.5)` su
+`Image` bianche, cioè praticamente per niente. Ora ognuno ha la sua etichetta,
+scritta da `HudController` in polling, e `UiBuild.Command` dà ai bottoni un
+disabilitato con contrasto reale. `Resolving` va controllato **prima** di
+`InputLocked`, o lo stato 6 si presenta come lo stato 8.
 
 ---
 
@@ -316,39 +326,57 @@ Servono una **etichetta di fase** e un trattamento di disabilitazione con contra
 
 ### 6.2 Griglia
 
+Colonne effettive, come le costruisce `FlipCardsLayoutBuilder`:
+
 ```
-colonna corsia   L = 240
+colonna corsia   L = 240 (cella 220 + gap 20)
 gap fra corsie   G = 48        ← deve ospitare il connettore di combo
-larghezza board  n·240 + (n−1)·48      3 corsie = 816   5 corsie = 1392
-campo di gioco   x   0 … 1440
-colonna destra   x 1440 … 1920         (480, contenuto 400 con 40 di padding)
-corsie centrate  x = 312 / 600 / 888   (3 corsie)
+passo di corsia  288 = cella 220 + LaneGap 68
+larghezza board  n·220 + (n−1)·68       3 corsie = 796
+rail giocatore   x    0 …   96          HP e AP in verticale
+campo di gioco   x   96 … 1440          (1344)
+colonna destra   x 1440 … 1920          (480, contenuto 400 con 40 di padding)
+corsie centrate  x = 480 / 768 / 1056   (3 corsie)
 ```
+
+Il rail verticale del giocatore è nato per togliere di mezzo la fascia
+orizzontale HP+AP da 52 px: in colonna costa larghezza, che c'era, invece di
+altezza, che serviva alle corsie e alla mano.
 
 ### 6.3 Bande verticali — campo di gioco
 
 | y | h | Zona | Contenuto |
 |---|---|---|---|
-| 0 | 56 | **Barra superiore** | `TURNO 4 / 12` · etichetta di fase |
-| 56 | 92 | **Fascia boss** | nome, barra HP `hp/maxHp`, preavviso del turno |
-| 148 | 330 | **Corsie nemiche** | celle slot 240 × 330 |
-| 478 | 68 | **Asse delle corsie** | bilancio previsto per corsia + connettori di combo nei gap |
-| 546 | 340 | **Corsie giocatore** | celle carta 240 × 340 (carta 220 × 330) |
-| 886 | 52 | **Fascia giocatore** | barra HP + pallini AP |
-| 938 | 142 | **Mano** | fino a 5 carte 220 × 330, visibili per 142, sollevate all'hover |
+| 0 | 52 | **Barra superiore** | `TURNO 4 / 12` · etichetta di fase |
+| 52 | 72 | **Fascia boss** | nome, barra HP `hp/maxHp`, preavviso del turno |
+| 124 | 358 | **Corsie nemiche** | celle slot 220 × 330 |
+| 482 | 64 | **Asse delle corsie** | bilancio previsto per corsia + connettori di combo nei gap |
+| 546 | 368 | **Corsie giocatore** | celle carta 220 × 330 |
+| 914 | 166 | **Mano** | fino a 5 carte 220 × 330; a riposo si vede solo la fascia alta, all'ingresso del puntatore la mano sale **in blocco** di 184 px e copre in parte le corsie |
+
+La mano sale tutta insieme, non carta per carta: l'area di attivazione contiene
+la mano come figlio, così passare da una carta all'altra non genera un
+`PointerExit`. Da alzata copre le corsie di proposito — è il momento in cui
+scegli cosa giocare, non quello in cui leggi il tavolo.
 
 ### 6.4 Bande verticali — colonna destra
 
 | y | h | Zona | Contenuto |
 |---|---|---|---|
-| 56 | 40 | Intestazione | `MAZZO 9` · `MANO 3/5` |
+| 56 | 40 | Intestazione | `MANO 3/5` |
 | 96 | 424 | **Ispettore** | carta o slot sotto il puntatore: stat complete, passive, testo delle abilità |
-| 520 | 336 | **Log** | ~14 righe, autoscroll in fondo, tetto a 6000 caratteri |
-| 856 | 224 | **Comandi** | PESCA · ATTACCA · CHIUDI TURNO, 400 × 56, gap 16, costo AP stampato |
+| 520 | 256 | **Log** | ~11 righe, autoscroll in fondo, tetto a 6000 caratteri |
+| 784 | 144 | **Mazzo** | pila di carte vere di dorso (132 di larghezza) + `MAZZO 9` e riga di stato |
+| 936 | 144 | **Comandi** | ATTACCA · CHIUDI TURNO, 400 × 56, gap 16, costo AP stampato |
 
 L'ispettore risolve in un colpo solo il problema più grosso: **abilità e passive non
-hanno oggi nessuno spazio**, e la carta a 220 × 330 non può ospitarle. Mostrare i dettagli
-al passaggio del puntatore evita di gonfiare la cella.
+hanno altrimenti nessuno spazio**, e la carta a 220 × 330 non può ospitarle. Mostrare i
+dettagli al passaggio del puntatore evita di gonfiare la cella.
+
+Il mazzo non è un comando ma un oggetto: la pila si assottiglia con le carte che
+restano, il dorso in cima è quello della prossima carta (il mazzo è mescolato una
+volta sola e si pesca dalla cima), passandoci sopra l'ispettore la mostra, e a
+mazzo vuoto o mano piena la riga di stato dice perché il clic non fa nulla.
 
 ### 6.5 Cella carta — 220 × 330
 
@@ -428,8 +456,22 @@ Il layout non è libero: queste sono regole che, se violate, rompono la logica d
    `container.localPosition` ogni frame; un `HorizontalLayoutGroup` attivo su `handRoot`
    ci combatte e produce uno scatto a ogni pesca.
    Inoltre `spacing = handRect.width / maxHandSize` → **`handRoot` deve essere largo
-   almeno `5 × larghezza carta` = 1100** (consigliato 1200), o le carte si sovrappongono
-   coprendo nome, HP e ATK di quelle a sinistra.
+   almeno `maxHandSize × larghezza carta`**, o le carte si sovrappongono coprendo
+   nome, HP e ATK di quelle a sinistra. Con `handRoot` a 1344 e carte da 220 il
+   massimo è 6; il builder scrive 5 (`MaxHandCards`), che lascia 48 di gap fra le
+   carte, lo stesso delle corsie. **`maxHandSize` è quindi una misura di layout**:
+   lo scrive `WireHandManager`, e modificarlo nell'Inspector non dura.
+
+11. **Il pivot di `handRoot` sta al centro** e la mano è figlia dell'area di
+    attivazione (`HandTray`), non sua sorella. `HandManager` posiziona i
+    container con `localPosition` simmetrica intorno allo zero, che è il pivot
+    del parent; e l'area deve contenere la mano, altrimenti passare da una carta
+    all'altra genera un `PointerExit` e la mano scende sotto le dita.
+
+12. **Il mazzo è mescolato una volta sola e si pesca dalla cima**
+    (`HandManager.RebuildDeckFromBindings` mescola con `GameManager.Rng`).
+    `DeckView` mostra i prossimi prefab con `PeekDeck`: tornare a estrarre a caso
+    a ogni pesca farebbe mentire la pila.
 
 8. **Nessuna `Image` con `Raycast Target` attivo sopra l'area di gioco.**
    `FindEmptySpotUnderPointer` e `FindBoardCardUnderPointer` usano
@@ -454,26 +496,29 @@ Il layout non è libero: queste sono regole che, se violate, rompono la logica d
 
 ## 8. Cosa manca oggi
 
-Elementi da prevedere nel layout perché il dato esiste nel codice ma non ha una casa.
+Elementi previsti dalla specifica perché il dato esiste nel codice. Tutti quelli
+elencati sotto sono **fatti**, tranne l'ultimo.
 
-| Elemento | Perché serve |
+| Elemento | Dove vive ora |
 |---|---|
-| **Traccia `flipPattern` sugli slot** | è l'unica informazione che rende il gioco pianificabile |
-| **Contatore turno** `4/12` | esiste solo come riga di log |
-| **Pannello di fine partita** | `EndMatch()` scrive una riga e spegne i bottoni; nient'altro |
-| **Etichetta di fase** | stati 7 e 8 non sono distinguibili |
-| **Costo AP sui comandi** | pescare, giocare, girare e scambiare costano 1 AP: mai scritto |
-| **Evidenziazione delle caselle libere** | la sequenza "casella prima, carta poi" non è scopribile |
-| **Icone e testo delle abilità** | 16 abilità, zero superficie di visualizzazione |
-| **Contatore furia del Berserker** | progettato per essere prevedibile, oggi invisibile |
-| **Contatori mazzo e mano** | `DrawCard` esce in silenzio a mazzo vuoto o mano piena |
-| **Traccia cariche a 3 tacche** | oggi è testo, `"[2/3]"`, in un rect da 26 px con Truncate |
-| **Barre HP con massimo** | oggi giocatore e boss sono numeri nudi: `13`, `9` |
-| **`ap/MaxPlayerAP`** | oggi stampa `ap/playerBaseAP`, cioè `5/4` |
-| **Log con autoscroll e tetto** | non scrolla, cresce senza limite, sopra ~16 000 caratteri smette di renderizzare |
-| **Segnalazione dei cambiamenti di fine turno** | flip caotico, cariche e avanzamento pattern sono tre righe di log indistinguibili |
+| **Traccia `flipPattern` sugli slot** | `SlotOverlay.RefreshPattern`, banda a y 290 della cella |
+| **Contatore turno** `4/12` | `HudController.UpdateTurn`, barra superiore |
+| **Pannello di fine partita** | `HudController.UpdateEndPanel` |
+| **Etichetta di fase** | `HudController.UpdatePhase`, cinque etichette distinte (§5) |
+| **Costo AP sui comandi** | `UiBuild.Command`, riga costo a destra; il rail dice `ogni azione 1 AP` |
+| **Evidenziazione delle caselle libere** | `GameManager.HighlightFreeSpots`, accesa anche su clic a vuoto |
+| **Icone e testo delle abilità** | `AbilityCatalog` + `InspectorPanel`; i nomi finiscono anche nel log all'ingresso degli slot |
+| **Contatore furia del Berserker** | `SlotOverlay`, chip `FURIA n/soglia` |
+| **Contatori mazzo e mano** | `MANO n/5` in intestazione, `MAZZO n` sulla pila; `DrawCard` logga il rifiuto |
+| **Traccia cariche a 3 tacche** | `CardOverlay` |
+| **Barre HP con massimo** | `UiBar` — boss orizzontale, giocatore verticale sul rail |
+| **`ap/MaxPlayerAP`** | `HudController.UpdateAp`, pallini + `4/5` |
+| **Log con autoscroll e tetto** | `LogPanel` + `GameManager.MaxLogChars` (6000) |
+| **Risoluzione leggibile** | `GameManager.ResolveAttackRoutine` una corsia per volta, con animazioni per attacco, parata e danno |
+| **Ingresso degli slot nemici** | `GameManager.EnterEnemySlotsRoutine`, uno per volta con le abilità raccontate |
+| **Segnalazione dei cambiamenti di fine turno** | **ancora da fare**: flip caotico, cariche e avanzamento pattern restano tre righe di log in un frame solo — vedi ROADMAP A5 |
 
 ---
 
-Riferimento correlato: [ANALISI_UI.md](ANALISI_UI.md) — audit dei difetti dell'interfaccia
-attuale e correzioni già applicate al reel delle slot nemiche.
+Riferimenti correlati: [ROADMAP.md](ROADMAP.md) per i lavori aperti,
+[ANALISI_UI.md](ANALISI_UI.md) — audit dei difetti dell'interfaccia precedente.

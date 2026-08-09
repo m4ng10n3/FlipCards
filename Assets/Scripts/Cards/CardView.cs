@@ -108,6 +108,17 @@ public class CardView : MonoBehaviour
     private Tween _selectTween;
     private Tween _moveInHandTween;
 
+    // Reazioni di combattimento. Lo scarto NON puo' essere un tween diretto su
+    // localPosition: FollowContainer la riscrive ogni frame e vincerebbe lui.
+    // Si tweena un offset che FollowContainer somma al bersaglio, come gia'
+    // fanno la curva della mano e il sollevamento da selezione.
+    private Vector3 _combatOffset;
+    private Vector3 _combatOffsetApplied;
+    private Tween _combatTween;
+    private Tween _flashTween;
+    private Color _templateBaseColor = Color.white;
+    private bool _templateBaseColorRead;
+
     public RectTransform RectTransform => _rt;
     public Canvas RootCanvas => _rootCanvas;
     public Canvas Canvas => _canvas;
@@ -295,14 +306,121 @@ public class CardView : MonoBehaviour
         _lastHp = instance.health;
     }
 
-    public void Blink() { StartCoroutine(BlinkRoutine()); }
-    IEnumerator BlinkRoutine()
+    public void Blink() => FlashTemplate(Color.yellow, 0.18f);
+
+    // ── Reazioni di combattimento ─────────────────────────────────────────────
+    //
+    // Una animazione per azione, non un lampo unico per tutto: guardando una
+    // risoluzione senza leggere il log si deve capire chi ha colpito, chi ha
+    // parato e chi ha incassato.
+
+    /// <summary>Attacca: scatto in avanti, cioe' verso il fronte nemico in alto.</summary>
+    public void PlayAttack()
     {
-        var c = Template.GetComponent<Image>().color;
-        Template.GetComponent<Image>().color = Color.yellow;
-        yield return new WaitForSeconds(0.08f);
-        Template.GetComponent<Image>().color = c;
+        PunchCombat(Vector3.up * 46f, 0.34f, 0f);
+        FlashTemplate(GamePalette.Fronte, 0.30f);
     }
+
+    /// <summary>Para: piccolo rimbalzo all'indietro e tinta del lato che ha bloccato.</summary>
+    public void PlayBlock(float delay = ReactionDelay)
+    {
+        PunchCombat(Vector3.down * 18f, 0.30f, delay);
+        FlashTemplate(instance != null ? GamePalette.SideColor(instance.side) : GamePalette.Retro, 0.26f, delay);
+    }
+
+    /// <summary>Incassa: scossa e lampo rosso.</summary>
+    public void PlayHit(float delay = ReactionDelay)
+    {
+        KillTween(ref _combatTween);
+        _combatOffset = Vector3.zero;
+        _combatTween = DOTween.Shake(() => _combatOffset, v => _combatOffset = v, 0.34f, 30f, 20, 90f)
+                              .SetDelay(delay)
+                              .OnComplete(() => _combatOffset = Vector3.zero)
+                              .SetUpdate(true)
+                              .SetLink(gameObject);
+
+        FlashTemplate(GamePalette.Danger, 0.32f, delay);
+    }
+
+    /// <summary>
+    /// Ritardo della reazione di chi subisce. La vittima pubblica AttackResolved
+    /// dentro la stessa chiamata che ha pubblicato AttackDeclared: senza sfasare,
+    /// colpo e incasso partirebbero nello stesso frame e non si leggerebbe chi ha
+    /// cominciato.
+    /// </summary>
+    public const float ReactionDelay = 0.12f;
+
+    void PunchCombat(Vector3 direction, float duration, float delay)
+    {
+        KillTween(ref _combatTween);
+        _combatOffset = Vector3.zero;
+        _combatTween = DOTween.Punch(() => _combatOffset, v => _combatOffset = v, direction, duration, 4, 0.55f)
+                              .SetDelay(delay)
+                              .OnComplete(() => _combatOffset = Vector3.zero)
+                              .SetUpdate(true)
+                              .SetLink(gameObject);
+    }
+
+    /// <summary>
+    /// Scarto di colore sul Template: parte dalla tinta e rientra sul colore base.
+    /// Il colore base si legge una volta sola — un flash che parte mentre il
+    /// precedente e' ancora in corso ripristinerebbe un colore gia' alterato, e la
+    /// carta resterebbe tinta per sempre.
+    /// </summary>
+    public void FlashTemplate(Color tint, float duration = 0.28f, float delay = 0f)
+    {
+        var img = Template != null ? Template.GetComponent<Image>() : null;
+        if (img == null) return;
+
+        if (!_templateBaseColorRead)
+        {
+            _templateBaseColor = img.color;
+            _templateBaseColorRead = true;
+        }
+
+        Color from = Color.Lerp(_templateBaseColor, tint, 0.75f);
+        Color to = _templateBaseColor;
+
+        // Durante il ritardo DOTween non chiama il setter: il colore resta quello
+        // base e scatta sulla tinta esattamente quando la reazione comincia.
+        KillTween(ref _flashTween);
+        _flashTween = DOTween.To(() => 0f, v => img.color = Color.Lerp(from, to, v), 1f, duration)
+                             .SetDelay(delay)
+                             .SetEase(Ease.OutQuad)
+                             .OnKill(() => { if (img != null) img.color = to; })
+                             .SetUpdate(true)
+                             .SetLink(gameObject);
+    }
+
+    /// <summary>
+    /// Mostra il dorso senza CardInstance: la pila del mazzo e' fatta di carte non
+    /// ancora pescate, quindi ApplySideVisuals — che legge <c>instance.side</c> —
+    /// non e' utilizzabile. <paramref name="showLabels"/> tiene nome e vita solo
+    /// sulla carta in cima, le altre della pila si vedono per un bordo.
+    /// </summary>
+    public void ShowDeckBack(bool showLabels)
+    {
+        var img = Template != null ? Template.GetComponent<Image>() : null;
+        if (img != null)
+        {
+            img.type = Image.Type.Simple;
+            img.preserveAspect = false;
+            if (backImage != null) img.sprite = backImage;
+        }
+
+        if (artworkMonster != null) artworkMonster.enabled = false;
+        if (hintText != null) hintText.gameObject.SetActive(false);
+        if (_shadow != null) _shadow.gameObject.SetActive(false);
+
+        SetTextEnabled(nameText, showLabels);
+        SetTextEnabled(hpText, showLabels);
+        SetTextEnabled(factionText, false);
+        SetTextEnabled(sideText, false);
+        SetTextEnabled(AttackPwrText, false);
+        SetTextEnabled(BlockPwrText, false);
+    }
+
+    static void SetTextEnabled(Text t, bool on) { if (t != null) t.enabled = on; }
 
     /// <summary>
     /// L'hint SOSTITUISCE il messaggio precedente. Accodando, il rect fisso
@@ -526,7 +644,14 @@ public class CardView : MonoBehaviour
         if (_selected)
             targetPosLocal += Vector3.up * selectPunchAmount;
 
-        _rt.localPosition = Vector3.Lerp(_rt.localPosition, targetPosLocal, handFollowSpeed * Time.deltaTime);
+        // Lo scarto di combattimento si sottrae prima del lerp e si risomma dopo:
+        // lerpando sulla posizione che lo contiene gia', il tween si mangerebbe da
+        // solo e la carta resterebbe indietro invece di tornare al suo posto.
+        Vector3 basePos = Vector3.Lerp(_rt.localPosition - _combatOffsetApplied, targetPosLocal,
+                                       handFollowSpeed * Time.deltaTime);
+        _combatOffsetApplied = _combatOffset;
+        _rt.localPosition = basePos + _combatOffsetApplied;
+
         if ((_rt.localPosition-targetPosLocal).magnitude > 0.5f && !inHand)
         {
             _canvas.overrideSorting = true;
@@ -809,6 +934,8 @@ public class CardView : MonoBehaviour
         KillTween(ref _hoverPunchTween);
         KillTween(ref _selectTween);
         KillTween(ref _moveInHandTween);
+        KillTween(ref _combatTween);
+        KillTween(ref _flashTween);
         KillHandTweens();
         KillBoardTweens();
     }

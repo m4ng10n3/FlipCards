@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -48,6 +49,16 @@ public class GameManager : MonoBehaviour
     [Range(0f, 1f)] public float chaosSwapChance = 0.3f;
     [Min(0)] public int maxChaosFlipsPerTurn = 1;
 
+    [Header("Ritmo della risoluzione")]
+    [Tooltip("Pausa dopo le combo di adiacenza, prima della prima corsia.")]
+    [Min(0f)] public float resolveOpeningDelay = 0.22f;
+    [Tooltip("Tempo lasciato alle animazioni di una corsia prima di contare i morti.")]
+    [Min(0f)] public float resolveLaneDelay = 0.38f;
+    [Tooltip("Stacco fra una corsia e la successiva.")]
+    [Min(0f)] public float resolveLaneGap = 0.12f;
+    [Tooltip("Stacco fra l'ingresso di uno slot nemico e il successivo, dopo il rullo.")]
+    [Min(0f)] public float slotEnterDelay = 0.26f;
+
     [Header("Refs")]
     [SerializeField] private HandManager handManager;
     public HandManager HandManager => handManager;
@@ -70,6 +81,10 @@ public class GameManager : MonoBehaviour
     // scambiati ma sono ancora coperti. Senza questo lock UpdateHUD riaccende
     // Attack/Draw a meta' animazione e il giocatore attaccherebbe slot invisibili.
     bool inputLocked;
+    // True mentre la risoluzione scorre corsia per corsia. Distinto da
+    // inputLocked perche' le due attese non sono la stessa cosa e la HUD deve
+    // poterle chiamare per nome: "risoluzione" e "nuovi slot in arrivo".
+    bool resolving;
     static GameManager _instance;
     public static GameManager Instance => _instance;
 
@@ -89,8 +104,22 @@ public class GameManager : MonoBehaviour
     public bool PlayerPhase => playerPhase;
     public bool AwaitingEndTurn => awaitingEndTurn;
     public bool InputLocked => inputLocked;
+    public bool Resolving => resolving;
     public bool MatchEnded => matchEnded;
     public string MatchResult => matchResult;
+
+    /// <summary>
+    /// Il giocatore puo' agire. Serve a chi non e' un Button e quindi non passa
+    /// da UpdateHUD: il mazzo cliccabile, per esempio.
+    /// </summary>
+    public bool CanAct => !matchEnded && playerPhase && !awaitingEndTurn && !inputLocked;
+
+    /// <summary>
+    /// Il generatore seminato della partita. Lo usa anche HandManager per
+    /// mescolare il mazzo: con lo stesso seed la sequenza di pesca si ripete, ed
+    /// e' quello che rende "la prossima carta" un fatto e non un tiro di dado.
+    /// </summary>
+    public System.Random Rng => rng;
 
     readonly Dictionary<CardInstance, CardView> viewByInstance = new Dictionary<CardInstance, CardView>();
     readonly Dictionary<CardInstance, List<AbilityBase>> abilitiesByInstance = new Dictionary<CardInstance, List<AbilityBase>>();
@@ -281,7 +310,8 @@ public class GameManager : MonoBehaviour
         bool enable = playerPhase && !awaitingEndTurn && !inputLocked;
         btnAttack.interactable = enable;
         btnEndTurn.interactable = !inputLocked;
-        handManager.btnDraw.interactable = enable;
+        // La pesca non ha piu' un bottone: e' il mazzo a lato, e DeckView si
+        // regola da solo su GameManager.CanAct.
 
         // Il tetto degli AP e' MaxPlayerAP, non playerBaseAP: con il vecchio
         // denominatore un guadagno da abilita' stampava "5/4".
@@ -409,6 +439,26 @@ public class GameManager : MonoBehaviour
             return;
         }
 
+        StartCoroutine(ResolveAttackRoutine());
+    }
+
+    /// <summary>
+    /// La risoluzione scorre una corsia per volta. Risolvendole tutte in un frame
+    /// il giocatore vedeva solo lo stato finale e doveva ricostruire la catena
+    /// leggendo il log; qui ogni riga di log cade mentre succede la cosa che
+    /// descrive, perche' le Logger.Info stanno dentro LaneResolver e la sequenza
+    /// e' temporizzata.
+    ///
+    /// awaitingEndTurn e lo sblocco dell'input stanno in fondo di proposito:
+    /// anticiparli permetterebbe di attaccare due volte o di chiudere il turno a
+    /// meta' risoluzione.
+    /// </summary>
+    IEnumerator ResolveAttackRoutine()
+    {
+        resolving = true;
+        inputLocked = true;
+        UpdateHUD();
+
         ResetCombatModifiers();
         EventBus.Publish(GameEventType.Custom, new EventContext
         {
@@ -418,13 +468,34 @@ public class GameManager : MonoBehaviour
         });
 
         SynergyResolver.Resolve(this, player, ai);
+        yield return new WaitForSeconds(resolveOpeningDelay);
 
         int lanes = Mathf.Max(playerBoardRoot.childCount, aiBoardRoot.childCount);
         for (int lane = 0; lane < lanes; lane++)
-            LaneResolver.Resolve(lane, GetPlayerCardAtLane(lane), GetEnemySlotAtLane(lane), player, ai);
+        {
+            var card = GetPlayerCardAtLane(lane);
+            var slot = GetEnemySlotAtLane(lane);
+
+            // Corsia vuota su entrambi i lati: non c'e' niente da guardare, e
+            // fermarsi lo stesso sarebbe solo tempo morto.
+            if (card == null && slot == null) continue;
+
+            LaneResolver.Resolve(lane, card, slot, player, ai);
+            yield return new WaitForSeconds(resolveLaneDelay);
+
+            // I morti si contano qui e non alla fine: cosi la morte si vede nella
+            // corsia in cui e' avvenuta. Gli indici restano validi, RemoveSlotView
+            // e RemoveCard rimettono il segnaposto allo stesso sibling index.
+            CleanupDestroyedSlots();
+            UpdateAllViews();
+            yield return new WaitForSeconds(resolveLaneGap);
+        }
 
         CleanupDestroyedSlots();
         UpdateAllViews();
+
+        resolving = false;
+        inputLocked = false;
         awaitingEndTurn = true;
         Logger.Info($"Attack phase end | Boss {ai.hp}/{ai.maxHp} | Player {player.hp}/{player.maxHp}");
         UpdateHUD();
@@ -640,11 +711,7 @@ public class GameManager : MonoBehaviour
             slotBatchManager.RollNewSlots(
                 laneCount,
                 chosenPrefabs => RespawnEnemySlotsFromList(chosenPrefabs),
-                _ =>
-                {
-                    SetButtonsInteractable(true);
-                    StartTurn(player, ai, true);
-                });
+                _ => StartCoroutine(EnterEnemySlotsRoutine()));
         }
         else
         {
@@ -652,13 +719,98 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Gli slot entrano uno per volta e si vede cosa li ha modificati.
+    ///
+    /// Le statistiche vengono fotografate prima e dopo <see cref="StartTurn"/>:
+    /// e' li' che le abilita' di inizio turno applicano i loro effetti, e cio' che
+    /// e' cambiato viene evidenziato mentre la riga di log lo racconta. Senza
+    /// questo confronto gli slot comparirebbero gia' coi valori finali e le
+    /// abilita' che li hanno prodotti resterebbero invisibili.
+    ///
+    /// L'input resta bloccato fino all'ultimo slot: SetButtonsInteractable(true)
+    /// sta in fondo.
+    /// </summary>
+    IEnumerator EnterEnemySlotsRoutine()
+    {
+        int lanes = aiBoardRoot.childCount;
+        var baseHp = new int[lanes];
+        var baseBlock = new int[lanes];
+        var baseAtk = new int[lanes];
+
+        for (int lane = 0; lane < lanes; lane++)
+        {
+            var slot = GetEnemySlotAtLane(lane);
+            if (slot == null) continue;
+            baseHp[lane] = slot.health;
+            baseBlock[lane] = slot.ComputeSelfBlock();
+            baseAtk[lane] = slot.def.atkDamage + slot.tempAtkBonus;
+        }
+
+        StartTurn(player, ai, true);
+
+        for (int lane = 0; lane < lanes && lane < aiBoardRoot.childCount; lane++)
+        {
+            var view = GetEnemySlotViewAtLane(lane);
+            var slot = view != null ? view.instance : null;
+            if (slot == null || !slot.alive) continue;
+
+            view.PlayEnter();
+
+            string abilities = AbilityNames(view);
+            Logger.Info($"Lane {lane + 1}: {slot.def.SlotName} entra in {slot.side}" +
+                        $" | ATK {slot.def.atkDamage} DEF {slot.ComputeSelfBlock()} HP {slot.health}/{slot.def.maxHealth}" +
+                        (string.IsNullOrEmpty(abilities) ? "" : $" | {abilities}"));
+
+            AnnounceSlotChange(lane, view, slot, baseHp[lane], baseBlock[lane], baseAtk[lane]);
+
+            yield return new WaitForSeconds(slotEnterDelay);
+        }
+
+        SetButtonsInteractable(true);
+        UpdateHUD();
+    }
+
+    /// <summary>Evidenzia e racconta le statistiche mosse dalle abilita' di inizio turno.</summary>
+    void AnnounceSlotChange(int lane, SlotView view, SlotInstance slot, int hp, int block, int atk)
+    {
+        int nowHp = slot.health;
+        int nowBlock = slot.ComputeSelfBlock();
+        int nowAtk = slot.def.atkDamage + slot.tempAtkBonus;
+
+        if (nowAtk != atk)
+        {
+            view.PulseStat(GamePalette.Danger);
+            Logger.Info($"Lane {lane + 1}: {slot.def.SlotName} ATK {atk} -> {nowAtk}");
+        }
+        else if (nowBlock != block)
+        {
+            view.PulseStat(GamePalette.Retro);
+            Logger.Info($"Lane {lane + 1}: {slot.def.SlotName} DEF {block} -> {nowBlock}");
+        }
+        else if (nowHp != hp)
+        {
+            view.PulseStat(GamePalette.Good);
+            Logger.Info($"Lane {lane + 1}: {slot.def.SlotName} HP {hp} -> {nowHp}");
+        }
+    }
+
+    static string AbilityNames(Component owner)
+    {
+        var abilities = owner.GetComponents<AbilityBase>();
+        if (abilities == null || abilities.Length == 0) return string.Empty;
+
+        var names = new List<string>(abilities.Length);
+        foreach (var ability in abilities)
+            names.Add(AbilityCatalog.Name(ability));
+        return string.Join(" · ", names);
+    }
+
     void SetButtonsInteractable(bool on)
     {
         inputLocked = !on;
         btnAttack.interactable = on;
         btnEndTurn.interactable = on;
-        if (handManager != null)
-            handManager.btnDraw.interactable = on;
     }
 
     void RespawnEnemySlotsFromList(List<GameObject> prefabs)
@@ -926,8 +1078,8 @@ public class GameManager : MonoBehaviour
         if (matchEnded) return;
         matchEnded = true;
         // UpdateHUD esce subito su matchEnded, quindi i bottoni resterebbero
-        // accesi: btnDraw e' cablato direttamente su HandManager.DrawCard e
-        // permetterebbe di pescare a partita finita.
+        // accesi. Il mazzo non passa da qui: DeckView guarda CanAct, che su
+        // matchEnded e' gia' false.
         SetButtonsInteractable(false);
 
         matchResult = player.hp > ai.hp ? "Player ahead" :

@@ -73,7 +73,11 @@ public class HudController : MonoBehaviour
         string label;
         Color color;
 
+        // Resolving prima di InputLocked: durante la risoluzione l'input e'
+        // bloccato anche lui, ma le due attese non sono la stessa cosa e
+        // chiamarle con lo stesso nome le renderebbe di nuovo indistinguibili.
         if (gm.MatchEnded)                { label = "PARTITA FINITA";                 color = GamePalette.Danger; }
+        else if (gm.Resolving)            { label = "RISOLUZIONE IN CORSO";           color = GamePalette.Fronte; }
         else if (gm.InputLocked)          { label = "NUOVI SLOT IN ARRIVO";           color = GamePalette.Retro; }
         else if (gm.AwaitingEndTurn)      { label = "ATTACCO RISOLTO — CHIUDI IL TURNO"; color = GamePalette.Fronte; }
         else                              { label = "FASE AZIONI";                    color = GamePalette.Good; }

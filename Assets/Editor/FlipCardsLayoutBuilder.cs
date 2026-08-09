@@ -49,13 +49,20 @@ public static class FlipCardsLayoutBuilder
     const float HandRaisedY = 185f;
     const float HandRestH = RefH - HandY;   // 166
     const float HandRaisedH = 380f;
-    const float HandRootW = 1344f;      // detta anche lo spacing: width / maxHandSize
+    const float HandRootW = 1344f;      // detta anche lo spacing: width / MaxHandCards
+    // 1344 / 5 = 268 di passo contro carte da 220: le carte in mano restano
+    // separate di 48, lo stesso gap delle corsie. A 6 il passo scenderebbe a 224
+    // e a mano piena si sfiorerebbero.
+    const int MaxHandCards = 5;
 
-    // Bande della colonna destra
+    // Bande della colonna destra. Il mazzo si e' preso lo spazio che era del
+    // bottone PESCA piu' un po' di log: e' un oggetto, non piu' un comando.
     const float HeaderY = 56f, HeaderH = 40f;
     const float InspectorY = 96f, InspectorH = 424f;
-    const float LogY = 520f, LogH = 336f;
-    const float CommandsY = 856f, CommandsH = 224f;
+    const float LogY = 520f, LogH = 256f;
+    const float DeckY = 784f, DeckH = 144f;
+    const float DeckStackW = 132f;
+    const float CommandsY = 936f, CommandsH = 144f;
     const float CommandH = 56f, CommandGap = 16f;
 
     [MenuItem("FlipCards/Ricostruisci layout di gioco")]
@@ -513,7 +520,8 @@ public static class FlipCardsLayoutBuilder
         BuildSideHeader(side, hud);
         BuildInspector(side);
         var logText = BuildLog(side);
-        var (btnDraw, btnAttack, btnEndTurn) = BuildCommands(side);
+        BuildDeck(side, hud);
+        var (btnAttack, btnEndTurn) = BuildCommands(side);
 
         BuildEndPanel(root, hud);
 
@@ -522,7 +530,7 @@ public static class FlipCardsLayoutBuilder
         axis.laneReferenceRoot = playerBoardRoot;
 
         WireGameManager(gm, playerBoardRoot, aiBoardRoot, btnAttack, btnEndTurn, logText);
-        WireHandManager(hand, handRoot, spawnPoint, btnDraw);
+        WireHandManager(hand, handRoot, spawnPoint);
 
         EditorUtility.SetDirty(canvasGO);
         EditorUtility.SetDirty(gm);
@@ -709,10 +717,8 @@ public static class FlipCardsLayoutBuilder
         var header = UiBuild.Rect("Header", side);
         UiBuild.Band(header, SidePad, HeaderY, SideContentW, HeaderH);
 
-        hud.deckText = UiBuild.Text("Deck", header, "MAZZO 0", 17f, GamePalette.TextPrimary,
-                                    TextAlignmentOptions.Left, FontStyles.Bold);
-        UiBuild.Band(hud.deckText.rectTransform, 0f, 8f, 200f, 24f);
-
+        // Il conteggio del mazzo vive sulla pila, non qui: ripeterlo in cima alla
+        // colonna sarebbe lo stesso numero scritto due volte.
         hud.handText = UiBuild.Text("Hand", header, "MANO 0/5", 17f, GamePalette.TextPrimary,
                                     TextAlignmentOptions.Right, FontStyles.Bold);
         UiBuild.Band(hud.handText.rectTransform, SideContentW - 200f, 8f, 200f, 24f);
@@ -771,33 +777,26 @@ public static class FlipCardsLayoutBuilder
         UiBuild.Stretch(viewport, 4f, 4f, 14f, 4f);
         viewport.gameObject.AddComponent<RectMask2D>();
 
-        var content = UiBuild.Rect("Content", viewport);
-        content.anchorMin = new Vector2(0f, 1f);
-        content.anchorMax = new Vector2(1f, 1f);
-        content.pivot = new Vector2(0.5f, 1f);
-        content.sizeDelta = new Vector2(0f, 0f);
-        content.anchoredPosition = Vector2.zero;
-
-        var fitter = content.gameObject.AddComponent<ContentSizeFitter>();
-        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-
-        var logText = UiBuild.Text("LogText", content, "", 14f, GamePalette.TextPrimary);
-        UiBuild.Stretch(logText.rectTransform);
+        // Il testo E' il contenuto dello ScrollRect, senza un rect intermedio.
+        // Un ContentSizeFitter misura l'ILayoutElement del proprio GameObject,
+        // non i figli: un "Content" con il fitter e il testo dentro restava alto
+        // zero, lo ScrollRect non aveva niente da scorrere e il RectMask2D
+        // tagliava tutte le righe oltre la prima schermata.
+        var logText = UiBuild.Text("LogText", viewport, "", 14f, GamePalette.TextPrimary);
         logText.alignment = TextAlignmentOptions.TopLeft;
         logText.textWrappingMode = TextWrappingModes.Normal;
         logText.overflowMode = TextOverflowModes.Overflow;
         logText.raycastTarget = false;
 
-        // Il testo e' il contenuto: senza ContentSizeFitter sul testo stesso il
-        // fitter del content non ha un ILayoutElement da misurare.
         var textFitter = logText.gameObject.AddComponent<ContentSizeFitter>();
         textFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-        var textRt = logText.rectTransform;
-        textRt.anchorMin = new Vector2(0f, 1f);
-        textRt.anchorMax = new Vector2(1f, 1f);
-        textRt.pivot = new Vector2(0.5f, 1f);
-        textRt.sizeDelta = Vector2.zero;
-        textRt.anchoredPosition = Vector2.zero;
+
+        var content = logText.rectTransform;
+        content.anchorMin = new Vector2(0f, 1f);
+        content.anchorMax = new Vector2(1f, 1f);
+        content.pivot = new Vector2(0.5f, 1f);
+        content.sizeDelta = Vector2.zero;
+        content.anchoredPosition = Vector2.zero;
 
         var scrollbar = BuildScrollbar(scrollRt);
 
@@ -837,16 +836,50 @@ public static class FlipCardsLayoutBuilder
         return scrollbar;
     }
 
-    static (Button draw, Button attack, Button endTurn) BuildCommands(RectTransform side)
+    /// <summary>
+    /// Il mazzo: una pila di carte vere che si assottiglia, cliccabile.
+    /// Il bottone PESCA non diceva quante carte restassero ne' cosa stesse per
+    /// uscire, e a mazzo vuoto non faceva nulla senza spiegare perche'.
+    /// </summary>
+    static void BuildDeck(RectTransform side, HudController hud)
+    {
+        var box = UiBuild.PanelBox("Deck", side, GamePalette.PanelSunken);
+        UiBuild.Band(box, SidePad, DeckY, SideContentW, DeckH);
+
+        // Unico Raycast Target di questa banda, e sta fuori dall'area di gioco:
+        // e' il bersaglio del clic che pesca. I figli — le carte della pila —
+        // fanno risalire il proprio clic fin qui.
+        var boxImage = box.GetComponent<UnityEngine.UI.Image>();
+        if (boxImage != null) boxImage.raycastTarget = true;
+
+        var view = box.gameObject.AddComponent<DeckView>();
+
+        var stack = UiBuild.Rect("Stack", box);
+        UiBuild.Band(stack, 0f, 0f, DeckStackW, DeckH);
+        view.stackRoot = stack;
+
+        float textX = DeckStackW + 12f;
+        float textW = SideContentW - textX - 16f;
+
+        var label = UiBuild.Text("Label", box, "MAZZO", 13f, GamePalette.TextMuted,
+                                 TextAlignmentOptions.Left, FontStyles.Bold);
+        UiBuild.Band(label.rectTransform, textX, 26f, textW, 18f);
+
+        hud.deckText = UiBuild.Text("Count", box, "MAZZO 0", 30f, GamePalette.TextPrimary,
+                                    TextAlignmentOptions.Left, FontStyles.Bold);
+        UiBuild.Band(hud.deckText.rectTransform, textX, 46f, textW, 36f);
+
+        view.hintText = UiBuild.Text("Hint", box, "clic per pescare · 1 AP", 14f, GamePalette.TextMuted);
+        UiBuild.Band(view.hintText.rectTransform, textX, 88f, textW, 40f);
+        view.hintText.textWrappingMode = TextWrappingModes.Normal;
+    }
+
+    static (Button attack, Button endTurn) BuildCommands(RectTransform side)
     {
         var box = UiBuild.Rect("Commands", side);
         UiBuild.Band(box, SidePad, CommandsY, SideContentW, CommandsH);
 
         float y = 12f;
-        var draw = UiBuild.Command("BtnDraw", box, "PESCA", "1 AP", GamePalette.Ap, out _);
-        UiBuild.Band((RectTransform)draw.transform, 0f, y, SideContentW, CommandH);
-
-        y += CommandH + CommandGap;
         var attack = UiBuild.Command("BtnAttack", box, "ATTACCA", "0 AP · chiude la fase", GamePalette.Fronte, out _);
         UiBuild.Band((RectTransform)attack.transform, 0f, y, SideContentW, CommandH);
 
@@ -854,7 +887,7 @@ public static class FlipCardsLayoutBuilder
         var endTurn = UiBuild.Command("BtnEndTurn", box, "CHIUDI TURNO", "0 AP", GamePalette.Retro, out _);
         UiBuild.Band((RectTransform)endTurn.transform, 0f, y, SideContentW, CommandH);
 
-        return (draw, attack, endTurn);
+        return (attack, endTurn);
     }
 
     static void BuildEndPanel(RectTransform root, HudController hud)
@@ -896,15 +929,19 @@ public static class FlipCardsLayoutBuilder
         so.ApplyModifiedPropertiesWithoutUndo();
     }
 
-    static void WireHandManager(HandManager hand, Transform handRoot, Transform spawnPoint, Button draw)
+    static void WireHandManager(HandManager hand, Transform handRoot, Transform spawnPoint)
     {
         var so = new SerializedObject(hand);
         so.FindProperty("handRoot").objectReferenceValue = handRoot;
         so.FindProperty("spawnPoint").objectReferenceValue = spawnPoint;
-        so.FindProperty("btnDraw").objectReferenceValue = draw;
         // La carta nasce gia' alla dimensione della cella: il moltiplicatore
         // serviva quando il prefab era 100x154 e ora la sparerebbe a 330x495.
         so.FindProperty("spawnScaleMultiplier").floatValue = 1f;
+        // La mano massima e' una misura di layout, non di bilanciamento:
+        // HandManager usa spacing = handRoot.width / maxHandSize, quindi con 8
+        // carte il passo scendeva a 168 contro carte da 220 e a mano piena le
+        // carte si coprivano nome, vita e attacco a vicenda.
+        so.FindProperty("maxHandSize").intValue = MaxHandCards;
         so.ApplyModifiedPropertiesWithoutUndo();
     }
 }

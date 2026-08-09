@@ -4,8 +4,7 @@ using UnityEngine;
 
 namespace FlipCards.UI
 {
-    /// Contenitore serializzabile: trascina qui gli sprite del kit (o caricali
-    /// dall'atlante) e recuperali per nome. I nomi sono quelli del manifest.
+    /// Contenitore serializzabile nome -> Sprite. I nomi sono quelli del manifest.
     [CreateAssetMenu(menuName = "FlipCards/UI Sprite Library")]
     public class SpriteLibrary : ScriptableObject
     {
@@ -15,6 +14,7 @@ namespace FlipCards.UI
 
         public Sprite Get(string key)
         {
+            if (string.IsNullOrEmpty(key)) return null;
             if (_map == null)
             {
                 _map = new Dictionary<string, Sprite>(entries.Count);
