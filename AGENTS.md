@@ -428,6 +428,33 @@ in questo progetto ha risposto `totalCount: 0` anche subito dopo una
 vietato dal validatore del comando, e `DG.Tweening` non è visibile
 dall'assembly dinamica: niente DOTween nel codice dei comandi.
 
+**La selezione si annulla col clic altrove, e non con un bersaglio di fondo.**
+`SelectionManager.Update` guarda il tasto sinistro e chiede all'EventSystem cosa
+c'era sotto: se non è una carta (`CardDefinition` sulla catena dei parent) né una
+casella libera, chiama `ClearAll`. **Non** stendere un Raycast Target invisibile
+dietro il tabellone per intercettare i clic a vuoto: è la trappola dell'area
+della mano, che mangiava clic e hover delle carte in campo. Le due esclusioni non
+sono cosmetiche — il clic su una casella libera e quello su una carta in mano sono
+i due passi di "casella prima, carta poi", e cancellare la selezione lì la
+romperebbe *a seconda dell'ordine di Update*, cioè in modo intermittente. La
+decisione viene dal raycast e non dallo stato, appunto per non dipendere da
+quell'ordine.
+
+**Iniettare un clic finto nell'Input System non arriva all'EventSystem.**
+`InputSystem.QueueStateEvent(Mouse.current, new MouseState{...})` seguito da
+`InputSystem.Update()` non fa scattare né `wasPressedThisFrame` per gli altri
+Update né i gestori di UI: la selezione non cambiava e nessun `OnPointerClick`
+partiva. È la stessa famiglia della trappola di `SetCursorPos` qui sotto. Per
+provare una logica di interazione senza raw input, **separarla dalla lettura
+dell'input** e chiamarla con la posizione: `SelectionManager.ClearIfClickedAway`
+è pubblica per questo, e la prova che esegue è il codice vero, raycast compreso.
+
+**Un punto sopra una carta in mano a riposo è fuori schermo.** La mano ferma sta
+sotto il bordo (`restHeight`): `WorldToScreenPoint` su una carta in mano dà
+`y ≈ -30`, dove il raycast non colpisce niente. Un test che usa quel punto non
+sta provando "clic sulla carta in mano" ma "clic nel vuoto", e riporta un
+fallimento che non esiste.
+
 **Per provare il mouse serve raw input.** `[System.Windows.Forms.Cursor]::Position`
 (cioè `SetCursorPos`) sposta il cursore ma **non** genera l'evento che
 l'Input System legge: `Mouse.current.position` resta `(0,0)` e nessun hover
