@@ -23,7 +23,7 @@ public static class AbilityCatalog
         ["OnFlipDealDamage"]   = new Entry { glyph = "F", icon = "icon_flip",         name = "Flip Strike",      effect = "al flip colpisce lo slot della sua corsia, o il boss se la corsia e' vuota" },
         ["OnFlipGainAP"]       = new Entry { glyph = "P", icon = "icon_plus",         name = "Flip Momentum",    effect = "al primo flip manuale del turno restituisce AP" },
         ["OnEndTurnDealDamage"]= new Entry { glyph = "E", icon = "icon_clock",        name = "End Turn Strike",  effect = "attacca a fine turno" },
-        ["GetBonusBack"]       = new Entry { glyph = "B", icon = "icon_diamond",      name = "Faction Aura",     effect = "in Retro applica i bonus di fazione alle altre carte" },
+        ["GetBonusBack"]       = new Entry { glyph = "B", icon = "icon_diamond",      name = "Staffetta",        effect = "coperta con un'altra della sua fazione restituisce AP, una volta per turno" },
 
         // Slot
         ["SlotArmorFront"]   = new Entry { glyph = "A", icon = "icon_shield",      name = "Armatura",     effect = "in Fronte riduce il danno in arrivo" },

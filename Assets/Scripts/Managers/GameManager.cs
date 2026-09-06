@@ -45,13 +45,23 @@ public class GameManager : MonoBehaviour
     [Min(0)] public int flipCardCost = 1;
     [Min(0)] public int swapCardCost = 1;
     [Min(0)] public int maxBonusAP = 2;
-    [Min(0)] public int bossDamageOnSlotBreak = 3;
-    [Tooltip("Quota delle ferite lasciate su uno slot che il rullo scarta e che " +
-             "vengono girate al boss. 0 = il danno non letale sparisce col giro.")]
-    [Range(0f, 1f)] public float woundCarryToBoss = 1f;
-    [Range(0f, 1f)] public float chaosFlipChance = 1f;
-    [Range(0f, 1f)] public float chaosSwapChance = 0f;
-    [Min(0)] public int maxChaosFlipsPerTurn = 1;
+
+    [Header("Difficolta'")]
+    [Tooltip("L'unica manopola. 0 = allenamento, 1 = il boss non perdona. Muove " +
+             "insieme vita e attacco delle caselle, quante carte il fine turno " +
+             "rimescola e quanti punti azione restano al giocatore.")]
+    [Range(0f, 1f)] public float difficulty = 0.5f;
+
+    /// <summary>Vita delle caselle del pool: la corazza del boss si ispessisce con la difficolta'.</summary>
+    public float SlotHealthScale => Mathf.Lerp(0.8f, 1.5f, difficulty);
+    /// <summary>Attacco delle caselle: quanto fa male restare scoperti.</summary>
+    public float SlotAttackScale => Mathf.Lerp(0.7f, 1.4f, difficulty);
+    /// <summary>Quante carte a terra si girano da sole a fine turno.</summary>
+    public int ChaosFlips => Mathf.RoundToInt(Mathf.Lerp(1f, 3f, difficulty));
+    /// <summary>Quante coppie di carte a terra si scambiano di posto a fine turno.</summary>
+    public int ChaosSwaps => Mathf.RoundToInt(Mathf.Lerp(0f, 2f, difficulty));
+    /// <summary>Punti azione a inizio turno: la difficolta' li toglie, non li aggiunge.</summary>
+    public int EffectiveBaseAP => Mathf.Max(1, playerBaseAP - Mathf.FloorToInt(difficulty * 2f));
 
     [Header("Ritmo della risoluzione")]
     [Tooltip("Pausa dopo le combo di adiacenza, prima della prima corsia.")]
@@ -138,10 +148,17 @@ public class GameManager : MonoBehaviour
     readonly Dictionary<SlotInstance, SlotView> slotViewByInstance = new Dictionary<SlotInstance, SlotView>();
     readonly List<SlotView> enemySlotViews = new List<SlotView>();
 
+    /// <summary>
+    /// Le caselle numerate del boss. Non e' un dettaglio del rullo: e' la sua
+    /// corazza, e la partita e' il tentativo di smontarla pezzo per pezzo.
+    /// </summary>
+    readonly BossPool bossPool = new BossPool();
+    public BossPool Pool => bossPool;
+
     Transform playerBoardRootClone;
     public Transform PlayerBoardRootClone => playerBoardRootClone;
 
-    public int MaxPlayerAP => playerBaseAP + maxBonusAP;
+    public int MaxPlayerAP => EffectiveBaseAP + maxBonusAP;
 
     void Awake()
     {
@@ -167,8 +184,10 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         rng = new System.Random(seed);
-        player = new PlayerState("Player", playerMaxHp, playerBaseAP);
+        player = new PlayerState("Player", playerMaxHp, EffectiveBaseAP);
         ai = new PlayerState("Boss", enemyMaxHp, 0);
+
+        bossPool.Build(BuildEnemySlotPool(), SlotHealthScale, SlotAttackScale);
 
         ClearChildrenUnder(playerBoardRoot);
         SpawnInitialEmptySpots();
@@ -192,7 +211,8 @@ public class GameManager : MonoBehaviour
         SpawnStartingHand();
 
         ClearLog();
-        Logger.Info($"Match start | Player {player.hp}/{player.maxHp} HP | Boss {ai.hp}/{ai.maxHp} HP | AP {playerBaseAP}");
+        Logger.Info($"Match start | Player {player.hp}/{player.maxHp} HP | Boss {ai.hp}/{ai.maxHp} HP | AP {EffectiveBaseAP}" +
+                    $" | difficolta' {difficulty:0.00} | corazza {bossPool.Summary()}");
 
         UpdateAllViews();
         UpdateHUD();
@@ -233,6 +253,11 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// I prefab distinti che formano il pool, in ordine: l'ordine diventa il
+    /// numero della casella. Niente ripetizioni — due copie della stessa casella
+    /// avrebbero due vite separate e il numero stampato non vorrebbe dire piu' niente.
+    /// </summary>
     List<GameObject> BuildEnemySlotPool()
     {
         var flat = new List<GameObject>();
@@ -240,28 +265,20 @@ public class GameManager : MonoBehaviour
         if (slotBatchManager != null && slotBatchManager.batch != null && slotBatchManager.batch.Count > 0)
         {
             foreach (var binding in slotBatchManager.batch)
-            {
-                if (binding?.prefab == null) continue;
-                for (int i = 0; i < Mathf.Max(1, binding.count); i++)
-                    flat.Add(binding.prefab);
-            }
+                if (binding?.prefab != null && !flat.Contains(binding.prefab)) flat.Add(binding.prefab);
         }
 
         if (flat.Count > 0) return flat;
 
         foreach (var binding in enemySlots)
-        {
-            if (binding?.prefab == null) continue;
-            for (int i = 0; i < Mathf.Max(1, binding.count); i++)
-                flat.Add(binding.prefab);
-        }
+            if (binding?.prefab != null && !flat.Contains(binding.prefab)) flat.Add(binding.prefab);
 
         return flat;
     }
 
-    void AddSlotFromTemplate(PlayerState owner, SlotDefinition.Spec def, GameObject prefab, Transform root, List<SlotView> outViews)
+    void AddSlotFromTemplate(PlayerState owner, SlotDefinition.Spec def, GameObject prefab, Transform root, List<SlotView> outViews, BossPool.Entry origin = null)
     {
-        var si = new SlotInstance(def, def.flipPattern != null && def.flipPattern.Length > 0 ? rng.Next(def.flipPattern.Length) : 0);
+        var si = new SlotInstance(def, def.flipPattern != null && def.flipPattern.Length > 0 ? rng.Next(def.flipPattern.Length) : 0, origin);
         var go = Instantiate(prefab, root);
         go.name = prefab.name;
         go.SetActive(true);
@@ -281,7 +298,7 @@ public class GameManager : MonoBehaviour
         slotViewByInstance.Clear();
         DetachAndDestroy(aiBoardRoot);
 
-        var flat = BuildEnemySlotPool();
+        var flat = bossPool.AlivePrefabs();
         if (flat.Count == 0) return;
 
         for (int i = flat.Count - 1; i > 0; i--)
@@ -291,12 +308,11 @@ public class GameManager : MonoBehaviour
         }
 
         int lanes = playerBoardRoot.childCount;
-        for (int lane = 0; lane < lanes; lane++)
+        for (int lane = 0; lane < lanes && lane < flat.Count; lane++)
         {
-            var prefab = flat[lane % flat.Count];
-            var sd = prefab.GetComponent<SlotDefinition>();
-            if (sd == null) continue;
-            AddSlotFromTemplate(ai, sd.BuildSpec(), prefab, aiBoardRoot, enemySlotViews);
+            var entry = bossPool.Of(flat[lane]);
+            if (entry == null) continue;
+            AddSlotFromTemplate(ai, entry.spec, entry.prefab, aiBoardRoot, enemySlotViews, entry);
         }
     }
 
@@ -443,15 +459,48 @@ public class GameManager : MonoBehaviour
         return ordered;
     }
 
-    public void DealBossPressureFromBreak(CardInstance source, int amount, int lane)
+    /// <summary>
+    /// Il danno che avanza dopo aver finito una casella arriva al boss.
+    ///
+    /// E' l'unico modo di fargli male finche' la corazza tiene, ed e' cio' che
+    /// rende diverso "uccidere una casella" da "uccidere una casella con il
+    /// colpo giusto": pareggiare la sua vita non gli toglie niente, eccederla
+    /// gli toglie la differenza. Le cariche accumulate stando coperti servono
+    /// esattamente a questo.
+    /// </summary>
+    public void OverflowToBoss(int amount, object attacker, SlotInstance broken)
     {
         int damage = Mathf.Max(0, amount);
-        if (source == null || damage <= 0) return;
+        if (damage <= 0) return;
 
         ai.TakeDamage(damage);
-        source.PushHint($"Boss -{damage}");
-        Logger.Info($"Lane {lane + 1}: {source.def.cardName} breaks through for {damage} boss damage");
+        string who = attacker is CardInstance c ? c.def.cardName : "?";
+        if (attacker is CardInstance card) card.PushHint($"SFONDA -{damage}");
+        Logger.Info($"Traboccamento: {who} sfonda {broken?.def.SlotName} e il boss paga {damage}");
         UpdateHUD();
+    }
+
+    /// <summary>
+    /// Speculare: il colpo che supera la vita della carta arriva al giocatore.
+    /// La corsia si e' scoperta a meta' colpo e il resto e' passato.
+    /// </summary>
+    public void OverflowToPlayer(int amount, object attacker, CardInstance fallen)
+    {
+        int damage = Mathf.Max(0, amount);
+        if (damage <= 0) return;
+
+        player.TakeDamage(damage);
+        string who = attacker is SlotInstance s ? s.def.SlotName : "?";
+        Logger.Info($"Traboccamento: {who} passa oltre {fallen?.def.cardName} e il giocatore paga {damage}");
+        UpdateHUD();
+    }
+
+    /// <summary>Annuncia che una casella e' uscita dal pool per sempre.</summary>
+    public void AnnouncePoolBreak(SlotInstance slot)
+    {
+        if (slot == null) return;
+        int number = slot.PoolNumber;
+        Logger.Info($"Casella {(number > 0 ? "#" + number + " " : "")}{slot.def.SlotName} distrutta: fuori dal rullo. Corazza {bossPool.Summary()}");
     }
 
     void OnAttack()
@@ -528,28 +577,38 @@ public class GameManager : MonoBehaviour
         if (rollAfter) OnEndTurn();
     }
 
+    /// <summary>
+    /// Il rimescolamento di fine turno: le carte a terra si girano e si
+    /// scambiano di posto da sole.
+    ///
+    /// E' l'avversario vero del gioco. Il rullo cambia le caselle, questo cambia
+    /// la tua fila: la disposizione che avevi costruito non sopravvive al turno,
+    /// e ogni turno ricomincia da una posizione che non hai scelto. Rimetterla a
+    /// posto — insegna accanto a chi colpisce, risonanza dove vuoi sfondare — e'
+    /// il lavoro del giocatore, e la manopola della difficolta' decide quanto ce
+    /// n'e' da fare.
+    ///
+    /// Le carte scosse per prime sono quelle nelle corsie che il giro NON ha
+    /// abbinato: il caso morde dove non stavi guardando, non dove avevi appena
+    /// costruito qualcosa.
+    /// </summary>
     IEnumerator RandomizePlayerBoard()
     {
         var ordered = GetOrderedPlayerCards();
         if (ordered.Count == 0) yield break;
 
-        int flipsDone = 0;
+        // 1. Si girano.
         var flipCandidates = new List<CardInstance>();
         foreach (var card in ordered)
-        {
-            if (rng.NextDouble() < Mathf.Clamp01(card.def.endTurnFlipChance * chaosFlipChance))
-                flipCandidates.Add(card);
-        }
+            if (rng.NextDouble() < Mathf.Clamp01(card.def.endTurnFlipChance)) flipCandidates.Add(card);
 
-        // La macchina scuote per prime le corsie che il giro NON ha abbinato: il
-        // flip casuale diventa la faccia B dell'esito del rullo invece di un dado
-        // scollegato. Se tutte le corsie risuonano si pesca fra quelle rimaste.
         var shaken = new List<CardInstance>();
         foreach (var candidate in flipCandidates)
             if (!SynergyResolver.Resonates(this, GetLaneIndexFor(candidate)))
                 shaken.Add(candidate);
 
-        while (flipCandidates.Count > 0 && flipsDone < maxChaosFlipsPerTurn)
+        int flipsDone = 0;
+        while (flipCandidates.Count > 0 && flipsDone < ChaosFlips)
         {
             var pool = shaken.Count > 0 ? shaken : flipCandidates;
             int pick = rng.Next(pool.Count);
@@ -572,55 +631,36 @@ public class GameManager : MonoBehaviour
                 view.FlipSide(false);
 
             card.PushHint($"SCOSSA -> {card.side}");
-            Logger.Info($"Chaos: {card.def.cardName} flips to {card.side}");
+            Logger.Info($"Caos: {card.def.cardName} si gira su {card.side}");
             flipsDone++;
             yield return new WaitForSeconds(0.4f);
         }
 
-        if (playerBoardRoot.childCount < 2 || rng.NextDouble() >= chaosSwapChance)
-            yield break;
-
-        var swappableLanes = new List<int>();
-        for (int lane = 0; lane < playerBoardRoot.childCount - 1; lane++)
+        // 2. Si scambiano di posto.
+        int swapsDone = 0;
+        while (swapsDone < ChaosSwaps)
         {
-            if (GetPlayerCardAtLane(lane) != null && GetPlayerCardAtLane(lane + 1) != null)
-                swappableLanes.Add(lane);
+            var swappableLanes = new List<int>();
+            for (int lane = 0; lane < playerBoardRoot.childCount - 1; lane++)
+                if (GetPlayerCardAtLane(lane) != null && GetPlayerCardAtLane(lane + 1) != null)
+                    swappableLanes.Add(lane);
+
+            if (swappableLanes.Count == 0) yield break;
+
+            int swapLane = swappableLanes[rng.Next(swappableLanes.Count)];
+            var a = GetPlayerCardViewAtLane(swapLane);
+            var b = GetPlayerCardViewAtLane(swapLane + 1);
+
+            // Stesso percorso dello scambio per trascinamento: il giocatore
+            // subisce questo cambiamento, quindi deve almeno vederlo succedere.
+            if (!AnimateLaneSwap(a, b)) yield break;
+
+            a?.instance?.PushHint("SPOSTATA");
+            b?.instance?.PushHint("SPOSTATA");
+            Logger.Info($"Caos: la corsia {swapLane + 1} si scambia con la {swapLane + 2}");
+            swapsDone++;
+            yield return new WaitForSeconds(0.35f);
         }
-
-        if (swappableLanes.Count == 0) yield break;
-
-        int swapLane = swappableLanes[rng.Next(swappableLanes.Count)];
-        // Stesso percorso dello scambio per trascinamento: il giocatore subisce
-        // questo cambiamento, quindi deve almeno vederlo succedere.
-        AnimateLaneSwap(GetPlayerCardViewAtLane(swapLane), GetPlayerCardViewAtLane(swapLane + 1));
-        Logger.Info($"Chaos: lane {swapLane + 1} swaps with lane {swapLane + 2}");
-    }
-
-    /// <summary>
-    /// Il rullo sostituisce ogni casella a ogni giro: senza questo, il danno che
-    /// non uccide sparisce con il giro e attaccare non serve a niente se non
-    /// uccidi in un colpo solo. Le caselle sono la corazza del boss per questo
-    /// giro: quello che gli hai tolto e che il rullo butta via, lo paga il boss.
-    /// Uccidere resta meglio, perche' aggiunge <see cref="bossDamageOnSlotBreak"/>.
-    /// </summary>
-    void CarryWoundsToBoss()
-    {
-        if (woundCarryToBoss <= 0f) return;
-
-        int carried = 0;
-        for (int lane = 0; lane < aiBoardRoot.childCount; lane++)
-        {
-            var slot = GetEnemySlotAtLane(lane);
-            if (slot == null || !slot.alive) continue;
-            int wounds = Mathf.Max(0, slot.def.maxHealth - slot.health);
-            if (wounds <= 0) continue;
-            carried += Mathf.FloorToInt(wounds * woundCarryToBoss);
-        }
-
-        if (carried <= 0) return;
-        ai.TakeDamage(carried);
-        Logger.Info($"Il rullo scarta le caselle ferite: il boss paga {carried}");
-        UpdateHUD();
     }
 
     void AccumulateFlipCharges()
@@ -776,7 +816,6 @@ public class GameManager : MonoBehaviour
             return;
         }
         AccumulateFlipCharges();
-        CarryWoundsToBoss();
 
         EventBus.Publish(GameEventType.TurnEnd, new EventContext
         {
@@ -928,20 +967,39 @@ public class GameManager : MonoBehaviour
         {
             if (lane >= prefabs.Count || prefabs[lane] == null)
             {
-                if (EmptySlot != null)
-                {
-                    var empty = Instantiate(EmptySlot, aiBoardRoot);
-                    empty.name = EmptySlot.name;
-                    empty.SetActive(true);
-                }
+                SpawnEmptySlotAt();
                 continue;
             }
 
             var prefab = prefabs[lane];
+
+            // La casella torna in campo dalla SUA riga del pool: stessa vita
+            // residua, stesso numero, stesse statistiche scalate dalla
+            // difficolta'. Passando invece da SlotDefinition.BuildSpec() —
+            // com'era — ogni giro rimetteva in campo una casella nuova di
+            // fabbrica: le ferite del turno prima svanivano, il numero stampato
+            // spariva e la manopola della difficolta' non toccava nessuno.
+            var entry = bossPool.Of(prefab);
+            if (entry != null)
+            {
+                if (!entry.alive) { SpawnEmptySlotAt(); continue; }
+                AddSlotFromTemplate(ai, entry.spec, prefab, aiBoardRoot, enemySlotViews, entry);
+                continue;
+            }
+
             var definition = prefab.GetComponent<SlotDefinition>();
             if (definition == null) continue;
             AddSlotFromTemplate(ai, definition.BuildSpec(), prefab, aiBoardRoot, enemySlotViews);
         }
+    }
+
+    /// <summary>Un buco nella corazza: la corsia mostra la casella vuota.</summary>
+    void SpawnEmptySlotAt()
+    {
+        if (EmptySlot == null) return;
+        var empty = Instantiate(EmptySlot, aiBoardRoot);
+        empty.name = EmptySlot.name;
+        empty.SetActive(true);
     }
 
     void RemoveCard(PlayerState owner, CardInstance card)

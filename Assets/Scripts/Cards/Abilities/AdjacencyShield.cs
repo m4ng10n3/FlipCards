@@ -35,7 +35,7 @@ public class AdjacencyShield : AbilityBase
 
         if (Mathf.Abs(myIdx - tgtIdx) == 1)
         {
-            targetCard.tempBlockBonus += shieldValue;
+            targetCard.AddBlockBonus(shieldValue, $"{AbilityCatalog.Name(this)} di {Source.def.cardName}");
             Source.PushHint($"→ scudo {shieldValue}");
         }
     }

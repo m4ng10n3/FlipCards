@@ -26,10 +26,9 @@ public class SlotRetroRegen : AbilityBase
             if (!ReferenceEquals(ctx.source, _slot)) return;
             if (_slot == null || !_slot.alive) return;
 
-            int healed = Mathf.Min(regenAmount, _slot.def.maxHealth - _slot.health);
+            int healed = _slot.Heal(regenAmount);
             if (healed <= 0) return;
 
-            _slot.health = Mathf.Min(_slot.def.maxHealth, _slot.health + regenAmount);
             _slot.PushHint($"Regen +{healed}HP");
             Logger.Info($"[SlotRetroRegen] {_slot.def.SlotName} recupera {healed}HP");
             if (_slotView != null) _slotView.Refresh();

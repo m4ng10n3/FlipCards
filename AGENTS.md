@@ -182,11 +182,53 @@ quel documento è l'elenco dei vincoli che, se violati, rompono la logica di gio
 
 ## Il gioco in tre righe
 
-Duello a corsie, giocatore contro un boss a pattern deterministici, 12 turni.
-Ogni corsia ha una carta del giocatore in basso e uno slot nemico in alto; carte e
-slot hanno due lati (Fronte attacca, Retro blocca e accumula cariche). Il giocatore
-sceglie i lati spendendo AP, lo slot segue una `flipPattern` fissa. A fine turno
-tutti gli slot nemici vengono sostituiti con un'animazione da slot machine.
+Duello a corsie contro il rullo di un boss, 12 turni. Ogni corsia ha una carta del
+giocatore in basso e una casella nemica in alto; le carte hanno due lati (Fronte
+attacca, Retro para ed e' un'insegna). Il giocatore sceglie lati e posizioni
+spendendo AP; le caselle le estrae il rullo a ogni fine turno, e a fine turno le
+carte a terra si girano e si scambiano di posto da sole. Si combatte contro il
+caso, e la mossa del turno e' rimettere la fila al posto giusto.
+
+## Le cinque regole del combattimento
+
+Sono la sostanza del gioco e stanno tutte in codice commentato, ma vanno sapute
+prima di toccare qualunque cosa: quasi ogni "bug" di bilanciamento nasce dal
+violarne una.
+
+1. **La casella e' corazza, non bersaglio.** Il colpo si ferma sulla vita della
+   casella e **quello che eccede lo paga il boss**
+   (`SlotInstance.ResolveIncomingAttack` → `GameManager.OverflowToBoss`).
+   Pareggiare la sua vita non fa male a nessuno: sfondarla si'. Simmetrico dalla
+   parte del giocatore — il colpo che supera la vita della carta arriva ai suoi HP
+   (`CardInstance.ResolveIncomingAttack` → `OverflowToPlayer`). Percio' una carta
+   con poca vita davanti a una casella che picchia forte non e' una copertura, e'
+   una porta aperta.
+2. **La corazza e' un mazzo numerato** (`BossPool`). N lastre con un numero
+   stampato; il rullo pesca **fra quelle vive e senza ripetizioni**, le ferite
+   restano sulla lastra fra un giro e l'altro, e ucciderne una la toglie dal pool
+   per il resto della partita. Se le vive sono meno delle corsie, i posti che
+   restano sono buchi e il boss e' scoperto in quelle corsie.
+3. **L'insegna.** Una carta coperta mostra sul retro il suo simbolo nel colore
+   della fazione — spada col numero, scudo col numero — e da' quel numero alle
+   carte **adiacenti della stessa fazione**. Sta in `SynergyResolver`, ed e' una
+   **regola, non un'abilita'**: vedi la trappola in fondo.
+4. **La risonanza.** Se in una corsia carta e casella sono della stessa fazione,
+   in quella corsia **nessuno dei due para**. Taglia da tutte e due le parti:
+   sfondi, ma resti scoperto. Viaggia nell'evento come `ignoreBlock`.
+   È l'unica regola che lega una carta alla casella che ha davanti, quindi lo
+   scudo spezzato si accende **su tutte due le celle** (`CardOverlay` e
+   `SlotOverlay`, oltre all'asse delle corsie): il simbolo sta sulle due cose
+   che la causano, non in un terzo posto lontano da entrambe. Prima stava solo
+   sull'asse, ed è il motivo per cui la sinergia carta-casella non si capiva.
+5. **Una sola manopola.** `GameManager.difficulty` (0..1) muove insieme vita e
+   attacco delle lastre, quante carte il fine turno gira e scambia, e quanti AP
+   restano al giocatore. Non ci sono altri numeri di bilanciamento da girare:
+   se serve un'altra leva, va derivata da questa.
+
+Il pronostico dell'asse delle corsie (`LaneAxisView`) chiama **gli stessi metodi**
+che poi risolvono il colpo, per costruzione: quello che si legge prima di attaccare
+e' quello che succede. Se il pronostico e la risoluzione divergono, il bug e' che
+qualcuno ha aggiunto un bonus fuori da `SynergyResolver`.
 
 ## Le tre catene asincrone
 
@@ -517,6 +559,80 @@ creati a runtime, che un `LayoutElement` non ce l'hanno.
 **Nel codice di `Unity_RunCommand`:** la classe deve chiamarsi `CommandScript` ed
 essere `internal`. `Image` va scritto `UnityEngine.UI.Image` per intero, perché
 `Image` collide con un namespace nello scope del comando.
+
+**Giocare una carta CLONA l'oggetto in mano, non il prefab su disco.**
+`GameManager.PlayCardFromHand` fa `Instantiate(definition.gameObject, parent)`
+dove `definition` sta sulla carta in mano, che ha già il chrome di `CardOverlay`
+montato. Il clone se lo porta dietro e poi la sua `CardOverlay` ne costruisce un
+secondo: due copie sovrapposte, e quella ereditata resta ferma sul lato di prima.
+Il sintomo è subdolo — funziona tutto finché le due copie disegnano la stessa
+cosa, e si vede solo quando iniziano a divergere (il nome dell'abilità che
+ricompariva sul retro). Per questo il chrome della carta sta in **due contenitori
+con un nome noto**, `_ChromeUnder` (dietro il Template, per il sigillo di
+ripiego) e `_ChromeOver`: `Build` li butta se li trova, quindi girare due volte è
+innocuo e non serve tenere aggiornato un elenco di figli. Chiunque aggiunga
+figli generati a una cella carta li metta lì dentro.
+
+**I glifi di `GlyphSprites` non si possono serializzare.** Sono `Texture2D`
+costruite in memoria con `HideFlags.HideAndDontSave`: assegnarne uno a un'`Image`
+dal **builder** (che gira nell'editor e salva la scena) lascia il riferimento
+null al primo domain reload, e Unity disegna un'`Image` senza sprite come un
+rettangolo pieno — in legenda uscivano due quadrati bianchi al posto della spada
+e dello scudo. Quello che si salva è `GlyphIcon` col suo enum, che riassegna lo
+sprite a Play. A runtime (`CardOverlay`, `LaneAxisView`) l'assegnazione diretta va
+benissimo.
+
+**L'insegna è una regola, non un'abilità: non rimetterla in un componente.**
+`GetBonusBack` applicava `backDamageBonusSameFaction` a **tutte** le carte della
+sua fazione in campo, e stava su tutte e dieci le carte. Due difetti in uno: il
+bonus si sommava a quello di `SynergyResolver` (numero doppio, e il pronostico
+diceva una cifra diversa da quella applicata) e, essendo un'aura che raggiunge
+tutto il tavolo, **rendeva inutile spostare le carte** — cioè annullava la
+decisione su cui il gioco si regge. Ora l'insegna la risolve solo
+`SynergyResolver`, per adiacenza, e in `GetBonusBack` resta la staffetta di AP,
+che è un'altra meccanica ed è rimasta solo sulle due carte che la hanno
+(`backBonusPAIfTwoRetroSameFaction > 0`).
+
+**Il fronte e il retro della carta sono due insiemi di elementi, non un
+elemento che cambia contenuto.** `CardOverlay` tiene `_frontOnly` e `_backOnly`
+e `ApplyFace` accende l'uno e spegne l'altro; il retro ha il suo gruppo
+`BackFace` **dentro il prefab** (lo scrive `BuildBackFace`, non si tocca a mano).
+Aggiungendo un elemento va messo in una delle due liste, e **mai il contenitore**:
+`_statBadge.transform` *è* il pozzetto, quindi il suo `.parent` è `_ChromeOver` —
+metterci quello nell'insieme del fronte spegne tutto il chrome del dorso, e il
+sintomo è un dorso nudo con i soli indici del prefab, che sembra un problema di
+sprite.
+
+**Ogni bonus deve dire da dove viene: si passa da `AddAtkBonus` /
+`AddBlockBonus`.** `tempAtkBonus` e `tempBlockBonus` non sono più campi
+scrivibili ma i totali di un `BonusLedger`, e i due metodi vogliono la
+**ragione** come parametro obbligatorio. Non è pignoleria: sulla cella compare
+un "+2" e l'unico posto dove leggerne la causa è l'ispettore, che stampa il
+registro senza ricostruire nulla — così una regola nuova compare da sola nella
+scheda e la spiegazione non può restare indietro rispetto all'effetto. Per la
+ragione si usa `AbilityCatalog.Name(this)`, che è la stessa etichetta stampata
+sulla carta. I reset passano da `ClearAtkBonus()` / `ClearBlockBonus()`.
+
+**Le cariche stanno nei `flip_cells` del kit e non si spostano girando la
+carta.** Sono l'unico elemento condiviso fra le due facce
+(`CardOverlay.BuildChargeColumn`, geometria da `layouts.card` ×2): la carica
+appartiene alla carta, non a un suo lato, e mostrarla in due posti diversi
+costringeva a ritrovarla a ogni flip. Il numero nel pozzetto ATK è sempre il
+**totale** (base + cariche + insegna in pronostico) — mai una somma da fare:
+`CardView.ForecastAttack` usa la stessa guardia `gm.CanAct` di `LaneAxisView`,
+perché durante la risoluzione l'insegna è già dentro `tempAtkBonus` e
+sommarla di nuovo la conterebbe due volte.
+
+**Chi cura una casella passi da `SlotInstance.Heal`.** Scrivere `health` a mano
+non aggiorna la riga del pool (`SyncOrigin`), e la lastra tornerebbe in campo con
+le ferite che si era appena curata: il numero sulla cella e quello nella corazza
+direbbero due cose diverse.
+
+**`tempAtkBonus` non sopravvive all'inizio della risoluzione.** Per provare uno
+scenario di traboccamento da `Unity_RunCommand` non serve gonfiare
+`tempAtkBonus`: viene azzerato prima delle corsie. Vale invece scrivere
+`card.def.frontDamage` (è una struct sull'istanza) o abbassare la vita della
+lastra.
 
 ## Invarianti da non rompere
 

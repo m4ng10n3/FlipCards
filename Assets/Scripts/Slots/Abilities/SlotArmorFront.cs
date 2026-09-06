@@ -26,7 +26,7 @@ public class SlotArmorFront : AbilityBase
             if (_slot == null || !_slot.alive) return;
             if (_slot.side != Side.Fronte) return;  // solo in Fronte
 
-            _slot.tempBlockBonus += armorValue;
+            _slot.AddBlockBonus(armorValue, AbilityCatalog.Name(this));
             _slot.PushHint($"Armor +{armorValue}");
         };
 

@@ -21,7 +21,7 @@ public class ChargeBoost : AbilityBase
         if (Source.side != Side.Fronte || Source.flipCharge < chargeThreshold) return;
 
         int boost = bonusDamage + Mathf.Max(0, Source.flipCharge - chargeThreshold);
-        Source.tempAtkBonus += boost;
+        Source.AddAtkBonus(boost, AbilityCatalog.Name(this));
         Source.PushHint($"Charge +{boost}");
 
         if (splashDamage <= 0 || Source.flipCharge < CardInstance.MaxFlipCharge) return;

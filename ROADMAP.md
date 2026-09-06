@@ -33,12 +33,59 @@ carte sovrapposte con pop-out all'hover. Il fondo `board_bg` del kit e gli
 overlay CRT si montano da soli se il kit è importato.
 
 **Regole riviste dopo il playtest del 6 settembre** (dati e misure in
-[PLAYTEST_REPORT.md](PLAYTEST_REPORT.md)): le ferite non letali lasciate su una
-casella le paga il boss quando il rullo la scarta (`woundCarryToBoss`); AP base
-da 4 a 3 con tetto bonus a 2; il flip caotico usa l'instabilità della carta e
-colpisce per prime le corsie che il giro non ha abbinato, e si anima; il
-pronostico di corsia e l'ispettore dicono quanto paga colpire; le colonne che
-fanno combinazione lampeggiano (`ReelChrome.FlashPayout`).
+[PLAYTEST_REPORT.md](PLAYTEST_REPORT.md)): AP base da 4 a 3 con tetto bonus a 2;
+il flip caotico usa l'instabilità della carta e colpisce per prime le corsie che
+il giro non ha abbinato, e si anima; il pronostico di corsia e l'ispettore dicono
+quanto paga colpire; le colonne che fanno combinazione lampeggiano
+(`ReelChrome.FlashPayout`).
+
+**Riscrittura del combattimento del 6 settembre — le cinque regole.** Sono
+descritte per intero in [AGENTS.md](AGENTS.md) → *Le cinque regole del
+combattimento*, ed è la prima cosa da leggere prima di toccare bilanciamento o
+sinergie. In sintesi di cosa è cambiato e dove:
+
+- **Traboccamento.** Il danno oltre la vita della casella lo paga il boss
+  (`GameManager.OverflowToBoss`), quello oltre la vita della carta lo paga il
+  giocatore (`OverflowToPlayer`). Sostituisce `woundCarryToBoss` e
+  `bossDamageOnSlotBreak`, che non esistono più. Chiude la voce *«Il muro non
+  viene mai scalfito»* della sezione C: con le tre corsie occupate il boss adesso
+  arriva agli HP, e morire in corsia costa due volte.
+- **Corazza numerata** (`Assets/Scripts/Managers/BossPool.cs`). Dieci lastre con
+  il numero stampato sulla cella; il rullo pesca fra le vive e senza ripetizioni,
+  le ferite restano sulla lastra fra un giro e l'altro, uccidere ne toglie una
+  per sempre. Verificato in partita: la #8 torna a 3/5 e poi a 2/5 su giri
+  diversi, e dopo la morte non esce più.
+- **Sinergia in due regole sole** (`SynergyResolver`): l'**insegna** — carta
+  coperta, simbolo nel colore della fazione, dà il suo numero alle adiacenti
+  della stessa fazione — e la **risonanza** — stessa fazione in corsia, nessuno
+  dei due para. Al posto di Blade Pair, Guard Link, Mystic Pulse e risonanza +1,
+  che si fondavano sulla classe della carta, un dato che sul tavolo non si vede.
+- **Una sola manopola**: `GameManager.difficulty` (0..1).
+- **Il retro della carta è un dorso** (E2, chiuso): niente nome, niente attacco,
+  niente nome dell'abilità, e un **layout suo** — la copertina piana del kit
+  (`card_back_plain`, la stessa che si vede nella pila del mazzo), il sigillo
+  grande al centro, l'insegna sulla plancia alta, i due numeri che servono negli
+  angoli bassi come gli indici di una carta da gioco, le cariche in colonna sul
+  bordo. Il gruppo `BackFace` sta **nel prefab**, scritto da
+  `FlipCardsLayoutBuilder.BuildBackFace`.
+- **L'ispettore spiega i conti invece di mostrarli** (`AppendLaneAccount`): ogni
+  riga ha il suo numero e la sua causa — *+1 insegna di Scythe, corsia 1*,
+  *−0 la tua guardia (2): azzerata dalla risonanza* — e finisce con la
+  conseguenza (sfonda / passa / regge). Un `+1` senza causa non dice al giocatore
+  come averne due, che è la mossa che deve imparare. Le ragioni le fornisce
+  `SynergyResolver.Contribution`, dallo stesso ciclo che calcola la somma.
+- **Qualunque `+n` a schermo ha la sua riga nell'ispettore**, anche sulle caselle
+  nemiche: i bonus temporanei passano da un `BonusLedger` che registra la causa
+  insieme al numero (`AddAtkBonus` / `AddBlockBonus`), e la sezione *Da cosa
+  vengono i bonus* lo stampa per carte e caselle. Vale anche per le abilità:
+  *+2 attacco · Furia del rullo: furia dei simboli*.
+- **Le cariche sono nello stesso posto sulle due facce** (i `flip_cells` del kit)
+  e il pozzetto ATK mostra sempre il **totale**, non "3+2": la cella e l'asse
+  delle corsie dicono ora lo stesso numero per lo stesso colpo.
+- **Via due cornici che non dicevano niente**: il medaglione tondo dietro il
+  simbolo della casella (era una seconda cornice dentro la prima) e la finestra
+  del ritratto sul dorso della carta (`card_rim_*` la disegna, ma sul dorso il
+  ritratto non c'è e restava un quadrato vuoto intorno al sigillo).
 
 Quello che segue è quel che resta, in ordine di quanto pesa sulla leggibilità.
 
@@ -54,9 +101,21 @@ disegnato a tinte piatte. Le tre voci che seguono non sono "attaccare le
 immagini": la v2 porta con sé **tre decisioni di lettura** che cambiano dove
 stanno le informazioni.
 
-### E2. La faccia della carta si vede, non si legge
+### E2. La faccia della carta si vede, non si legge — CHIUSA
 
-**Obiettivo.** Sulla cella carta non compare più la parola FRONTE o RETRO. La
+**Chiusa il 6 settembre.** Sulla cella non compare più la parola FRONTE o RETRO:
+la faccia la dice il template del kit (`card_front_{fazione}` con il ritratto,
+`card_back_{fazione}` con il sigillo già disegnato dentro) e la confermano i
+numeri, che cambiano con il lato. E il retro fa un passo in più di quanto diceva
+questa voce: **nasconde l'identità della carta**. Via il nome, via l'attacco, via
+il nome dell'abilità — resta l'icona, il colore della fazione e cosa fa da
+coperta. Con sei carte a terra chi hai coperto te lo devi ricordare, e la plancia
+alta che portava il nome ospita adesso l'**insegna**: spada col numero e scudo
+col numero, nel colore della fazione (`CardOverlay.BuildBannerRow`,
+`GlyphSprites`). La tabella qui sotto resta come riferimento di dove stanno le
+informazioni.
+
+**Obiettivo (originale).** Sulla cella carta non compare più la parola FRONTE o RETRO. La
 faccia si riconosce dal **template**: `card_front_{fazione}` con il ritratto nella
 finestra, `card_back_{fazione}` con il sigillo. La fascia bassa che oggi scrive il
 lato diventa la striscia dell'abilità (`ability_strip` del manifest).
@@ -271,12 +330,12 @@ Nessuna di queste è decisa: sono i buchi rimasti fra il codice e la specifica.
   leggibile il tavolo senza tenere il mouse fermo.
 - **Bersaglio di flip esplicito.** Il flip è un doppio clic entro 0.3 s e nessun
   elemento lo suggerisce (LAYOUT_SPEC §4, sequenza non scopribile numero 2).
-- **Il muro non viene mai scalfito.** Con le tre corsie occupate il boss non può
-  toccare gli HP del giocatore: il danno finisce sempre sulla carta. La partita
-  `turtle` chiude 12 turni a 20/20 senza subire un colpo — perde ai punti, quindi
-  una pressione formalmente c'è, ma è una partita piatta. L'idea più economica è
-  far passare al giocatore il danno che eccede gli HP della carta colpita
-  (`CardInstance.ResolveIncomingAttack`), così morire in corsia costa due volte.
+- ~~**Il muro non viene mai scalfito.**~~ **Chiusa**: è il traboccamento, e
+  l'idea «più economica» in fondo alla voce è esattamente quella implementata —
+  il danno che eccede gli HP della carta colpita passa al giocatore
+  (`CardInstance.ResolveIncomingAttack` → `GameManager.OverflowToPlayer`).
+  Verificato in partita: una casella da 12 su una carta da 3 HP porta il
+  giocatore da 20 a 13, come scritto nel pronostico di corsia.
 - **Hint sopra il bordo della cella.** Oggi galleggia sopra l'artwork invece che
   sopra il bordo superiore come dice LAYOUT_SPEC §6.5: fuori dalla cella finiva
   addosso all'asse delle corsie. Con le animazioni di D2 il testo è meno

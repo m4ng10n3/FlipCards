@@ -69,6 +69,17 @@ public class CardView : MonoBehaviour
     public Text AttackPwrText;
     public Text BlockPwrText;
 
+    [Header("Retro (montato nel prefab dal builder)")]
+    [Tooltip("Gruppo del dorso: contiene i due indici degli angoli bassi. " +
+             "Si accende al posto dei pozzetti del fronte, non insieme a loro.")]
+    [SerializeField] private GameObject backFace;
+    [Tooltip("Indice della vita sul dorso, in basso a destra. E' un Text diverso " +
+             "da quello del fronte perche' i due stanno in posti diversi.")]
+    [SerializeField] private Text backHpText;
+
+    /// <summary>Il gruppo del dorso, per chi deve rialzarlo sopra il chrome.</summary>
+    public GameObject BackFace => backFace;
+
     [Header("Runtime wiring")]
     [HideInInspector] public GameManager gm;
     [HideInInspector] public PlayerState owner;
@@ -180,6 +191,8 @@ public class CardView : MonoBehaviour
         hpText.enabled = true;
         AttackPwrText.enabled = true;
         BlockPwrText.enabled = false;
+        if (backHpText != null) backHpText.text = def.maxHealth.ToString();
+        if (backFace != null) backFace.SetActive(false);
     }
 
     public void Init(GameManager gm, PlayerState owner, CardInstance instance)
@@ -230,6 +243,7 @@ public class CardView : MonoBehaviour
         nameText.text    = def.cardName;
         factionText.text = def.faction.ToString();
         hpText.text      = $"{instance.health}/{def.maxHealth}";
+        if (backHpText != null) backHpText.text = $"{instance.health}/{def.maxHealth}";
 
         // Stat display dipende dal lato corrente
         RefreshStatTexts();
@@ -243,12 +257,19 @@ public class CardView : MonoBehaviour
     }
 
     /// <summary>
-    /// La prima casella statistica della cella cambia significato con la faccia:
-    /// in Fronte e' l'attacco, in Retro e' il blocco. Non e' una scelta grafica —
-    /// e' quello che la carta sa fare da quel lato, e l'altro numero in quel
-    /// momento non serve a decidere niente. Il valore dell'altra faccia si legge
-    /// nell'ispettore. Le cariche non hanno un numero: sono le tre tacche che
-    /// disegna CardOverlay, e in Fronte sono gia' sommate nell'ATK.
+    /// I numeri della cella: attacco sul fronte, guardia sul dorso.
+    ///
+    /// **E' sempre il totale, mai una somma da fare.** Prima il fronte scriveva
+    /// "3+2" quando c'erano cariche accumulate, e quel numero non era ne'
+    /// l'attacco base ne' quello vero: il giocatore doveva sommare a mente
+    /// proprio nel punto in cui deve solo decidere, e il dorso invece scriveva
+    /// un numero pieno. Adesso le due facce dicono la stessa cosa nello stesso
+    /// modo — quanto fa <em>adesso</em>, tutto compreso — e da dove viene quel
+    /// numero lo spiega l'ispettore, riga per riga.
+    ///
+    /// Le cariche restano visibili come tacche (CardOverlay), nello stesso posto
+    /// su tutte due le facce: quante sono si conta, quanto valgono e' gia' dentro
+    /// il totale.
     /// </summary>
     public void RefreshStatTexts()
     {
@@ -259,16 +280,35 @@ public class CardView : MonoBehaviour
         BlockPwrText.enabled = !isFront;
 
         if (isFront)
-        {
-            int atk = instance.def.frontDamage + instance.tempAtkBonus;
-            AttackPwrText.text = instance.flipCharge > 0
-                ? $"{atk}+{instance.flipCharge}"
-                : atk.ToString();
-        }
+            AttackPwrText.text = ForecastAttack().ToString();
         else
-        {
             BlockPwrText.text = (instance.def.backBlockValue + instance.tempBlockBonus).ToString();
-        }
+    }
+
+    /// <summary>
+    /// Quanto colpirebbe adesso, insegne comprese.
+    ///
+    /// Deve essere **lo stesso numero** che scrive l'asse delle corsie: la cella
+    /// diceva 4 e l'asse 5 per la stessa carta, perche' la cella ignorava
+    /// l'insegna della vicina. Due numeri per lo stesso colpo sono peggio di
+    /// qualunque numero singolo.
+    ///
+    /// L'insegna si somma solo mentre il giocatore puo' agire, cioe' finche' e'
+    /// un pronostico: durante la risoluzione il bonus e' gia' dentro
+    /// <c>tempAtkBonus</c>, e aggiungerlo di nuovo lo conterebbe due volte.
+    /// E' la stessa guardia che usa LaneAxisView.
+    /// </summary>
+    int ForecastAttack()
+    {
+        int total = instance.ComputeAttackDamage();
+
+        var manager = GameManager.Instance;
+        if (manager == null || !manager.CanAct) return total;
+
+        int lane = manager.GetLaneIndexFor(instance);
+        if (lane < 0) return total;
+
+        return total + SynergyResolver.AttackBonus(manager, lane);
     }
 
     public void FlipSide(bool immediate = false)
@@ -298,13 +338,24 @@ public class CardView : MonoBehaviour
         img.preserveAspect = false;
         img.sprite         = isFront ? frontImage : (backImage != null ? backImage : frontImage);
 
-        // Nome e HP sempre visibili; il ritratto solo in Fronte, perche' in Retro
-        // la finestra ospita il sigillo (CardOverlay). E' l'unico segnale del
-        // lato: sulla cella non c'e' nessuna scritta che lo dica.
-        nameText.enabled       = true;
-        hpText.enabled         = true;
+        // Girata, la carta diventa un DORSO: non il fronte con altri numeri.
+        // Il template passa alla copertina piana del kit, il ritratto lascia il
+        // posto al sigillo grande, e i pozzetti bassi del fronte si spengono in
+        // favore dei due indici agli angoli (il gruppo backFace, montato nel
+        // prefab). Il resto del dorso — insegna, bordo di fazione, colonnina
+        // delle cariche — lo accende CardOverlay.
+        //
+        // E il dorso non dice piu' chi e' la carta: niente nome, niente attacco.
+        // Non e' una scelta grafica, e' la regola — con sei carte a terra chi hai
+        // coperto te lo devi ricordare, e la carta ti dice solo quello che serve
+        // a decidere adesso: quanto para, quanta vita ha, che numero passa alle
+        // vicine. Nome, attacco e dettagli stanno nell'ispettore.
+        nameText.enabled       = isFront;
+        hpText.enabled         = isFront;
         artworkMonster.enabled = isFront;
         hintText.enabled       = true;
+
+        if (backFace != null) backFace.SetActive(!isFront);
 
         // ATK o BLOCCO, mai tutti e due: le caselle sono due e la prima cambia.
         RefreshStatTexts();
@@ -313,6 +364,8 @@ public class CardView : MonoBehaviour
     public void UpdateHpOnly()
     {
         hpText.text = instance.health + "";
+        if (backHpText != null)
+            backHpText.text = $"{instance.health}/{instance.def.maxHealth}";
         _lastHp = instance.health;
     }
 
@@ -428,6 +481,10 @@ public class CardView : MonoBehaviour
         SetTextEnabled(sideText, false);
         SetTextEnabled(AttackPwrText, false);
         SetTextEnabled(BlockPwrText, false);
+
+        // Nella pila del mazzo il dorso e' nudo: gli indici dicono la guardia e
+        // la vita di una carta in campo, e qui non c'e' nessuna carta in campo.
+        if (backFace != null) backFace.SetActive(false);
     }
 
     static void SetTextEnabled(Text t, bool on) { if (t != null) t.enabled = on; }

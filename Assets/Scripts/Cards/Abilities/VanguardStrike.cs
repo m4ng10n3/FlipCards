@@ -30,7 +30,7 @@ public class VanguardStrike : AbilityBase
         if (emptyNeighbors <= 0) return;
 
         int bonus = bonusDamage * emptyNeighbors;
-        Source.tempAtkBonus += bonus;
+        Source.AddAtkBonus(bonus, AbilityCatalog.Name(this));
         Source.PushHint($"Vanguard +{bonus}");
     }
 

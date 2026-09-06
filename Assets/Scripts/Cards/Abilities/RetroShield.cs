@@ -20,7 +20,7 @@ public class RetroShield : AbilityBase
             if (ctx.target != Source || !Source.alive) return;
             if (Source.side != Side.Retro) return; // solo in Retro
 
-            Source.tempBlockBonus += shieldBonus;
+            Source.AddBlockBonus(shieldBonus, AbilityCatalog.Name(this));
             Source.PushHint($"Shield +{shieldBonus}");
         };
 

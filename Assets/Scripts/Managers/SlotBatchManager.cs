@@ -139,18 +139,37 @@ public class SlotBatchManager : MonoBehaviour
         // Senza questo un'eccezione lascerebbe il gioco bloccato dietro un pannello nero.
         try
         {
-            var flat  = BuildFlatBatch();
             var gm    = GameManager.Instance;
             var board = gm != null ? gm.aiBoardRoot as RectTransform : null;
 
+            // Il rullo pesca dalla CORAZZA, non dal proprio batch: sono le
+            // caselle ancora vive del pool numerato. Uccidere una casella
+            // accorcia il rullo, e si vede — le facce che girano sono quelle che
+            // possono ancora uscire. Il batch resta come sorgente di ripiego per
+            // chi usa questo componente senza un GameManager (il pool nasce da
+            // lui, quindi normalmente le due liste coincidono meno i morti).
+            var pool = gm != null ? gm.Pool : null;
+            var flat = pool != null && pool.Count > 0 ? pool.AlivePrefabs() : BuildFlatBatch();
+
             _chosenPrefabs.Clear();
 
-            if (flat.Count == 0 || board == null)
+            if (board == null)
             {
-                if (flat.Count == 0) Debug.LogWarning("[SlotBatchManager] Batch vuoto.");
-                else                 Debug.LogWarning("[SlotBatchManager] aiBoardRoot non e' un RectTransform.");
+                Debug.LogWarning("[SlotBatchManager] aiBoardRoot non e' un RectTransform.");
                 onPrefabsChosen?.Invoke(_chosenPrefabs);
                 yield break;   // il finally invoca comunque onComplete
+            }
+
+            if (flat.Count == 0)
+            {
+                // Corazza esaurita: non e' un errore di configurazione, e' la
+                // fine della partita. Le corsie restano vuote e il boss e'
+                // scoperto — ci pensa RespawnEnemySlotsFromList, che sui buchi
+                // mette la casella vuota.
+                if (pool != null && pool.Count > 0) Logger.Info("Rullo: corazza esaurita, il boss resta scoperto");
+                else Debug.LogWarning("[SlotBatchManager] Batch vuoto.");
+                onPrefabsChosen?.Invoke(_chosenPrefabs);
+                yield break;
             }
 
             // Le facce del rullo sono i candidati distinti di questo roll.
@@ -158,11 +177,22 @@ public class SlotBatchManager : MonoBehaviour
             foreach (var candidate in flat)
                 if (!_reelFaces.Contains(candidate)) _reelFaces.Add(candidate);
 
+            // Estrazione SENZA ripetizioni: una casella del pool e' una lastra
+            // numerata e non puo' stare in due corsie insieme. Se ne condividessero
+            // una, le ferite si scriverebbero due volte sulla stessa riga e
+            // ucciderne una farebbe sparire anche l'altra. Quando le vive sono
+            // meno delle corsie, i posti che restano sono buchi nella corazza.
             var rng = gm.Rng;
+            var bag = new List<GameObject>(flat);
             for (int i = 0; i < laneCount; i++)
-                _chosenPrefabs.Add(flat[rng.Next(flat.Count)]);
+            {
+                if (bag.Count == 0) { _chosenPrefabs.Add(null); continue; }
+                int pick = rng.Next(bag.Count);
+                _chosenPrefabs.Add(bag[pick]);
+                bag.RemoveAt(pick);
+            }
 
-            Logger.Info($"[Batch] Roll: {string.Join(" | ", _chosenPrefabs.ConvertAll(p => p.GetComponent<SlotDefinition>()?.SlotName ?? p.name))}");
+            Logger.Info($"[Batch] Roll: {string.Join(" | ", _chosenPrefabs.ConvertAll(p => p == null ? "vuota" : p.GetComponent<SlotDefinition>()?.SlotName ?? p.name))}");
 
             // 1. Copertura sulle lane attuali, prima che qualcosa cambi ─────────
             Canvas.ForceUpdateCanvases();

@@ -31,7 +31,7 @@ public class ClassSynergyBoost : AbilityBase
 
         if (!adjacentSameClass) return;
 
-        Source.tempAtkBonus += bonusDamage;
+        Source.AddAtkBonus(bonusDamage, AbilityCatalog.Name(this));
         Source.PushHint($"+{bonusDamage} class");
     }
 

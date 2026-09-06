@@ -5,12 +5,25 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Asse delle corsie: fra il fronte nemico e quello del giocatore, per ogni corsia
-/// mostra l'esito previsto con i lati attuali, e nei gap fra le colonne accende i
-/// connettori delle combo di adiacenza.
+/// Asse delle corsie: fra il fronte nemico e quello del giocatore dice, corsia
+/// per corsia, cosa succede se si attacca adesso, e nei varchi fra una corsia e
+/// l'altra disegna le insegne, cioe' i bonus che una carta coperta passa alla
+/// vicina della sua fazione.
 ///
-/// E' la traduzione a schermo di LaneResolver e SynergyResolver: senza, il
-/// giocatore deve rifare a mente l'aritmetica del danno a ogni flip.
+/// E' la traduzione a schermo di LaneResolver e SynergyResolver, e usa gli
+/// stessi metodi che poi risolvono il colpo: quello che si legge qui e' quello
+/// che succede. In particolare la guardia mostrata e' quella **efficace**
+/// (<see cref="SynergyResolver.EffectiveSlotBlock"/>), quindi in una corsia in
+/// risonanza si legge zero — che e' il punto della risonanza.
+///
+/// Le tre cose che il giocatore decide guardando questa banda:
+///  - dove puo' <b>sfondare</b>, cioe' fare piu' danno della vita che resta alla
+///    casella, perche' l'eccedenza la paga il boss;
+///  - dove sta per <b>passare</b> un colpo, cioe' dove la sua carta non ha
+///    abbastanza vita e il resto arriva ai suoi HP;
+///  - dove conviene spostare un'insegna, perche' i varchi dicono a chi sta
+///    dando il suo numero e a chi lo darebbe.
+///
 /// Le colonne si allineano leggendo la posizione reale delle corsie, quindi
 /// seguono lo swap e funzionano con qualunque numero di corsie.
 /// </summary>
@@ -28,22 +41,33 @@ public class LaneAxisView : MonoBehaviour
         public TextMeshProUGUI main;
         public TextMeshProUGUI counter;
         public Image rule;
-        public Image readout;   // freccia del kit: chi colpisce, o parata
+        public Image readout;    // freccia del kit: chi colpisce, o parata
+        public Image resonance;  // scudo spezzato: in questa corsia nessuno para
     }
 
     /// <summary>Esito della corsia, nei tre indicatori che il kit disegna.</summary>
     enum Readout { None, Up, Down, Block }
 
+    /// <summary>Un'insegna accesa nel varco: da quale corsia, verso quale, con che simbolo.</summary>
+    struct Banner
+    {
+        public Sprite glyph;
+        public Color color;
+        public string label;
+    }
+
     class Connector
     {
         public RectTransform root;
-        public readonly List<Image> chips = new List<Image>();
+        public readonly List<RectTransform> chips = new List<RectTransform>();
+        public readonly List<Image> plates = new List<Image>();
+        public readonly List<Image> glyphs = new List<Image>();
         public readonly List<TextMeshProUGUI> labels = new List<TextMeshProUGUI>();
     }
 
     readonly List<Column> _columns = new List<Column>();
     readonly List<Connector> _connectors = new List<Connector>();
-    readonly List<string> _combos = new List<string>(3);
+    readonly List<Banner> _banners = new List<Banner>(4);
     readonly StringBuilder _sb = new StringBuilder(48);
 
     RectTransform _rt;
@@ -85,6 +109,7 @@ public class LaneAxisView : MonoBehaviour
     {
         var card = gm.GetPlayerCardAtLane(lane);
         var slot = gm.GetEnemySlotAtLane(lane);
+        bool resonant = SynergyResolver.Resonates(gm, lane);
 
         string main, counter = string.Empty;
         Color color;
@@ -94,41 +119,52 @@ public class LaneAxisView : MonoBehaviour
         {
             if (card.side == Side.Fronte)
             {
-                int atk = (card.ComputeAttackDamage() + (gm.CanAct ? SynergyResolver.AttackBonus(gm, lane) : 0));
-                int def = slot.ComputeSelfBlock();
-                int net = Mathf.Max(0, atk - def);
-                main = Compose(true, atk, def, net);
+                int atk = card.ComputeAttackDamage() + (gm.CanAct ? SynergyResolver.AttackBonus(gm, lane) : 0);
+                int guard = SynergyResolver.EffectiveSlotBlock(gm, lane);
+                int net = Mathf.Max(0, atk - guard);
+                main = Compose(true, atk, guard, net);
                 color = net > 0 ? GamePalette.Good : GamePalette.Neutral;
                 readout = net > 0 ? Readout.Up : Readout.Block;
 
-                // La carta colpisce per prima; se la casella sopravvive ed e' carica, risponde.
-                if (slot.side == Side.Fronte && net < slot.health)
-                    counter = $"risposta {Mathf.Max(0, slot.def.atkDamage + slot.tempAtkBonus - (CardBlock(card) + (gm.CanAct ? SynergyResolver.BlockBonus(gm, lane) : 0)))}";
+                // Il traboccamento e' l'unica via al boss finche' la corazza
+                // tiene: senza questa riga il giocatore vede "3" e non sa se
+                // sta facendo qualcosa o riempiendo un secchio bucato.
+                if (net > slot.health) counter = $"SFONDA · boss −{net - slot.health}";
+                else if (net == slot.health) counter = "rompe la casella";
+                else if (net > 0) counter = $"le restano {slot.health - net}";
 
-                // Il danno che non uccide non e' sprecato: il rullo scarta la
-                // casella ferita e il boss paga. Senza questa riga il giocatore
-                // legge "1" e conclude che attaccare non serve a niente.
-                int carried = Mathf.FloorToInt(net * gm.woundCarryToBoss);
-                string payoff = net >= slot.health ? $"rompe: boss -{gm.bossDamageOnSlotBreak}"
-                              : carried > 0        ? $"boss -{carried} al giro"
-                                                   : null;
-                if (!string.IsNullOrEmpty(payoff))
-                    counter = string.IsNullOrEmpty(counter) ? payoff : payoff + " / " + counter;
+                // La carta colpisce per prima; se la casella sopravvive ed e'
+                // carica, risponde. Ed e' li' che si vede se la corsia regge.
+                if (slot.side == Side.Fronte && net < slot.health)
+                {
+                    int back = Mathf.Max(0, slot.def.atkDamage + slot.tempAtkBonus
+                                          - SynergyResolver.EffectiveCardBlock(gm, lane));
+                    string risposta = back > card.health
+                        ? $"risposta {back} · PASSA −{back - card.health}"
+                        : $"risposta {back}";
+                    counter = string.IsNullOrEmpty(counter) ? risposta : counter + " / " + risposta;
+                }
             }
             else if (slot.side == Side.Fronte)
             {
                 int atk = slot.def.atkDamage + slot.tempAtkBonus;
-                int block = (CardBlock(card) + (gm.CanAct ? SynergyResolver.BlockBonus(gm, lane) : 0));
-                int net = Mathf.Max(0, atk - block);
-                main = Compose(false, atk, block, net);
+                int guard = SynergyResolver.EffectiveCardBlock(gm, lane);
+                int net = Mathf.Max(0, atk - guard);
+                main = Compose(false, atk, guard, net);
                 color = net > 0 ? GamePalette.Danger : GamePalette.Neutral;
                 readout = net > 0 ? Readout.Down : Readout.Block;
+
+                // La copertura non e' infinita: quando la carta cede, il resto
+                // del colpo arriva addosso al giocatore.
+                if (net > card.health) counter = $"PASSA · tu −{net - card.health}";
+                else if (net >= card.health && net > 0) counter = "la carta cade";
+                else if (net > 0) counter = $"le restano {card.health - net}";
             }
             else
             {
                 main = "—";
                 color = GamePalette.Neutral;
-                counter = "stallo";
+                counter = "stallo · lei carica, tu carichi";
                 readout = Readout.Block;
             }
         }
@@ -136,8 +172,11 @@ public class LaneAxisView : MonoBehaviour
         {
             if (card.side == Side.Fronte)
             {
-                main = $"{Arrow(true)}{(card.ComputeAttackDamage() + (gm.CanAct ? SynergyResolver.AttackBonus(gm, lane) : 0))} → BOSS";
+                // Corsia senza casella: la corazza non copre e il colpo va tutto al boss.
+                int atk = card.ComputeAttackDamage() + (gm.CanAct ? SynergyResolver.AttackBonus(gm, lane) : 0);
+                main = $"{Arrow(true)}{atk} → BOSS";
                 color = GamePalette.Good;
+                counter = "corazza scoperta";
                 readout = Readout.Up;
             }
             else { main = "—"; color = GamePalette.Neutral; counter = "carica"; readout = Readout.None; }
@@ -161,14 +200,28 @@ public class LaneAxisView : MonoBehaviour
             readout = Readout.None;
         }
 
-        if (gm.CanAct && card != null)
-            counter = (SynergyResolver.Resonates(gm, lane) ? "RISONANZA +1 / " : "") + "stima base" +
-                      (string.IsNullOrEmpty(counter) ? "" : " / " + counter);
         if (col.main.text != main) col.main.text = main;
         col.main.color = color;
         if (col.counter.text != counter) col.counter.text = counter;
         col.rule.color = GamePalette.WithAlpha(color, 0.45f);
         ApplyReadout(col, readout, color);
+        ApplyResonance(col, resonant, card);
+    }
+
+    /// <summary>
+    /// Lo scudo spezzato del colore della fazione: in questa corsia carta e
+    /// casella sono della stessa fazione e nessuno dei due para. Sta sull'asse e
+    /// non sulla carta perche' e' una proprieta' della corsia — nasce
+    /// dall'incontro fra le due, e sparisce appena una delle due cambia.
+    /// </summary>
+    void ApplyResonance(Column col, bool resonant, CardInstance card)
+    {
+        if (col.resonance == null) return;
+
+        col.resonance.enabled = resonant && card != null;
+        if (!col.resonance.enabled) return;
+
+        col.resonance.color = GamePalette.FactionColor(card.def.faction);
     }
 
     /// <summary>
@@ -210,40 +263,70 @@ public class LaneAxisView : MonoBehaviour
         return _sb.ToString();
     }
 
-    static int CardBlock(CardInstance card)
-        => (card.side == Side.Fronte ? card.def.frontBlockValue : card.def.backBlockValue) + card.tempBlockBonus;
+    // ── Insegne nei varchi ────────────────────────────────────────────────────
 
-    // ── Connettori di combo ───────────────────────────────────────────────────
-
+    /// <summary>
+    /// Il varco fra due corsie mostra cosa si stanno passando le due carte. Una
+    /// carta coperta e' un'insegna: da' il suo numero — spada in attacco, scudo
+    /// in guardia — alla vicina della sua stessa fazione, e la freccia dice in
+    /// che direzione, perche' il bonus non e' reciproco.
+    ///
+    /// E' il posto giusto per dirlo: il bonus nasce dall'adiacenza, quindi vive
+    /// nello spazio fra le due carte, non sopra una delle due. Ed e' quello che
+    /// rende leggibile lo spostamento: si vede il varco spegnersi quando il
+    /// caos di fine turno separa la coppia.
+    /// </summary>
     void RefreshConnector(GameManager gm, Connector con, int lane)
     {
-        _combos.Clear();
+        _banners.Clear();
 
         var left = gm.GetPlayerCardAtLane(lane);
         var right = gm.GetPlayerCardAtLane(lane + 1);
 
-        if (left != null && right != null)
-        {
-            if (left.side == Side.Fronte && right.side == Side.Fronte &&
-                left.def.cardClass == CardClass.Assalto && right.def.cardClass == CardClass.Assalto)
-                _combos.Add("BLADE +1 ATK");
-
-            bool hasGuard = left.def.cardClass == CardClass.Guardia || right.def.cardClass == CardClass.Guardia;
-            bool hasRetro = left.side == Side.Retro || right.side == Side.Retro;
-            if (hasGuard && hasRetro)
-                _combos.Add("GUARD +1 BLK");
-
-            if (SynergyResolver.MysticTarget(left, right) != null)
-                _combos.Add("PULSE +1 CHG");
-        }
+        Collect(left, right, "→");
+        Collect(right, left, "←");
 
         for (int i = 0; i < con.chips.Count; i++)
         {
-            bool on = i < _combos.Count;
+            bool on = i < _banners.Count;
             con.chips[i].gameObject.SetActive(on);
             if (!on) continue;
-            con.labels[i].text = _combos[i];
+
+            var banner = _banners[i];
+            con.glyphs[i].sprite = banner.glyph;
+            con.glyphs[i].color = banner.color;
+            con.labels[i].text = banner.label;
+            con.labels[i].color = banner.color;
+            con.plates[i].color = GamePalette.WithAlpha(banner.color, 0.16f);
         }
+    }
+
+    /// <summary>Quello che <paramref name="source"/> passa a <paramref name="target"/>, se e' un'insegna.</summary>
+    void Collect(CardInstance source, CardInstance target, string arrow)
+    {
+        if (source == null || target == null) return;
+        if (!source.alive || !target.alive) return;
+        if (source.side != Side.Retro) return;
+        if (source.def.faction != target.def.faction) return;
+
+        var color = GamePalette.FactionColor(source.def.faction);
+
+        // La spada vale solo se chi la riceve e' scoperto: da coperto non attacca.
+        if (source.def.backDamageBonusSameFaction > 0 && target.side == Side.Fronte)
+            _banners.Add(new Banner
+            {
+                glyph = GlyphSprites.Sword,
+                color = color,
+                label = $"+{source.def.backDamageBonusSameFaction} {arrow}",
+            });
+
+        if (source.def.backBlockBonusSameFaction > 0)
+            _banners.Add(new Banner
+            {
+                glyph = GlyphSprites.Shield,
+                color = color,
+                label = $"+{source.def.backBlockBonusSameFaction} {arrow}",
+            });
     }
 
     // ── Costruzione e geometria ───────────────────────────────────────────────
@@ -290,6 +373,16 @@ public class LaneAxisView : MonoBehaviour
             col.readout.enabled = false;
         }
 
+        // Lo scudo spezzato in coda alla riga, dalla parte opposta alla freccia:
+        // e' un secondo indicatore e non deve leggersi come parte del numero.
+        var resRt = UiBuild.Rect("Resonance", col.root);
+        UiBuild.Centered(resRt, 26f, 26f, columnWidth * 0.5f - 34f, 2f);
+        col.resonance = UiBuild.Fill(resRt, GamePalette.Danger);
+        col.resonance.sprite = GlyphSprites.BrokenShield;
+        col.resonance.type = Image.Type.Simple;
+        col.resonance.preserveAspect = true;
+        col.resonance.enabled = false;
+
         col.counter = UiBuild.Text("Counter", col.root, string.Empty, 14f, GamePalette.TextMuted,
                                    TextAlignmentOptions.Center);
         UiBuild.Centered(col.counter.rectTransform, columnWidth, 16f, 0f, -half + 8f);
@@ -300,26 +393,37 @@ public class LaneAxisView : MonoBehaviour
     Connector CreateConnector(int index)
     {
         var con = new Connector();
-        con.root = UiBuild.Rect($"Combo{index + 1}", transform);
+        con.root = UiBuild.Rect($"Insegne{index + 1}", transform);
         con.root.anchorMin = con.root.anchorMax = new Vector2(0f, 0.5f);
         con.root.pivot = new Vector2(0.5f, 0.5f);
-        con.root.sizeDelta = new Vector2(120f, _rt.rect.height);
+        con.root.sizeDelta = new Vector2(96f, _rt.rect.height);
 
-        const float h = 14f, gap = 2f;
+        const float w = 84f, h = 20f, gap = 3f;
         float top = _rt.rect.height * 0.5f - h * 0.5f - 2f;
-        for (int i = 0; i < 3; i++)
+
+        // Quattro: due insegne per carta (spada e scudo) in ognuna delle due
+        // direzioni non capitano mai tutte insieme, ma tre si'.
+        for (int i = 0; i < 4; i++)
         {
             var chipRt = UiBuild.Rect($"Chip{i}", con.root);
-            UiBuild.Centered(chipRt, 116f, h, 0f, top - i * (h + gap));
-            var chip = UiBuild.Fill(chipRt, GamePalette.WithAlpha(GamePalette.Charge, 0.22f));
+            UiBuild.Centered(chipRt, w, h, 0f, top - i * (h + gap));
+            con.plates.Add(UiBuild.Fill(chipRt, GamePalette.WithAlpha(GamePalette.Neutral, 0.16f)));
 
-            var label = UiBuild.Text("Label", chipRt, string.Empty, 12f, GamePalette.Charge,
+            var glyphRt = UiBuild.Rect("Glyph", chipRt);
+            UiBuild.Centered(glyphRt, 16f, 16f, -w * 0.5f + 12f, 0f);
+            var glyph = UiBuild.Fill(glyphRt, GamePalette.Neutral);
+            glyph.sprite = GlyphSprites.Sword;
+            glyph.type = Image.Type.Simple;
+            glyph.preserveAspect = true;
+            con.glyphs.Add(glyph);
+
+            var label = UiBuild.Text("Label", chipRt, string.Empty, 13f, GamePalette.Neutral,
                                      TextAlignmentOptions.Center, FontStyles.Bold);
-            UiBuild.Stretch(label.rectTransform);
+            UiBuild.Centered(label.rectTransform, w - 26f, h, 10f, 0f);
+            con.labels.Add(label);
 
             chipRt.gameObject.SetActive(false);
-            con.chips.Add(chip);
-            con.labels.Add(label);
+            con.chips.Add(chipRt);
         }
 
         return con;

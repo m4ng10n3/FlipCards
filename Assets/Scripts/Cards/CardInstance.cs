@@ -16,8 +16,24 @@ public class CardInstance
 
     // Modificatori temporanei che le abilità possono impostare reagendo agli eventi
     public int? incomingDamageOverride; // override puntuale del danno in arrivo (es. 0 per parata)
-    public int tempBlockBonus;          // bonus block additivo per questo colpo
-    public int tempAtkBonus;            // bonus attacco aggiuntivo per questo turno
+
+    // I bonus non sono due interi ma due registri: chi somma deve dire perche',
+    // e l'ispettore legge la ragione invece di indovinarla. Vedi BonusLedger.
+    readonly BonusLedger _atkLedger = new BonusLedger();
+    readonly BonusLedger _blockLedger = new BonusLedger();
+
+    public int tempAtkBonus => _atkLedger.Total;
+    public int tempBlockBonus => _blockLedger.Total;
+
+    /// <summary>Da cosa viene il bonus di attacco che ha adesso.</summary>
+    public BonusLedger AtkBonuses => _atkLedger;
+    /// <summary>Da cosa viene il bonus di guardia che ha adesso.</summary>
+    public BonusLedger BlockBonuses => _blockLedger;
+
+    public void AddAtkBonus(int amount, string reason) => _atkLedger.Add(amount, reason);
+    public void AddBlockBonus(int amount, string reason) => _blockLedger.Add(amount, reason);
+    public void ClearAtkBonus() => _atkLedger.Clear();
+    public void ClearBlockBonus() => _blockLedger.Clear();
 
     // Flip Charge System: si accumula stando in Retro, si consuma attaccando in Fronte
     public int flipCharge;              // 0..3, bonus danno al prossimo attacco
@@ -53,8 +69,8 @@ public class CardInstance
     public void ClearCombatBonuses()
     {
         incomingDamageOverride = null;
-        tempBlockBonus = 0;
-        tempAtkBonus = 0;
+        ClearBlockBonus();
+        ClearAtkBonus();
     }
 
     public int GainCharge(int amount)
@@ -67,7 +83,7 @@ public class CardInstance
     // ====== FLUSSO EVENT-DRIVEN ======
 
     // ATTACCANTE: pubblica proposta includendo le flipCharge accumulate
-    public void Attack(PlayerState owner, PlayerState defender, object target)
+    public void Attack(PlayerState owner, PlayerState defender, object target, bool ignoreBlock = false)
     {
         if (!alive || target == null) return;
 
@@ -81,8 +97,8 @@ public class CardInstance
         });
 
         int damage = def.frontDamage + flipCharge + tempAtkBonus;
-        flipCharge   = 0;
-        tempAtkBonus = 0;
+        flipCharge = 0;
+        ClearAtkBonus();
 
         EventBus.Publish(GameEventType.AttackDeclared, new EventContext
         {
@@ -90,7 +106,8 @@ public class CardInstance
             opponent = defender,
             source = this,
             target = target,
-            amount = damage
+            amount = damage,
+            ignoreBlock = ignoreBlock
         });
     }
 
@@ -109,29 +126,39 @@ public class CardInstance
             attackerOwner: ctx.owner,
             defenderOwner: ctx.opponent,
             attacker: ctx.source,
-            proposedDamage: ctx.amount
+            proposedDamage: ctx.amount,
+            ignoreBlock: ctx.ignoreBlock
         );
     }
 
 
-    // Calcolo/applicazione del danno: niente logica abilità qui dentro
-    void ResolveIncomingAttack(PlayerState attackerOwner, PlayerState defenderOwner, object attacker, int proposedDamage)
+    /// <summary>
+    /// Simmetrico a quello della casella: il colpo si ferma sulla vita della
+    /// carta, e quello che avanza arriva al giocatore.
+    ///
+    /// La carta e' la tua copertura in quella corsia. Finche' regge non prendi
+    /// niente; quando cede, il resto del colpo passa. Percio' una carta con
+    /// poca vita davanti a una casella che picchia forte non e' una copertura:
+    /// e' una porta aperta, e spostarla e' una mossa vera.
+    /// </summary>
+    void ResolveIncomingAttack(PlayerState attackerOwner, PlayerState defenderOwner, object attacker, int proposedDamage, bool ignoreBlock)
     {
         int incoming = Mathf.Max(0, incomingDamageOverride ?? proposedDamage);
 
         // In Fronte: block base frontale. In Retro: block potenziato (la carta assorbe per il player)
-        int block = (side == Side.Fronte)
+        int block = ignoreBlock ? 0 : (side == Side.Fronte)
             ? (def.frontBlockValue + tempBlockBonus)
             : (def.backBlockValue  + tempBlockBonus);
 
         int final = Mathf.Max(0, incoming - block);
 
-        // Il danno va sempre alla carta, mai direttamente al player
-        // (il player subisce danno solo se la lane è vuota — gestito da LaneResolver)
+        int absorbed = Mathf.Min(final, health);
+        int overflow = final - absorbed;
+
         if (final > 0)
-            health = Mathf.Max(0, health - final);
+            health = Mathf.Max(0, health - absorbed);
         else
-            PushHint("Blocked!");
+            PushHint("Parato!");
 
         EventBus.Publish(GameEventType.AttackResolved, new EventContext
         {
@@ -142,10 +169,13 @@ public class CardInstance
             amount = final
         });
 
+        if (overflow > 0)
+            GameManager.Instance?.OverflowToPlayer(overflow, attacker, this);
+
         // reset modificatori per-colpo
         incomingDamageOverride = null;
-        tempBlockBonus = 0;
-        tempAtkBonus   = 0;
+        ClearBlockBonus();
+        ClearAtkBonus();
     }
     // Hint pilotato dalla logica carta/abilit� (CardView lo intercetta)
     public void PushHint(string msg)

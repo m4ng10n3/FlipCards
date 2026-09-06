@@ -48,7 +48,7 @@ public class SlotStrikeOnAct : AbilityBase
             case GameEventType.AttackDeclared:
                 if (ReferenceEquals(ctx.target, _slot) && _slot.side == Side.Fronte && signature == SlotSignature.ArmorFront)
                 {
-                    _slot.tempBlockBonus += power;
+                    _slot.AddBlockBonus(power, $"{AbilityCatalog.Name(this)}: corazza");
                     _slot.PushHint($"Armor +{power}");
                 }
                 break;
@@ -78,7 +78,7 @@ public class SlotStrikeOnAct : AbilityBase
         if (_frontTurns >= threshold)
         {
             _rageReady = true;
-            _slot.tempAtkBonus += power;
+            _slot.AddAtkBonus(power, $"{AbilityCatalog.Name(this)}: furia dei simboli");
             _slot.PushHint("Rage ready");
         }
     }
@@ -92,7 +92,7 @@ public class SlotStrikeOnAct : AbilityBase
             case SlotSignature.PressureFront:
                 if (ctx.target == null)
                 {
-                    _slot.tempAtkBonus += power;
+                    _slot.AddAtkBonus(power, $"{AbilityCatalog.Name(this)}: corsia scoperta");
                     _slot.PushHint($"Pressure +{power}");
                 }
                 break;
@@ -135,7 +135,7 @@ public class SlotStrikeOnAct : AbilityBase
         {
             var other = gm.GetEnemySlotAtLane(lane + delta);
             if (other == null) continue;
-            other.tempBlockBonus += power;
+            other.AddBlockBonus(power, $"{AbilityCatalog.Name(this)} di {_slot.def.SlotName}");
             other.PushHint($"Aura +{power}");
             buffed++;
         }
@@ -151,9 +151,7 @@ public class SlotStrikeOnAct : AbilityBase
     {
         if (power <= 0) return;
 
-        int before = _slot.health;
-        _slot.health = Mathf.Min(_slot.def.maxHealth, _slot.health + power);
-        int healed = _slot.health - before;
+        int healed = _slot.Heal(power);
         if (healed <= 0) return;
 
         _slot.PushHint($"+{healed} HP");

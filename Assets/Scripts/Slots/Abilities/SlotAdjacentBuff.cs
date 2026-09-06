@@ -41,7 +41,7 @@ public class SlotAdjacentBuff : AbilityBase
                 var sv = gm.aiBoardRoot.GetChild(ln).GetComponentInChildren<SlotView>(false);
                 if (sv == null || !sv.instance.alive) continue;
 
-                sv.instance.tempBlockBonus += blockBonus;
+                sv.instance.AddBlockBonus(blockBonus, $"{AbilityCatalog.Name(this)} di {_slot.def.SlotName}");
                 sv.instance.PushHint($"AuraDef +{blockBonus}");
                 buffed++;
             }

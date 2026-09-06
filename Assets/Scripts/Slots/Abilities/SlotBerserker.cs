@@ -42,7 +42,7 @@ public class SlotBerserker : AbilityBase
                     if (_furyStacks >= furyThreshold)
                     {
                         _burstReady = true;
-                        _slot.tempAtkBonus += _slot.def.atkDamage;
+                        _slot.AddAtkBonus(_slot.def.atkDamage, $"{AbilityCatalog.Name(this)}: burst");
                         _slot.PushHint($"FURIA! Prossimo attacco x2");
                         Logger.Info($"[Berserker] {_slot.def.SlotName} BURST PRONTO ({_furyStacks}/{furyThreshold} stack)");
                     }

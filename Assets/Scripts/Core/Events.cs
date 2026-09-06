@@ -32,6 +32,13 @@ public struct EventContext
     public int amount;
     public string phase;
 
+    /// <summary>
+    /// Il colpo passa attraverso la guardia. Lo accende la risonanza: carta e
+    /// casella della stessa fazione. Viaggia nell'evento e non in un campo della
+    /// vittima perche' vale per il singolo colpo, non per il turno.
+    /// </summary>
+    public bool ignoreBlock;
+
     public override string ToString()
     {
         string ownerName = owner?.name ?? "null";

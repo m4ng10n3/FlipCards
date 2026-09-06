@@ -36,10 +36,11 @@ public static class LaneResolver
     static void ResolveCardPressure(int laneIndex, CardInstance card, SlotInstance slot, PlayerState player, PlayerState ai)
     {
         bool slotWasAlive = slot.alive;
-        card.Attack(player, ai, slot);
+        // Risonanza: stessa fazione in corsia, la guardia della casella non tiene.
+        card.Attack(player, ai, slot, SynergyResolver.Resonates(GameManager.Instance, laneIndex));
 
         if (slotWasAlive && !slot.alive)
-            GameManager.Instance?.DealBossPressureFromBreak(card, GameManager.Instance.bossDamageOnSlotBreak, laneIndex);
+            GameManager.Instance?.AnnouncePoolBreak(slot);
 
         if (slot.alive && slot.side == Side.Fronte)
             ResolveSlotPressure(laneIndex, slot, card, player, ai);
@@ -65,13 +66,16 @@ public static class LaneResolver
                 opponent = player,
                 source = slot,
                 target = card,
-                amount = damage
+                amount = damage,
+                // La risonanza taglia da tutte e due le parti: se il tuo colpo
+                // passa la sua guardia, il suo passa la tua.
+                ignoreBlock = SynergyResolver.Resonates(GameManager.Instance, laneIndex)
             });
 
-            Logger.Info($"Lane {laneIndex + 1}: {slot.def.SlotName} presses {card.def.cardName}");
+            Logger.Info($"Corsia {laneIndex + 1}: {slot.def.SlotName} colpisce {card.def.cardName}");
         }
 
-        slot.tempAtkBonus = 0;
+        slot.ClearAtkBonus();
     }
 
     static void DirectCardPressure(int laneIndex, CardInstance card, PlayerState player, PlayerState ai)
@@ -94,7 +98,7 @@ public static class LaneResolver
         if (damage > 0)
         {
             card.PushHint($"Boss -{damage}");
-            Logger.Info($"Lane {laneIndex + 1}: {card.def.cardName} hits boss for {damage}");
+            Logger.Info($"Corsia {laneIndex + 1}: {card.def.cardName} colpisce il boss scoperto per {damage}");
         }
     }
 
@@ -110,7 +114,7 @@ public static class LaneResolver
         });
 
         int damage = Mathf.Max(0, slot.def.atkDamage + slot.tempAtkBonus);
-        slot.tempAtkBonus = 0;
+        slot.ClearAtkBonus();
 
         player.TakeDamage(damage);
         GameManager.Instance?.UpdateHUD();
@@ -128,7 +132,7 @@ public static class LaneResolver
         if (damage > 0)
         {
             slot.PushHint($"Player -{damage}");
-            Logger.Info($"Lane {laneIndex + 1}: {slot.def.SlotName} hits player for {damage}");
+            Logger.Info($"Corsia {laneIndex + 1}: corsia scoperta, {slot.def.SlotName} colpisce il giocatore per {damage}");
         }
     }
 

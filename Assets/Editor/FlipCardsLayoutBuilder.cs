@@ -197,21 +197,21 @@ public static class FlipCardsLayoutBuilder
                 var portrait = cell.Find("imagecharacter")?.GetComponent<Image>();
                 if (portrait != null) portrait.preserveAspect = true;
 
-                // Due caselle statistica, non tre, e la prima cambia con la
-                // faccia: ATK in Fronte, BLOCCO in Retro. I due Text stanno nello
-                // stesso posto e CardView ne accende uno solo, quello che serve da
-                // quel lato. Il numero parte dopo l'icona del badge del kit.
+                // Il FRONTE ha due caselle statistica: ATK e vita, nei pozzetti
+                // che il template del kit disegna. Il numero parte dopo l'icona
+                // del badge.
                 Place(cell, "FrontDamage", CardOverlay.StatTextX(0), CardOverlay.StatY,
                                            CardOverlay.StatTextW, CardOverlay.StatH);
-                Place(cell, "BackBlock", CardOverlay.StatTextX(0), CardOverlay.StatY,
-                                         CardOverlay.StatTextW, CardOverlay.StatH);
                 Place(cell, "HP", CardOverlay.StatTextX(1), CardOverlay.StatY,
                                   CardOverlay.StatTextW, CardOverlay.StatH);
 
                 StyleText(cell, "Name", 20, TextAnchor.MiddleLeft, GamePalette.TextPrimary);
                 StyleText(cell, "FrontDamage", 26, TextAnchor.MiddleCenter, GamePalette.Danger);
                 StyleText(cell, "HP", 22, TextAnchor.MiddleCenter, GamePalette.PlayerHp);
-                StyleText(cell, "BackBlock", 26, TextAnchor.MiddleCenter, GamePalette.Retro);
+
+                // Il RETRO ha un gruppo suo, con i numeri in un altro posto: e'
+                // un dorso, non il fronte con altri numeri.
+                BuildBackFace(root, cell, view);
 
                 // Fazione e lato li disegna CardOverlay come badge e fascia colorata.
                 // I Text del prefab restano (CardView li scrive e usa sideText per
@@ -229,6 +229,89 @@ public static class FlipCardsLayoutBuilder
             PrefabUtility.SaveAsPrefabAsset(root, path);
         }
         finally { PrefabUtility.UnloadPrefabContents(root); }
+    }
+
+    /// <summary>
+    /// Il gruppo del retro, creato **dentro il prefab**.
+    ///
+    /// Il retro non e' il fronte con altri numeri: e' un dorso, e deve leggersi
+    /// come le carte impilate nel mazzo — <c>card_back_plain</c> del kit, cioe'
+    /// il sigillo grande al centro e le squadre agli angoli, senza plance e
+    /// senza pozzetti. Mettere BLOCCO e vita nelle stesse due caselle del fronte
+    /// faceva sembrare la carta coperta una carta scoperta con numeri diversi, e
+    /// il colpo d'occhio sul tavolo — sei ritratti in alto, due dorsi in basso —
+    /// non funzionava.
+    ///
+    /// Quindi i due numeri che servono da coperta stanno **negli angoli bassi**,
+    /// come gli indici di una carta da gioco, e nient'altro occupa la cella:
+    /// <c>BackBlock</c> a sinistra (ciano, la guardia) e <c>BackHP</c> a destra
+    /// (verde, la vita). Il resto del dorso — insegna, cariche, bordo di fazione
+    /// — lo monta <see cref="CardOverlay"/>, che possiede tutto il chrome.
+    ///
+    /// Sta in un gruppo con un nome noto e non sparso nella cella per due
+    /// motivi: <see cref="CardView"/> lo accende e lo spegne in un colpo solo, e
+    /// il builder puo' girare due volte senza duplicare niente.
+    ///
+    /// <c>BackFace</c> ha la stessa misura della cella, quindi le coordinate
+    /// banda di <see cref="CardOverlay"/> valgono identiche al suo interno.
+    /// </summary>
+    static void BuildBackFace(GameObject root, RectTransform cell, CardView view)
+    {
+        var backFace = cell.Find("BackFace") as RectTransform;
+        if (backFace == null)
+        {
+            var go = new GameObject("BackFace", typeof(RectTransform));
+            backFace = (RectTransform)go.transform;
+            backFace.SetParent(cell, false);
+        }
+
+        backFace.anchorMin = backFace.anchorMax = new Vector2(0.5f, 0.5f);
+        backFace.pivot = new Vector2(0.5f, 0.5f);
+        backFace.sizeDelta = new Vector2(CardW, CardH);
+        backFace.anchoredPosition = Vector2.zero;
+        backFace.localScale = Vector3.one;
+
+        // BackBlock esisteva nella cella, accanto a FrontDamage: si sposta nel
+        // gruppo del retro, dove ha senso. Il riferimento su CardView e' per
+        // oggetto, quindi il cambio di parent non lo rompe.
+        var block = cell.Find("BackBlock") as RectTransform;
+        if (block == null) block = backFace.Find("BackBlock") as RectTransform;
+        if (block != null && block.parent != backFace) block.SetParent(backFace, false);
+
+        var hp = backFace.Find("BackHP") as RectTransform;
+        if (hp == null)
+        {
+            var source = cell.Find("HP")?.GetComponent<Text>();
+            var go = new GameObject("BackHP", typeof(RectTransform), typeof(Text));
+            hp = (RectTransform)go.transform;
+            hp.SetParent(backFace, false);
+
+            var text = go.GetComponent<Text>();
+            if (source != null)
+            {
+                text.font = source.font;
+                text.fontStyle = source.fontStyle;
+            }
+            text.raycastTarget = false;
+        }
+
+        Place(backFace, "BackBlock", CardOverlay.BackIndexTextX(0), CardOverlay.BackIndexY,
+                                     CardOverlay.BackIndexTextW, CardOverlay.BackIndexH);
+        Place(backFace, "BackHP", CardOverlay.BackIndexX(1), CardOverlay.BackIndexY,
+                                  CardOverlay.BackIndexW, CardOverlay.BackIndexH);
+
+        StyleText(backFace, "BackBlock", 26, TextAnchor.MiddleLeft, GamePalette.Retro);
+        StyleText(backFace, "BackHP", 24, TextAnchor.MiddleRight, GamePalette.PlayerHp);
+
+        foreach (var graphic in backFace.GetComponentsInChildren<Graphic>(true))
+            graphic.raycastTarget = false;
+
+        var so = new SerializedObject(view);
+        var faceProperty = so.FindProperty("backFace");
+        if (faceProperty != null) faceProperty.objectReferenceValue = backFace.gameObject;
+        var hpProperty = so.FindProperty("backHpText");
+        if (hpProperty != null) hpProperty.objectReferenceValue = hp.GetComponent<Text>();
+        so.ApplyModifiedPropertiesWithoutUndo();
     }
 
     /// <summary>
@@ -250,7 +333,16 @@ public static class FlipCardsLayoutBuilder
         if (definition == null) return;
 
         var front = KitSprite($"card/card_front_{definition.faction}");
-        var back = KitSprite($"card/card_back_{definition.faction}");
+
+        // Il dorso e' la COPERTINA PIANA, non `card_back_{fazione}`: quella ha la
+        // stessa anatomia del fronte — plancia, finestra, due pozzetti, striscia
+        // — e con i pozzetti vuoti il retro sembrava un fronte a cui mancava
+        // qualcosa. `card_back_plain` e' il dorso che si vede nella pila del
+        // mazzo, ed e' quello che deve vedersi anche in campo: la fazione la
+        // portano il bordo e i simboli che monta CardOverlay.
+        var back = KitSprite("card/card_back_plain")
+                ?? KitSprite($"card/card_back_{definition.faction}")
+                ?? KitSprite("card/card_back");
         if (front == null && back == null) return;
 
         var template = cell.Find("Template");
@@ -1007,6 +1099,13 @@ public static class FlipCardsLayoutBuilder
     /// dice il template, il ruolo dei numeri lo dice il badge — e le caselle
     /// nemiche non sono carte: senza una chiave, queste due scelte si pagano alla
     /// prima partita di chi non ha scritto il codice.
+    ///
+    /// Il gruppo SINERGIA e' il piu' importante dei tre, ed e' l'unico con i
+    /// simboli veri accanto: la spada, lo scudo e lo scudo spezzato sono le tre
+    /// cose che decidono il turno, e vanno riconosciute a colpo d'occhio sul
+    /// retro delle carte e sull'asse delle corsie. Il gruppo NUMERI sta invece
+    /// su una riga sola perche' i suoi colori li ripetono i badge di ogni cella:
+    /// serviva lo spazio, e li' se ne poteva risparmiare senza perdere niente.
     /// </summary>
     static void BuildLegend(RectTransform rail)
     {
@@ -1017,9 +1116,17 @@ public static class FlipCardsLayoutBuilder
         UiBuild.Band(title.rectTransform, 12f, 10f, 200f, 20f);
 
         float y = 38f;
-        y = LegendGroup(box, y, "LE TUE CARTE");
-        y = LegendRow(box, y, GamePalette.Fronte, "RITRATTO", "attacca: ATK");
-        y = LegendRow(box, y, GamePalette.Retro, "SIGILLO", "blocca: BLOCCO");
+        y = LegendGroup(box, y, "SINERGIA — NEL COLORE DELLA FAZIONE");
+        y = LegendGlyphRow(box, y, GlyphSprites.Kind.Sword, GamePalette.TextPrimary,
+                           "+n", "attacco a chi ha accanto");
+        y = LegendGlyphRow(box, y, GlyphSprites.Kind.Shield, GamePalette.TextPrimary,
+                           "+n", "guardia a chi ha accanto");
+        y = LegendGlyphRow(box, y, GlyphSprites.Kind.BrokenShield, GamePalette.Danger,
+                           "risonanza", "su carta e casella: nessuno para");
+
+        y = LegendGroup(box, y + 6f, "LE TUE CARTE");
+        y = LegendRow(box, y, GamePalette.Fronte, "RITRATTO", "scoperta: attacca");
+        y = LegendRow(box, y, GamePalette.Retro, "SIGILLO", "coperta: para ed e' insegna");
         y = LegendRow(box, y, GamePalette.Charge, "TACCHE", "cariche: bonus al colpo");
 
         y = LegendGroup(box, y + 6f, "IL RULLO NEMICO");
@@ -1028,11 +1135,51 @@ public static class FlipCardsLayoutBuilder
         y = LegendRow(box, y, GamePalette.TextMuted, "PIP", "i giri che verranno");
 
         y = LegendGroup(box, y + 6f, "NUMERI");
-        y = LegendRow(box, y, GamePalette.Danger, "ATK", "danno");
-        y = LegendRow(box, y, GamePalette.PlayerHp, "HP", "vita");
-        y = LegendRow(box, y, GamePalette.Retro, "BLOCCO", "danno assorbito");
+        y = LegendInlineRow(box, y, GamePalette.Danger, "ATK", GamePalette.PlayerHp, "HP",
+                            GamePalette.Retro, "BLOCCO");
+    }
 
+    /// <summary>
+    /// Riga di legenda col simbolo vero al posto del quadratino di colore. I
+    /// simboli vengono da GlyphSprites e non dal font: il font legacy non ha ne'
+    /// la spada ne' lo scudo, e uscirebbero come rettangoli vuoti.
+    ///
+    /// Lo sprite lo assegna <see cref="GlyphIcon"/> a Play, non questo metodo:
+    /// i glifi non sono serializzabili e un riferimento salvato nella scena
+    /// tornerebbe null, lasciando un rettangolo pieno. Vedi il commento del
+    /// componente.
+    /// </summary>
+    static float LegendGlyphRow(RectTransform box, float y, GlyphSprites.Kind kind, Color color,
+                                string name, string note)
+    {
+        const float h = 22f;
 
+        var iconRt = UiBuild.Rect($"Glyph_{name}_{note}", box);
+        UiBuild.Band(iconRt, 13f, y + 3f, 16f, 16f);
+        UiBuild.Fill(iconRt, color);
+        iconRt.gameObject.AddComponent<GlyphIcon>().kind = kind;
+
+        var text = UiBuild.Text($"Row_{name}_{note}", box, name, 13f, color,
+                                TextAlignmentOptions.Left, FontStyles.Bold);
+        UiBuild.Band(text.rectTransform, 34f, y, 74f, h);
+
+        var noteText = UiBuild.Text($"Note_{name}_{note}", box, note, 11f, GamePalette.TextFaint);
+        UiBuild.Band(noteText.rectTransform, 108f, y, RailW - 120f, h);
+
+        return y + h;
+    }
+
+    /// <summary>Tre voci su una riga: i colori dei numeri li ripete ogni badge.</summary>
+    static float LegendInlineRow(RectTransform box, float y, Color c1, string n1,
+                                 Color c2, string n2, Color c3, string n3)
+    {
+        string Tag(Color c, string n) => $"<color=#{ColorUtility.ToHtmlStringRGB(c)}><b>{n}</b></color>";
+
+        var text = UiBuild.Text("Row_Numeri", box,
+                                $"{Tag(c1, n1)}  ·  {Tag(c2, n2)}  ·  {Tag(c3, n3)}",
+                                13f, GamePalette.TextFaint, TextAlignmentOptions.Left);
+        UiBuild.Band(text.rectTransform, 14f, y, RailW - 26f, 22f);
+        return y + 22f;
     }
 
     static float LegendGroup(RectTransform box, float y, string label)

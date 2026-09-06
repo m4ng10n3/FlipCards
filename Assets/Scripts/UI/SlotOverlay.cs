@@ -60,21 +60,29 @@ public class SlotOverlay : MonoBehaviour,
     const float PipRight = 344f, PipY = 14f, PipSize = 16f, PipPitch = 26f;
     const float PipMarkSize = 24f;
 
+    // Il numero della lastra, nella striscia libera a sinistra del simbolo, e
+    // sotto di lui il marchio della risonanza.
+    const float PoolX = 6f, PoolY = 48f, PoolW = 68f, PoolH = 26f;
+    const float ResonanceX = 8f, ResonanceY = 78f, ResonanceSize = 26f;
+
     SlotView _view;
     RectTransform _rt;
 
     Image _frame;            // cornice della casella: carica o trattenuta
-    Image _medallion;
+    Image _resonanceMark;    // scudo spezzato: questa corsia risuona
     TextMeshProUGUI _atkLabel;
     RectTransform _pipRoot;
     readonly List<Image> _pips = new List<Image>();
     readonly List<Image> _pipMarks = new List<Image>();
     Image _furyChip;
     TextMeshProUGUI _furyLabel;
+    TextMeshProUGUI _poolLabel;   // il numero della lastra nella corazza
     SlotBerserker _berserker;
 
     Side _lastSide = (Side)(-1);
     int _lastStep = -1, _lastAtk = int.MinValue, _lastFury = int.MinValue;
+    int _lastWounded = -1;
+    int _lastResonance = -1;
     bool _built;
 
     /// <summary>La casella colpisce in questo giro. La legge <see cref="ReelChrome"/>.</summary>
@@ -115,6 +123,32 @@ public class SlotOverlay : MonoBehaviour,
             RefreshProgram(inst);
         }
 
+        // Il numero cambia colore quando la lastra e' ferita: e' l'unico modo di
+        // riconoscere a occhio una casella che il rullo ha gia' fatto uscire e
+        // che stavolta torna scalfita. Senza, la vita che persiste sarebbe una
+        // regola invisibile.
+        int wounded = _poolLabel != null && inst.origin != null && inst.origin.Wounded ? 1 : 0;
+        if (wounded != _lastWounded)
+        {
+            _lastWounded = wounded;
+            _poolLabel.color = wounded == 1 ? GamePalette.Danger : GamePalette.TextFaint;
+        }
+
+        // La risonanza va riletta a ogni giro: dipende dalla carta che ha
+        // davanti, e quella cambia sia per scelta del giocatore sia per il caos.
+        var gmRes = GameManager.Instance;
+        int laneRes = gmRes != null ? gmRes.GetLaneIndexFor(inst) : -1;
+        int resonance = gmRes != null && SynergyResolver.Resonates(gmRes, laneRes) ? 1 : 0;
+        if (resonance != _lastResonance)
+        {
+            _lastResonance = resonance;
+            if (_resonanceMark != null)
+            {
+                _resonanceMark.enabled = resonance == 1;
+                _resonanceMark.color = GamePalette.FactionColor(inst.def.faction);
+            }
+        }
+
         if (_berserker != null && _berserker.FuryStacks != _lastFury)
         {
             _lastFury = _berserker.FuryStacks;
@@ -149,10 +183,6 @@ public class SlotOverlay : MonoBehaviour,
             _frame.color = GamePalette.WithAlpha(armed ? GamePalette.Fronte : GamePalette.Retro, 0.22f);
         }
 
-        // Trattenuta, la casella si spegne: il simbolo resta leggibile ma non
-        // chiama l'attenzione, che deve andare alle colonne che colpiscono.
-        if (_medallion != null)
-            _medallion.color = GamePalette.WithAlpha(Color.white, armed ? 1f : 0.45f);
     }
 
     // ── Ispettore ─────────────────────────────────────────────────────────────
@@ -185,14 +215,19 @@ public class SlotOverlay : MonoBehaviour,
 
         var def = _view.instance.def;
 
-        // Ordine di disegno della casella (recipes.reel_cell del manifest):
-        // simbolo → medaglione → cornice → tag, pip, badge → nome.
-        // Il simbolo e' il figlio "Sprite" del prefab e deve stare sotto tutto:
-        // la cornice del kit ha la finestra trasparente ed e' lei a incorniciarlo.
+        // Ordine di disegno della casella: simbolo → cornice → tag, pip, badge
+        // → nome. Il simbolo e' il figlio "Sprite" del prefab e deve stare sotto
+        // tutto: la cornice del kit ha la finestra trasparente ed e' lei a
+        // incorniciarlo.
+        //
+        // Il medaglione tondo del kit (`enemy_medallion_*`) non c'e' piu': era
+        // una seconda cornice, circolare, dentro quella rettangolare della
+        // casella, e non aggiungeva nessuna informazione — il colore di fazione
+        // lo dicono gia' la cornice e il tag. Due cornici concentriche intorno a
+        // un simbolo lo rimpiccioliscono e basta.
         var art = _rt.Find("Sprite") as RectTransform;
         if (art != null) art.SetAsFirstSibling();
 
-        BuildMedallion(def);
         BuildFrame();
 
         if (!Skinned)
@@ -219,6 +254,9 @@ public class SlotOverlay : MonoBehaviour,
         _pipRoot = UiBuild.Rect("Program", _rt);
         UiBuild.Band(_pipRoot, 0f, 0f, CellW, NameH + 16f);
 
+        BuildPoolNumber();
+        BuildResonanceMark();
+
         if (_berserker != null)
         {
             var furyRt = UiBuild.Rect("FuryChip", _rt);
@@ -240,17 +278,50 @@ public class SlotOverlay : MonoBehaviour,
 
     static bool Skinned => UiSkin.Sprite(UiSkin.ReelFrame) != null;
 
-    void BuildMedallion(SlotDefinition.Spec def)
+    /// <summary>
+    /// Il numero della lastra nella corazza del boss.
+    ///
+    /// La corazza e' un mazzo numerato: le caselle che il rullo mostra sono
+    /// sempre quelle, e le ferite restano su di loro fra un giro e l'altro. Senza
+    /// il numero stampato il giocatore non ha modo di sapere che la casella
+    /// davanti a lui e' la stessa che ha scalfito due turni fa, e la regola che
+    /// rende sensato colpire senza uccidere resta invisibile. E' anche il numero
+    /// che l'ispettore usa per dire quante lastre restano.
+    ///
+    /// La striscia a sinistra del simbolo (x 0..ArtX) e' l'unico spazio libero
+    /// della cella: il nome sta in cima, i tre numeri in fondo, i pip a destra.
+    /// </summary>
+    void BuildPoolNumber()
     {
-        var sprite = UiSkin.Sprite(UiSkin.EnemyMedallion(def.faction));
-        if (sprite == null) return;
+        int number = _view.instance.PoolNumber;
+        if (number <= 0) return;
 
-        var rt = UiBuild.Rect("Medallion", _rt);
-        UiBuild.Band(rt, ArtX, ArtY, ArtSize, ArtSize);
-        _medallion = UiBuild.Fill(rt, Color.white);
-        _medallion.sprite = sprite;
-        _medallion.type = Image.Type.Simple;
-        rt.SetSiblingIndex(1);   // sopra il simbolo, sotto la cornice
+        _poolLabel = UiBuild.Text("PoolNumber", _rt, $"#{number}", 18f, GamePalette.TextFaint,
+                                  TextAlignmentOptions.Left, FontStyles.Bold);
+        UiBuild.Band(_poolLabel.rectTransform, PoolX, PoolY, PoolW, PoolH);
+    }
+
+    /// <summary>
+    /// Lo scudo spezzato della risonanza, sulla casella che la subisce.
+    ///
+    /// La stessa icona compare sulla carta della corsia (CardOverlay): sono le
+    /// due cose che la causano, e vederla su tutte due dice "questi due,
+    /// insieme, non si parano" senza spiegazioni. Prima stava solo sull'asse
+    /// delle corsie, cioe' in un terzo posto lontano da entrambe, ed e' il
+    /// motivo per cui la sinergia fra carta e casella non si capiva.
+    ///
+    /// Il colore e' quello della fazione condivisa, perche' e' la sua causa.
+    /// </summary>
+    void BuildResonanceMark()
+    {
+        var rt = UiBuild.Rect("ResonanceMark", _rt);
+        UiBuild.Band(rt, ResonanceX, ResonanceY, ResonanceSize, ResonanceSize);
+
+        _resonanceMark = UiBuild.Fill(rt, GamePalette.Danger);
+        _resonanceMark.sprite = GlyphSprites.BrokenShield;
+        _resonanceMark.type = Image.Type.Simple;
+        _resonanceMark.preserveAspect = true;
+        _resonanceMark.enabled = false;
     }
 
     /// <summary>
@@ -272,7 +343,7 @@ public class SlotOverlay : MonoBehaviour,
             _frame.type = Image.Type.Simple;
         }
 
-        rt.SetSiblingIndex(_medallion != null ? 2 : 1);
+        rt.SetSiblingIndex(1);   // sopra il simbolo, sotto tutto il resto
     }
 
     void BuildFactionTag(SlotDefinition.Spec def)
