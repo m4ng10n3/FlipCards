@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -51,6 +52,7 @@ public class ReelChrome : MonoBehaviour
         public RectTransform root;
         public Image blur;
         public Image highlight;
+        public Image payout;
     }
 
     readonly List<Column> _columns = new List<Column>();
@@ -58,6 +60,7 @@ public class ReelChrome : MonoBehaviour
     bool _built;
     int _lastArmedMask = -1;
     bool _lastRolling;
+    int _lastPayoutSerial = -1;
 
     void LateUpdate()
     {
@@ -85,6 +88,15 @@ public class ReelChrome : MonoBehaviour
             // che si vedono passare non sono ancora quelle del prossimo turno.
             bool armed = !rolling && slot != null && slot.alive && slot.side == Side.Fronte;
             if (armed) armedMask |= 1 << i;
+        }
+
+        // La vincita si annuncia prima dell'uscita anticipata: e' un evento, non
+        // uno stato, e senza questo controllo passerebbe inosservata nei giri in
+        // cui nient'altro cambia.
+        if (gm.RollPayoutSerial != _lastPayoutSerial)
+        {
+            _lastPayoutSerial = gm.RollPayoutSerial;
+            if (_lastPayoutSerial > 0) FlashPayout(gm.RollPayoutLanes, gm.RollPayoutJackpot);
         }
 
         if (armedMask == _lastArmedMask && rolling == _lastRolling) return;
@@ -177,7 +189,48 @@ public class ReelChrome : MonoBehaviour
         }
         col.highlight.enabled = false;
 
+        // Strato separato dall'alone di attacco: i due significati possono
+        // capitare insieme (una colonna che paga E che colpisce) e devono
+        // restare leggibili come due cose diverse.
+        var payoutRt = UiBuild.Rect("Payout", col.root);
+        UiBuild.Band(payoutRt, -highlightBleed, colTop - highlightBleed,
+                     cellWidth + highlightBleed * 2f, colHeight + highlightBleed * 2f);
+        col.payout = UiBuild.Fill(payoutRt, GamePalette.WithAlpha(GamePalette.Good, 0f));
+        var payoutSprite = UiSkin.Sprite(UiSkin.ReelColHighlight);
+        if (payoutSprite != null) col.payout.sprite = payoutSprite;
+        col.payout.enabled = false;
+
         return col;
+    }
+
+    /// <summary>
+    /// Il lampo di vincita sulle colonne che hanno fatto combinazione. E' il
+    /// momento di pagamento della macchina: senza, la coppia esiste solo come
+    /// riga di testo nella HUD e il giro non ha un esito che si guarda.
+    /// </summary>
+    void FlashPayout(int laneMask, bool jackpot)
+    {
+        int pulses = jackpot ? 5 : 3;
+        float duration = jackpot ? 1.1f : 0.7f;
+        float peak = jackpot ? 0.55f : 0.35f;
+
+        for (int i = 0; i < _columns.Count; i++)
+        {
+            var img = _columns[i].payout;
+            if (img == null) continue;
+
+            img.DOKill();
+            if ((laneMask & (1 << i)) == 0) { img.enabled = false; continue; }
+
+            img.enabled = true;
+            img.color = GamePalette.WithAlpha(jackpot ? GamePalette.Fronte : GamePalette.Good, 0f);
+            var target = img;
+            DOTween.Sequence()
+                   .SetUpdate(true)
+                   .SetLink(img.gameObject)
+                   .Append(img.DOFade(peak, duration / pulses).SetLoops(pulses * 2, LoopType.Yoyo))
+                   .OnComplete(() => { if (target != null) target.enabled = false; });
+        }
     }
 
     static Image Layer(RectTransform parent, string name, string key,

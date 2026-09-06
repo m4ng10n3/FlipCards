@@ -21,7 +21,7 @@ public static class AbilityCatalog
         ["BlockAllAttacks"]    = new Entry { glyph = "0", icon = "icon_lock",         name = "Block All",        effect = "azzera il danno in arrivo" },
         ["PulseHeal"]          = new Entry { glyph = "+", icon = "icon_heart_green",  name = "Pulse Heal",       effect = "cura a ogni flip" },
         ["OnFlipDealDamage"]   = new Entry { glyph = "F", icon = "icon_flip",         name = "Flip Strike",      effect = "al flip colpisce lo slot della sua corsia, o il boss se la corsia e' vuota" },
-        ["OnFlipGainAP"]       = new Entry { glyph = "P", icon = "icon_plus",         name = "Flip Momentum",    effect = "al flip restituisce AP" },
+        ["OnFlipGainAP"]       = new Entry { glyph = "P", icon = "icon_plus",         name = "Flip Momentum",    effect = "al primo flip manuale del turno restituisce AP" },
         ["OnEndTurnDealDamage"]= new Entry { glyph = "E", icon = "icon_clock",        name = "End Turn Strike",  effect = "attacca a fine turno" },
         ["GetBonusBack"]       = new Entry { glyph = "B", icon = "icon_diamond",      name = "Faction Aura",     effect = "in Retro applica i bonus di fazione alle altre carte" },
 
@@ -36,6 +36,21 @@ public static class AbilityCatalog
     public static string Describe(Component ability)
     {
         if (ability == null) return string.Empty;
+        if (ability is SlotStrikeOnAct slot)
+        {
+            string effect = slot.signature switch
+            {
+                SlotStrikeOnAct.SlotSignature.PressureFront => $"in Attacco, +{slot.power} danni sulle corsie vuote",
+                SlotStrikeOnAct.SlotSignature.ArmorFront => $"in Attacco, +{slot.power} BLOCCO contro ogni colpo",
+                SlotStrikeOnAct.SlotSignature.BerserkFront => $"in Attacco, +{slot.power} ATK se escono almeno {slot.threshold} slot della sua fazione",
+                SlotStrikeOnAct.SlotSignature.GuardAuraRetro => $"in Difesa, +{slot.power} BLOCCO ai vicini dopo questa corsia",
+                SlotStrikeOnAct.SlotSignature.RegenRetro => $"in Difesa, recupera {slot.power} HP dopo questa corsia",
+                _ => "nessun effetto aggiuntivo"
+            };
+            return $"<b>{Name(slot)}</b> / {effect}";
+        }
+        if (ability is SlotBerserker berserker)
+            return $"<b>Furia del rullo</b> / in Attacco colpisce doppio con {berserker.furyThreshold} slot della stessa fazione";
         string type = ability.GetType().Name;
         return Table.TryGetValue(type, out var e)
             ? $"<b>{e.name}</b> — {e.effect}"
@@ -66,6 +81,15 @@ public static class AbilityCatalog
     public static string Name(Component ability)
     {
         if (ability == null) return string.Empty;
+        if (ability is SlotStrikeOnAct slot) return slot.signature switch
+        {
+            SlotStrikeOnAct.SlotSignature.PressureFront => "Pressione",
+            SlotStrikeOnAct.SlotSignature.ArmorFront => "Armatura",
+            SlotStrikeOnAct.SlotSignature.BerserkFront => "Furia del rullo",
+            SlotStrikeOnAct.SlotSignature.GuardAuraRetro => "Scudo ai vicini",
+            SlotStrikeOnAct.SlotSignature.RegenRetro => "Rigenerazione",
+            _ => "Nessuna abilita"
+        };
         string type = ability.GetType().Name;
         return Table.TryGetValue(type, out var e) ? e.name : Humanize(type);
     }

@@ -21,15 +21,16 @@ public class AdjacencyShield : AbilityBase
 
     void OnEvent(GameEventType t, EventContext ctx)
     {
-        if (Source == null || Source.side != Side.Fronte) return;
+        if (Source == null || !Source.alive || Source.side != Side.Fronte) return;
         if (!(ctx.source is SlotInstance)) return;
 
         // ctx.target è la carta adiacente che sta per essere colpita
         if (!(ctx.target is CardInstance targetCard)) return;
 
-        var board = Owner.board;
-        int myIdx  = board.IndexOf(Source);
-        int tgtIdx = board.IndexOf(targetCard);
+        var gm = GameManager.Instance;
+        if (gm == null) return;
+        int myIdx = gm.GetLaneIndexFor(Source);
+        int tgtIdx = gm.GetLaneIndexFor(targetCard);
         if (myIdx < 0 || tgtIdx < 0) return;
 
         if (Mathf.Abs(myIdx - tgtIdx) == 1)

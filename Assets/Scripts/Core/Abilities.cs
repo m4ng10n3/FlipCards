@@ -12,18 +12,25 @@ public abstract class AbilityBase : MonoBehaviour, IAbility
 {
     protected CardInstance Source;
     protected PlayerState Owner, Opponent;
+    bool _bound;
 
     public virtual void Bind(CardInstance source, PlayerState owner, PlayerState opponent)
     {
+        if (_bound) Unbind();
         Source = source; Owner = owner; Opponent = opponent;
+        _bound = true;
         Register(); // sottoscrizioni concrete
     }
 
     public virtual void Unbind()
     {
+        if (!_bound) return;
+        _bound = false;
         Unregister(); // rimuovi sottoscrizioni
         Source = null; Owner = null; Opponent = null;
     }
+
+    protected virtual void OnDestroy() => Unbind();
 
     protected abstract void Register();
     protected abstract void Unregister();

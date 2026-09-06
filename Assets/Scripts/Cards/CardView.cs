@@ -104,6 +104,8 @@ public class CardView : MonoBehaviour
     private Tween _boardMoveTween;
     private Quaternion _targetBoardRotation = Quaternion.identity;
     private Tween _scaleTween;
+    private Tween _flipTween;
+    private float _flipAngle, _appliedFlipAngle;
     private Tween _hoverPunchTween;
     private Tween _selectTween;
     private Tween _moveInHandTween;
@@ -112,11 +114,6 @@ public class CardView : MonoBehaviour
     // localPosition: FollowContainer la riscrive ogni frame e vincerebbe lui.
     // Si tweena un offset che FollowContainer somma al bersaglio, come gia'
     // fanno la curva della mano e il sollevamento da selezione.
-    // Misura originale della radice, cioe' del bersaglio di raycast. Si allarga
-    // solo mentre la carta e' sollevata in mano: vedi UpdateHoverBounds.
-    private Vector2 _baseRootSize;
-    private bool _hoverBoundsExpanded;
-
     private Vector3 _combatOffset;
     private Vector3 _combatOffsetApplied;
     private Tween _combatTween;
@@ -127,7 +124,13 @@ public class CardView : MonoBehaviour
     public RectTransform RectTransform => _rt;
     public Canvas RootCanvas => _rootCanvas;
     public Canvas Canvas => _canvas;
-    public bool IsDragging { get => _dragging; set { _dragging = value; } }
+    public bool IsDragging { get => _dragging; set {
+        _dragging = value;
+        if (value && _rt != null) {
+            _draggingHand = _handContainer != null && _rt.parent.IsChildOf(_handContainer);
+            _draggingFromBoard = _playerBoardContainer != null && _rt.parent.IsChildOf(_playerBoardContainer);
+        }
+    } }
     public bool IsDraggingFromBoard => _draggingFromBoard;
     public bool IsDraggingHand => _draggingHand;
     public bool IsHovering { get => _hovering; set { _hovering = value; } }// Debug.Log(name + $" hover state: {value}"); } }
@@ -257,7 +260,7 @@ public class CardView : MonoBehaviour
 
         if (isFront)
         {
-            int atk = instance.def.frontDamage;
+            int atk = instance.def.frontDamage + instance.tempAtkBonus;
             AttackPwrText.text = instance.flipCharge > 0
                 ? $"{atk}+{instance.flipCharge}"
                 : atk.ToString();
@@ -270,33 +273,20 @@ public class CardView : MonoBehaviour
 
     public void FlipSide(bool immediate = false)
     {
+        KillTween(ref _flipTween);
+        _flipAngle = 0f;
         if (immediate || flipDuration <= 0f || _rt == null)
         {
             ApplySideVisuals();
             return;
         }
-        _rt.DOKill();
-
-        Vector3 startEuler = _rt.localEulerAngles;
-        float halfDuration = flipDuration * 0.5f;
-
-        var seq = DOTween.Sequence()
-            .SetUpdate(true)
-            .SetLink(gameObject);
-
-        seq.Append(
-                _rt.DOLocalRotate(
-                    new Vector3(startEuler.x, startEuler.y + 90f, startEuler.z),
-                    halfDuration
-                ).SetEase(flipEase)
-            )
-        .AppendCallback(ApplySideVisuals)
-        .Append(
-                _rt.DOLocalRotate(
-                    startEuler,
-                    halfDuration
-                ).SetEase(flipEase)
-            );
+        float half = flipDuration * 0.5f;
+        // Animate an offset. Hover/tilt also write rotation every frame, so a
+        // rotation tween on the same RectTransform gets overwritten.
+        _flipTween = DOTween.Sequence().SetUpdate(true).SetLink(gameObject)
+            .Append(DOTween.To(() => _flipAngle, v => _flipAngle = v, 90f, half).SetEase(flipEase))
+            .AppendCallback(() => { ApplySideVisuals(); _flipAngle = -90f; })
+            .Append(DOTween.To(() => _flipAngle, v => _flipAngle = v, 0f, half).SetEase(flipEase));
     }
 
     private void ApplySideVisuals()
@@ -523,6 +513,8 @@ public class CardView : MonoBehaviour
     private void Update()
     {
         if (_rt == null) return;
+        _rt.localRotation *= Quaternion.Euler(0f, -_appliedFlipAngle, 0f);
+        _appliedFlipAngle = 0f;
 
         var anchorRotation = GetAnchorRotation();
         bool inHand = _handContainer != null && _rt.parent.IsChildOf(_handContainer);
@@ -562,65 +554,66 @@ public class CardView : MonoBehaviour
         }
         if (!doHover) CardTilt(anchorRotation);
         UpdateHoverBounds(inHand);
+        _appliedFlipAngle = _flipAngle;
+        _rt.localRotation *= Quaternion.Euler(0f, _appliedFlipAngle, 0f);
         UpdateShadow();
     }
 
-    /// <summary>
-    /// L'area di raycast della carta deve coprire la carta **dove si vede**, non
-    /// dove stava prima di sollevarsi.
-    ///
-    /// Il bersaglio del raycast e' la radice (`CardDefinition`), che resta ferma
-    /// sul container mentre a salire e' il figlio grafico. Con il rect della
-    /// radice fermo alla misura della carta, appena il puntatore seguiva la carta
-    /// sollevata usciva dal rect: PointerExit, la carta ricadeva, il puntatore
-    /// rientrava, e il pop-out sfarfallava sul bordo alto.
-    ///
-    /// Il margine si applica **solo in mano e solo mentre la carta e' sotto il
-    /// puntatore**. Fisso, coprirebbe le corsie: la radice di una carta in mano
-    /// arriverebbe sopra le carte in campo e ne ruberebbe i click.
-    /// </summary>
+    // Expand only the hit area, never move/resize the root carrying the visual.
+    // The union includes the resting card so entering at its bottom cannot
+    // cause an exit on the next frame. Padding is left, bottom, right, top.
     void UpdateHoverBounds(bool inHand)
     {
         var root = _rt != null ? _rt.parent as RectTransform : null;
         if (root == null) return;
+        var hit = root.GetComponent<Image>();
+        if (hit == null) return;
 
-        if (_baseRootSize.sqrMagnitude <= 0f) _baseRootSize = root.sizeDelta;
-
-        bool expand = inHand && _hovering && !_dragging;
-        if (expand == _hoverBoundsExpanded)
+        // Never reorder hand containers for hover: HandManager derives the
+        // actual hand order from siblings every frame. The visual Canvas alone
+        // handles drawing the hovered card above its neighbours.
+        if (!inHand)
         {
-            if (expand)
-            {
-                var center = _handCurveOffset + Vector3.up * handHoverLift;
-                root.anchoredPosition = center;
-            }
-            return;
-        }
-        _hoverBoundsExpanded = expand;
-
-        if (!expand)
-        {
-            root.sizeDelta = _baseRootSize;
-            root.anchoredPosition = Vector3.zero;
-            if (inHand && gm != null && gm.HandManager != null)
-            {
-                gm.HandManager.RestoreContainerSiblingIndices();
-            }
+            hit.raycastPadding = Vector4.zero;
             return;
         }
 
-        if (inHand && _handContainer != null)
+        Vector2 half = root.rect.size * 0.5f;
+        Vector2 min = -half, max = half;
+
+        // Mano sollevata: sotto le carte resta un vuoto alto quanto la salita,
+        // fino al bordo basso dello schermo. Chi arriva dal fondo — cioe'
+        // chiunque butti il mouse in basso — vedeva la carta scappare in alto e
+        // perdeva hover e anteprima con il puntatore fermo. Misurato: hover
+        // Bastion -> nessuno in 0,1 s a puntatore immobile.
+        var tray = HandTrayRef();
+        if (tray != null && tray.IsRaised)
+            min.y -= Mathf.Max(0f, tray.raisedY - tray.restY);
+
+        if (_hovering && !_dragging)
         {
-            _handContainer.SetAsLastSibling();
+            Vector2 center = _handCurveOffset + Vector3.up * handHoverLift;
+            Vector2 extent = half * Mathf.Max(1f, scaleOnHover, scaleOnSelect);
+            min = Vector2.Min(min, center - extent);
+            max = Vector2.Max(max, center + extent);
         }
 
-        var card = _baseRootSize;
-        float scaledW = card.x * scaleOnHover;
-        float scaledH = card.y * scaleOnHover;
-        root.sizeDelta = new Vector2(scaledW, scaledH);
+        hit.raycastPadding = new Vector4(min.x + half.x, min.y + half.y,
+                                        half.x - max.x, half.y - max.y);
+    }
 
-        var targetCenter = _handCurveOffset + Vector3.up * handHoverLift;
-        root.anchoredPosition = targetCenter;
+    HandTray _handTray;
+    bool _handTraySearched;
+
+    /// <summary>La barra della mano, cercata una volta sola: sta sopra il container.</summary>
+    HandTray HandTrayRef()
+    {
+        if (_handTraySearched) return _handTray;
+        _handTraySearched = true;
+        _handTray = _handContainer != null
+            ? _handContainer.GetComponentInParent<HandTray>()
+            : Object.FindAnyObjectByType<HandTray>();
+        return _handTray;
     }
 
     private void HoverMotion(Quaternion anchorRotation)
@@ -746,7 +739,7 @@ public class CardView : MonoBehaviour
         {
             if (_hovering && !_dragging)
             {
-                targetPosLocal = Vector3.zero;
+                targetPosLocal = _handCurveOffset + Vector3.up * handHoverLift;
             }
             else
             {
@@ -1056,6 +1049,7 @@ public class CardView : MonoBehaviour
         _rt?.DOKill();
         transform.DOKill(); // ensure lingering tweens tied to this GameObject are removed
         KillTween(ref _scaleTween);
+        KillTween(ref _flipTween);
         KillTween(ref _hoverPunchTween);
         KillTween(ref _selectTween);
         KillTween(ref _moveInHandTween);

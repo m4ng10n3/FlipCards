@@ -3,9 +3,11 @@ using UnityEngine;
 public class GetBonusBack : AbilityBase
 {
     private EventBus.Handler _h;
+    int _rewardTurn = -1;
 
     protected override void Register()
     {
+        _rewardTurn = -1;
         _h = OnEvent;
         EventBus.Subscribe(GameEventType.Custom, _h);
         EventBus.Subscribe(GameEventType.Flip, _h);
@@ -63,9 +65,13 @@ public class GetBonusBack : AbilityBase
         var gm = GameManager.Instance;
         if (gm == null) return;
 
+        if (!gm.CanAct || _rewardTurn == gm.CurrentTurn) return;
         int gained = gm.GainPlayerAP(bonusAP, $"{Source.def.cardName} relay");
         if (gained > 0)
+        {
+            _rewardTurn = gm.CurrentTurn;
             Source.PushHint($"+{gained} AP");
+        }
     }
 
     protected override void Unregister()

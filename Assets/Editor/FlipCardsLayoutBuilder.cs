@@ -72,7 +72,6 @@ public static class FlipCardsLayoutBuilder
     const float HandRestY = -28f;
     const float HandRaisedY = 208f;
     const float HandRestH = RefH - HandDockY;   // 156
-    const float HandRaisedH = 440f;
     const float HandRootW = 1148f;
 
     // Il passo della mano e' PIU' STRETTO della carta: le carte in mano si
@@ -195,6 +194,8 @@ public static class FlipCardsLayoutBuilder
                                               CardOverlay.ArtW, CardOverlay.ArtH);
 
                 ApplyCardTemplate(root, cell);
+                var portrait = cell.Find("imagecharacter")?.GetComponent<Image>();
+                if (portrait != null) portrait.preserveAspect = true;
 
                 // Due caselle statistica, non tre, e la prima cambia con la
                 // faccia: ATK in Fronte, BLOCCO in Retro. I due Text stanno nello
@@ -335,6 +336,8 @@ public static class FlipCardsLayoutBuilder
             // rect e al reveal l'immagine non deve cambiare dimensione.
             Place(cell, "Name", SlotOverlay.NameX, SlotOverlay.NameY, SlotOverlay.NameW, SlotOverlay.NameH);
             Place(cell, "Sprite", SlotOverlay.ArtX, SlotOverlay.ArtY, SlotOverlay.ArtSize, SlotOverlay.ArtSize);
+            var symbol = cell.Find("Sprite")?.GetComponent<Image>();
+            if (symbol != null) symbol.preserveAspect = true;
             Place(cell, "HP", SlotOverlay.ChipTextX(1), SlotOverlay.ChipY,
                               SlotOverlay.ChipTextW, SlotOverlay.ChipH);
             Place(cell, "Def", SlotOverlay.ChipTextX(2), SlotOverlay.ChipY,
@@ -625,6 +628,10 @@ public static class FlipCardsLayoutBuilder
         var scaler = canvasGO.GetComponent<CanvasScaler>() ?? canvasGO.AddComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(RefW, RefH);
+        // Il kit usa 1 pixel per unita': con il default 100 i bordi 9-slice
+        // diventano cento volte piu' grandi e il centro delle barre sparisce.
+        scaler.referencePixelsPerUnit = 1f;
+        canvas.referencePixelsPerUnit = 1f;
         scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
         scaler.matchWidthOrHeight = 0.5f;
 
@@ -667,7 +674,7 @@ public static class FlipCardsLayoutBuilder
         BuildSideHeader(side, hud, gm);
         BuildInspector(side);
         var logText = BuildLog(side);
-        var (btnAttack, btnEndTurn) = BuildCommands(side);
+        var (btnAttack, btnEndTurn) = BuildCommands(side, hud);
 
         BuildCrtOverlay(root);
         BuildEndPanel(root, hud);
@@ -751,6 +758,7 @@ public static class FlipCardsLayoutBuilder
         var note = UiBuild.Text("Note", band, "il rullo gira a fine turno e cambia tutte le caselle",
                                 14f, GamePalette.TextMuted, TextAlignmentOptions.Left);
         UiBuild.Band(note.rectTransform, 16f, 28f, 480f, 22f);
+        hud.rollSummaryText = note;
 
         hud.bossHpBar = UiBuild.Bar("HpBar", band, GamePalette.BossHp, out var barRt, kind: "boss");
         UiBuild.Band(barRt, 520f, 8f, 520f, 40f);
@@ -875,9 +883,12 @@ public static class FlipCardsLayoutBuilder
                                   TextAlignmentOptions.Right, FontStyles.Bold);
         UiBuild.Band(hud.apText.rectTransform, RailW - 68f, RailApY + 6f, 60f, 26f);
 
-        var costs = UiBuild.Text("Costs", rail, "OGNI AZIONE 1 AP · ATTACCA 0", 13f, GamePalette.TextMuted,
+        var costs = UiBuild.Text("Costs", rail, "PESCA 1 / GIOCA 1 / FLIP 1 / ATK 1 AP", 13f, GamePalette.TextMuted,
                                  TextAlignmentOptions.Left);
-        UiBuild.Band(costs.rectTransform, 10f, RailCostY + 6f, RailW - 20f, RailCostH - 12f);
+        UiBuild.Band(costs.rectTransform, 10f, RailCostY, RailW - 20f, RailCostH);
+        costs.fontSize = 12f;
+        costs.textWrappingMode = TextWrappingModes.Normal;
+        hud.actionCostsText = costs;
 
         BuildDeck(rail, hud);
         BuildLegend(rail);
@@ -931,7 +942,6 @@ public static class FlipCardsLayoutBuilder
         tray.restY = HandRestY;
         tray.raisedY = HandRaisedY;
         tray.restHeight = HandRestH;
-        tray.raisedHeight = HandRaisedH;
 
         return (handRoot, spawn);
     }
@@ -975,11 +985,16 @@ public static class FlipCardsLayoutBuilder
         var stackRt = UiBuild.Rect("StackImage", stack);
         UiBuild.Stretch(stackRt);
         view.stackImage = Kit(stackRt, "deck/deck_stack_5");
+        if (view.stackImage != null) view.stackImage.preserveAspect = true;
 
         var pulseRt = UiBuild.Rect("Pulse", stack);
         UiBuild.Stretch(pulseRt, -8f, -8f, -8f, -8f);
         view.pulseImage = Kit(pulseRt, "deck/deck_pulse");
-        if (view.pulseImage != null) view.pulseImage.enabled = false;
+        if (view.pulseImage != null)
+        {
+            view.pulseImage.preserveAspect = true;
+            view.pulseImage.enabled = false;
+        }
 
         view.hintText = UiBuild.Text("Hint", rail, "clic per pescare · 1 AP", 14f, GamePalette.TextMuted,
                                      TextAlignmentOptions.Center);
@@ -1009,7 +1024,7 @@ public static class FlipCardsLayoutBuilder
 
         y = LegendGroup(box, y + 6f, "IL RULLO NEMICO");
         y = LegendRow(box, y, GamePalette.Fronte, "CARICA", "colpisce questo giro");
-        y = LegendRow(box, y, GamePalette.Retro, "TRATTENUTA", "non colpisce, para");
+        y = LegendRow(box, y, GamePalette.Retro, "DIFESA", "non colpisce, para");
         y = LegendRow(box, y, GamePalette.TextMuted, "PIP", "i giri che verranno");
 
         y = LegendGroup(box, y + 6f, "NUMERI");
@@ -1017,10 +1032,7 @@ public static class FlipCardsLayoutBuilder
         y = LegendRow(box, y, GamePalette.PlayerHp, "HP", "vita");
         y = LegendRow(box, y, GamePalette.Retro, "BLOCCO", "danno assorbito");
 
-        y = LegendGroup(box, y + 6f, "FAZIONI");
-        y = LegendRow(box, y, GamePalette.FactionColor(Faction.A), "A", string.Empty);
-        y = LegendRow(box, y, GamePalette.FactionColor(Faction.B), "B", string.Empty);
-        LegendRow(box, y, GamePalette.FactionColor(Faction.C), "C", string.Empty);
+
     }
 
     static float LegendGroup(RectTransform box, float y, string label)
@@ -1182,14 +1194,14 @@ public static class FlipCardsLayoutBuilder
         return scrollbar;
     }
 
-    static (Button attack, Button endTurn) BuildCommands(RectTransform side)
+    static (Button attack, Button endTurn) BuildCommands(RectTransform side, HudController hud)
     {
         var box = UiBuild.Rect("Commands", side);
         UiBuild.Band(box, 0f, CommandsY, SideContentW, CommandH * 2f + CommandGap);
 
         // Quattro stati disegnati per tono, non una tinta moltiplicata: il rosso
         // sangue attacca, il verde fosforo chiude il turno.
-        var attack = UiBuild.Command("BtnAttack", box, "ATTACCA", "0 AP · chiude la fase",
+        var attack = UiBuild.Command("BtnAttack", box, "ATTACCA", "1 AP / attacca con le carte in Fronte",
                                      GamePalette.Danger, out _, tone: "blood");
         UiBuild.Band((RectTransform)attack.transform, 0f, 0f, SideContentW, CommandH);
 
@@ -1197,6 +1209,11 @@ public static class FlipCardsLayoutBuilder
                                       GamePalette.PlayerHp, out _, tone: "phos");
         UiBuild.Band((RectTransform)endTurn.transform, 0f, CommandH + CommandGap, SideContentW, CommandH);
 
+        hud.attackCostText = attack.transform.Find("Cost").GetComponent<TMP_Text>();
+        hud.endTurnLabel = endTurn.transform.Find("Label").GetComponent<TMP_Text>();
+        hud.endTurnCostText = endTurn.transform.Find("Cost").GetComponent<TMP_Text>();
+        hud.attackCostText.fontSize = 13f;
+        hud.endTurnCostText.fontSize = 13f;
         return (attack, endTurn);
     }
 
@@ -1214,8 +1231,8 @@ public static class FlipCardsLayoutBuilder
         var layer = UiBuild.Rect("CrtOverlay", root);
         UiBuild.Band(layer, 0f, 0f, RefW, RefH);
 
-        CrtLayer(layer, "Scanlines", scanlines, 0.40f);
-        CrtLayer(layer, "Vignette", vignette, 0.75f);
+        CrtLayer(layer, "Scanlines", scanlines, 0.16f);
+        CrtLayer(layer, "Vignette", vignette, 0.35f);
     }
 
     static void CrtLayer(RectTransform parent, string name, Sprite sprite, float alpha)

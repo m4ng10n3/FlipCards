@@ -29,13 +29,14 @@ public class SelectionManager : MonoBehaviour
             SelectedEmptySpot = null;
         }
 
-        // --- SE SIAMO IN MODALITÀ SWAP ED È LA SECONDA CARTA ---
+        // --- SE SIAMO IN MODALITÃ€ SWAP ED Ãˆ LA SECONDA CARTA ---
         if (IsSwapArmed && SwapSource != null && view != SwapSource)
         {
             // esegue lo swap delle due carte sulla board del player
             GameManager.Instance.SwapCardPositions(SwapSource, view);
 
             // azzero selezioni / stato swap
+            if (SelectedOwned != null) SelectedOwned.ApplySelect(false);
             SelectedOwned = null;
             SwapSource = null;
             IsSwapArmed = false;
@@ -43,11 +44,29 @@ public class SelectionManager : MonoBehaviour
             return;
         }
 
-        // --- SE CLICCO DI NUOVO LA STESSA CARTA MENTRE NON STO SWAPPANDO ---
-        if (!IsSwapArmed && SelectedOwned == view) return;
+        // --- RICLIC SULLA STESSA CARTA: DESELEZIONA ---
+        // Senza questo la selezione non si puo' togliere: una volta scelta una
+        // carta il tavolo resta per forza con una accesa, e riclickarla non fa
+        // niente. Vale anche come annullamento dello swap, perche' la seconda
+        // carta dello scambio e' gestita sopra: qui ci arriva solo la sorgente.
+        if (SelectedOwned == view)
+        {
+            view.ApplySelect(false);
+            SelectedOwned = null;
+            SwapSource = null;
+            IsSwapArmed = false;
+
+            EventBus.Publish(GameEventType.Info, new EventContext
+            {
+                phase = "[SEL] #- [L-]"
+            });
+            return;
+        }
 
         // --- SELEZIONE NORMALE ---
+        if (SelectedOwned != null) SelectedOwned.ApplySelect(false);
         SelectedOwned = view;
+        view.ApplySelect(true);
 
         EventBus.Publish(GameEventType.Info, new EventContext
         {
@@ -60,13 +79,14 @@ public class SelectionManager : MonoBehaviour
         // se clicco lo stesso spot e vuoi il "toggle" puoi gestirlo qui,
         // per ora semplicemente cambiamo selezione
 
-        // 1) spegni highlight sulla carta selezionata (se c'è)
+        // 1) spegni highlight sulla carta selezionata (se c'Ã¨)
         if (SelectedOwned != null)
         {
+            if (SelectedOwned != null) SelectedOwned.ApplySelect(false);
             SelectedOwned = null;
         }
 
-        // lo swap non ha più senso se sto scegliendo uno spot vuoto
+        // lo swap non ha piÃ¹ senso se sto scegliendo uno spot vuoto
         SwapSource = null;
         IsSwapArmed = false;
 
@@ -96,7 +116,7 @@ public class SelectionManager : MonoBehaviour
 
     public void BeginSwap()
     {
-        // se non c'è nessuna carta già selezionata, non ha senso armare lo swap
+        // se non c'Ã¨ nessuna carta giÃ  selezionata, non ha senso armare lo swap
         if (SelectedOwned == null)
         {
             EventBus.Publish(GameEventType.Info, new EventContext
@@ -118,6 +138,7 @@ public class SelectionManager : MonoBehaviour
 
     public void ClearAll()
     {
+        if (SelectedOwned != null) SelectedOwned.ApplySelect(false);
         SelectedOwned = null;
 
         if (SelectedEmptySpot != null)

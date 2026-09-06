@@ -38,10 +38,11 @@ public class SlotBerserker : AbilityBase
             {
                 if (_slot.side == Side.Fronte)
                 {
-                    _furyStacks++;
+                    _furyStacks = GameManager.Instance != null ? GameManager.Instance.CountEnemyFaction(_slot.def.faction) : 1;
                     if (_furyStacks >= furyThreshold)
                     {
                         _burstReady = true;
+                        _slot.tempAtkBonus += _slot.def.atkDamage;
                         _slot.PushHint($"FURIA! Prossimo attacco x2");
                         Logger.Info($"[Berserker] {_slot.def.SlotName} BURST PRONTO ({_furyStacks}/{furyThreshold} stack)");
                     }
@@ -64,9 +65,8 @@ public class SlotBerserker : AbilityBase
             }
 
             // Prima che lo slot attacchi: se burst pronto, raddoppia il danno
-            if (t == GameEventType.AttackDeclared && ReferenceEquals(ctx.source, _slot) && _burstReady)
+            if (t == GameEventType.Custom && ctx.phase == "PreSlotAttack" && ReferenceEquals(ctx.source, _slot) && _burstReady)
             {
-                _slot.tempAtkBonus += _slot.def.atkDamage; // raddoppia (base + bonus = x2)
                 _burstReady = false;
                 _furyStacks = 0;
                 _slot.PushHint("BURST x2!");
@@ -75,13 +75,13 @@ public class SlotBerserker : AbilityBase
         };
 
         EventBus.Subscribe(GameEventType.TurnStart, _h);
-        EventBus.Subscribe(GameEventType.AttackDeclared, _h);
+        EventBus.Subscribe(GameEventType.Custom, _h);
     }
 
     protected override void Unregister()
     {
         EventBus.Unsubscribe(GameEventType.TurnStart, _h);
-        EventBus.Unsubscribe(GameEventType.AttackDeclared, _h);
+        EventBus.Unsubscribe(GameEventType.Custom, _h);
         _h = null;
         _slotView = null;
         _slot     = null;

@@ -9,6 +9,14 @@ public static class SynergyResolver
         ApplyBladePairs(gm);
         ApplyGuardLinks(gm);
         ApplyMysticPulse(gm, player);
+        for (int lane = 0; lane < gm.playerBoardRoot.childCount; lane++)
+        {
+            var card = gm.GetPlayerCardAtLane(lane);
+            if (card == null || !Resonates(gm, lane)) continue;
+            if (card.side == Side.Fronte) card.tempAtkBonus++;
+            else card.tempBlockBonus++;
+            card.PushHint(card.side == Side.Fronte ? "RISONANZA +1 ATK" : "RISONANZA +1 BLOCCO");
+        }
     }
 
     static void ApplyBladePairs(GameManager gm)
@@ -59,13 +67,9 @@ public static class SynergyResolver
             var right = gm.GetPlayerCardAtLane(lane + 1);
             if (left == null || right == null) continue;
 
-            CardInstance mystic = left.def.cardClass == CardClass.Mistico ? left :
-                                  right.def.cardClass == CardClass.Mistico ? right : null;
-            CardInstance retro = left.side == Side.Retro ? left :
-                                 right.side == Side.Retro ? right : null;
-
-            if (mystic == null || retro == null) continue;
-            if (mystic == retro) continue;
+            var retro = MysticTarget(left, right);
+            if (retro == null) continue;
+            var mystic = retro == left ? right : left;
 
             int gained = retro.GainCharge(1);
             int healed = triggered ? 0 : player.Heal(1);
@@ -77,4 +81,49 @@ public static class SynergyResolver
             triggered = true;
         }
     }
+    public static CardInstance MysticTarget(CardInstance left, CardInstance right)
+    {
+        if (left == null || right == null) return null;
+        if (left.def.cardClass == CardClass.Mistico && right.side == Side.Retro) return right;
+        if (right.def.cardClass == CardClass.Mistico && left.side == Side.Retro) return left;
+        return null;
+    }
+
+    public static bool Resonates(GameManager gm, int lane)
+    {
+        var card = gm.GetPlayerCardAtLane(lane);
+        var slot = gm.GetEnemySlotAtLane(lane);
+        return card != null && slot != null && card.def.faction == slot.def.faction;
+    }
+
+    // Shared by the forecast and combat. These are the visible adjacency and
+    // lane bonuses; event-driven abilities are still resolved during battle.
+    public static int AttackBonus(GameManager gm, int lane)
+    {
+        var card = gm.GetPlayerCardAtLane(lane);
+        if (card == null || card.side != Side.Fronte) return 0;
+        int bonus = Resonates(gm, lane) ? 1 : 0;
+        for (int i = lane - 1; i <= lane + 1; i += 2)
+        {
+            var other = gm.GetPlayerCardAtLane(i);
+            if (other != null && other.side == Side.Fronte &&
+                other.def.cardClass == CardClass.Assalto && card.def.cardClass == CardClass.Assalto) bonus++;
+        }
+        return bonus;
+    }
+
+    public static int BlockBonus(GameManager gm, int lane)
+    {
+        var card = gm.GetPlayerCardAtLane(lane);
+        if (card == null) return 0;
+        int bonus = card.side == Side.Retro && Resonates(gm, lane) ? 1 : 0;
+        for (int i = lane - 1; i <= lane + 1; i += 2)
+        {
+            var other = gm.GetPlayerCardAtLane(i);
+            if (other != null && (other.side == Side.Retro || card.side == Side.Retro) &&
+                (other.def.cardClass == CardClass.Guardia || card.def.cardClass == CardClass.Guardia)) bonus++;
+        }
+        return bonus;
+    }
+
 }

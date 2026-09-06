@@ -18,6 +18,7 @@ public class HudController : MonoBehaviour
     public TMP_Text turnText;
     public TMP_Text phaseText;
     public Image phaseChip;
+    public TMP_Text attackCostText, endTurnLabel, endTurnCostText, rollSummaryText, actionCostsText;
 
     [Header("Boss")]
     public TMP_Text bossNameText;
@@ -58,6 +59,21 @@ public class HudController : MonoBehaviour
         UpdateAp(gm);
         UpdateCounters(gm);
         UpdateEndPanel(gm);
+        UpdateCommands(gm);
+    }
+
+    void UpdateCommands(GameManager gm)
+    {
+        SetText(attackCostText, $"{Mathf.Max(1, gm.attackCost)} AP / attacca con le carte in Fronte");
+        SetText(endTurnLabel, gm.AwaitingEndTurn ? "GIRA I RULLI" : "DIFENDI E GIRA");
+        SetText(endTurnCostText, gm.AwaitingEndTurn ? "0 AP / prepara il prossimo giro" : "0 AP / risponde il nemico, tu non attacchi");
+        SetText(rollSummaryText, gm.RollSummary);
+        SetText(actionCostsText, $"PESCA {gm.drawCardCost} / GIOCA {gm.playCardCost} / FLIP {gm.flipCardCost} / ATK {Mathf.Max(1, gm.attackCost)} AP");
+    }
+
+    static void SetText(TMP_Text label, string value)
+    {
+        if (label != null && label.text != value) label.text = value;
     }
 
     void UpdateTurn(GameManager gm)

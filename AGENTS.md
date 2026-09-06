@@ -350,6 +350,14 @@ IEnumerator Trace(CardView card) {
 }
 ```
 
+**Giocare una partita intera senza guardare.** Una coroutine avviata su
+`GameManager` sopravvive al comando: fa le azioni, aspetta gli stati (`CanAct`,
+`AwaitingEndTurn`, `CurrentTurn`) e scrive una riga per turno su
+`Logs/playtest.txt`. Attenzione a `CurrentTurn`: viene incrementato **prima**
+del rullo, quindi aspettare che cambi non significa che il turno nuovo sia
+pronto — per quello serve `CanAct`. In fondo conviene salvare anche
+`gm.logText.text`, che è la narrazione che legge il giocatore.
+
 Altre scorciatoie: `gm.btnAttack.onClick.Invoke()` per attaccare (parte la
 coroutine di risoluzione, ~1.5 s), `gm.btnEndTurn.onClick.Invoke()` per chiudere
 il turno e far partire il reel (~5 s fino a `FASE AZIONI`), `gm.ai.hp = 0;`
@@ -358,6 +366,59 @@ seguito da fine turno per il pannello di fine partita,
 l'ispettore senza muovere il mouse.
 
 ## Trappole già pagate
+
+**Il Play Mode si ferma se la finestra di Unity non ha il fuoco.** Non è un
+dettaglio: pilotando il gioco via MCP con l'editor in secondo piano
+`Time.frameCount` resta a **1**, `EditorApplication.update` non scatta mai, le
+coroutine non avanzano e il turno non parte — mentre i comandi continuano a
+eseguire, quindi sembra che il gioco sia rotto e non fermo. Non lo risolvono né
+`Application.runInBackground`, né `PlayerSettings.runInBackground`, né
+`EditorApplication.QueuePlayerLoopUpdate()`: è l'editor che dorme, non il
+gioco. Prima di qualunque partita, portare la finestra in primo piano
+(`WScript.Shell.AppActivate(<pid di Unity.exe>)`) e non toccarla. Verifica in
+una riga: due `Time.frameCount` a qualche secondo di distanza devono essere
+diversi.
+
+**I log delle partite vanno su file, non in Console.** `Unity_GetConsoleLogs`
+in questo progetto ha risposto `totalCount: 0` anche subito dopo una
+`Debug.Log`. `System.IO` invece funziona dentro `Unity_RunCommand`: scrivere in
+`Logs/` e rileggere da shell è l'unico canale affidabile. `System.Reflection` è
+vietato dal validatore del comando, e `DG.Tweening` non è visibile
+dall'assembly dinamica: niente DOTween nel codice dei comandi.
+
+**Per provare il mouse serve raw input.** `[System.Windows.Forms.Cursor]::Position`
+(cioè `SetCursorPos`) sposta il cursore ma **non** genera l'evento che
+l'Input System legge: `Mouse.current.position` resta `(0,0)` e nessun hover
+scatta. Serve `mouse_event(MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE, …)`. La
+mappa fra pixel del desktop e pixel di gioco si ricava con due punti di
+calibrazione: `EditorWindow.position` della GameView e `Cursor.Position` stanno
+nello stesso spazio logico (DPI-unaware), il rendering del gioco no.
+
+**L'area della mano è un Raycast Target invisibile: non allargarla.**
+`HandZone` ha un'`Image` trasparente con `raycastTarget = true` per ricevere il
+`PointerEnter`. Facendola crescere da 156 a 440 quando la mano sale si stendeva
+un blocco invisibile sopra la metà bassa delle corsie: il clic e l'hover sulle
+carte in campo finivano sull'area invece che sulla carta, ma solo *a volte* —
+cioè solo con la mano sollevata, che è il motivo per cui sembrava casuale. Ora
+il rettangolo resta sempre alto `restHeight` (la striscia di richiamo in fondo
+allo schermo) e a tenere su la mano ci pensa `HandTray.ContainsPointer`, che
+misura **le carte dove stanno adesso** — il figlio grafico `CardView.RectTransform`,
+che include sollevamento e ingrandimento, non la radice e non il
+`raycastPadding`, che è più largo della carta apposta e rimetterebbe l'alone
+davanti al tabellone. Con la mano vuota la mano non sale affatto.
+
+**Hover della mano: non spostare la radice e non cambiare i sibling.**
+Il sollevamento appartiene solo al figlio `CardView`. Il raycast si estende con
+`Image.raycastPadding`, mantenendo incluso il rettangolo iniziale: spostarlo
+verso l'alto crea un ciclo enter/exit sul bordo basso. Non usare
+`SetAsLastSibling` sul container durante hover: `HandManager` rilegge i sibling
+ogni frame e li interpreta come ordine della mano, spostando anche le altre
+carte sotto il mouse. Il primo piano visivo usa solo il Canvas della carta.
+
+**I bordi del kit richiedono `referencePixelsPerUnit = 1`.** Il kit e' importato
+con `spritePixelsPerUnit = 1`; lasciare il CanvasScaler al default 100 ingrandisce
+i bordi 9-slice e le tile delle barre di cento volte. Lo imposta il builder su
+CanvasScaler e Canvas. Non compensare stirando i rettangoli o modificando i PNG.
 
 **`Image.fillAmount` non funziona senza sprite.** Un'`Image` con
 `type = Filled` ma `sprite = null` ignora del tutto `fillAmount` e disegna sempre

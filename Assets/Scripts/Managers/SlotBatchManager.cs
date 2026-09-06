@@ -40,7 +40,7 @@ public class SlotBatchManager : MonoBehaviour
 
     [Header("Animazione Reel")]
     [SerializeField] private float rollDuration = 1.5f;
-    [SerializeField] private float staggerDelay = 0.18f;
+    [SerializeField] private float staggerDelay = 0.32f;
     [Tooltip("Pausa sul risultato prima di rivelare lo slot vero.")]
     [SerializeField] private float holdAfterSettle = 0.5f;
     [Tooltip("Dissolvenza della copertura che rivela lo slot.")]
@@ -158,7 +158,7 @@ public class SlotBatchManager : MonoBehaviour
             foreach (var candidate in flat)
                 if (!_reelFaces.Contains(candidate)) _reelFaces.Add(candidate);
 
-            var rng = new System.Random();
+            var rng = gm.Rng;
             for (int i = 0; i < laneCount; i++)
                 _chosenPrefabs.Add(flat[rng.Next(flat.Count)]);
 
@@ -224,7 +224,7 @@ public class SlotBatchManager : MonoBehaviour
         }
 
         float loop    = faces * step;
-        float y       = loop + Random.Range(0, faces) * step;   // parte dalla ripetizione centrale
+        float y       = loop + (cell.root.GetSiblingIndex() % faces) * step;   // parte dalla ripetizione centrale
         float elapsed = 0f;
 
         // ── Fase scroll: la colonna di facce scorre verso l'alto ──────────────
@@ -252,7 +252,7 @@ public class SlotBatchManager : MonoBehaviour
         bool tweenDone = false;
         DOTween.To(
             () => y,
-            v => { y = v; if (cell.strip != null) cell.strip.anchoredPosition = new Vector2(0f, v); },
+            v => { y = v; if (cell.strip != null) cell.strip.anchoredPosition = new Vector2(0f, loop + Mathf.Repeat(v, loop)); },
             target,
             reelSettleDuration
         ).SetEase(Ease.OutCubic)
@@ -262,7 +262,7 @@ public class SlotBatchManager : MonoBehaviour
         yield return new WaitUntil(() => tweenDone || cell.root == null);
         if (cell.root == null) { onDone?.Invoke(); yield break; }
 
-        cell.strip.anchoredPosition = new Vector2(0f, target);
+        cell.strip.anchoredPosition = new Vector2(0f, loop + Mathf.Repeat(target, loop));
 
         if (settlePunch > 0f)
             cell.strip.DOPunchScale(Vector3.one * settlePunch, 0.28f, 6, 0.6f)
@@ -280,7 +280,9 @@ public class SlotBatchManager : MonoBehaviour
         {
             cell.label.gameObject.SetActive(true);
             cell.label.color = settleColor;
-            cell.label.text  = $"{finalSD.SlotName}\nATK {finalSD.atkDamage}  DEF {finalSD.blockFront}  HP {finalSD.maxHealth}";
+            var slot = GameManager.Instance?.GetEnemySlotAtLane(cell.root.GetSiblingIndex());
+            string state = slot != null && slot.side == Side.Retro ? "DIFESA" : "ATTACCO";
+            cell.label.text = $"{finalSD.SlotName}  [{finalSD.faction}]\n{state}";
         }
 
         yield return new WaitForSeconds(holdAfterSettle);

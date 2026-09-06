@@ -232,12 +232,14 @@ public static class UiBuild
         // l'altezza del bottone e' cambiata col layout e le bande da 56 lasciavano
         // il testo fuori asse.
         labelText = Text("Label", rt, label, 24f, GamePalette.TextPrimary, TextAlignmentOptions.Left, FontStyles.Bold);
-        Stretch(labelText.rectTransform, 20f, 0f, 170f, 0f);
+        Stretch(labelText.rectTransform, 20f, 4f, 20f, 0f);
+        labelText.rectTransform.anchorMin = new Vector2(0f, 0.42f);
         labelText.alignment = TextAlignmentOptions.Left;
 
-        var costText = Text("Cost", rt, cost, 16f, GamePalette.TextMuted, TextAlignmentOptions.Right);
-        Stretch(costText.rectTransform, 200f, 0f, 20f, 0f);
-        costText.alignment = TextAlignmentOptions.Right;
+        var costText = Text("Cost", rt, cost, 16f, GamePalette.TextMuted, TextAlignmentOptions.Left);
+        Stretch(costText.rectTransform, 20f, 0f, 20f, 5f);
+        costText.rectTransform.anchorMax = new Vector2(1f, 0.42f);
+        costText.alignment = TextAlignmentOptions.Left;
 
         return btn;
     }

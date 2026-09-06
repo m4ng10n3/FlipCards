@@ -34,14 +34,14 @@ public class CardInstance
 
         // La vittima risolve i colpi che la riguardano
         _evtHandler = OnEvent;
-        EventBus.Subscribe(GameEventType.AttackDeclared, _evtHandler);
+        EventBus.Subscribe(GameEventType.DamageResolution, _evtHandler);
     }
 
     public void Dispose()
     {
         if (_evtHandler != null)
         {
-            EventBus.Unsubscribe(GameEventType.AttackDeclared, _evtHandler);
+            EventBus.Unsubscribe(GameEventType.DamageResolution, _evtHandler);
             _evtHandler = null;
         }
     }
@@ -102,7 +102,7 @@ public class CardInstance
     // VITTIMA: risolve solo se il bersaglio sono io
     void OnEvent(GameEventType t, EventContext ctx)
     {
-        if (t != GameEventType.AttackDeclared) return;
+        if (t != GameEventType.DamageResolution) return;
         if (ctx.target != this || !alive) return;
 
         ResolveIncomingAttack(

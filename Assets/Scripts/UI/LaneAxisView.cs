@@ -94,7 +94,7 @@ public class LaneAxisView : MonoBehaviour
         {
             if (card.side == Side.Fronte)
             {
-                int atk = card.ComputeAttackDamage();
+                int atk = (card.ComputeAttackDamage() + (gm.CanAct ? SynergyResolver.AttackBonus(gm, lane) : 0));
                 int def = slot.ComputeSelfBlock();
                 int net = Mathf.Max(0, atk - def);
                 main = Compose(true, atk, def, net);
@@ -103,12 +103,22 @@ public class LaneAxisView : MonoBehaviour
 
                 // La carta colpisce per prima; se la casella sopravvive ed e' carica, risponde.
                 if (slot.side == Side.Fronte && net < slot.health)
-                    counter = $"risposta {Mathf.Max(0, slot.def.atkDamage + slot.tempAtkBonus - CardBlock(card))}";
+                    counter = $"risposta {Mathf.Max(0, slot.def.atkDamage + slot.tempAtkBonus - (CardBlock(card) + (gm.CanAct ? SynergyResolver.BlockBonus(gm, lane) : 0)))}";
+
+                // Il danno che non uccide non e' sprecato: il rullo scarta la
+                // casella ferita e il boss paga. Senza questa riga il giocatore
+                // legge "1" e conclude che attaccare non serve a niente.
+                int carried = Mathf.FloorToInt(net * gm.woundCarryToBoss);
+                string payoff = net >= slot.health ? $"rompe: boss -{gm.bossDamageOnSlotBreak}"
+                              : carried > 0        ? $"boss -{carried} al giro"
+                                                   : null;
+                if (!string.IsNullOrEmpty(payoff))
+                    counter = string.IsNullOrEmpty(counter) ? payoff : payoff + " / " + counter;
             }
             else if (slot.side == Side.Fronte)
             {
                 int atk = slot.def.atkDamage + slot.tempAtkBonus;
-                int block = CardBlock(card);
+                int block = (CardBlock(card) + (gm.CanAct ? SynergyResolver.BlockBonus(gm, lane) : 0));
                 int net = Mathf.Max(0, atk - block);
                 main = Compose(false, atk, block, net);
                 color = net > 0 ? GamePalette.Danger : GamePalette.Neutral;
@@ -126,7 +136,7 @@ public class LaneAxisView : MonoBehaviour
         {
             if (card.side == Side.Fronte)
             {
-                main = $"{Arrow(true)}{card.ComputeAttackDamage()} → BOSS";
+                main = $"{Arrow(true)}{(card.ComputeAttackDamage() + (gm.CanAct ? SynergyResolver.AttackBonus(gm, lane) : 0))} → BOSS";
                 color = GamePalette.Good;
                 readout = Readout.Up;
             }
@@ -151,6 +161,9 @@ public class LaneAxisView : MonoBehaviour
             readout = Readout.None;
         }
 
+        if (gm.CanAct && card != null)
+            counter = (SynergyResolver.Resonates(gm, lane) ? "RISONANZA +1 / " : "") + "stima base" +
+                      (string.IsNullOrEmpty(counter) ? "" : " / " + counter);
         if (col.main.text != main) col.main.text = main;
         col.main.color = color;
         if (col.counter.text != counter) col.counter.text = counter;
@@ -220,10 +233,7 @@ public class LaneAxisView : MonoBehaviour
             if (hasGuard && hasRetro)
                 _combos.Add("GUARD +1 BLK");
 
-            var mystic = left.def.cardClass == CardClass.Mistico ? left :
-                         right.def.cardClass == CardClass.Mistico ? right : null;
-            var retro = left.side == Side.Retro ? left : right.side == Side.Retro ? right : null;
-            if (mystic != null && retro != null && mystic != retro)
+            if (SynergyResolver.MysticTarget(left, right) != null)
                 _combos.Add("PULSE +1 CHG");
         }
 

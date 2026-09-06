@@ -63,6 +63,17 @@ public class InspectorPanel : MonoBehaviour
 
     // ── Carta ─────────────────────────────────────────────────────────────────
 
+    float _refreshAt;
+    void LateUpdate()
+    {
+        if (Time.unscaledTime < _refreshAt) return;
+        _refreshAt = Time.unscaledTime + 0.12f;
+        DropDeadPin();
+        if (_source is Object obj && obj == null) { Clear(); return; }
+        if (_source is CardView card) ShowCard(card);
+        else if (_source is SlotView slot) ShowSlot(slot);
+    }
+
     public void ShowCard(CardView view)
     {
         if (view == null || view.instance == null || Locked(view)) return;
@@ -80,7 +91,7 @@ public class InspectorPanel : MonoBehaviour
         Stat("BLOCK Fronte", Delta(def.frontBlockValue, front ? inst.tempBlockBonus : 0));
         Stat("BLOCK Retro", Delta(def.backBlockValue, front ? 0 : inst.tempBlockBonus));
         Stat("Cariche", $"{inst.flipCharge} / {CardInstance.MaxFlipCharge}  <color=#8888aa>(danno bonus al prossimo attacco in Fronte)</color>");
-        Stat("Instabilita'", $"{Mathf.RoundToInt(def.endTurnFlipChance * 100f)}%  <color=#8888aa>(si gira da sola a fine turno)</color>");
+        Stat("Flip del rullo", $"fino al {Mathf.RoundToInt(def.endTurnFlipChance * (GameManager.Instance != null ? GameManager.Instance.chaosFlipChance : 0f) * 100f)}% / max {GameManager.Instance?.maxChaosFlipsPerTurn ?? 0} carte per giro");
 
         if (inst.incomingDamageOverride.HasValue)
             Stat("Parata", $"danno in arrivo forzato a {inst.incomingDamageOverride.Value}");
@@ -89,13 +100,17 @@ public class InspectorPanel : MonoBehaviour
         bool anyPassive = false;
         if (def.backDamageBonusSameFaction > 0) { Line($"+{def.backDamageBonusSameFaction} ATK alle carte {def.faction} in Fronte"); anyPassive = true; }
         if (def.backBlockBonusSameFaction > 0)  { Line($"+{def.backBlockBonusSameFaction} BLOCK alle carte {def.faction}"); anyPassive = true; }
-        if (def.backBonusPAIfTwoRetroSameFaction > 0) { Line($"+{def.backBonusPAIfTwoRetroSameFaction} AP con due {def.faction} in Retro"); anyPassive = true; }
+        if (def.backBonusPAIfTwoRetroSameFaction > 0) { Line($"+{def.backBonusPAIfTwoRetroSameFaction} AP con due {def.faction} in Retro, una volta per turno"); anyPassive = true; }
         if (!anyPassive) Line("<color=#66667a>nessuna</color>");
 
         AppendAbilities(view.GetComponentInParent<CardDefinition>()?.gameObject);
 
         bodyText.text = _sb.ToString();
-        SetHint("Doppio click per girare · 1 AP     Trascina su un'altra corsia per scambiare · 1 AP");
+        var gm = GameManager.Instance;
+        int lane = gm != null ? gm.GetLaneIndexFor(inst) : -1;
+        if (gm != null && SynergyResolver.Resonates(gm, lane))
+            bodyText.text += "\n<b>RISONANZA</b>: stessa fazione dello slot, +1 ATK in Fronte / +1 BLOCCO in Retro.";
+        SetHint($"Doppio clic: flip {gm?.flipCardCost ?? 1} AP / trascina: scambio {gm?.swapCardCost ?? 1} AP");
     }
 
     /// <summary>
@@ -114,7 +129,7 @@ public class InspectorPanel : MonoBehaviour
         if (sideStrip != null) sideStrip.color = GamePalette.WithAlpha(GamePalette.Neutral, 0.7f);
         if (sideText != null)
         {
-            sideText.text = "IN MANO";
+            sideText.text = "IN MANO / ENTRA IN FRONTE";
             sideText.color = GamePalette.TextMuted;
         }
 
@@ -123,13 +138,13 @@ public class InspectorPanel : MonoBehaviour
         Stat("ATK Fronte", $"{def.frontDamage}");
         Stat("BLOCK Fronte", $"{def.frontBlockValue}");
         Stat("BLOCK Retro", $"{def.backBlockValue}");
-        Stat("Instabilita'", $"{Mathf.RoundToInt(def.endTurnFlipChance * 100f)}%  <color=#8888aa>(si gira da sola a fine turno)</color>");
+        Stat("Flip del rullo", $"fino al {Mathf.RoundToInt(def.endTurnFlipChance * (GameManager.Instance != null ? GameManager.Instance.chaosFlipChance : 0f) * 100f)}% / max {GameManager.Instance?.maxChaosFlipsPerTurn ?? 0} carte per giro");
 
         Section("Passive in Retro");
         bool anyPassive = false;
         if (def.backDamageBonusSameFaction > 0) { Line($"+{def.backDamageBonusSameFaction} ATK alle carte {def.faction} in Fronte"); anyPassive = true; }
         if (def.backBlockBonusSameFaction > 0)  { Line($"+{def.backBlockBonusSameFaction} BLOCK alle carte {def.faction}"); anyPassive = true; }
-        if (def.backBonusPAIfTwoRetroSameFaction > 0) { Line($"+{def.backBonusPAIfTwoRetroSameFaction} AP con due {def.faction} in Retro"); anyPassive = true; }
+        if (def.backBonusPAIfTwoRetroSameFaction > 0) { Line($"+{def.backBonusPAIfTwoRetroSameFaction} AP con due {def.faction} in Retro, una volta per turno"); anyPassive = true; }
         if (!anyPassive) Line("<color=#66667a>nessuna</color>");
 
         AppendAbilities(definition.gameObject);
@@ -166,7 +181,22 @@ public class InspectorPanel : MonoBehaviour
         Stat("DEF trattenuta", $"{def.blockRetro}");
         Stat("DEF adesso", $"{inst.ComputeSelfBlock()}");
 
-        Section("Programma del rullo");
+        // La regola meno intuitiva del gioco: la casella dura un giro solo,
+        // quindi "non l'ho uccisa" sembra "non ho fatto niente". Detto qui,
+        // dove il giocatore viene a capire perche' vale la pena colpirla.
+        var gmRef = GameManager.Instance;
+        int wounds = Mathf.Max(0, def.maxHealth - inst.health);
+        if (gmRef != null && gmRef.woundCarryToBoss > 0f)
+        {
+            Section("Cosa paga colpirla");
+            Line($"Romperla: <b>boss -{gmRef.bossDamageOnSlotBreak}</b> subito.");
+            int carried = Mathf.FloorToInt(wounds * gmRef.woundCarryToBoss);
+            Line(wounds > 0
+                ? $"Ferite gia' inflitte: <b>{wounds}</b> — il rullo la scarta a fine turno e il boss paga <b>{carried}</b>."
+                : "Le ferite non letali non si perdono: il rullo scarta la casella e il boss paga quel danno.");
+        }
+
+        Section("Posizioni possibili del rullo");
         if (inst.PatternLength == 0)
         {
             Line("<color=#66667a>fisso: colpisce a ogni giro</color>");
@@ -184,8 +214,10 @@ public class InspectorPanel : MonoBehaviour
                     : $"<color=#{hex}>{label}</color>  ");
             }
             Line(line.ToString());
-            Line($"<color=#8888aa>prossimo giro: " +
-                 $"{(inst.PatternSideAt(inst.PatternStep + 1) == Side.Fronte ? "colpisce" : "trattiene")}</color>");
+            int armedCount = 0;
+            for (int i = 0; i < inst.PatternLength; i++) if (inst.PatternSideAt(i) == Side.Fronte) armedCount++;
+            Line($"Attacco: {armedCount}/{inst.PatternLength} posizioni. Tra parentesi: esito attuale.");
+            Line("Il prossimo giro estrae una nuova casella e una nuova posizione.");
         }
 
         var berserker = view.GetComponent<SlotBerserker>();
@@ -194,7 +226,7 @@ public class InspectorPanel : MonoBehaviour
             Section("Furia");
             Line(berserker.BurstReady
                 ? "<b>BURST PRONTO</b> — il prossimo attacco vale doppio"
-                : $"{berserker.FuryStacks} / {berserker.furyThreshold} stack");
+                : $"{berserker.FuryStacks} / {berserker.furyThreshold} simboli della stessa fazione");
         }
 
         AppendAbilities(view.gameObject);

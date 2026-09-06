@@ -148,7 +148,9 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
     {
         LogPointerEvent("BeginDrag", eventData);
         EnsureRuntimeRefs();
-        if (cardView == null || cardView.IsDragging) return;
+        if (cardView == null || cardView.IsDragging || gm == null || !gm.CanAct) return;
+        int cost = IsHandCard() ? gm.playCardCost : gm.swapCardCost;
+        if (gm.player.actionPoints < cost) return;
         if (cardView.RectTransform == null) throw new System.InvalidOperationException("CardView missing RectTransform");
         if (cardView.RootCanvas == null) throw new System.InvalidOperationException("CardView missing Canvas");
 
@@ -253,13 +255,15 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
         if (cardView == null) return;
         if (cardView.IsDragging || (eventData != null && eventData.dragging)) return;
         if (eventData != null && eventData.button != PointerEventData.InputButton.Left) return;
-        if (gm == null) return;
+        if (gm == null || !gm.CanAct) return;
 
         gm.OnCardClicked(cardView);
         if (IsBoardCard() && _lastClickTime > 0f && Time.time - _lastClickTime <= DoubleClickThreshold)
+        {
             gm.OnCardDoubleClicked(cardView);
-        _lastClickTime = Time.time;
-        cardView.ApplySelect(!cardView.Selected);
+            _lastClickTime = 0f;
+        }
+        else _lastClickTime = Time.time;
     }
 
     private void HandleHandDrop(PointerEventData eventData)

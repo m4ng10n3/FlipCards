@@ -32,6 +32,14 @@ caselle di un rullo, con cassa e payline; carte 224×336; mano a ventaglio da 8
 carte sovrapposte con pop-out all'hover. Il fondo `board_bg` del kit e gli
 overlay CRT si montano da soli se il kit è importato.
 
+**Regole riviste dopo il playtest del 6 settembre** (dati e misure in
+[PLAYTEST_REPORT.md](PLAYTEST_REPORT.md)): le ferite non letali lasciate su una
+casella le paga il boss quando il rullo la scarta (`woundCarryToBoss`); AP base
+da 4 a 3 con tetto bonus a 2; il flip caotico usa l'instabilità della carta e
+colpisce per prime le corsie che il giro non ha abbinato, e si anima; il
+pronostico di corsia e l'ispettore dicono quanto paga colpire; le colonne che
+fanno combinazione lampeggiano (`ReelChrome.FlashPayout`).
+
 Quello che segue è quel che resta, in ordine di quanto pesa sulla leggibilità.
 
 ---
@@ -170,10 +178,17 @@ tinte piatte.
 accumulo cariche, avanzamento dei pattern nemici — devono avere una resa visiva e
 un ritmo, come ce l'ha ora la risoluzione dell'attacco (D3).
 
-**Perché.** Sono ancora tre righe di log identiche a tutte le altre, eseguite in
-un frame. Il flip caotico ha già l'animazione di `FlipSide`, ma parte insieme a
-tutto il resto e passa inosservata; cariche e pattern non hanno nessuna resa.
-È l'ultima voce rimasta della tabella "Cosa manca oggi" di LAYOUT_SPEC §8.
+**Perché.** Sono ancora righe di log identiche a tutte le altre. È l'ultima voce
+rimasta della tabella "Cosa manca oggi" di LAYOUT_SPEC §8.
+
+**Fatto finora.** Il flip caotico è già in coroutine, animato con `FlipSide` e
+distanziato di 0.4 s, con il suo hint sulla carta — e adesso succede davvero
+(era 0 volte su 48 carte-turno, vedi il report). `AdvanceSlotPatterns` non
+esiste più: gli slot vengono sostituiti interi a ogni giro, quindi la parte
+"l'indice del pattern scorre di un passo" di questa voce è decaduta. **Restano
+le cariche**: le tacche che si riempiono, e il danno che il rullo gira al boss
+scartando le caselle ferite — che oggi è solo una riga di log e merita di
+vedersi partire dalla casella e arrivare alla barra del boss.
 
 **Dove.**
 - `Assets/Scripts/Managers/GameManager.cs` → `OnEndTurn`: `RandomizePlayerBoard`,
@@ -221,6 +236,32 @@ indagare**. Metà dei sospetti di questa voce potrebbero essere questo.
 
 ---
 
+### B3. Dalla mano al tavolo — chiuso, ma la sovrapposizione resta
+
+**Chiuso.** L'area della mano non è più un rettangolo fisso che da sollevata
+arrivava a 440: era un Raycast Target invisibile steso sopra la metà bassa delle
+corsie, ed è il motivo per cui il clic e l'hover sulle carte in campo "a volte"
+non arrivavano — cioè ogni volta che la mano era su. Adesso
+`HandTray.ContainsPointer` misura le carte dove stanno, il rettangolo dell'area
+resta la striscia bassa (`restHeight`), e con la mano vuota la mano non sale
+affatto. Verificato con il cursore vero: uscendo dalle carte scende in 0,1 s e
+la carta in campo sotto il puntatore si accende (`Logs/uitest.txt`,
+`Logs/emptyhand.txt`).
+
+**Resta.** Mentre una carta della mano è sollevata, la sua grafica arriva a
+`y ≈ 517` e copre davvero la corsia sotto: finché il puntatore è **sopra quella
+carta** la mano resta su. È la regola giusta, ma significa che l'ultimo tratto
+verso la corsia passa sopra la carta sollevata. Si accorcia solo riducendo
+`handHoverLift` o `scaleOnHover` in `CardView`, cioè cambiando la sensazione del
+pop-out: va deciso guardandolo, non calcolandolo.
+
+**Trappole note.** Il padding verso il basso in `CardView.UpdateHoverBounds`
+(mano sollevata → il bersaglio scende fino al bordo dello schermo) serve al caso
+opposto e va lasciato: senza, entrando dal fondo la carta scappa in alto e
+l'hover si perde a puntatore fermo. Ed è **diverso** dall'area della mano: il
+padding decide chi prende l'hover, `ContainsPointer` decide se la mano resta su.
+
+
 ## C — Idee non ancora specificate
 
 Nessuna di queste è decisa: sono i buchi rimasti fra il codice e la specifica.
@@ -230,6 +271,12 @@ Nessuna di queste è decisa: sono i buchi rimasti fra il codice e la specifica.
   leggibile il tavolo senza tenere il mouse fermo.
 - **Bersaglio di flip esplicito.** Il flip è un doppio clic entro 0.3 s e nessun
   elemento lo suggerisce (LAYOUT_SPEC §4, sequenza non scopribile numero 2).
+- **Il muro non viene mai scalfito.** Con le tre corsie occupate il boss non può
+  toccare gli HP del giocatore: il danno finisce sempre sulla carta. La partita
+  `turtle` chiude 12 turni a 20/20 senza subire un colpo — perde ai punti, quindi
+  una pressione formalmente c'è, ma è una partita piatta. L'idea più economica è
+  far passare al giocatore il danno che eccede gli HP della carta colpita
+  (`CardInstance.ResolveIncomingAttack`), così morire in corsia costa due volte.
 - **Hint sopra il bordo della cella.** Oggi galleggia sopra l'artwork invece che
   sopra il bordo superiore come dice LAYOUT_SPEC §6.5: fuori dalla cella finiva
   addosso all'asse delle corsie. Con le animazioni di D2 il testo è meno

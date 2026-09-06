@@ -18,27 +18,26 @@ public class SlotInstance
 
     EventBus.Handler _evtHandler;
 
-    public SlotInstance(SlotDefinition.Spec def)
+    public SlotInstance(SlotDefinition.Spec def, int initialStep = 0)
     {
         this.def = def;
         health = def.maxHealth;
         id = GlobalId.Next();
 
-        // Imposta il lato iniziale dal pattern (o Fronte di default)
-        side = (def.flipPattern != null && def.flipPattern.Length > 0)
-            ? def.flipPattern[0]
-            : Side.Fronte;
-        _patternIndex = 1; // pronto per il prossimo avanzamento
+        int length = PatternLength;
+        int step = length > 0 ? ((initialStep % length) + length) % length : 0;
+        side = PatternSideAt(step);
+        _patternIndex = step + 1;
 
         _evtHandler = OnEvent;
-        EventBus.Subscribe(GameEventType.AttackDeclared, _evtHandler);
+        EventBus.Subscribe(GameEventType.DamageResolution, _evtHandler);
     }
 
     public void Dispose()
     {
         if (_evtHandler != null)
         {
-            EventBus.Unsubscribe(GameEventType.AttackDeclared, _evtHandler);
+            EventBus.Unsubscribe(GameEventType.DamageResolution, _evtHandler);
             _evtHandler = null;
         }
     }
@@ -100,7 +99,7 @@ public class SlotInstance
 
     void OnEvent(GameEventType t, EventContext ctx)
     {
-        if (t != GameEventType.AttackDeclared) return;
+        if (t != GameEventType.DamageResolution) return;
         if (!alive) return;
         if (!ReferenceEquals(ctx.target, this)) return;
 
@@ -134,7 +133,7 @@ public class SlotInstance
 
         incomingDamageOverride = null;
         tempBlockBonus = 0;
-        tempAtkBonus   = 0;
+        // Attack bonus survives taking damage and is consumed when retaliating.
     }
 
     public void PushHint(string msg)

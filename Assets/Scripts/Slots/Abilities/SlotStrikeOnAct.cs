@@ -73,11 +73,12 @@ public class SlotStrikeOnAct : AbilityBase
             return;
         }
 
-        _frontTurns++;
+        // Slots respawn every roll: fury comes from matching symbols, not age.
+        _frontTurns = GameManager.Instance != null ? GameManager.Instance.CountEnemyFaction(_slot.def.faction) : 1;
         if (_frontTurns >= threshold)
         {
             _rageReady = true;
-            _frontTurns = 0;
+            _slot.tempAtkBonus += power;
             _slot.PushHint("Rage ready");
         }
     }
@@ -99,7 +100,6 @@ public class SlotStrikeOnAct : AbilityBase
             case SlotSignature.BerserkFront:
                 if (_rageReady)
                 {
-                    _slot.tempAtkBonus += power;
                     _slot.PushHint($"Rage +{power}");
                     _rageReady = false;
                 }

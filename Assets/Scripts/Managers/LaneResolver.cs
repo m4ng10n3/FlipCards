@@ -2,11 +2,11 @@ using UnityEngine;
 
 public static class LaneResolver
 {
-    public static void Resolve(int laneIndex, CardInstance card, SlotInstance slot, PlayerState player, PlayerState ai)
+    public static void Resolve(int laneIndex, CardInstance card, SlotInstance slot, PlayerState player, PlayerState ai, bool playerAttacks = true)
     {
         if (card != null && slot != null)
         {
-            if (card.side == Side.Fronte)
+            if (playerAttacks && card.side == Side.Fronte)
                 ResolveCardPressure(laneIndex, card, slot, player, ai);
             else if (slot.side == Side.Fronte)
                 ResolveSlotPressure(laneIndex, slot, card, player, ai);
@@ -19,7 +19,7 @@ public static class LaneResolver
 
         if (card != null)
         {
-            if (card.side == Side.Fronte)
+            if (playerAttacks && card.side == Side.Fronte)
                 DirectCardPressure(laneIndex, card, player, ai);
             return;
         }

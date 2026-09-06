@@ -29,7 +29,7 @@ public class GameManager : MonoBehaviour
 
     [Header("Match Parameters")]
     public int turns = 12;
-    public int playerBaseAP = 4;
+    public int playerBaseAP = 3;
     public int seed = 12345;
 
     [Header("Start Constraints")]
@@ -39,14 +39,18 @@ public class GameManager : MonoBehaviour
     [Header("Balance")]
     [Min(1)] public int playerMaxHp = 20;
     [Min(1)] public int enemyMaxHp = 24;
+    [Min(1)] public int attackCost = 1;
     [Min(0)] public int drawCardCost = 1;
     [Min(0)] public int playCardCost = 1;
     [Min(0)] public int flipCardCost = 1;
     [Min(0)] public int swapCardCost = 1;
-    [Min(0)] public int maxBonusAP = 1;
-    [Min(0)] public int bossDamageOnSlotBreak = 1;
-    [Range(0f, 1f)] public float chaosFlipChance = 0.45f;
-    [Range(0f, 1f)] public float chaosSwapChance = 0.3f;
+    [Min(0)] public int maxBonusAP = 2;
+    [Min(0)] public int bossDamageOnSlotBreak = 3;
+    [Tooltip("Quota delle ferite lasciate su uno slot che il rullo scarta e che " +
+             "vengono girate al boss. 0 = il danno non letale sparisce col giro.")]
+    [Range(0f, 1f)] public float woundCarryToBoss = 1f;
+    [Range(0f, 1f)] public float chaosFlipChance = 1f;
+    [Range(0f, 1f)] public float chaosSwapChance = 0f;
     [Min(0)] public int maxChaosFlipsPerTurn = 1;
 
     [Header("Ritmo della risoluzione")]
@@ -107,6 +111,14 @@ public class GameManager : MonoBehaviour
     public bool Resolving => resolving;
     public bool MatchEnded => matchEnded;
     public string MatchResult => matchResult;
+    public string RollSummary { get; private set; } = "Abbina carta e slot: +1 ATK o BLOCCO";
+
+    /// <summary>Maschera delle corsie che hanno fatto combinazione nell'ultimo giro.</summary>
+    public int RollPayoutLanes { get; private set; }
+    /// <summary>Cambia a ogni vincita: chi disegna la cassa lo osserva e lampeggia.</summary>
+    public int RollPayoutSerial { get; private set; }
+    public bool RollPayoutJackpot { get; private set; }
+    public bool CanAttack => CanAct && player != null && player.actionPoints >= Mathf.Max(1, attackCost);
 
     /// <summary>
     /// Il giocatore puo' agire. Serve a chi non e' un Button e quindi non passa
@@ -141,6 +153,15 @@ public class GameManager : MonoBehaviour
 
         btnAttack.onClick.AddListener(OnAttack);
         btnEndTurn.onClick.AddListener(OnEndTurn);
+    }
+
+    void OnDestroy()
+    {
+        foreach (var pair in abilitiesByInstance)
+            foreach (var ability in pair.Value) if (ability != null) ability.Unbind();
+        if (player != null) foreach (var card in player.board) card?.Dispose();
+        foreach (var view in enemySlotViews) if (view != null) view.instance?.Dispose();
+        if (_instance == this) _instance = null;
     }
 
     void Start()
@@ -240,7 +261,7 @@ public class GameManager : MonoBehaviour
 
     void AddSlotFromTemplate(PlayerState owner, SlotDefinition.Spec def, GameObject prefab, Transform root, List<SlotView> outViews)
     {
-        var si = new SlotInstance(def);
+        var si = new SlotInstance(def, def.flipPattern != null && def.flipPattern.Length > 0 ? rng.Next(def.flipPattern.Length) : 0);
         var go = Instantiate(prefab, root);
         go.name = prefab.name;
         go.SetActive(true);
@@ -308,7 +329,7 @@ public class GameManager : MonoBehaviour
         if (matchEnded) return;
 
         bool enable = playerPhase && !awaitingEndTurn && !inputLocked;
-        btnAttack.interactable = enable;
+        btnAttack.interactable = CanAttack;
         btnEndTurn.interactable = !inputLocked;
         // La pesca non ha piu' un bottone: e' il mazzo a lato, e DeckView si
         // regola da solo su GameManager.CanAct.
@@ -325,6 +346,7 @@ public class GameManager : MonoBehaviour
         playerPhase = isPlayerPhase;
         awaitingEndTurn = false;
         owner.ResetAP(playerBaseAP);
+        ApplyRollReward();
         ResetCombatModifiers();
 
         EventBus.Publish(GameEventType.TurnStart, new EventContext
@@ -373,7 +395,7 @@ public class GameManager : MonoBehaviour
         return gained;
     }
 
-    public void ResetCombatModifiers()
+    public void ResetCombatModifiers(bool includeSlots = true)
     {
         if (player != null)
         {
@@ -381,8 +403,9 @@ public class GameManager : MonoBehaviour
                 card?.ClearCombatBonuses();
         }
 
-        for (int i = 0; i < enemySlotViews.Count; i++)
-            enemySlotViews[i]?.instance?.ClearCombatBonuses();
+        if (includeSlots)
+            for (int i = 0; i < enemySlotViews.Count; i++)
+                enemySlotViews[i]?.instance?.ClearCombatBonuses();
     }
 
     public CardView GetPlayerCardViewAtLane(int lane)
@@ -439,6 +462,7 @@ public class GameManager : MonoBehaviour
             return;
         }
 
+        if (!TrySpendPlayerAP(Mathf.Max(1, attackCost), "Attacco")) return;
         StartCoroutine(ResolveAttackRoutine());
     }
 
@@ -453,13 +477,13 @@ public class GameManager : MonoBehaviour
     /// anticiparli permetterebbe di attaccare due volte o di chiudere il turno a
     /// meta' risoluzione.
     /// </summary>
-    IEnumerator ResolveAttackRoutine()
+    IEnumerator ResolveAttackRoutine(bool playerAttacks = true, bool rollAfter = false)
     {
         resolving = true;
         inputLocked = true;
         UpdateHUD();
 
-        ResetCombatModifiers();
+        ResetCombatModifiers(includeSlots: false);
         EventBus.Publish(GameEventType.Custom, new EventContext
         {
             owner = player,
@@ -480,7 +504,7 @@ public class GameManager : MonoBehaviour
             // fermarsi lo stesso sarebbe solo tempo morto.
             if (card == null && slot == null) continue;
 
-            LaneResolver.Resolve(lane, card, slot, player, ai);
+            LaneResolver.Resolve(lane, card, slot, player, ai, playerAttacks);
             yield return new WaitForSeconds(resolveLaneDelay);
 
             // I morti si contano qui e non alla fine: cosi la morte si vede nella
@@ -488,6 +512,7 @@ public class GameManager : MonoBehaviour
             // e RemoveCard rimettono il segnaposto allo stesso sibling index.
             CleanupDestroyedSlots();
             UpdateAllViews();
+            if (IsGameOver()) break;
             yield return new WaitForSeconds(resolveLaneGap);
         }
 
@@ -498,27 +523,40 @@ public class GameManager : MonoBehaviour
         inputLocked = false;
         awaitingEndTurn = true;
         Logger.Info($"Attack phase end | Boss {ai.hp}/{ai.maxHp} | Player {player.hp}/{player.maxHp}");
+        if (IsGameOver()) { EndMatch(); yield break; }
         UpdateHUD();
+        if (rollAfter) OnEndTurn();
     }
 
-    void RandomizePlayerBoard()
+    IEnumerator RandomizePlayerBoard()
     {
         var ordered = GetOrderedPlayerCards();
-        if (ordered.Count == 0) return;
+        if (ordered.Count == 0) yield break;
 
         int flipsDone = 0;
         var flipCandidates = new List<CardInstance>();
         foreach (var card in ordered)
         {
-            if (rng.NextDouble() <= Mathf.Clamp01(card.def.endTurnFlipChance))
+            if (rng.NextDouble() < Mathf.Clamp01(card.def.endTurnFlipChance * chaosFlipChance))
                 flipCandidates.Add(card);
         }
 
-        while (flipCandidates.Count > 0 && flipsDone < maxChaosFlipsPerTurn && rng.NextDouble() < chaosFlipChance)
+        // La macchina scuote per prime le corsie che il giro NON ha abbinato: il
+        // flip casuale diventa la faccia B dell'esito del rullo invece di un dado
+        // scollegato. Se tutte le corsie risuonano si pesca fra quelle rimaste.
+        var shaken = new List<CardInstance>();
+        foreach (var candidate in flipCandidates)
+            if (!SynergyResolver.Resonates(this, GetLaneIndexFor(candidate)))
+                shaken.Add(candidate);
+
+        while (flipCandidates.Count > 0 && flipsDone < maxChaosFlipsPerTurn)
         {
-            int pick = rng.Next(flipCandidates.Count);
-            var card = flipCandidates[pick];
-            flipCandidates.RemoveAt(pick);
+            var pool = shaken.Count > 0 ? shaken : flipCandidates;
+            int pick = rng.Next(pool.Count);
+            var card = pool[pick];
+            pool.RemoveAt(pick);
+            flipCandidates.Remove(card);
+            shaken.Remove(card);
 
             card.Flip();
             EventBus.Publish(GameEventType.Flip, new EventContext
@@ -528,15 +566,19 @@ public class GameManager : MonoBehaviour
                 source = card
             });
 
+            // Animato, non solo aggiornato: e' un cambiamento che il giocatore
+            // subisce, quindi deve vederlo girare (ROADMAP A5).
             if (viewByInstance.TryGetValue(card, out var view))
                 view.FlipSide(false);
 
+            card.PushHint($"SCOSSA -> {card.side}");
             Logger.Info($"Chaos: {card.def.cardName} flips to {card.side}");
             flipsDone++;
+            yield return new WaitForSeconds(0.4f);
         }
 
         if (playerBoardRoot.childCount < 2 || rng.NextDouble() >= chaosSwapChance)
-            return;
+            yield break;
 
         var swappableLanes = new List<int>();
         for (int lane = 0; lane < playerBoardRoot.childCount - 1; lane++)
@@ -545,13 +587,40 @@ public class GameManager : MonoBehaviour
                 swappableLanes.Add(lane);
         }
 
-        if (swappableLanes.Count == 0) return;
+        if (swappableLanes.Count == 0) yield break;
 
         int swapLane = swappableLanes[rng.Next(swappableLanes.Count)];
         // Stesso percorso dello scambio per trascinamento: il giocatore subisce
         // questo cambiamento, quindi deve almeno vederlo succedere.
         AnimateLaneSwap(GetPlayerCardViewAtLane(swapLane), GetPlayerCardViewAtLane(swapLane + 1));
         Logger.Info($"Chaos: lane {swapLane + 1} swaps with lane {swapLane + 2}");
+    }
+
+    /// <summary>
+    /// Il rullo sostituisce ogni casella a ogni giro: senza questo, il danno che
+    /// non uccide sparisce con il giro e attaccare non serve a niente se non
+    /// uccidi in un colpo solo. Le caselle sono la corazza del boss per questo
+    /// giro: quello che gli hai tolto e che il rullo butta via, lo paga il boss.
+    /// Uccidere resta meglio, perche' aggiunge <see cref="bossDamageOnSlotBreak"/>.
+    /// </summary>
+    void CarryWoundsToBoss()
+    {
+        if (woundCarryToBoss <= 0f) return;
+
+        int carried = 0;
+        for (int lane = 0; lane < aiBoardRoot.childCount; lane++)
+        {
+            var slot = GetEnemySlotAtLane(lane);
+            if (slot == null || !slot.alive) continue;
+            int wounds = Mathf.Max(0, slot.def.maxHealth - slot.health);
+            if (wounds <= 0) continue;
+            carried += Mathf.FloorToInt(wounds * woundCarryToBoss);
+        }
+
+        if (carried <= 0) return;
+        ai.TakeDamage(carried);
+        Logger.Info($"Il rullo scarta le caselle ferite: il boss paga {carried}");
+        UpdateHUD();
     }
 
     void AccumulateFlipCharges()
@@ -565,20 +634,41 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    void AdvanceSlotPatterns()
+    public int CountEnemyFaction(Faction faction)
     {
-        for (int i = 0; i < enemySlotViews.Count; i++)
+        int count = 0;
+        for (int lane = 0; lane < aiBoardRoot.childCount; lane++)
+            if (GetEnemySlotAtLane(lane)?.def.faction == faction) count++;
+        return count;
+    }
+
+    void ApplyRollReward()
+    {
+        var a = GetEnemySlotAtLane(0);
+        var b = GetEnemySlotAtLane(1);
+        var c = GetEnemySlotAtLane(2);
+        bool leftPair  = a != null && b != null && a.def.faction == b.def.faction;
+        bool rightPair = b != null && c != null && b.def.faction == c.def.faction;
+        bool pair = leftPair || rightPair;
+        bool triple = pair && a != null && c != null && a.def.faction == c.def.faction;
+        RollSummary = "Abbina carta e slot: +1 ATK o BLOCCO";
+
+        // Le caselle che hanno fatto combinazione: la cassa del rullo le
+        // illumina, cosi la vincita si vede sulla macchina e non solo nel testo.
+        RollPayoutLanes = triple ? 0b111 : leftPair ? 0b011 : rightPair ? 0b110 : 0;
+        RollPayoutJackpot = triple;
+        if (pair) RollPayoutSerial++;
+
+        if (!pair) return;
+        int gained = GainPlayerAP(1, "Combo rullo");
+        RollSummary = (triple ? "TRIS" : "COPPIA ADIACENTE") + "  +" + gained + " AP";
+        if (triple)
         {
-            var slotView = enemySlotViews[i];
-            if (slotView?.instance == null || !slotView.instance.alive) continue;
-
-            Side oldSide = slotView.instance.side;
-            slotView.instance.AdvanceFlip();
-            slotView.Refresh();
-
-            if (slotView.instance.side != oldSide)
-                Logger.Info($"Slot shift: {slotView.instance.def.SlotName} -> {slotView.instance.side}");
+            foreach (var card in GetOrderedPlayerCards())
+                if (card.side == Side.Retro) card.GainCharge(1);
+            RollSummary += " / +1 carica ai Retro";
         }
+        Logger.Info("Rullo: " + RollSummary);
     }
 
     public void OnCardDoubleClicked(CardView view)
@@ -612,6 +702,7 @@ public class GameManager : MonoBehaviour
         Logger.Info($"Flip: {view.instance.def.cardName} -> {view.instance.side}");
         UpdateAllViews();
         UpdateHUD();
+        if (IsGameOver()) EndMatch();
         return true;
     }
 
@@ -678,9 +769,14 @@ public class GameManager : MonoBehaviour
     {
         if (matchEnded || !playerPhase || inputLocked) return;
 
-        RandomizePlayerBoard();
+        if (!awaitingEndTurn)
+        {
+            // Passing gives up our attacks, never the enemy response.
+            StartCoroutine(ResolveAttackRoutine(playerAttacks: false, rollAfter: true));
+            return;
+        }
         AccumulateFlipCharges();
-        AdvanceSlotPatterns();
+        CarryWoundsToBoss();
 
         EventBus.Publish(GameEventType.TurnEnd, new EventContext
         {
@@ -747,6 +843,8 @@ public class GameManager : MonoBehaviour
             baseAtk[lane] = slot.def.atkDamage + slot.tempAtkBonus;
         }
 
+        yield return RandomizePlayerBoard();
+        if (IsGameOver()) { EndMatch(); yield break; }
         StartTurn(player, ai, true);
 
         for (int lane = 0; lane < lanes && lane < aiBoardRoot.childCount; lane++)
@@ -809,8 +907,8 @@ public class GameManager : MonoBehaviour
     void SetButtonsInteractable(bool on)
     {
         inputLocked = !on;
-        btnAttack.interactable = on;
-        btnEndTurn.interactable = on;
+        btnAttack.interactable = on && CanAttack;
+        btnEndTurn.interactable = on && !matchEnded;
     }
 
     void RespawnEnemySlotsFromList(List<GameObject> prefabs)
@@ -917,7 +1015,7 @@ public class GameManager : MonoBehaviour
         emptySpot.SetParent(null, false);   // vedi DetachAndDestroy
         Destroy(emptySpot.gameObject);
 
-        var card = new CardInstance(definition.BuildSpec(), rng);
+        var card = new CardInstance(definition.BuildSpec(), rng) { side = Side.Fronte };
         card.AssignGM(this);
         player.board.Add(card);
 

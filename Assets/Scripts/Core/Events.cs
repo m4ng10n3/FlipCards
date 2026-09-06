@@ -9,7 +9,8 @@ public enum GameEventType
     AttackResolved,       // il difensore ha calcolato e applicato il danno
     CardPlayed,
     Info,
-    Custom
+    Custom,
+    DamageResolution // after all AttackDeclared modifiers have run
 }
 
 public static class GlobalId
@@ -88,6 +89,8 @@ public static class EventBus
                 catch (Exception e) { Debug.LogException(e); }
             }
         }
+        if (t == GameEventType.AttackDeclared)
+            Publish(GameEventType.DamageResolution, ctx);
     }
 
     public static string Format(GameEventType t, EventContext ctx)
