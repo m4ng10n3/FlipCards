@@ -13,6 +13,7 @@ using UnityEngine.UI;
 public static class UiBuild
 {
     static TMP_FontAsset _font;
+    static TMP_FontAsset _displayFont;
 
     public static TMP_FontAsset Font
     {
@@ -132,6 +133,11 @@ public static class UiBuild
         var rt = Rect(name, parent);
         var t = rt.gameObject.AddComponent<TextMeshProUGUI>();
         if (Font != null) t.font = Font;
+        if (size >= 18f)
+        {
+            if (_displayFont == null) _displayFont = Resources.Load<TMP_FontAsset>("NeonMonteDisplay");
+            if (_displayFont != null) { t.font = _displayFont; size *= 1.2f; }
+        }
         t.text = content;
         t.fontSize = size;
         t.color = color;

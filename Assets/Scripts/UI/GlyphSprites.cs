@@ -91,6 +91,8 @@ public static class GlyphSprites
 
     static Sprite Get(string key, string[] art)
     {
+        var illustrated = UiSkin.Sprite("glyph_" + key);
+        if (illustrated != null) return illustrated;
         if (_cache.TryGetValue(key, out var cached) && cached != null) return cached;
 
         int h = art.Length;

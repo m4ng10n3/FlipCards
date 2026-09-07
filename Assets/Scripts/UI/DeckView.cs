@@ -206,7 +206,9 @@ public class DeckView : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
         var view = go.GetComponentInChildren<CardView>(true);
         if (view != null)
         {
-            view.ShowDeckBack(isTop);
+            var overlay = view.GetComponent<CardOverlay>();
+            if (overlay != null) overlay.enabled = false;
+            view.ShowDeckBack(false);
             view.enabled = false;   // niente hover, tilt, ombra o inseguimento del container
         }
 

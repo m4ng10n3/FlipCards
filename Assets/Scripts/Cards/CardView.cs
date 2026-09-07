@@ -441,7 +441,8 @@ public class CardView : MonoBehaviour
             _templateBaseColorRead = true;
         }
 
-        Color from = Color.Lerp(_templateBaseColor, tint, 0.75f);
+        float flashStrength = img.material != null && img.material.HasProperty("_PaperSheen") ? 0.32f : 0.75f;
+        Color from = Color.Lerp(_templateBaseColor, tint, flashStrength);
         Color to = _templateBaseColor;
 
         // Durante il ritardo DOTween non chiama il setter: il colore resta quello

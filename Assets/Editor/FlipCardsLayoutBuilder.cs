@@ -110,6 +110,7 @@ public static class FlipCardsLayoutBuilder
     [MenuItem("FlipCards/Ricostruisci layout di gioco")]
     public static void Rebuild()
     {
+        NeonMonteSkinBuilder.Prepare();
         _boardBg = KitSprite("board/board_bg");
 
         ResizePrefabs();
@@ -123,7 +124,8 @@ public static class FlipCardsLayoutBuilder
     }
 
     static Sprite KitSprite(string relativePath)
-        => AssetDatabase.LoadAssetAtPath<Sprite>($"{KitRoot}/{relativePath}.png");
+        => UiSkin.Sprite(Path.GetFileName(relativePath))
+        ?? AssetDatabase.LoadAssetAtPath<Sprite>($"{KitRoot}/{relativePath}.png");
 
     // ══════════════════════════════════════════════════════════════════════════
     //  1. Prefab alla dimensione della cella
@@ -195,7 +197,19 @@ public static class FlipCardsLayoutBuilder
 
                 ApplyCardTemplate(root, cell);
                 var portrait = cell.Find("imagecharacter")?.GetComponent<Image>();
-                if (portrait != null) portrait.preserveAspect = true;
+                if (portrait != null)
+                {
+                    portrait.preserveAspect = true;
+                    // The paper template is opaque: the portrait must be above it.
+                    portrait.transform.SetAsLastSibling();
+                    var definition = root.GetComponent<CardDefinition>();
+                    var art = definition != null ? NeonMonteSkinBuilder.Art("portrait_" + definition.cardName.ToLowerInvariant()) : null;
+                    if (art != null) portrait.sprite = art;
+                    portrait.color = Color.white;
+                    portrait.material = null; // Printed ink is matte; only the paper catches light.
+                    var oldEffect = portrait.GetComponent<ShaderCode>();
+                    if (oldEffect != null) oldEffect.enabled = false;
+                }
 
                 // Il FRONTE ha due caselle statistica: ATK e vita, nei pozzetti
                 // che il template del kit disegna. Il numero parte dopo l'icona
@@ -205,7 +219,7 @@ public static class FlipCardsLayoutBuilder
                 Place(cell, "HP", CardOverlay.StatTextX(1), CardOverlay.StatY,
                                   CardOverlay.StatTextW, CardOverlay.StatH);
 
-                StyleText(cell, "Name", 20, TextAnchor.MiddleLeft, GamePalette.TextPrimary);
+                StyleText(cell, "Name", 20, TextAnchor.MiddleLeft, GamePalette.Ink);
                 StyleText(cell, "FrontDamage", 26, TextAnchor.MiddleCenter, GamePalette.Danger);
                 StyleText(cell, "HP", 22, TextAnchor.MiddleCenter, GamePalette.PlayerHp);
 
@@ -298,7 +312,7 @@ public static class FlipCardsLayoutBuilder
         Place(backFace, "BackBlock", CardOverlay.BackIndexTextX(0), CardOverlay.BackIndexY,
                                      CardOverlay.BackIndexTextW, CardOverlay.BackIndexH);
         Place(backFace, "BackHP", CardOverlay.BackIndexX(1), CardOverlay.BackIndexY,
-                                  CardOverlay.BackIndexW, CardOverlay.BackIndexH);
+                                  CardOverlay.BackIndexW - 8f, CardOverlay.BackIndexH);
 
         StyleText(backFace, "BackBlock", 26, TextAnchor.MiddleLeft, GamePalette.Retro);
         StyleText(backFace, "BackHP", 24, TextAnchor.MiddleRight, GamePalette.PlayerHp);
@@ -355,6 +369,9 @@ public static class FlipCardsLayoutBuilder
             // La tinta la porta lo sprite: un colore diverso da bianco lo
             // spegnerebbe, e FlashTemplate ci rientra sopra a ogni reazione.
             image.color = Color.white;
+            image.material = NeonMonteSkinBuilder.PaperMaterial();
+            var paperEffect = image.GetComponent<ShaderCode>() ?? image.gameObject.AddComponent<ShaderCode>();
+            paperEffect.enabled = true;
         }
 
         if (back == null) return;
@@ -419,7 +436,12 @@ public static class FlipCardsLayoutBuilder
             // (la sua finestra e' trasparente) e l'Image della radice disegna per
             // prima. La monta SlotOverlay come figlio.
             var bg = root.GetComponent<Image>();
-            if (bg != null) bg.color = GamePalette.WithAlpha(GamePalette.Panel, 0.88f);
+            if (bg != null)
+            {
+                bg.sprite = NeonMonteSkinBuilder.Art("card_front");
+                bg.type = Image.Type.Simple;
+                bg.color = bg.sprite != null ? Color.white : GamePalette.Paper;
+            }
 
             var cell = (RectTransform)root.transform;
 
@@ -429,13 +451,21 @@ public static class FlipCardsLayoutBuilder
             Place(cell, "Name", SlotOverlay.NameX, SlotOverlay.NameY, SlotOverlay.NameW, SlotOverlay.NameH);
             Place(cell, "Sprite", SlotOverlay.ArtX, SlotOverlay.ArtY, SlotOverlay.ArtSize, SlotOverlay.ArtSize);
             var symbol = cell.Find("Sprite")?.GetComponent<Image>();
-            if (symbol != null) symbol.preserveAspect = true;
+            if (symbol != null)
+            {
+                symbol.preserveAspect = true;
+                var definition = root.GetComponent<SlotDefinition>();
+                var art = definition != null ? NeonMonteSkinBuilder.Art("symbol_" + definition.SlotName.ToLowerInvariant()) : null;
+                if (art != null) symbol.sprite = art;
+                symbol.material = null;
+                symbol.color = Color.white;
+            }
             Place(cell, "HP", SlotOverlay.ChipTextX(1), SlotOverlay.ChipY,
                               SlotOverlay.ChipTextW, SlotOverlay.ChipH);
             Place(cell, "Def", SlotOverlay.ChipTextX(2), SlotOverlay.ChipY,
                                SlotOverlay.ChipTextW, SlotOverlay.ChipH);
 
-            StyleText(cell, "Name", 19, TextAnchor.MiddleLeft, GamePalette.TextPrimary);
+            StyleText(cell, "Name", 19, TextAnchor.MiddleLeft, GamePalette.Ink);
             StyleText(cell, "HP", 20, TextAnchor.MiddleCenter, GamePalette.PlayerHp);
             StyleText(cell, "Def", 20, TextAnchor.MiddleCenter, GamePalette.Retro);
 
@@ -646,6 +676,12 @@ public static class FlipCardsLayoutBuilder
 
         text.resizeTextForBestFit = false;
         text.fontSize = size;
+        var printedFont = NeonMonteSkinBuilder.DisplaySource;
+        if (printedFont != null)
+        {
+            text.font = printedFont;
+            text.fontSize = Mathf.RoundToInt(size * 1.2f);
+        }
         text.alignment = anchor;
         text.color = color;
         text.horizontalOverflow = HorizontalWrapMode.Overflow;
@@ -751,7 +787,7 @@ public static class FlipCardsLayoutBuilder
 
         var side = UiBuild.Rect("SidePanel", root);
         UiBuild.Band(side, SideX, 0f, RefW - SideX, RefH);
-        if (!HasBackdrop) UiBuild.Fill(side, GamePalette.Panel);
+        UiBuild.Fill(side, GamePalette.WithAlpha(GamePalette.PanelSunken, 0.97f));
 
         var hud = canvasGO.GetComponent<HudController>() ?? canvasGO.AddComponent<HudController>();
 
@@ -951,11 +987,11 @@ public static class FlipCardsLayoutBuilder
     {
         var rail = UiBuild.Rect("PlayerRail", root);
         UiBuild.Band(rail, RailX, RailY, RailW, RailH);
-        if (!HasBackdrop) UiBuild.Fill(rail, GamePalette.PanelSunken);
+        UiBuild.Fill(rail, GamePalette.WithAlpha(GamePalette.PanelSunken, 0.96f));
 
-        var label = UiBuild.Text("Label", rail, "TU", 18f, GamePalette.PlayerHp,
+        var label = UiBuild.Text("Label", rail, "FLIPCARDS", 27f, GamePalette.Paper,
                                  TextAlignmentOptions.Left, FontStyles.Bold);
-        UiBuild.Band(label.rectTransform, 12f, 12f, 120f, 26f);
+        UiBuild.Band(label.rectTransform, 12f, 8f, RailW - 24f, 38f);
 
         hud.playerHpBar = UiBuild.Bar("HpBar", rail, GamePalette.PlayerHp, out var barRt, kind: "hp");
         UiBuild.Band(barRt, 0f, RailHpY + 2f, RailW, RailHpH - 4f);
@@ -1076,7 +1112,7 @@ public static class FlipCardsLayoutBuilder
         // annidati per una pila che non si puo' nemmeno leggere.
         var stackRt = UiBuild.Rect("StackImage", stack);
         UiBuild.Stretch(stackRt);
-        view.stackImage = Kit(stackRt, "deck/deck_stack_5");
+        view.stackImage = null; // Use the real new card backs; depth still follows remaining deck size.
         if (view.stackImage != null) view.stackImage.preserveAspect = true;
 
         var pulseRt = UiBuild.Rect("Pulse", stack);
@@ -1378,8 +1414,8 @@ public static class FlipCardsLayoutBuilder
         var layer = UiBuild.Rect("CrtOverlay", root);
         UiBuild.Band(layer, 0f, 0f, RefW, RefH);
 
-        CrtLayer(layer, "Scanlines", scanlines, 0.16f);
-        CrtLayer(layer, "Vignette", vignette, 0.35f);
+        CrtLayer(layer, "Scanlines", scanlines, 0.035f);
+        CrtLayer(layer, "Vignette", vignette, 0.12f);
     }
 
     static void CrtLayer(RectTransform parent, string name, Sprite sprite, float alpha)

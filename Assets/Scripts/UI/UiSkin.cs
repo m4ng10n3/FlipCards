@@ -29,6 +29,7 @@ public class UiSkin : ScriptableObject
     }
 
     public List<Entry> entries = new List<Entry>();
+    public bool neonMonte;
 
     Dictionary<string, Sprite> _map;
 

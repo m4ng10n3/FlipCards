@@ -131,7 +131,8 @@ public class SlotOverlay : MonoBehaviour,
         if (wounded != _lastWounded)
         {
             _lastWounded = wounded;
-            _poolLabel.color = wounded == 1 ? GamePalette.Danger : GamePalette.TextFaint;
+            if (_poolLabel != null)
+                _poolLabel.color = wounded == 1 ? new Color(0.55f, 0.14f, 0.1f) : GamePalette.Ink;
         }
 
         // La risonanza va riletta a ogni giro: dipende dalla carta che ha
@@ -296,7 +297,7 @@ public class SlotOverlay : MonoBehaviour,
         int number = _view.instance.PoolNumber;
         if (number <= 0) return;
 
-        _poolLabel = UiBuild.Text("PoolNumber", _rt, $"#{number}", 18f, GamePalette.TextFaint,
+        _poolLabel = UiBuild.Text("PoolNumber", _rt, $"#{number}", 18f, GamePalette.Ink,
                                   TextAlignmentOptions.Left, FontStyles.Bold);
         UiBuild.Band(_poolLabel.rectTransform, PoolX, PoolY, PoolW, PoolH);
     }
@@ -350,6 +351,15 @@ public class SlotOverlay : MonoBehaviour,
     {
         var rt = UiBuild.Rect("FactionTag", _rt);
         UiBuild.Band(rt, FactionX, FactionY, FactionSize, FactionSize);
+
+        if (UiSkin.Active != null && UiSkin.Active.neonMonte)
+        {
+            UiBuild.Fill(rt, GamePalette.Ink);
+            var tag = UiBuild.Text("Letter", rt, def.faction.ToString(), 18f, GamePalette.FactionColor(def.faction),
+                TextAlignmentOptions.Center, FontStyles.Bold);
+            UiBuild.Stretch(tag.rectTransform);
+            return;
+        }
 
         var sprite = UiSkin.Sprite(UiSkin.FactionTag(def.faction));
         if (sprite != null)

@@ -340,6 +340,16 @@ public class CardOverlay : MonoBehaviour
             _frontOnly.Add(Plate("AbilityStrip", NameX, StripY, NameW, StripH, 0.55f).gameObject);
         }
 
+        if (UiSkin.Active != null && UiSkin.Active.neonMonte)
+        {
+            // The paper texture has no baked wells: these rules share exact geometry with the text.
+            var rules = UiBuild.Rect("PrintedRules", _over);
+            UiBuild.Stretch(rules);
+            Edge(rules, NameX + 6f, NameY + NameH, NameW - 12f, 1f, GamePalette.Ink);
+            Edge(rules, NameX + 6f, StripY - 2f, NameW - 12f, 1f, GamePalette.Ink);
+            _frontOnly.Add(rules.gameObject);
+        }
+
         BuildSigil();
         BuildStatBadges();
         BuildChargeColumn();
@@ -375,6 +385,7 @@ public class CardOverlay : MonoBehaviour
     /// </summary>
     void BuildSigil()
     {
+        if (UiSkin.Active != null && UiSkin.Active.neonMonte) return; // Three eyes are printed on the back.
         var rt = UiBuild.Rect("Sigil", _under);
         UiBuild.Band(rt, ArtX, ArtY, ArtW, ArtH);
 
@@ -531,7 +542,9 @@ public class CardOverlay : MonoBehaviour
 
         // Fondo appena accennato: sotto la plancia c'e' il template del kit, e
         // un ripieno pieno spegnerebbe lo shader della carta.
-        UiBuild.Fill(chip, GamePalette.WithAlpha(color, 0.14f));
+        UiBuild.Fill(chip, UiSkin.Active != null && UiSkin.Active.neonMonte
+            ? GamePalette.WithAlpha(GamePalette.PanelSunken, 0.55f)
+            : GamePalette.WithAlpha(color, 0.14f));
 
         var glyphRt = UiBuild.Rect("Glyph", chip);
         UiBuild.Band(glyphRt, 4f, (NameH - BannerGlyph) * 0.5f, BannerGlyph, BannerGlyph);
@@ -564,6 +577,12 @@ public class CardOverlay : MonoBehaviour
     void BuildBackChrome(CardDefinition.Spec def)
     {
         var color = GamePalette.FactionColor(def.faction);
+        if (UiSkin.Active != null && UiSkin.Active.neonMonte)
+        {
+            for (int i = 0; i < 2; i++)
+                _backOnly.Add(Plate("BackIndexWell" + i, BackIndexX(i), BackIndexY,
+                    BackIndexW, BackIndexH, 0.55f).gameObject);
+        }
 
         // Quattro strisce e non `card_rim_{fazione}` del kit: quello sprite
         // disegna il perimetro **e la cornice della finestra del ritratto**, e
@@ -601,6 +620,15 @@ public class CardOverlay : MonoBehaviour
     {
         var rt = UiBuild.Rect("FactionTag", _over);
         UiBuild.Band(rt, TagX, TagY, TagSize, TagSize);
+
+        if (UiSkin.Active != null && UiSkin.Active.neonMonte)
+        {
+            UiBuild.Fill(rt, GamePalette.Ink);
+            var tag = UiBuild.Text("Letter", rt, def.faction.ToString(), 18f, GamePalette.FactionColor(def.faction),
+                TextAlignmentOptions.Center, FontStyles.Bold);
+            UiBuild.Stretch(tag.rectTransform);
+            return;
+        }
 
         var sprite = UiSkin.Sprite(UiSkin.FactionTag(def.faction));
         if (sprite != null)
@@ -654,7 +682,8 @@ public class CardOverlay : MonoBehaviour
 
         if (abilities != null && abilities.Length > 1) label += $" +{abilities.Length - 1}";
 
-        _abilityLabel = UiBuild.Text("AbilityLabel", _over, label, 13f, GamePalette.TextMuted,
+        _abilityLabel = UiBuild.Text("AbilityLabel", _over, label, 13f,
+                                     UiSkin.Active != null && UiSkin.Active.neonMonte ? GamePalette.Ink : GamePalette.TextMuted,
                                      TextAlignmentOptions.Left, FontStyles.Bold);
         UiBuild.Band(_abilityLabel.rectTransform, StripIconX + StripIconSize + 6f, StripY + 4f,
                      NameW - StripIconSize - 20f, StripH - 8f);
