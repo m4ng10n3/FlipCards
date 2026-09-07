@@ -1,0 +1,16 @@
+Frames advanced: 1247 -> 1307
+Lanes player/enemy: 3/3
+Lane 0 centers=509,0/509,0 artAbovePaper=True artVisible=True
+Chrome copies=1
+Lane 1 centers=905,0/905,0 artAbovePaper=True artVisible=True
+Chrome copies=1
+Lane 2 centers=1301,0/1301,0 artAbovePaper=True artVisible=False
+Chrome copies=1
+Enabled decorative deck overlays=0
+Swap dx: 392,851 392,851 392,851 392,851 392,851 392,851 392,851 392,851 392,851 392,851 392,851 392,851 392,851 392,851 392,851 392,851 392,851 392,851 392,851 392,851
+Flip Y: 13,8 23,7 40,1 62,4 81,6 94,4 100,7 282,5 288,8 301,5 320,5 342,8 359,2 9,3 12,7 12,9 13,0 13,1 13,2 13,3 13,5 13,6 13,7 13,8 13,9
+Paper shader=FlipCards/Printed Paper supported=True max rotation=2,2502
+Flip changed side=True
+Attack resolved=True
+Next turn=2 CanAct=True Locked=False
+Settled-frame swap dx: 66,16 120,78 170,18 203,30 235,50 261,42 283,32 301,23 317,80 329,34 339,74 348,30 355,86 361,96 367,49 371,25 374,79 377,74 380,19 382,21
