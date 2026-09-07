@@ -617,3 +617,6 @@ elencati sotto sono **fatti**, tranne l'ultimo.
 
 Riferimenti correlati: [ROADMAP.md](ROADMAP.md) per i lavori aperti,
 [ANALISI_UI.md](ANALISI_UI.md) — audit dei difetti dell'interfaccia precedente.
+
+## Revisione visiva: prospettiva e manovella
+Il builder usa ora FieldW=1100 e LanePitch=370; i centri nominali sono x=496/866/1236. Carte 224x336 e slot 352x288 restano invariati. La manovella occupa la fascia fra campo e ispettore. La prospettiva e applicata solo al figlio grafico della carta: root e gerarchia delle corsie conservano la logica di input e risoluzione. Fronte: artwork 204x232, indici ATK/HP agli angoli bassi, cariche compatte, abilita nel bordo inferiore.

@@ -763,7 +763,7 @@ public class CardView : MonoBehaviour
 
         var baseRotation = anchorRotation;
         if (inHand) baseRotation *= _targetHandRotation;
-        else if (inBoard) baseRotation *= _targetBoardRotation;
+        else if (inBoard) baseRotation *= _targetBoardRotation * TablePerspective();
 
         float sine = Mathf.Sin(Time.time + savedIndex);
         float cosine = Mathf.Cos(Time.time + savedIndex);
@@ -783,6 +783,14 @@ public class CardView : MonoBehaviour
 
         var targetRot = baseRotation * Quaternion.Euler(lerpX, lerpY, lerpZ);
         _rt.rotation = Quaternion.Lerp(_rt.rotation, targetRot, handFollowRotationSpeed * Time.deltaTime);
+    }
+
+    private Quaternion TablePerspective()
+    {
+        if (UiSkin.Active == null || !UiSkin.Active.neonMonte) return Quaternion.identity;
+        int lane = _playerBoardContainer != null ? _playerBoardContainer.GetSiblingIndex() : savedIndex;
+        float spread = Mathf.Clamp(lane - 1, -1, 1);
+        return Quaternion.Euler(18f, -spread * 6f, -spread * 5f);
     }
 
     private void FollowContainer()

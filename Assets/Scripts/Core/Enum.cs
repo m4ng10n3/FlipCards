@@ -16,5 +16,6 @@ public enum Editions
 {
     REGULAR,
     POLYCHROME,
-    NEGATIVE
+    NEGATIVE,
+    FOIL
 }

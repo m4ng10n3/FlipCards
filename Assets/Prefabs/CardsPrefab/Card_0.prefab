@@ -35,8 +35,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 36}
-  m_SizeDelta: {x: 160, y: 160}
+  m_AnchoredPosition: {x: 0, y: 16}
+  m_SizeDelta: {x: 204, y: 232}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &9010848516961293436
 CanvasRenderer:
@@ -58,7 +58,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 2100000, guid: 79eaa6de742e6794c80758e8fb40ffbf, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
@@ -83,12 +83,12 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 740151830469251801}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 385bd7ef3d997354e9b7db0218955387, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShaderCode
-  edition: 2
+  edition: 1
 --- !u!1 &2144578116558927278
 GameObject:
   m_ObjectHideFlags: 0
@@ -124,7 +124,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 36}
+  m_AnchoredPosition: {x: 0, y: 16}
   m_SizeDelta: {x: 224, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5696199564044567640
@@ -218,8 +218,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -12, y: 139}
-  m_SizeDelta: {x: 156, y: 26}
+  m_AnchoredPosition: {x: -12, y: 145}
+  m_SizeDelta: {x: 156, y: 18}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6540376102472322647
 CanvasRenderer:
@@ -351,7 +351,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 385bd7ef3d997354e9b7db0218955387, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShaderCode
-  edition: 0
+  edition: 1
 --- !u!1 &3627047429709939806
 GameObject:
   m_ObjectHideFlags: 0
@@ -465,8 +465,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 61, y: -70}
-  m_SizeDelta: {x: 66, y: 36}
+  m_AnchoredPosition: {x: 71, y: -123}
+  m_SizeDelta: {x: 46, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3319572983754793002
 CanvasRenderer:
@@ -489,7 +489,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Text
   m_Material: {fileID: 0}
-  m_Color: {r: 0.70980394, g: 0.8117647, b: 0.50980395, a: 1}
+  m_Color: {r: 0.08235294, g: 0.1254902, b: 0.13725491, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -745,7 +745,7 @@ MonoBehaviour:
   scaleTransition: 0.15
   scaleEase: 27
   selectPunchAmount: 20
-  autoTiltAmount: 10
+  autoTiltAmount: 5
   manualTiltAmount: 15
   tiltSpeed: 15
   hoverPunchAngle: 5
@@ -1198,8 +1198,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -41, y: -70}
-  m_SizeDelta: {x: 66, y: 36}
+  m_AnchoredPosition: {x: -51, y: -123}
+  m_SizeDelta: {x: 46, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1861916863805320691
 CanvasRenderer:
@@ -1222,7 +1222,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Text
   m_Material: {fileID: 0}
-  m_Color: {r: 0.92941177, g: 0.44705883, b: 0.35686275, a: 1}
+  m_Color: {r: 0.08235294, g: 0.1254902, b: 0.13725491, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1

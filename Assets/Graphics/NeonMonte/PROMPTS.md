@@ -1,4 +1,4 @@
-﻿# FlipCards — Bisca indie
+# FlipCards — Bisca indie
 
 Direzione approvata: `ArtStudies/indie-concept-study.png`. Strumento: image_gen integrato, con lo studio come riferimento visivo. Mostri e slot rigenerati: vedere MONSTER_PROMPTS.md.
 
@@ -31,3 +31,6 @@ Use case: stylized-concept. One functional simple heraldic shield ICON for an in
 Use case: stylized-concept. One functional shield split apart by a broad zigzag crack ICON for an indie retro printed-card game matching reference. GENUINELY TRANSPARENT background. Single bold rough OFF-WHITE INK silhouette, apparent24x24 logical pixel art enlarged with nearest-neighbor, chunky square pixel edges and few deliberate black/transparent cuts, extremely simple and readable at22px. Center icon in square canvas, occupies85% of area. Gap divides silhouette into two clearly separated halves. Ivory only, no colors, no surrounding frame, no lettering, no text, no glow, no shadows, no tiny details, no metallic shading. Flat stamp impression, graphic gameplay symbol, not a detailed illustration.
 
 
+
+## reel_lever
+Production sprite generated with image_gen using indie-concept-study.png: isolated worn brick-red round knob, ivory/ochre shaft and petrol mounting block. Rough pixel woodcut penny-arcade texture, real transparent alpha, no machine or text. Separate image animated by ReelLever.

@@ -34,7 +34,7 @@ public static class FlipCardsLayoutBuilder
 
     // Tre colonne: rail del giocatore, campo, colonna destra.
     const float RailX = 12f, RailY = 12f, RailW = 294f, RailH = 1056f;
-    const float FieldX = 316f, FieldW = 1178f;
+    const float FieldX = 316f, FieldW = 1100f;
     const float SideX = 1504f, SideContentW = 400f;
 
     // Celle. La carta e' verticale, la casella nemica orizzontale: il fronte
@@ -46,7 +46,7 @@ public static class FlipCardsLayoutBuilder
     // Passo di corsia unico per i due lati: le colonne del rullo e le corsie del
     // giocatore devono stare sugli stessi centri (508 / 904 / 1300 sul canvas),
     // o l'asse dei pronostici punterebbe fra due corsie.
-    const float LanePitch = 396f;
+    const float LanePitch = 370f;
     const float PlayerLaneGap = LanePitch - CardW;   // 172
     const float EnemyLaneGap = LanePitch - SlotW;    // 44
     const int Lanes = 3;
@@ -57,7 +57,7 @@ public static class FlipCardsLayoutBuilder
     // Bande del campo, in coordinate canvas (il rect Field parte a x = FieldX ma
     // e' alto quanto lo schermo, quindi la y di banda e' gia' quella del canvas).
     const float TurnPlateW = 400f, TopPlateY = 12f, TopPlateH = 48f;
-    const float PhaseX = 544f, PhaseW = 634f;
+    const float PhaseX = 544f, PhaseW = FieldW - PhaseX;
     const float BossY = 68f, BossH = 56f;
     const float ReelHousingY = 132f, ReelHousingH = 400f;
     const float EnemyY = 188f;
@@ -206,9 +206,11 @@ public static class FlipCardsLayoutBuilder
                     var art = definition != null ? NeonMonteSkinBuilder.Art("portrait_" + definition.cardName.ToLowerInvariant()) : null;
                     if (art != null) portrait.sprite = art;
                     portrait.color = Color.white;
-                    portrait.material = null; // Printed ink is matte; only the paper catches light.
-                    var oldEffect = portrait.GetComponent<ShaderCode>();
-                    if (oldEffect != null) oldEffect.enabled = false;
+                    var edition = NeonMonteSkinBuilder.EditionFor(definition);
+                    portrait.material = edition == Editions.REGULAR ? null : NeonMonteSkinBuilder.EditionMaterial(edition);
+                    var oldEffect = portrait.GetComponent<ShaderCode>() ?? portrait.gameObject.AddComponent<ShaderCode>();
+                    oldEffect.edition = edition;
+                    oldEffect.enabled = edition != Editions.REGULAR;
                 }
 
                 // Il FRONTE ha due caselle statistica: ATK e vita, nei pozzetti
@@ -220,8 +222,8 @@ public static class FlipCardsLayoutBuilder
                                   CardOverlay.StatTextW, CardOverlay.StatH);
 
                 StyleText(cell, "Name", 20, TextAnchor.MiddleLeft, GamePalette.Ink);
-                StyleText(cell, "FrontDamage", 26, TextAnchor.MiddleCenter, GamePalette.Danger);
-                StyleText(cell, "HP", 22, TextAnchor.MiddleCenter, GamePalette.PlayerHp);
+                StyleText(cell, "FrontDamage", 26, TextAnchor.MiddleCenter, GamePalette.Ink);
+                StyleText(cell, "HP", 22, TextAnchor.MiddleCenter, GamePalette.Ink);
 
                 // Il RETRO ha un gruppo suo, con i numeri in un altro posto: e'
                 // un dorso, non il fronte con altri numeri.
@@ -369,8 +371,10 @@ public static class FlipCardsLayoutBuilder
             // La tinta la porta lo sprite: un colore diverso da bianco lo
             // spegnerebbe, e FlashTemplate ci rientra sopra a ogni reazione.
             image.color = Color.white;
+            var edition = NeonMonteSkinBuilder.EditionFor(definition);
             image.material = NeonMonteSkinBuilder.PaperMaterial();
             var paperEffect = image.GetComponent<ShaderCode>() ?? image.gameObject.AddComponent<ShaderCode>();
+            paperEffect.edition = edition;
             paperEffect.enabled = true;
         }
 
@@ -399,6 +403,7 @@ public static class FlipCardsLayoutBuilder
         SetFloat(so, "handHoverLift", 80f);
         SetFloat(so, "scaleOnHover", 1.18f);
         SetFloat(so, "scaleOnSelect", 1.26f);
+        SetFloat(so, "autoTiltAmount", 5f);
         so.ApplyModifiedPropertiesWithoutUndo();
     }
 
@@ -902,6 +907,12 @@ public static class FlipCardsLayoutBuilder
         // fasce in cui il reel di fine turno fa scorrere le caselle parziali.
         var housing = UiBuild.Rect("ReelHousing", field);
         UiBuild.Band(housing, 0f, ReelHousingY, FieldW, ReelHousingH);
+        var lever = UiBuild.Rect("ReelLever", field);
+        UiBuild.Band(lever, FieldW - 4f, ReelHousingY + 38f, 86f, 320f);
+        var leverImage = UiBuild.Fill(lever, Color.white);
+        leverImage.sprite = NeonMonteSkinBuilder.Art("reel_lever");
+        leverImage.preserveAspect = true;
+        lever.gameObject.AddComponent<ReelLever>();
         if (!HasBackdrop) UiBuild.Fill(housing, GamePalette.WithAlpha(Color.black, 0.35f));
 
         // Wrapper: _ReelOverlayLayer nasce come FRATELLO di AIBoardRoot, quindi il

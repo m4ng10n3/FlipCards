@@ -28,6 +28,33 @@ public static class NeonMonteSkinBuilder
         return material;
     }
 
+    public static Editions EditionFor(CardDefinition card)
+    {
+        switch (card.cardName.ToLowerInvariant())
+        {
+            case "vanguard": case "oracle": case "spark": case "scythe": return Editions.POLYCHROME;
+            case "relay": case "bulwark": case "hex": case "bastion": return Editions.FOIL;
+            default: return Editions.REGULAR;
+        }
+    }
+
+    public static Material EditionMaterial(Editions edition)
+    {
+        if (edition == Editions.REGULAR) return PaperMaterial();
+        var original = AssetDatabase.LoadAssetAtPath<Material>("Assets/Materials/Shader Graphs_CardShaderGraph.mat");
+        if (original == null) return PaperMaterial();
+        string path = Root + "/Card_" + edition + ".mat";
+        var material = AssetDatabase.LoadAssetAtPath<Material>(path);
+        if (material == null) { material = new Material(original); AssetDatabase.CreateAsset(material, path); }
+        foreach (var keyword in material.enabledKeywords)
+            if (keyword.name.StartsWith("_EDITION_")) material.DisableKeyword(keyword);
+        material.EnableKeyword("_EDITION_" + edition);
+        material.SetFloat("_EDITION", edition == Editions.FOIL ? 2f : 1f);
+        material.SetFloat("_poly_power", 0.3f);
+        EditorUtility.SetDirty(material);
+        return material;
+    }
+
     public static void Prepare()
     {
         if (!File.Exists(Root + "/card_front.png") || !File.Exists(Root + "/card_back.png")) return;

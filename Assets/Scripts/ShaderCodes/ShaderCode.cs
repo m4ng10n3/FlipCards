@@ -18,7 +18,7 @@ public class ShaderCode : MonoBehaviour
         if (_source == null || !_source.HasProperty(Rotation)) return;
         _instance = new Material(_source);
         _image.material = _instance;
-        if (_instance.HasProperty("_EDITION"))
+        if (_instance.shader.keywordSpace.FindKeyword("_EDITION_POLYCHROME").isValid)
         {
             foreach (var keyword in _instance.enabledKeywords)
                 if (keyword.name.StartsWith("_EDITION_")) _instance.DisableKeyword(keyword);

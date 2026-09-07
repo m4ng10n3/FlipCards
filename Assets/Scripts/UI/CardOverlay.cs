@@ -74,18 +74,18 @@ public class CardOverlay : MonoBehaviour
 
     public const float CardW = 224f, CardH = 336f;
 
-    public const float NameX = 12f, NameY = 12f, NameW = 200f, NameH = 34f;
-    public const float ArtX = 32f, ArtY = 52f, ArtW = 160f, ArtH = 160f;
+    public const float NameX = 12f, NameY = 10f, NameW = 200f, NameH = 26f;
+    public const float ArtX = 10f, ArtY = 36f, ArtW = 204f, ArtH = 232f;
 
     // Due caselle, non tre: la prima e' ATK in Fronte e BLOCCO in Retro.
-    public const float StatY = 220f, StatH = 36f, StatW = 98f, StatGap = 4f;
+    public const float StatY = 276f, StatH = 30f, StatW = 78f, StatGap = 44f;
 
     // Il badge del kit ha l'icona a sinistra: il numero parte dopo di lei.
     public const float StatTextInset = 26f;
     public const float StatTextW = StatW - StatTextInset - 6f;
 
-    public const float StripY = 290f, StripH = 34f;
-    public const float StripIconX = 16f, StripIconY = 294f, StripIconSize = 26f;
+    public const float StripY = 310f, StripH = 20f;
+    public const float StripIconX = 16f, StripIconY = 312f, StripIconSize = 16f;
 
     // ── Anatomia del RETRO ────────────────────────────────────────────────────
     //
@@ -116,7 +116,7 @@ public class CardOverlay : MonoBehaviour
     // carta, non a una delle sue facce. Sul fronte cadono dentro i pozzetti
     // stampati nel template, sul dorso stanno alla stessa quota sulla
     // copertina.
-    public const float ChargeY = 262f, ChargeH = 22f, ChargeW = 64f, ChargeGap = 4f;
+    public const float ChargeY = 261f, ChargeH = 10f, ChargeW = 12f, ChargeGap = 5f;
 
     // L'insegna divide la plancia alta con il tag di fazione, che resta al suo
     // posto anche da coperta: la fazione e' la chiave della regola.
@@ -131,7 +131,7 @@ public class CardOverlay : MonoBehaviour
 
     public static float StatX(int index) => NameX + index * (StatW + StatGap);
     public static float StatTextX(int index) => StatX(index) + StatTextInset;
-    public static float ChargeX(int index) => NameX + index * (ChargeW + ChargeGap);
+    public static float ChargeX(int index) => 88f + index * (ChargeW + ChargeGap);
 
     // Alpha dei ripieghi senza skin. Tenerli bassi non e' un vezzo: sotto c'e'
     // lo shader.
@@ -428,6 +428,26 @@ public class CardOverlay : MonoBehaviour
 
         var sprite = UiSkin.Sprite(key);
         rule = null;
+
+        if (UiSkin.Active != null && UiSkin.Active.neonMonte)
+        {
+            var indexPlate = UiBuild.Fill(rt, GamePalette.WithAlpha(GamePalette.Paper, 0.55f));
+            var icon = UiBuild.Rect("IndexSymbol", rt);
+            UiBuild.Band(icon, 3f, 5f, 20f, 20f);
+            if (index == 0)
+            {
+                var glyph = UiBuild.Fill(icon, GamePalette.Ink);
+                glyph.sprite = GlyphSprites.Sword;
+                glyph.preserveAspect = true;
+            }
+            else
+            {
+                var label = UiBuild.Text("Health", icon, "+", 22f, GamePalette.Ink, TextAlignmentOptions.Center, FontStyles.Bold);
+                UiBuild.Stretch(label.rectTransform);
+            }
+            _frontOnly.Add(rt.gameObject);
+            return indexPlate;
+        }
 
         if (sprite != null)
         {
