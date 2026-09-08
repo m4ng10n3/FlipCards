@@ -22,7 +22,7 @@ using UnityEngine.UI;
 /// para e basta. E' l'"hold" della slot machine.</item>
 /// </list>
 ///
-/// I tre pip in cima sono il **programma**: cosa fara' nei giri successivi, con
+/// I pip al centro del bordo inferiore sono il **programma**: cosa fara' nei giri successivi, con
 /// il giro in corso marcato. E' l'informazione piu' importante del tavolo — senza,
 /// decidere se coprire una corsia adesso o al turno dopo e' un tiro di dado.
 ///
@@ -43,27 +43,28 @@ public class SlotOverlay : MonoBehaviour,
 
     public const float CellW = 352f, CellH = 288f;
 
-    public const float NameX = 44f, NameY = 8f, NameW = 206f, NameH = 28f;
-    public const float FactionX = 12f, FactionY = 10f, FactionSize = 26f;
+    public const float NameX = 100f, NameY = 13f, NameW = 172f, NameH = 28f;
+    public const float FactionX = 18f, FactionY = 14f, FactionSize = 18f;
 
-    public const float ArtX = 80f, ArtY = 44f, ArtSize = 192f;
+    public const float ArtX = 68f, ArtY = 38f, ArtSize = 216f;
 
-    // Tre caselle statistica in fondo: ATK, HP, DEF. Il badge del kit ha l'icona
+    // Angoli: ATK in basso a sinistra, HP in alto a destra, DEF in basso a destra. Icona
     // a sinistra, quindi il numero parte dopo di lei.
-    public const float ChipY = 244f, ChipH = 36f, ChipW = 108f, ChipGap = 4f;
+    public const float ChipY = 246f, ChipH = 30f, ChipW = 72f, ChipGap = 12f;
     public const float ChipTextInset = 26f;
-    public static float ChipX(int index) => 10f + index * (ChipW + ChipGap);
+    public static float ChipX(int index) => index == 0 ? 14f : CellW - 14f - ChipW;
+    public static float ChipRowY(int index) => index == 1 ? 12f : ChipY;
     public static float ChipTextX(int index) => ChipX(index) + ChipTextInset;
-    public const float ChipTextW = ChipW - ChipTextInset - 6f;
+    public const float ChipTextW = ChipW - ChipTextInset - 16f;
 
     // Pip del programma, in coda alla striscia del nome.
-    const float PipRight = 344f, PipY = 14f, PipSize = 16f, PipPitch = 26f;
-    const float PipMarkSize = 24f;
+    const float PipY = 245f, PipSize = 12f, PipPitch = 20f;
+    const float PipMarkSize = 18f;
 
     // Il numero della lastra, nella striscia libera a sinistra del simbolo, e
     // sotto di lui il marchio della risonanza.
-    const float PoolX = 6f, PoolY = 48f, PoolW = 68f, PoolH = 26f;
-    const float ResonanceX = 8f, ResonanceY = 78f, ResonanceSize = 26f;
+    const float PoolX = 304f, PoolY = 21f, PoolW = 44f, PoolH = 22f;
+    const float ResonanceX = 14f, ResonanceY = 44f, ResonanceSize = 26f;
 
     SlotView _view;
     RectTransform _rt;
@@ -74,6 +75,8 @@ public class SlotOverlay : MonoBehaviour,
     RectTransform _pipRoot;
     readonly List<Image> _pips = new List<Image>();
     readonly List<Image> _pipMarks = new List<Image>();
+    SlotLamp _attackLamp, _guardLamp;
+    readonly List<SlotLamp> _programLamps = new List<SlotLamp>();
     Image _furyChip;
     TextMeshProUGUI _furyLabel;
     TextMeshProUGUI _poolLabel;   // il numero della lastra nella corazza
@@ -112,9 +115,7 @@ public class SlotOverlay : MonoBehaviour,
         if (atk != _lastAtk)
         {
             _lastAtk = atk;
-            _atkLabel.text = inst.tempAtkBonus > 0
-                ? $"{inst.def.atkDamage} <color=#FF8A8A>+{inst.tempAtkBonus}</color>"
-                : inst.def.atkDamage.ToString();
+            _atkLabel.text = atk.ToString();
         }
 
         if (inst.PatternStep != _lastStep || _pips.Count != PipCount(inst))
@@ -150,12 +151,20 @@ public class SlotOverlay : MonoBehaviour,
             }
         }
 
+        if (UiSkin.Active != null && UiSkin.Active.neonMonte)
+        {
+            if (_view.hpText != null) _view.hpText.enabled = false;
+            if (_view.defText != null) _view.defText.enabled = false;
+        }
+        _attackLamp?.SetState(inst.side == Side.Fronte, GamePalette.Danger);
+        _guardLamp?.SetState(inst.ComputeSelfBlock() > 0 && resonance == 0, GamePalette.Retro);
+
         if (_berserker != null && _berserker.FuryStacks != _lastFury)
         {
             _lastFury = _berserker.FuryStacks;
             _furyLabel.text = _berserker.BurstReady
                 ? "FURIA x2"
-                : $"FURIA {_berserker.FuryStacks}/{_berserker.furyThreshold}";
+                : $"F {_berserker.FuryStacks}";
             _furyChip.color = _berserker.BurstReady
                 ? GamePalette.Danger
                 : GamePalette.WithAlpha(GamePalette.Danger, 0.45f);
@@ -168,6 +177,11 @@ public class SlotOverlay : MonoBehaviour,
     /// </summary>
     void ApplyReelState(Side side)
     {
+        if (UiSkin.Active != null && UiSkin.Active.neonMonte)
+        {
+            _frame.color = Color.clear;
+            return;
+        }
         bool armed = side == Side.Fronte;
 
         var sprite = UiSkin.Sprite(armed
@@ -238,13 +252,21 @@ public class SlotOverlay : MonoBehaviour,
             UiBuild.Fill(nameBar, GamePalette.WithAlpha(Color.black, 0.5f));
         }
 
+        if (UiSkin.Active != null && UiSkin.Active.neonMonte)
+        {
+            var nameFrame = UiBuild.Rect("FamilyNameFrame", _rt);
+            UiBuild.Band(nameFrame, 56f, 4f, 240f, 46f);
+            var nameImage = UiBuild.Fill(nameFrame, Color.white);
+            nameImage.sprite = UiSkin.Sprite("slot_name_" + def.faction);
+            nameImage.preserveAspect = false;
+        }
         BuildFactionTag(def);
 
         // ATK, HP e DEF sempre a schermo: sono i numeri su cui il giocatore
         // decide se coprire la corsia o lasciarla scoperta, e la casella non ha
         // una seconda faccia dove nasconderne uno.
         var atkRt = Chip("AtkChip", 0, UiSkin.MicroAtk, GamePalette.Danger);
-        _atkLabel = UiBuild.Text("Label", atkRt, "0", 20f, GamePalette.TextPrimary,
+        _atkLabel = UiBuild.Text("Label", atkRt, "0", 20f, GamePalette.Ink,
                                  TextAlignmentOptions.Center, FontStyles.Bold);
         UiBuild.Band(_atkLabel.rectTransform, ChipTextInset, 0f, ChipTextW, ChipH);
         _atkLabel.alignment = TextAlignmentOptions.Center;
@@ -261,7 +283,7 @@ public class SlotOverlay : MonoBehaviour,
         if (_berserker != null)
         {
             var furyRt = UiBuild.Rect("FuryChip", _rt);
-            UiBuild.Band(furyRt, 12f, ArtY + 4f, 130f, 24f);
+            UiBuild.Band(furyRt, 276f, 72f, 62f, 20f);
             _furyChip = UiBuild.Fill(furyRt, GamePalette.WithAlpha(GamePalette.Danger, 0.45f));
             _furyLabel = UiBuild.Text("Label", furyRt, "FURIA", 12f, GamePalette.TextPrimary,
                                       TextAlignmentOptions.Center, FontStyles.Bold);
@@ -270,8 +292,8 @@ public class SlotOverlay : MonoBehaviour,
 
         // I Text del prefab devono disegnare sopra i fondi appena creati.
         if (_view.nameText != null) _view.nameText.transform.SetAsLastSibling();
-        if (_view.hpText != null) _view.hpText.transform.SetAsLastSibling();
-        if (_view.defText != null) _view.defText.transform.SetAsLastSibling();
+        if (_view.hpText != null) { _view.hpText.color = GamePalette.Ink; _view.hpText.transform.SetAsLastSibling(); }
+        if (_view.defText != null) { _view.defText.color = GamePalette.Ink; _view.defText.transform.SetAsLastSibling(); }
 
         var hint = _rt.Find("HintText");
         if (hint != null) hint.SetAsLastSibling();
@@ -349,37 +371,44 @@ public class SlotOverlay : MonoBehaviour,
 
     void BuildFactionTag(SlotDefinition.Spec def)
     {
+        if (UiSkin.Active != null && UiSkin.Active.neonMonte) return;
         var rt = UiBuild.Rect("FactionTag", _rt);
         UiBuild.Band(rt, FactionX, FactionY, FactionSize, FactionSize);
-
-        if (UiSkin.Active != null && UiSkin.Active.neonMonte)
-        {
-            UiBuild.Fill(rt, GamePalette.Ink);
-            var tag = UiBuild.Text("Letter", rt, def.faction.ToString(), 18f, GamePalette.FactionColor(def.faction),
-                TextAlignmentOptions.Center, FontStyles.Bold);
-            UiBuild.Stretch(tag.rectTransform);
-            return;
-        }
-
-        var sprite = UiSkin.Sprite(UiSkin.FactionTag(def.faction));
-        if (sprite != null)
-        {
-            var img = UiBuild.Fill(rt, Color.white);
-            img.sprite = sprite;
-            img.type = Image.Type.Simple;
-            return;
-        }
-
-        UiBuild.Fill(rt, GamePalette.FactionColor(def.faction));
-        var label = UiBuild.Text("Label", rt, def.faction.ToString(), 15f,
-                                 GamePalette.Background, TextAlignmentOptions.Center, FontStyles.Bold);
-        UiBuild.Stretch(label.rectTransform);
+        GlyphSprites.Stamp(rt, def.faction);
     }
 
     RectTransform Chip(string name, int index, string key, Color accent)
     {
         var rt = UiBuild.Rect(name, _rt);
-        UiBuild.Band(rt, ChipX(index), ChipY, ChipW, ChipH);
+        UiBuild.Band(rt, ChipX(index), ChipRowY(index), ChipW, ChipH);
+
+        if (UiSkin.Active != null && UiSkin.Active.neonMonte)
+        {
+            var icon = UiBuild.Rect("Symbol", rt);
+            UiBuild.Band(icon, 0f, 6f, 20f, 20f);
+            if (index == 1)
+            {
+                var plus = UiBuild.Text("Health", icon, "+", 26f, GamePalette.Ink,
+                    TextAlignmentOptions.Center, FontStyles.Bold);
+                UiBuild.Stretch(plus.rectTransform);
+            }
+            else
+            {
+                var glyph = UiBuild.Fill(icon, GamePalette.Ink);
+                glyph.sprite = index == 0 ? GlyphSprites.Sword : GlyphSprites.Shield;
+                glyph.preserveAspect = true;
+            }
+            if (index != 1)
+            {
+                var lampRt = UiBuild.Rect("SignalLamp", rt);
+                UiBuild.Band(lampRt, ChipW - 10f, 11f, 8f, 8f);
+                var lamp = lampRt.gameObject.AddComponent<SlotLamp>();
+                lamp.raycastTarget = false;
+                if (index == 0) _attackLamp = lamp; else _guardLamp = lamp;
+            }
+            rt.gameObject.SetActive(false); // Live stats belong to the cabinet instruments.
+            return rt;
+        }
 
         var sprite = UiSkin.Sprite(key);
         if (sprite != null)
@@ -415,15 +444,15 @@ public class SlotOverlay : MonoBehaviour,
             UiBuild.ClearChildren(_pipRoot);
             _pips.Clear();
             _pipMarks.Clear();
+            _programLamps.Clear();
 
             for (int i = 0; i < count; i++)
             {
-                float x = PipRight - (count - i) * PipPitch + (PipPitch - PipSize);
+                float x = (CellW - count * PipPitch) * 0.5f + i * PipPitch + (PipPitch - PipSize) * 0.5f;
 
                 var markRt = UiBuild.Rect($"Mark{i}", _pipRoot);
-                UiBuild.Band(markRt, x - (PipMarkSize - PipSize) * 0.5f,
-                                     PipY - (PipMarkSize - PipSize) * 0.5f, PipMarkSize, PipMarkSize);
-                var mark = Sprited(markRt, UiSkin.ReelPipCurrent, GamePalette.WithAlpha(Color.white, 0.85f));
+                UiBuild.Band(markRt, x, PipY + PipSize + 5f, PipSize, 2f);
+                var mark = UiBuild.Fill(markRt, GamePalette.Ink);
                 mark.enabled = false;
                 _pipMarks.Add(mark);
 
@@ -450,6 +479,7 @@ public class SlotOverlay : MonoBehaviour,
             {
                 _pips[i].color = GamePalette.WithAlpha(GamePalette.SideColor(side), current ? 1f : 0.35f);
             }
+
 
             _pipMarks[i].enabled = current;
         }

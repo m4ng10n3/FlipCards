@@ -76,7 +76,41 @@ public static class GlyphSprites
     /// ricordarsi quale simbolo mostrare salva questo enum e chiama
     /// <see cref="Of"/> a runtime — vedi <see cref="GlyphIcon"/>.
     /// </summary>
-    public enum Kind { Sword, Shield, BrokenShield }
+    public enum Kind { Sword, Shield, BrokenShield, Flame, Wave, Thorn }
+
+    static readonly string[] FlameArt = {
+        "......#.....", ".....##.....", "....###.....", "...####..#..",
+        "...####.##..", "..########..", ".##########.", ".####..####.",
+        ".###....###.", "..##....##..", "...##..##...", "....####...."
+    };
+    static readonly string[] WaveArt = {
+        "............", ".....#####..", "...########.", "..####...##.",
+        ".####....#..", ".####.......", ".#####......", "..#####...#.",
+        "...########.", "##..######..", "###########.", ".#########.."
+    };
+    static readonly string[] ThornArt = {
+        ".....##.....", ".#...##...#.", ".##..##..##.", "..########..",
+        "...######...", ".....##.....", "##...##...##", ".###.##.###.",
+        "..########..", "....####....", ".....##.....", ".....##....."
+    };
+
+    public static Kind FamilyKind(Faction faction) => faction switch
+    {
+        Faction.A => Kind.Flame,
+        Faction.B => Kind.Wave,
+        _ => Kind.Thorn,
+    };
+
+    /// <summary>Emblema stampato senza cartiglio; il filetto mantiene il contrasto sul retro.</summary>
+    public static void Stamp(RectTransform rect, Faction faction)
+    {
+        var ink = UiBuild.Fill(rect, Color.Lerp(GamePalette.Ink, GamePalette.FactionColor(faction), .63f));
+        ink.sprite = Of(FamilyKind(faction));
+        ink.preserveAspect = true;
+        var outline = rect.gameObject.AddComponent<UnityEngine.UI.Outline>();
+        outline.effectColor = GamePalette.Ink;
+        outline.effectDistance = new Vector2(.35f, -.35f);
+    }
 
     public static Sprite Sword => Get("sword", SwordArt);
     public static Sprite Shield => Get("shield", ShieldArt);
@@ -86,6 +120,9 @@ public static class GlyphSprites
     {
         Kind.Shield => Shield,
         Kind.BrokenShield => BrokenShield,
+        Kind.Flame => Get("flame", FlameArt),
+        Kind.Wave => Get("wave", WaveArt),
+        Kind.Thorn => Get("thorn", ThornArt),
         _ => Sword,
     };
 

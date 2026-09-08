@@ -115,6 +115,9 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
 
     private void OnDestroy()
     {
+        ClearDropPreview();
+        if (cardView != null && cardView.IsDraggingHand)
+            gm?.HandManager?.HandRoot.GetComponentInParent<HandTray>()?.SetDraggedCard(null);
         UnsubscribeAllEvents();
     }
 
@@ -175,6 +178,8 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
             // Stato 3: carta in mano presa -> tutte le caselle libere evidenziate.
             gm.HighlightFreeSpots(true);
             gm.HandManager.OnHandCardBeginDrag(cardView);
+            gm.HandManager.HandRoot.GetComponentInParent<HandTray>()?.SetDraggedCard(cardView);
+            UpdateDropPreview(eventData);
             return;
         }
 
@@ -205,6 +210,7 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
 
         if (cardView.IsDraggingHand && gm != null && gm.HandManager != null)
             gm.HandManager.ReorderHandDuringDrag(cardView, cardView.RectTransform.position);
+        UpdateDropPreview(eventData);
     }
 
     public void OnEndDrag(PointerEventData eventData)
@@ -212,6 +218,8 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
         LogPointerEvent("EndDrag", eventData);
         EnsureRuntimeRefs();
         if (cardView == null || !cardView.IsDragging) return;
+        ClearDropPreview();
+        gm?.HandManager?.HandRoot.GetComponentInParent<HandTray>()?.SetDraggedCard(null);
 
         if (cardView.IsDraggingFromBoard)
             HandleBoardDrop(eventData);
@@ -279,6 +287,24 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
 
         gm.HighlightFreeSpots(false);
         gm.HandManager.OnHandCardEndDrag(cardView);
+    }
+
+    DropPreview _dropPreview;
+    public Transform CurrentDropTarget { get; private set; }
+    void UpdateDropPreview(PointerEventData eventData)
+    {
+        Transform target = cardView.IsDraggingHand ? FindEmptySpotUnderPointer(eventData)
+            : FindBoardCardUnderPointer(eventData)?.transform;
+        if (target == CurrentDropTarget) return;
+        ClearDropPreview();
+        CurrentDropTarget = target;
+        if (target != null) _dropPreview = DropPreview.Show(target, cardView.IsDraggingFromBoard);
+    }
+    void ClearDropPreview()
+    {
+        if (_dropPreview != null) { _dropPreview.gameObject.SetActive(false); Destroy(_dropPreview.gameObject); }
+        _dropPreview = null;
+        CurrentDropTarget = null;
     }
 
     private void HandleBoardDrop(PointerEventData eventData)

@@ -42,6 +42,7 @@ public class HandTray : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     bool _raised;
     PointerEventData _pointer;
     float _outsideSince = -1f;
+    CardView _draggedCard;
 
     public bool IsRaised => _raised;
 
@@ -53,6 +54,7 @@ public class HandTray : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
     public void OnPointerEnter(PointerEventData eventData)
     {
+        if (_draggedCard != null) return;
         _pointer = eventData;
         _outsideSince = -1f;
         // Con la mano vuota non c'e' niente da sollevare, e sollevarla vorrebbe
@@ -129,6 +131,11 @@ public class HandTray : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
     void LateUpdate()
     {
+        if (_draggedCard != null)
+        {
+            Apply(false);
+            return;
+        }
         if (!_raised || Mouse.current == null || (_pointer != null && _pointer.dragging)) return;
         if (ContainsPointer(Mouse.current.position.ReadValue())) { _outsideSince = -1f; return; }
         if (_outsideSince < 0f) _outsideSince = Time.unscaledTime;
@@ -137,6 +144,7 @@ public class HandTray : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
     void OnDisable()
     {
+        _draggedCard = null;
         _pointer = null;
         Apply(false, immediate: true);
     }
@@ -170,4 +178,11 @@ public class HandTray : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
     /// <summary>Forza la discesa: serve a fine drag, quando il puntatore e' altrove.</summary>
     public void Lower() => Apply(false);
+
+    public void SetDraggedCard(CardView card)
+    {
+        _draggedCard = card;
+        _pointer = null;
+        Apply(false);
+    }
 }

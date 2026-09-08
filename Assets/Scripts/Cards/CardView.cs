@@ -176,7 +176,7 @@ public class CardView : MonoBehaviour
         var def = inline.BuildSpec();
 
         nameText.text = def.cardName;
-        factionText.text = def.faction.ToString();
+        factionText.text = GamePalette.FactionName(def.faction);
         sideText.text = "Side";
         hpText.text = def.maxHealth.ToString();
         AttackPwrText.text = def.frontDamage.ToString();
@@ -241,7 +241,7 @@ public class CardView : MonoBehaviour
         var def = instance.def;
 
         nameText.text    = def.cardName;
-        factionText.text = def.faction.ToString();
+        factionText.text = GamePalette.FactionName(def.faction);
         hpText.text      = $"{instance.health}/{def.maxHealth}";
         if (backHpText != null) backHpText.text = $"{instance.health}/{def.maxHealth}";
 
@@ -298,7 +298,7 @@ public class CardView : MonoBehaviour
     /// <c>tempAtkBonus</c>, e aggiungerlo di nuovo lo conterebbe due volte.
     /// E' la stessa guardia che usa LaneAxisView.
     /// </summary>
-    int ForecastAttack()
+    public int ForecastAttack()
     {
         int total = instance.ComputeAttackDamage();
 
@@ -469,7 +469,7 @@ public class CardView : MonoBehaviour
         {
             img.type = Image.Type.Simple;
             img.preserveAspect = false;
-            if (backImage != null) img.sprite = backImage;
+            img.sprite = UiSkin.Sprite("card_neutral") ?? backImage;
         }
 
         if (artworkMonster != null) artworkMonster.enabled = false;
@@ -615,6 +615,14 @@ public class CardView : MonoBehaviour
         _appliedFlipAngle = _flipAngle;
         _rt.localRotation *= Quaternion.Euler(0f, _appliedFlipAngle, 0f);
         UpdateShadow();
+    }
+
+    private void LateUpdate()
+    {
+        // HandManager can move the container after this card's Update.
+        // Resolve the picked card in world space after every parent has moved.
+        if (_dragging && _dragTarget.HasValue && _rt != null)
+            _rt.position = _dragTarget.Value;
     }
 
     // Expand only the hit area, never move/resize the root carrying the visual.

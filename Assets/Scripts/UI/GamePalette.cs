@@ -48,6 +48,13 @@ public static class GamePalette
 
     public static Color SideColor(Side side) => side == Side.Fronte ? Fronte : Retro;
 
+    public static string FactionName(Faction faction) => faction switch
+    {
+        Faction.A => "Braci",
+        Faction.B => "Abissi",
+        _ => "Rovi",
+    };
+
     /// Fazioni come nel kit: A sangue, B ciano, C fosforo.
     public static Color FactionColor(Faction f) => f switch
     {

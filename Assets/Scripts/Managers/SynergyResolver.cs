@@ -70,7 +70,7 @@ public static class SynergyResolver
             if (Resonates(gm, lane))
             {
                 card.PushHint("RISONANZA: niente guardie");
-                Logger.Info($"Risonanza: lane {lane + 1} {card.def.faction} - nessuno para");
+                Logger.Info($"Risonanza: lane {lane + 1} {GamePalette.FactionName(card.def.faction)} - nessuno para");
             }
         }
     }

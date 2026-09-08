@@ -356,8 +356,8 @@ public static class FlipCardsLayoutBuilder
         // qualcosa. `card_back_plain` e' il dorso che si vede nella pila del
         // mazzo, ed e' quello che deve vedersi anche in campo: la fazione la
         // portano il bordo e i simboli che monta CardOverlay.
-        var back = KitSprite("card/card_back_plain")
-                ?? KitSprite($"card/card_back_{definition.faction}")
+        var back = front ?? KitSprite($"card/card_back_{definition.faction}")
+                ?? KitSprite("card/card_back_plain")
                 ?? KitSprite("card/card_back");
         if (front == null && back == null) return;
 
@@ -443,7 +443,7 @@ public static class FlipCardsLayoutBuilder
             var bg = root.GetComponent<Image>();
             if (bg != null)
             {
-                bg.sprite = NeonMonteSkinBuilder.Art("card_front");
+                bg.sprite = NeonMonteSkinBuilder.SlotPaper ?? NeonMonteSkinBuilder.Art("slot_face");
                 bg.type = Image.Type.Simple;
                 bg.color = bg.sprite != null ? Color.white : GamePalette.Paper;
             }
@@ -465,12 +465,12 @@ public static class FlipCardsLayoutBuilder
                 symbol.material = null;
                 symbol.color = Color.white;
             }
-            Place(cell, "HP", SlotOverlay.ChipTextX(1), SlotOverlay.ChipY,
+            Place(cell, "HP", SlotOverlay.ChipTextX(1), SlotOverlay.ChipRowY(1),
                               SlotOverlay.ChipTextW, SlotOverlay.ChipH);
-            Place(cell, "Def", SlotOverlay.ChipTextX(2), SlotOverlay.ChipY,
+            Place(cell, "Def", SlotOverlay.ChipTextX(2), SlotOverlay.ChipRowY(2),
                                SlotOverlay.ChipTextW, SlotOverlay.ChipH);
 
-            StyleText(cell, "Name", 19, TextAnchor.MiddleLeft, GamePalette.Ink);
+            StyleText(cell, "Name", 19, TextAnchor.MiddleCenter, GamePalette.Ink);
             StyleText(cell, "HP", 20, TextAnchor.MiddleCenter, GamePalette.PlayerHp);
             StyleText(cell, "Def", 20, TextAnchor.MiddleCenter, GamePalette.Retro);
 
@@ -906,9 +906,9 @@ public static class FlipCardsLayoutBuilder
         // La cassa del rullo e' piu' alta delle caselle: sopra e sotto restano le
         // fasce in cui il reel di fine turno fa scorrere le caselle parziali.
         var housing = UiBuild.Rect("ReelHousing", field);
-        UiBuild.Band(housing, 0f, ReelHousingY, FieldW, ReelHousingH);
+        UiBuild.Band(housing, 0f, ReelHousingY, FieldW + 70f, ReelHousingH);
         var lever = UiBuild.Rect("ReelLever", field);
-        UiBuild.Band(lever, FieldW - 4f, ReelHousingY + 38f, 86f, 320f);
+        UiBuild.Band(lever, FieldW, ReelHousingY - 7f, 70f, 230f);
         var leverImage = UiBuild.Fill(lever, Color.white);
         leverImage.sprite = NeonMonteSkinBuilder.Art("reel_lever");
         leverImage.preserveAspect = true;
@@ -1158,32 +1158,42 @@ public static class FlipCardsLayoutBuilder
     {
         var box = Zone("Legend", rail, 0f, RailLegendY, RailW, RailLegendH);
 
-        var title = UiBuild.Text("Title", box, "LEGENDA", 13f, GamePalette.TextMuted,
+        var title = UiBuild.Text("Title", box, "ROMBO = 1   /   LINEA = 0", 13f, GamePalette.TextMuted,
                                  TextAlignmentOptions.Left, FontStyles.Bold);
-        UiBuild.Band(title.rectTransform, 12f, 10f, 200f, 20f);
+        UiBuild.Band(title.rectTransform, 12f, 10f, RailW - 24f, 20f);
 
         float y = 38f;
-        y = LegendGroup(box, y, "SINERGIA — NEL COLORE DELLA FAZIONE");
+        y = LegendGroup(box, y, "SINERGIA — NEL COLORE DELLA FAMIGLIA");
         y = LegendGlyphRow(box, y, GlyphSprites.Kind.Sword, GamePalette.TextPrimary,
-                           "+n", "attacco a chi ha accanto");
+                           "tacche", "attacco a chi ha accanto");
         y = LegendGlyphRow(box, y, GlyphSprites.Kind.Shield, GamePalette.TextPrimary,
-                           "+n", "guardia a chi ha accanto");
+                           "tacche", "guardia a chi ha accanto");
         y = LegendGlyphRow(box, y, GlyphSprites.Kind.BrokenShield, GamePalette.Danger,
                            "risonanza", "su carta e casella: nessuno para");
 
         y = LegendGroup(box, y + 6f, "LE TUE CARTE");
         y = LegendRow(box, y, GamePalette.Fronte, "RITRATTO", "scoperta: attacca");
         y = LegendRow(box, y, GamePalette.Retro, "SIGILLO", "coperta: para ed e' insegna");
-        y = LegendRow(box, y, GamePalette.Charge, "TACCHE", "cariche: bonus al colpo");
+        y = LegendRow(box, y, GamePalette.Charge, "ROSA", "cariche: bonus al colpo");
 
-        y = LegendGroup(box, y + 6f, "IL RULLO NEMICO");
-        y = LegendRow(box, y, GamePalette.Fronte, "CARICA", "colpisce questo giro");
-        y = LegendRow(box, y, GamePalette.Retro, "DIFESA", "non colpisce, para");
-        y = LegendRow(box, y, GamePalette.TextMuted, "PIP", "i giri che verranno");
+        y = LegendGroup(box, y + 6f, "CASSA: 1 LUCE = 1 PUNTO");
+        y = LegendRow(box, y, GamePalette.Danger, "VITA", "tonde rosse: HP rimasti");
+        y = LegendRow(box, y, GamePalette.Fronte, "ATTACCO", "punte ambra: colpo attivo");
+        y = LegendRow(box, y, GamePalette.Retro, "DIFESA", "scudi acqua: parata attiva");
 
-        y = LegendGroup(box, y + 6f, "NUMERI");
-        y = LegendInlineRow(box, y, GamePalette.Danger, "ATK", GamePalette.PlayerHp, "HP",
-                            GamePalette.Retro, "BLOCCO");
+        y = LegendGroup(box, y + 6f, "FAMIGLIE - RICONOSCI IL SIMBOLO");
+        for (int i = 0; i < 3; i++)
+        {
+            var faction = (Faction)i;
+            float x = 14f + i * (RailW - 28f) / 3f;
+            var icon = UiBuild.Rect("Family_" + GamePalette.FactionName(faction), box);
+            UiBuild.Band(icon, x, y + 2f, 18f, 18f);
+            UiBuild.Fill(icon, GamePalette.FactionColor(faction));
+            icon.gameObject.AddComponent<GlyphIcon>().kind = GlyphSprites.FamilyKind(faction);
+            var label = UiBuild.Text("FamilyName_" + i, box, GamePalette.FactionName(faction),
+                14f, GamePalette.FactionColor(faction), TextAlignmentOptions.Left);
+            UiBuild.Band(label.rectTransform, x + 24f, y, (RailW - 28f) / 3f - 24f, 22f);
+        }
     }
 
     /// <summary>

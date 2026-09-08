@@ -215,5 +215,5 @@ public class SlotInstance
     public void PushHint(string msg)
         => EventBus.Publish(GameEventType.Info, new EventContext { source = this, phase = "HINT: " + msg });
 
-    public override string ToString() => $"Slot#{id} {def.SlotName} ({def.faction}) {side} HP:{health}";
+    public override string ToString() => $"Slot#{id} {def.SlotName} ({GamePalette.FactionName(def.faction)}) {side} HP:{health}";
 }

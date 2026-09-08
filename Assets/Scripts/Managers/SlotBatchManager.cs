@@ -312,7 +312,7 @@ public class SlotBatchManager : MonoBehaviour
             cell.label.color = settleColor;
             var slot = GameManager.Instance?.GetEnemySlotAtLane(cell.root.GetSiblingIndex());
             string state = slot != null && slot.side == Side.Retro ? "DIFESA" : "ATTACCO";
-            cell.label.text = $"{finalSD.SlotName}  [{finalSD.faction}]\n{state}";
+            cell.label.text = $"{finalSD.SlotName}  [{GamePalette.FactionName(finalSD.faction)}]\n{state}";
         }
 
         yield return new WaitForSeconds(holdAfterSettle);

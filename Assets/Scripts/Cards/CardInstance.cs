@@ -63,7 +63,7 @@ public class CardInstance
     }
 
     public void Flip() => side = (side == Side.Fronte ? Side.Retro : Side.Fronte);
-    public override string ToString() => $"#{id} {def.cardName} ({def.faction}) {side} HP:{health}";
+    public override string ToString() => $"#{id} {def.cardName} ({GamePalette.FactionName(def.faction)}) {side} HP:{health}";
 
     // ====== UTIL ======
     public void ClearCombatBonuses()

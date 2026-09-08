@@ -91,7 +91,7 @@ public class InspectorPanel : MonoBehaviour
         var def = inst.def;
         bool front = inst.side == Side.Fronte;
 
-        SetHeader(def.cardName, $"{def.cardClass}  ·  Fazione {def.faction}", inst.side);
+        SetHeader(def.cardName, $"{def.cardClass}  ·  Famiglia {GamePalette.FactionName(def.faction)}", inst.side);
 
         var gm = GameManager.Instance;
         int lane = gm != null ? gm.GetLaneIndexFor(inst) : -1;
@@ -150,7 +150,7 @@ public class InspectorPanel : MonoBehaviour
         Section($"Il conto della corsia {lane + 1}");
 
         if (resonant)
-            Line($"<color=#ff2b3c><b>RISONANZA</b></color> stessa fazione {card.def.faction} in corsia: " +
+            Line($"<color=#ff2b3c><b>RISONANZA</b></color> stessa famiglia {GamePalette.FactionName(card.def.faction)} in corsia: " +
                  "<b>nessuno dei due para</b>.");
 
         // ── Quello che fai tu ────────────────────────────────────────────────
@@ -257,7 +257,7 @@ public class InspectorPanel : MonoBehaviour
         if (_bannerTargets.Count == 0)
         {
             Line($"<color=#ff2b3c>A nessuno</color>: nelle corsie accanto non c'e' " +
-                 $"nessuna carta {card.def.faction} che possa usarla.");
+                 $"nessuna carta {GamePalette.FactionName(card.def.faction)} che possa usarla.");
             Line("<color=#8b93a3>Spostarla accanto a una della sua fazione la accende.</color>");
             return;
         }
@@ -347,7 +347,7 @@ public class InspectorPanel : MonoBehaviour
         var def = definition.BuildSpec();
 
         if (titleText != null) titleText.text = def.cardName;
-        if (subtitleText != null) subtitleText.text = $"{def.cardClass}  ·  Fazione {def.faction}";
+        if (subtitleText != null) subtitleText.text = $"{def.cardClass}  ·  Famiglia {GamePalette.FactionName(def.faction)}";
         if (sideStrip != null) sideStrip.color = GamePalette.WithAlpha(GamePalette.Neutral, 0.7f);
         if (sideText != null)
         {
@@ -387,7 +387,7 @@ public class InspectorPanel : MonoBehaviour
         var def = inst.def;
         bool armed = inst.side == Side.Fronte;
 
-        SetHeader(def.SlotName, $"Casella del rullo  ·  Fazione {def.faction}", inst.side);
+        SetHeader(def.SlotName, $"Casella del rullo  ·  Famiglia {GamePalette.FactionName(def.faction)}", inst.side);
         if (sideText != null) sideText.text = armed ? "CARICA — COLPISCE" : "TRATTENUTA — NON COLPISCE";
 
         _sb.Clear();
@@ -575,17 +575,17 @@ public class InspectorPanel : MonoBehaviour
 
         if (def.backDamageBonusSameFaction > 0)
         {
-            Line($"<color=#{hex}><b>SPADA +{def.backDamageBonusSameFaction}</b></color>  attacco alle carte <b>{def.faction}</b> nelle corsie accanto");
+            Line($"<color=#{hex}><b>SPADA +{def.backDamageBonusSameFaction}</b></color>  attacco alle carte <b>{GamePalette.FactionName(def.faction)}</b> nelle corsie accanto");
             any = true;
         }
         if (def.backBlockBonusSameFaction > 0)
         {
-            Line($"<color=#{hex}><b>SCUDO +{def.backBlockBonusSameFaction}</b></color>  guardia alle carte <b>{def.faction}</b> nelle corsie accanto");
+            Line($"<color=#{hex}><b>SCUDO +{def.backBlockBonusSameFaction}</b></color>  guardia alle carte <b>{GamePalette.FactionName(def.faction)}</b> nelle corsie accanto");
             any = true;
         }
         if (def.backBonusPAIfTwoRetroSameFaction > 0)
         {
-            Line($"+{def.backBonusPAIfTwoRetroSameFaction} AP con due {def.faction} coperte, una volta per turno");
+            Line($"+{def.backBonusPAIfTwoRetroSameFaction} AP con due {GamePalette.FactionName(def.faction)} coperte, una volta per turno");
             any = true;
         }
         if (!any) Line("<color=#66667a>nessuna: da coperta e' soltanto un muro</color>");

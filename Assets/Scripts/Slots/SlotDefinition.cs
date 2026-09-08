@@ -14,7 +14,7 @@ public class SlotDefinition : MonoBehaviour
         public Side[] flipPattern;
         public int reelFrameIndex;
 
-        public override string ToString() => $"{SlotName} [{faction}]";
+        public override string ToString() => $"{SlotName} [{GamePalette.FactionName(faction)}]";
     }
 
     [Header("Identity")]

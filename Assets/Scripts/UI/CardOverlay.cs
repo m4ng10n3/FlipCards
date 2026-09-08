@@ -4,62 +4,11 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Chrome della cella carta, montato sull'anatomia del kit *Arcade Horror CRT*
-/// (`layouts.card` del manifest, ×2): tag di fazione, badge delle statistiche,
-/// traccia delle cariche, striscia dell'abilita' e sigillo della faccia Retro.
-///
-/// **Sulla carta non e' scritto quale faccia sia.** Il lato lo dice il template —
-/// <c>card_front_{fazione}</c> ha la finestra del ritratto aperta,
-/// <c>card_back_{fazione}</c> e' cieca e ci si stampa sopra il sigillo — e lo
-/// confermano i numeri, che cambiano con la faccia. Una fascia con scritto
-/// FRONTE o RETRO ripeterebbe a parole quello che l'immagine gia' dice, e
-/// costerebbe l'unica banda libera della cella: quella bassa, che qui e'
-/// l'abilita'.
-///
-/// **Le informazioni sono divise fra le due facce**, non ripetute su entrambe:
-/// due sole caselle statistica, e la prima cambia significato.
-///
-/// | | in mano | Fronte | Retro |
-/// |---|---|---|---|
-/// | template | fronte di fazione | fronte di fazione | **copertina piana + bordo di fazione** |
-/// | plancia alta | nome | nome | **insegna: spada/scudo col numero** |
-/// | finestra | ritratto | ritratto | **sigillo grande, come nel mazzo** |
-/// | pozzetti bassi | ATK e HP | ATK e HP | **spenti** |
-/// | numeri | — | nei pozzetti | **due indici negli angoli bassi** |
-/// | cariche | nascoste | tre pozzetti sotto le statistiche | **gli stessi tre, nello stesso posto** |
-/// | fascia bassa | icona + nome abilita' | icona + nome | **niente** |
-///
-/// **Il retro e' un dorso, non il fronte con altri numeri.** Deve leggersi come
-/// le carte impilate nel mazzo: <c>card_back_plain</c> del kit, il sigillo
-/// grande al centro, le squadre agli angoli, e nessun pozzetto. Con i numeri
-/// nelle stesse due caselle del fronte una carta coperta sembrava una carta
-/// scoperta a cui mancava qualcosa, e il conto delle facce sul tavolo — quante
-/// attaccano, quante parano — richiedeva di leggere invece di guardare.
-///
-/// **Girata, la carta non dice piu' chi e'.** Il nome sparisce, l'attacco
-/// sparisce, il nome dell'abilita' sparisce: resta l'icona, il colore della
-/// fazione e cosa fa da coperta. Non e' una semplificazione grafica, e' la
-/// regola del gioco — con sei carte a terra devi ricordarti tu che cosa hai
-/// coperto, e sbagliarsi e' una mossa persa. Quello che il retro mostra e'
-/// soltanto cio' che serve a decidere <em>adesso</em>: quanto para, quanta vita
-/// ha, e che numero passa alle vicine della sua fazione.
-///
-/// Il resto — blocco dell'altra faccia, passive, instabilita', testo completo
-/// dell'abilita' — sta nell'ispettore, che e' la superficie fatta per il
-/// dettaglio. Una cella da 224x336 non puo' ospitarlo e provarci significa
-/// scriverlo cosi' piccolo che non lo legge nessuno.
-///
-/// **Il chrome resta traslucido.** Il Template monta CardShaderGraph, che
-/// l'edizione POLYCHROME lega alla rotazione della carta: fondi opachi
-/// spegnerebbero il riflesso che scorre al tilt. Gli sprite del kit hanno gia'
-/// la loro trasparenza; i ripieghi a tinta piatta non superano alpha ~0.55.
-///
-/// Funziona anche sulle carte in mano, che non hanno ancora una CardInstance:
-/// in quel caso legge la Spec dal CardDefinition e mostra la faccia di fronte.
-///
-/// Nessun elemento e' Raycast Target: FindBoardCardUnderPointer prende il primo
-/// hit e ci cerca dentro un CardView, quindi un figlio che intercetta il click
-/// romperebbe lo swap per trascinamento.
+/// Runtime card engraving. Neon Monte uses vertical power/health tallies on both
+/// faces, a printed faction banner on the back, and a shared pink charge track.
+/// All ink is unshaded above the foil template; the illustration keeps its own
+/// edition material. No child graphic intercepts input. The legacy skin retains
+/// its badge presentation. Chrome is rebuilt when a hand card is cloned to board.
 /// </summary>
 [DisallowMultipleComponent]
 public class CardOverlay : MonoBehaviour
@@ -74,8 +23,14 @@ public class CardOverlay : MonoBehaviour
 
     public const float CardW = 224f, CardH = 336f;
 
-    public const float NameX = 12f, NameY = 10f, NameW = 200f, NameH = 26f;
-    public const float ArtX = 10f, ArtY = 36f, ArtW = 204f, ArtH = 232f;
+    public const float NameX = 62f, NameY = 24f, NameW = 108f, NameH = 24f;
+    public const float ArtX = 40f, ArtY = 58f, ArtW = 144f, ArtH = 218f;
+    public const float RailY = 91f, RailH = 170f, RailW = 12f;
+    public static float RailX(int index) => index == 0 ? 15f : 197f;
+    MarginTally _powerTally, _healthTally;
+    EngravedOrnament _powerGlyph;
+    MarginTally _chargeTally;
+    static bool Printed => UiSkin.Active != null && UiSkin.Active.neonMonte;
 
     // Due caselle, non tre: la prima e' ATK in Fronte e BLOCCO in Retro.
     public const float StatY = 276f, StatH = 30f, StatW = 78f, StatGap = 44f;
@@ -84,8 +39,8 @@ public class CardOverlay : MonoBehaviour
     public const float StatTextInset = 26f;
     public const float StatTextW = StatW - StatTextInset - 6f;
 
-    public const float StripY = 310f, StripH = 20f;
-    public const float StripIconX = 16f, StripIconY = 312f, StripIconSize = 16f;
+    public const float StripY = 307f, StripH = 18f;
+    public const float StripIconX = 52f, StripIconY = 310f, StripIconSize = 12f;
 
     // ── Anatomia del RETRO ────────────────────────────────────────────────────
     //
@@ -116,7 +71,7 @@ public class CardOverlay : MonoBehaviour
     // carta, non a una delle sue facce. Sul fronte cadono dentro i pozzetti
     // stampati nel template, sul dorso stanno alla stessa quota sulla
     // copertina.
-    public const float ChargeY = 261f, ChargeH = 10f, ChargeW = 12f, ChargeGap = 5f;
+    public const float ChargeY = 293f, ChargeH = 12f, ChargeW = 36f, ChargeGap = 0f;
 
     // L'insegna divide la plancia alta con il tag di fazione, che resta al suo
     // posto anche da coperta: la fazione e' la chiave della regola.
@@ -125,9 +80,9 @@ public class CardOverlay : MonoBehaviour
     public const float BannerChipW = (BannerRowW - BannerChipGap) * 0.5f;
     public const float BannerGlyph = 22f;
 
-    public const float TagSize = 26f;
-    public const float TagX = NameX + NameW - TagSize - 2f;   // in coda alla barra nome
-    public const float TagY = NameY + 4f;
+    public const float TagSize = 20f;
+    public const float TagX = 187f;   // in coda alla barra nome
+    public const float TagY = 17f;
 
     public static float StatX(int index) => NameX + index * (StatW + StatGap);
     public static float StatTextX(int index) => StatX(index) + StatTextInset;
@@ -139,6 +94,7 @@ public class CardOverlay : MonoBehaviour
 
     CardView _view;
     CardDefinition _definition;
+    CardDefinition.Spec _printedSpec;
     RectTransform _rt;
 
     Image _statBadge;        // badge della prima casella: ATK o BLOCCO
@@ -200,7 +156,11 @@ public class CardOverlay : MonoBehaviour
             ApplyFace(face, onBoard);
         }
 
-        if (!onBoard) return;
+        if (!onBoard)
+        {
+            if (Printed) RefreshMargins();
+            return;
+        }
 
         if (inst.flipCharge != _lastCharge)
         {
@@ -231,6 +191,7 @@ public class CardOverlay : MonoBehaviour
                 _resonanceMark.color = GamePalette.FactionColor(inst.def.faction);
             }
         }
+        if (Printed) RefreshMargins();
     }
 
     // ── Faccia ────────────────────────────────────────────────────────────────
@@ -264,7 +225,8 @@ public class CardOverlay : MonoBehaviour
         // Le cariche si vedono in campo su tutte due le facce: sono la stessa
         // informazione, e cambiare posto girando la carta la rendeva difficile
         // da seguire. In mano non ci sono, perche' la carta non ne ha ancora.
-        if (_chargeColumn != null) _chargeColumn.gameObject.SetActive(onBoard);
+        if (_chargeColumn != null) _chargeColumn.gameObject.SetActive(Printed || onBoard);
+        if (Printed) ApplyCharge(onBoard ? _view.instance.flipCharge : 0);
 
         // Da coperta anche il nome dell'abilita' la tradirebbe, e la fascia
         // bassa del dorso deve restare vuota: la striscia intera si spegne.
@@ -282,6 +244,7 @@ public class CardOverlay : MonoBehaviour
     /// </summary>
     void ApplyCharge(int charge)
     {
+        if (_chargeTally != null) { _chargeTally.SetValue(charge, CardInstance.MaxFlipCharge, GamePalette.Charge); return; }
         var full = UiSkin.Sprite(UiSkin.FlipCellCurrent);
         var empty = UiSkin.Sprite(UiSkin.FlipCellUnknown);
 
@@ -328,6 +291,7 @@ public class CardOverlay : MonoBehaviour
         _over.SetAsLastSibling();
 
         var def = _definition.BuildSpec();
+        _printedSpec = def;
 
         // I fondi vanno creati PRIMA di rialzare i Text del prefab, altrimenti li
         // coprirebbero: i figli aggiunti dopo disegnano sopra.
@@ -340,16 +304,38 @@ public class CardOverlay : MonoBehaviour
             _frontOnly.Add(Plate("AbilityStrip", NameX, StripY, NameW, StripH, 0.55f).gameObject);
         }
 
-        if (UiSkin.Active != null && UiSkin.Active.neonMonte)
+        if (Printed)
         {
-            // The paper texture has no baked wells: these rules share exact geometry with the text.
-            var rules = UiBuild.Rect("PrintedRules", _over);
-            UiBuild.Stretch(rules);
-            Edge(rules, NameX + 6f, NameY + NameH, NameW - 12f, 1f, GamePalette.Ink);
-            Edge(rules, NameX + 6f, StripY - 2f, NameW - 12f, 1f, GamePalette.Ink);
-            _frontOnly.Add(rules.gameObject);
+            var portrait = _rt.Find("imagecharacter")?.GetComponent<Image>();
+            var edition = portrait != null ? portrait.GetComponent<ShaderCode>() : null;
+            if (edition != null && edition.edition != Editions.REGULAR)
+            {
+                var rim = UiBuild.Rect("FoilBorder", _over);
+                UiBuild.Stretch(rim);
+                var foil = rim.gameObject.AddComponent<FoilBorder>();
+                foil.source = _rt.Find("Template").GetComponent<Image>();
+                foil.driver = portrait;
+                foil.raycastTarget = false;
+            }
+            var sealSprite = UiSkin.Sprite("back_seal");
+            if (sealSprite != null)
+            {
+                var seal = UiBuild.Rect("BackSeal", _over);
+                UiBuild.Band(seal, 52f, 104f, 120f, 120f);
+                var sealImage = UiBuild.Fill(seal, Color.white);
+                sealImage.sprite = sealSprite;
+                sealImage.preserveAspect = true;
+                _backOnly.Add(seal.gameObject);
+            }
+            BuildMargins();
+            BuildChargeColumn();
+            BuildFactionTag(def);
+            BuildAbilityStrip(def);
+            BuildBannerRow(def);
+            BuildResonanceMark();
+            RaisePrefabTexts();
+            return;
         }
-
         BuildSigil();
         BuildStatBadges();
         BuildChargeColumn();
@@ -415,6 +401,54 @@ public class CardOverlay : MonoBehaviour
     /// I pozzetti del fronte: attacco e vita. Non cambiano piu' significato col
     /// lato — sul dorso non ci sono affatto.
     /// </summary>
+    // Printed indices occupy the border on both faces; the ornamental back stays exposed.
+    EngravedOrnament Ornament(string name, string key, float x, float y, float w, float h)
+    {
+        var rt=UiBuild.Rect(name,_over);UiBuild.Band(rt,x,y,w,h);
+        var graphic=rt.gameObject.AddComponent<EngravedOrnament>();graphic.spriteKey=key;graphic.raycastTarget=false;graphic.color=Color.white;
+        return graphic;
+    }
+    void BuildMargins()
+    {
+        for(int i=0;i<2;i++)
+        {
+            var root=UiBuild.Rect(i==0?"PowerMargin":"HealthMargin",_over);
+            UiBuild.Band(root,RailX(i),RailY,RailW,RailH);
+            var tally=root.gameObject.AddComponent<MarginTally>();tally.raycastTarget=false;
+            if(i==0)_powerTally=tally;else _healthTally=tally;
+            var head=Ornament(i==0?"PowerSymbol":"HealthSymbol",i==0?"engraved_sword":"engraved_heart",RailX(i)-5f,RailY-35f,22f,35f);
+            if(i==0)_powerGlyph=head;
+            Ornament("MarginTerminal"+i,"engraved_terminal",RailX(i),RailY+RailH,RailW,13f);
+        }
+    }
+
+    void RefreshMargins()
+    {
+        var inst = _view.instance;
+        var spec = _printedSpec;
+        bool front = inst == null || inst.side == Side.Fronte;
+        int power = inst == null ? spec.frontDamage : front ? _view.ForecastAttack()
+            : inst.def.backBlockValue + inst.tempBlockBonus;
+        if (!front && inst != null)
+        {
+            var gm=GameManager.Instance;
+            int lane=gm!=null?gm.GetLaneIndexFor(inst):-1;
+            if(lane>=0)
+            {
+                if(SynergyResolver.Resonates(gm,lane))power=0;
+                else if(gm.CanAct)power+=SynergyResolver.BlockBonus(gm,lane);
+            }
+        }
+        var ink = GamePalette.Ink;
+        _powerGlyph.SetSprite(front ? "engraved_sword" : "engraved_shield");
+        _powerTally.SetValue(power, power, ink);
+        _healthTally.SetValue(inst == null ? spec.maxHealth : inst.health, spec.maxHealth, ink);
+        if (_view.AttackPwrText != null) _view.AttackPwrText.enabled = false;
+        if (_view.BlockPwrText != null) _view.BlockPwrText.enabled = false;
+        if (_view.hpText != null) _view.hpText.enabled = false;
+        if (_view.BackFace != null) _view.BackFace.SetActive(false);
+    }
+
     void BuildStatBadges()
     {
         _statBadge = StatBadge("StatBadge0", 0, UiSkin.BadgeAtk, GamePalette.Danger, out _statRule);
@@ -478,6 +512,15 @@ public class CardOverlay : MonoBehaviour
     /// </summary>
     void BuildChargeColumn()
     {
+        if (Printed)
+        {
+            _chargeColumn=UiBuild.Rect("ChargeTrack",_over);
+            UiBuild.Band(_chargeColumn,58f,ChargeY,108f,ChargeH);
+            _chargeTally=_chargeColumn.gameObject.AddComponent<MarginTally>();
+            _chargeTally.compact=true;_chargeTally.raycastTarget=false;
+            _chargeTally.SetValue(0,CardInstance.MaxFlipCharge,GamePalette.Charge);
+            return;
+        }
         _chargeColumn = UiBuild.Rect("ChargeTrack", _over);
         UiBuild.Band(_chargeColumn, NameX, ChargeY, NameW, ChargeH);
 
@@ -512,7 +555,7 @@ public class CardOverlay : MonoBehaviour
     void BuildResonanceMark()
     {
         var rt = UiBuild.Rect("ResonanceMark", _over);
-        UiBuild.Band(rt, TagX, TagY + TagSize + 2f, TagSize, TagSize);
+        UiBuild.Band(rt, TagX, Printed ? CardH - 58f : TagY + TagSize + 2f, TagSize, TagSize);
 
         _resonanceMark = UiBuild.Fill(rt, GamePalette.Danger);
         _resonanceMark.sprite = GlyphSprites.BrokenShield;
@@ -542,7 +585,7 @@ public class CardOverlay : MonoBehaviour
         _bannerRow = UiBuild.Rect("BannerRow", _over);
         UiBuild.Band(_bannerRow, NameX, NameY, BannerRowW, NameH);
 
-        var color = GamePalette.FactionColor(def.faction);
+        var color = Color.Lerp(GamePalette.Ink, GamePalette.FactionColor(def.faction), .55f);
         int shown = 0;
 
         if (def.backDamageBonusSameFaction > 0)
@@ -562,7 +605,7 @@ public class CardOverlay : MonoBehaviour
 
         // Fondo appena accennato: sotto la plancia c'e' il template del kit, e
         // un ripieno pieno spegnerebbe lo shader della carta.
-        UiBuild.Fill(chip, UiSkin.Active != null && UiSkin.Active.neonMonte
+        if (!Printed) UiBuild.Fill(chip, UiSkin.Active != null && UiSkin.Active.neonMonte
             ? GamePalette.WithAlpha(GamePalette.PanelSunken, 0.55f)
             : GamePalette.WithAlpha(color, 0.14f));
 
@@ -573,6 +616,16 @@ public class CardOverlay : MonoBehaviour
         img.type = Image.Type.Simple;
         img.preserveAspect = true;
 
+        if (Printed)
+        {
+            var track = UiBuild.Rect("GiftTally", chip);
+            UiBuild.Band(track, BannerGlyph + 8f, 5f, BannerChipW - BannerGlyph - 12f, NameH - 10f);
+            var tally = track.gameObject.AddComponent<MarginTally>();
+            tally.raycastTarget = false;
+            tally.compact = true;
+            tally.SetValue(value, value, color);
+            return;
+        }
         var label = UiBuild.Text("Value", chip, $"+{value}", 20f, color,
                                  TextAlignmentOptions.Center, FontStyles.Bold);
         UiBuild.Band(label.rectTransform, BannerGlyph + 6f, 0f,
@@ -638,31 +691,14 @@ public class CardOverlay : MonoBehaviour
 
     void BuildFactionTag(CardDefinition.Spec def)
     {
+        if (Printed)
+        {
+            Ornament("FamilyEngraving","engraved_family_"+def.faction,11f,20f,44f,30f);
+            return;
+        }
         var rt = UiBuild.Rect("FactionTag", _over);
         UiBuild.Band(rt, TagX, TagY, TagSize, TagSize);
-
-        if (UiSkin.Active != null && UiSkin.Active.neonMonte)
-        {
-            UiBuild.Fill(rt, GamePalette.Ink);
-            var tag = UiBuild.Text("Letter", rt, def.faction.ToString(), 18f, GamePalette.FactionColor(def.faction),
-                TextAlignmentOptions.Center, FontStyles.Bold);
-            UiBuild.Stretch(tag.rectTransform);
-            return;
-        }
-
-        var sprite = UiSkin.Sprite(UiSkin.FactionTag(def.faction));
-        if (sprite != null)
-        {
-            var img = UiBuild.Fill(rt, Color.white);
-            img.sprite = sprite;
-            img.type = Image.Type.Simple;
-            return;
-        }
-
-        UiBuild.Fill(rt, GamePalette.FactionColor(def.faction));
-        var label = UiBuild.Text("Label", rt, def.faction.ToString(), 15f, GamePalette.Background,
-                                 TextAlignmentOptions.Center, FontStyles.Bold);
-        UiBuild.Stretch(label.rectTransform);
+        GlyphSprites.Stamp(rt, def.faction);
     }
 
     /// <summary>
@@ -694,7 +730,8 @@ public class CardOverlay : MonoBehaviour
             UiBuild.Fill(iconRt, GamePalette.ClassColor(def.cardClass));
         }
 
-        _frontOnly.Add(iconRt.gameObject);
+        if (Printed) iconRt.gameObject.SetActive(false);
+        else _frontOnly.Add(iconRt.gameObject);
 
         string label = ability != null
             ? AbilityCatalog.Name(ability).ToUpperInvariant()
@@ -705,8 +742,13 @@ public class CardOverlay : MonoBehaviour
         _abilityLabel = UiBuild.Text("AbilityLabel", _over, label, 13f,
                                      UiSkin.Active != null && UiSkin.Active.neonMonte ? GamePalette.Ink : GamePalette.TextMuted,
                                      TextAlignmentOptions.Left, FontStyles.Bold);
-        UiBuild.Band(_abilityLabel.rectTransform, StripIconX + StripIconSize + 6f, StripY + 4f,
-                     NameW - StripIconSize - 20f, StripH - 8f);
+        if (Printed)
+        {
+            _abilityLabel.fontSize=11f;
+            _abilityLabel.alignment=TextAlignmentOptions.Center;
+            UiBuild.Band(_abilityLabel.rectTransform,50f,306f,124f,13f);
+        }
+        else UiBuild.Band(_abilityLabel.rectTransform,StripIconX+StripIconSize+6f,StripY+4f,NameW-StripIconSize-20f,StripH-8f);
     }
 
     /// <summary>Icona di ripiego quando la carta non ha abilita': la sua classe.</summary>

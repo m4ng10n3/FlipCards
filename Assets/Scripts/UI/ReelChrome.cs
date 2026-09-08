@@ -53,6 +53,7 @@ public class ReelChrome : MonoBehaviour
         public Image blur;
         public Image highlight;
         public Image payout;
+        public RectTransform instruments;
     }
 
     readonly List<Column> _columns = new List<Column>();
@@ -122,7 +123,7 @@ public class ReelChrome : MonoBehaviour
 
         if (overLayer == null) return;
 
-        Layer(overLayer, "Frame", UiSkin.ReelFrame, 0f, 0f, overLayer.rect.width, overLayer.rect.height, 1f);
+        if (UiSkin.Active == null || !UiSkin.Active.neonMonte) Layer(overLayer, "Frame", UiSkin.ReelFrame, 0f, 0f, overLayer.rect.width, overLayer.rect.height, 1f);
 
         // La payline attraversa le caselle: e' la riga su cui il rullo "si ferma".
         // Nel gioco non decide nulla, ma e' cio' che rende la fila un rullo.
@@ -136,7 +137,7 @@ public class ReelChrome : MonoBehaviour
 
         // Il vetro va sopra a tutto: riflesso in alto, ombra interna in basso.
         // Tenuto basso di alpha, o spegnerebbe i simboli sotto.
-        Layer(overLayer, "Glass", UiSkin.ReelGlass, 0f, 0f, overLayer.rect.width, overLayer.rect.height, 0.55f);
+        if (UiSkin.Active == null || !UiSkin.Active.neonMonte) Layer(overLayer, "Glass", UiSkin.ReelGlass, 0f, 0f, overLayer.rect.width, overLayer.rect.height, 0.55f);
     }
 
     void Rebuild(int lanes)
@@ -146,6 +147,7 @@ public class ReelChrome : MonoBehaviour
         for (int i = _columns.Count - 1; i >= 0; i--)
         {
             if (_columns[i].root != null) Destroy(_columns[i].root.gameObject);
+            if (_columns[i].instruments != null) Destroy(_columns[i].instruments.gameObject);
         }
         _columns.Clear();
         _lastArmedMask = -1;
@@ -164,9 +166,9 @@ public class ReelChrome : MonoBehaviour
 
         // Caselle parziali: quello che si intravede della casella precedente e
         // della successiva, come nella finestra di una slot machine.
-        Layer(col.root, "SliverTop", UiSkin.ReelSliverTop,
+        if (UiSkin.Active == null || !UiSkin.Active.neonMonte) Layer(col.root, "SliverTop", UiSkin.ReelSliverTop,
               0f, cellTop - sliverHeight, cellWidth, sliverHeight, 1f);
-        Layer(col.root, "SliverBottom", UiSkin.ReelSliverBottom,
+        if (UiSkin.Active == null || !UiSkin.Active.neonMonte) Layer(col.root, "SliverBottom", UiSkin.ReelSliverBottom,
               0f, cellTop + cellHeight, cellWidth, sliverHeight, 1f);
 
         float colTop = cellTop - sliverHeight;
@@ -200,6 +202,14 @@ public class ReelChrome : MonoBehaviour
         if (payoutSprite != null) col.payout.sprite = payoutSprite;
         col.payout.enabled = false;
 
+        if (overLayer != null)
+        {
+            col.instruments = UiBuild.Rect("CabinetInstruments" + index, overLayer);
+            UiBuild.Band(col.instruments, 0f, 0f, cellWidth, underLayer.rect.height);
+            var instruments = col.instruments.gameObject.AddComponent<ReelInstruments>();
+            instruments.lane = index;
+            instruments.laneRoot = laneReferenceRoot;
+        }
         return col;
     }
 
@@ -246,7 +256,7 @@ public class ReelChrome : MonoBehaviour
 
         var img = UiBuild.Fill(rt, new Color(1f, 1f, 1f, alpha));
         img.sprite = sprite;
-        img.type = Image.Type.Simple;
+        img.type = key == UiSkin.ReelBacking && sprite.border != Vector4.zero ? Image.Type.Sliced : Image.Type.Simple;
         img.preserveAspect = false;
         return img;
     }

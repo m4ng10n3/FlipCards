@@ -77,13 +77,13 @@ public static class NeonMonteSkinBuilder
         Directory.CreateDirectory(Root + "/Chrome");
         foreach (var key in new List<string>(entries.Keys))
         {
-            if (key.StartsWith("card_front")) entries[key] = Art("card_front");
-            else if (key.StartsWith("card_back")) entries[key] = Art("card_back");
+            if (key.StartsWith("card_front")) entries[key] = Art("card_engraved_base") ?? Art(key) ?? Art("card_front");
+            else if (key.StartsWith("card_back")) entries[key] = Art(key) ?? Art("card_back");
             else if (key == "board_bg") entries[key] = Art("board") ?? entries[key];
             else if (key == "reel_backing") entries[key] = Art("reel_housing") ?? entries[key];
             else if (IsChrome(key)) entries[key] = Chrome(key, entries[key]);
         }
-        foreach (var name in new[] { "sword", "shield", "broken" })
+        foreach (var name in new[] { "sword", "shield", "broken", "flame", "wave", "thorn" })
         {
             var glyph = Art("glyph_" + name);
             if (glyph != null)
@@ -92,6 +92,7 @@ public static class NeonMonteSkinBuilder
                 if (name != "broken") entries["icon_" + name] = glyph;
             }
         }
+        PrepareParts(entries);
         skin.entries.Clear();
         foreach (var pair in entries)
             if (pair.Value != null) skin.entries.Add(new UiSkin.Entry { key = pair.Key, sprite = pair.Value });
@@ -100,6 +101,130 @@ public static class NeonMonteSkinBuilder
         UiSkin.ForgetActive();
         EditorUtility.SetDirty(skin);
         AssetDatabase.SaveAssets();
+    }
+
+    public static Sprite SlotPaper => AssetDatabase.LoadAssetAtPath<Sprite>($"{Root}/Chrome/slot_paper.asset");
+
+    static Sprite Part(string name, Texture2D texture, Rect rect, float ppu = 1f, Vector4 border = default, bool inkCut = false)
+    {
+        string path = $"{Root}/Chrome/{name}.asset";
+        var sprite = Sprite.Create(texture, rect, new Vector2(.5f, .5f), ppu, 0, inkCut ? SpriteMeshType.Tight : SpriteMeshType.FullRect, border);
+        sprite.name = name;
+        if (inkCut) CutInkSilhouette(sprite, texture);
+        var existing = AssetDatabase.LoadAssetAtPath<Sprite>(path);
+        if (existing == null) { AssetDatabase.CreateAsset(sprite, path); return sprite; }
+        EditorUtility.CopySerialized(sprite, existing);
+        Object.DestroyImmediate(sprite);
+        EditorUtility.SetDirty(existing);
+        return existing;
+    }
+
+    static void PrepareParts(Dictionary<string, Sprite> entries)
+    {
+        foreach (var key in new[] { "card_neutral", "stat_ink_fill", "back_seal" })
+            if (Art(key) != null) entries[key] = Art(key);
+        var lamps = AssetDatabase.LoadAssetAtPath<Texture2D>(Root + "/cabinet_lamps.png");
+        if (lamps != null)
+        {
+            var names = new[] { "round", "spear", "shield" };
+            float w = lamps.width / 3f, h = lamps.height / 2f;
+            for (int row = 0; row < 2; row++)
+            for (int col = 0; col < 3; col++)
+            {
+                string key = "lamp_" + names[col] + (row == 1 ? "_on" : "_off");
+                entries[key] = Part(key, lamps, new Rect(col * w + w*.13f, row * h + h*.13f, w*.74f, h*.74f));
+            }
+        }
+        PrepareEngravedParts(entries);
+        var headers = AssetDatabase.LoadAssetAtPath<Texture2D>(Root + "/slot_name_frames.png");
+        if (headers != null)
+        {
+            // Three equal source rows; the suit is part of each printed name frame.
+            float h = headers.height * .338f;
+            float[] centers = { .214f, .506f, .806f };
+            for (int i = 0; i < 3; i++)
+            {
+                string key = "slot_name_" + (char)('A' + i);
+                entries[key] = Part(key, headers, new Rect(0, headers.height*(1f-centers[i])-h*.5f, headers.width, h));
+            }
+            entries["slot_paper"] = Part("slot_paper", headers,
+                new Rect(headers.width*.5f, headers.height*.74f, headers.height*.08f, headers.height*.08f));
+        }
+        var cabinet = AssetDatabase.LoadAssetAtPath<Texture2D>(Root + "/cabinet_body.png");
+        if (cabinet != null)
+            entries["reel_backing"] = Part("CabinetBody", cabinet, new Rect(0, 0, cabinet.width, cabinet.height),
+                3f, new Vector4(cabinet.width*.04f, cabinet.height*.2f, cabinet.width*.105f, cabinet.height*.17f));
+    }
+
+    static void PrepareEngravedParts(Dictionary<string, Sprite> entries)
+    {
+        string path = Root + "/card_engraved_parts.png";
+        var importer = AssetImporter.GetAtPath(path) as TextureImporter;
+        if (importer == null) return;
+        if (!importer.isReadable) { importer.isReadable = true; importer.SaveAndReimport(); }
+        var texture = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+        // Artwork measured in the 1254px production sheet, never resynthesized.
+        string[] names = { "sword", "shield", "heart", "point_on", "point_off", "terminal", "family_A", "family_B", "family_C" };
+        Rect[] regions = {
+            new Rect(128,25,176,384), new Rect(510,25,232,384), new Rect(918,25,254,384),
+            new Rect(148,466,132,324), new Rect(560,466,132,324), new Rect(958,480,176,280),
+            new Rect(29,865,366,331), new Rect(436,865,384,331), new Rect(855,865,372,331)
+        };
+        for (int i = 0; i < names.Length; i++)
+        {
+            var r = regions[i]; float scale = texture.width / 1254f;
+            r = new Rect(Mathf.Round(r.x*scale), Mathf.Round(texture.height-(r.y+r.height)*scale), Mathf.Round(r.width*scale), Mathf.Round(r.height*scale));
+            string key = "engraved_" + names[i];
+            var sprite = Part(key, texture, r, 1f, default, true);
+            entries[key] = sprite;
+        }
+    }
+
+    // Native sprite-mesh cutout: retains original raster ink, removes the carrier
+    // paper geometrically. Enclosed coloured areas (heart/family) stay intact.
+    static void CutInkSilhouette(Sprite sprite, Texture2D texture)
+    {
+        var r = sprite.rect; int w=(int)r.width, h=(int)r.height;
+        var pixels=texture.GetPixels((int)r.x,(int)r.y,w,h);
+        var outside=new bool[w*h]; var queue=new Queue<int>();
+        bool Paper(int n) { var c=pixels[n]; return c.r>c.g*1.4f && c.r>c.b*1.3f && c.r>.15f; }
+        void Seed(int n) { if(!outside[n] && Paper(n)){outside[n]=true;queue.Enqueue(n);} }
+        for(int x=0;x<w;x++){Seed(x);Seed((h-1)*w+x);}
+        for(int y=0;y<h;y++){Seed(y*w);Seed(y*w+w-1);}
+        while(queue.Count>0){int n=queue.Dequeue(),x=n%w,y=n/w;if(x>0)Seed(n-1);if(x<w-1)Seed(n+1);if(y>0)Seed(n-w);if(y<h-1)Seed(n+w);}
+        // Discard detached print-grain specks; keep the connected ornament.
+        var seen=new bool[w*h]; var largest=new List<int>();
+        for(int n=0;n<seen.Length;n++)
+        {
+            if(seen[n]||outside[n])continue;
+            var component=new List<int>();queue.Enqueue(n);seen[n]=true;
+            while(queue.Count>0){int k=queue.Dequeue();component.Add(k);int x=k%w,y=k/w;
+                for(int dy=-1;dy<=1;dy++)for(int dx=-1;dx<=1;dx++){int xx=x+dx,yy=y+dy;if(xx<0||xx>=w||yy<0||yy>=h)continue;int j=yy*w+xx;if(!seen[j]&&!outside[j]){seen[j]=true;queue.Enqueue(j);}}}
+            if(component.Count>largest.Count)largest=component;
+        }
+        var ink=new bool[w*h];foreach(int n in largest)ink[n]=true;
+        var vertices=new List<Vector2>();var triangles=new List<ushort>();
+        for(int y=0;y<h;y++)for(int x=0;x<w;)
+        {
+            if(!ink[y*w+x]){x++;continue;}int left=x;while(x<w&&ink[y*w+x])x++;
+            ushort n=(ushort)vertices.Count;
+            vertices.Add(new Vector2(left-w*.5f,y-h*.5f));vertices.Add(new Vector2(left-w*.5f,y+1-h*.5f));
+            vertices.Add(new Vector2(x-w*.5f,y+1-h*.5f));vertices.Add(new Vector2(x-w*.5f,y-h*.5f));
+            triangles.Add(n);triangles.Add((ushort)(n+1));triangles.Add((ushort)(n+2));triangles.Add(n);triangles.Add((ushort)(n+2));triangles.Add((ushort)(n+3));
+        }
+        const string path="Assets/Resources/EngravedInkLibrary.asset";
+        var library=AssetDatabase.LoadAssetAtPath<EngravedInkLibrary>(path);
+        if(library==null){library=ScriptableObject.CreateInstance<EngravedInkLibrary>();AssetDatabase.CreateAsset(library,path);}
+        var normalized=new Vector2[vertices.Count];var uv=new Vector2[vertices.Count];
+        for(int i=0;i<vertices.Count;i++)
+        {
+            var pixel=vertices[i]+new Vector2(w*.5f,h*.5f);
+            normalized[i]=new Vector2(pixel.x/w,pixel.y/h);
+            uv[i]=new Vector2((r.x+pixel.x)/texture.width,(r.y+pixel.y)/texture.height);
+        }
+        library.entries.RemoveAll(e=>e.key==sprite.name);
+        library.entries.Add(new EngravedInkLibrary.Entry{key=sprite.name,vertices=normalized,uv=uv,triangles=triangles.ConvertAll(t=>(int)t).ToArray()});
+        EditorUtility.SetDirty(library);
     }
 
     static bool IsChrome(string key) => key.StartsWith("panel_") || key.StartsWith("plate_") ||
