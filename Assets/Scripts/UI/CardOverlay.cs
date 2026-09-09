@@ -27,6 +27,7 @@ public class CardOverlay : MonoBehaviour
     public const float ArtX = 40f, ArtY = 58f, ArtW = 144f, ArtH = 218f;
     public const float RailY = 91f, RailH = 170f, RailW = 12f;
     public static float RailX(int index) => index == 0 ? 15f : 197f;
+    FinalCardInk _finalInk;
     MarginTally _powerTally, _healthTally;
     EngravedOrnament _powerGlyph;
     MarginTally _chargeTally;
@@ -317,6 +318,16 @@ public class CardOverlay : MonoBehaviour
                 foil.driver = portrait;
                 foil.raycastTarget = false;
             }
+            if (UiSkin.Sprite("final_front_front_clean") != null)
+            {
+                _finalInk = _over.gameObject.AddComponent<FinalCardInk>();
+                _finalInk.Build(def);
+                BuildAbilityStrip(def);
+                BuildResonanceMark();
+                UiBuild.Band(_resonanceMark.rectTransform, 190f, 310f, 18f, 18f);
+                RaisePrefabTexts();
+                return;
+            }
             var sealSprite = UiSkin.Sprite("back_seal");
             if (sealSprite != null)
             {
@@ -440,9 +451,13 @@ public class CardOverlay : MonoBehaviour
             }
         }
         var ink = GamePalette.Ink;
-        _powerGlyph.SetSprite(front ? "engraved_sword" : "engraved_shield");
-        _powerTally.SetValue(power, power, ink);
-        _healthTally.SetValue(inst == null ? spec.maxHealth : inst.health, spec.maxHealth, ink);
+        if (_finalInk != null) _finalInk.Refresh(front, inst == null ? spec.maxHealth : inst.health, power, inst == null ? 0 : inst.flipCharge);
+        else
+        {
+            _powerGlyph.SetSprite(front ? "engraved_sword" : "engraved_shield");
+            _powerTally.SetValue(power, power, ink);
+            _healthTally.SetValue(inst == null ? spec.maxHealth : inst.health, spec.maxHealth, ink);
+        }
         if (_view.AttackPwrText != null) _view.AttackPwrText.enabled = false;
         if (_view.BlockPwrText != null) _view.BlockPwrText.enabled = false;
         if (_view.hpText != null) _view.hpText.enabled = false;
@@ -746,7 +761,8 @@ public class CardOverlay : MonoBehaviour
         {
             _abilityLabel.fontSize=11f;
             _abilityLabel.alignment=TextAlignmentOptions.Center;
-            UiBuild.Band(_abilityLabel.rectTransform,50f,306f,124f,13f);
+            var area = FinalCardLayout.Ability;
+            UiBuild.Band(_abilityLabel.rectTransform, area.x, area.y, area.width, area.height);
         }
         else UiBuild.Band(_abilityLabel.rectTransform,StripIconX+StripIconSize+6f,StripY+4f,NameW-StripIconSize-20f,StripH-8f);
     }

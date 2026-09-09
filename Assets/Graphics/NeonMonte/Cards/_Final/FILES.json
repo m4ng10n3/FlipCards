@@ -1,0 +1,795 @@
+{
+  "release": "final-2026-09-09",
+  "files": [
+    {
+      "path": "Back/Artwork/three_eyes_ornament.png",
+      "bytes": 426948,
+      "sha256": "4969d4e7de839e233b20dac89d2993b7b391372dac9360f5a27bc04d49f2e240",
+      "size": [
+        540,
+        811
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Back/Indicators/defense_empty.png",
+      "bytes": 7225,
+      "sha256": "e80b0c9ff820e95729446f6cd259706111763d12bd9b2a35723b8ba7992f92fe",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Back/Indicators/defense_empty_mask.png",
+      "bytes": 7166,
+      "sha256": "f723dd844620f1a148d6fe8aed69f61cf401b1f4fd39f0e4557f68f51a2a3991",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Back/Indicators/defense_full.png",
+      "bytes": 4955,
+      "sha256": "7e6eed710093f6024f5a12e4d4c440e93e3f08af58f1dcb9e7d37177b96d9188",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Back/Indicators/defense_full_mask.png",
+      "bytes": 4954,
+      "sha256": "e1d6eeff71d8ead2d45a585013edfcbb1bbcebbba87b0aeade14c601d1b881ae",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Back/Indicators/drop_empty.png",
+      "bytes": 7732,
+      "sha256": "43d2b3feb1c8254400d136175f6e03f96dccdc0a487ec6586187855801dddc95",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Back/Indicators/drop_empty_mask.png",
+      "bytes": 7673,
+      "sha256": "c4e449f75aae55d1f120bad6345da258054a9250cf4ecad57526f375a91c9861",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Back/Indicators/drop_full.png",
+      "bytes": 5818,
+      "sha256": "a1db80001feeb9798e706fad75fb8a6d4f746b9bef5a47f5d2ac34a7eb6d5a51",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Back/Indicators/drop_full_mask.png",
+      "bytes": 5652,
+      "sha256": "090bf4dc3d8d138a5d44fb69bf4f1a1c994512ee852522c198b057199e54cb34",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Back/layout_manifest.json",
+      "bytes": 106559,
+      "sha256": "929d7d2cd21a2c5697b4f52cf6e9920b07d93c64aedf219ba83be53e23ce1803"
+    },
+    {
+      "path": "Back/Previews/back_defense_banner_overlay.png",
+      "bytes": 118326,
+      "sha256": "599af2f52f2ae2fcae9df49e983c169c550e35f27469d4e8144187d031a69767",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Back/Previews/back_defense_banner_preview.png",
+      "bytes": 2923956,
+      "sha256": "cf49a85e5440295dc39e7bea60394a9abfd20416194fd5b0281d37af5452c752",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Back/Previews/back_empty_overlay.png",
+      "bytes": 129242,
+      "sha256": "bf0927f12398e47442aa919fdd1368b2f320edd2b915d57a00070fe65ce0e172",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Back/Previews/back_empty_preview.png",
+      "bytes": 2980536,
+      "sha256": "9770054c111e820a6031670c0c0c926a6197338c690b22f4929764cd112e80d6",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Back/Previews/back_moon_overlay.png",
+      "bytes": 109484,
+      "sha256": "dbf935d61197960268e2c173e2e66e16e30d053e436f414b0bc80816a3c10306",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Back/Previews/back_moon_preview.png",
+      "bytes": 2923724,
+      "sha256": "0a50a7661cb3b8eb6b8fd3555d224ac79a14cf35160a2e0116e24a02a865ee82",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Back/Previews/back_saturn_overlay.png",
+      "bytes": 108637,
+      "sha256": "d25459829b0a8ba84ad5bdb895d9d84c6b958c172a6908be5a2f925a9e391099",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Back/Previews/back_saturn_preview.png",
+      "bytes": 2923476,
+      "sha256": "ea9baa3c3b6e69ea62ce2a67fc2c269eb736f2053f35df424b159ccb378fdc54",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Back/Previews/back_sun_overlay.png",
+      "bytes": 116572,
+      "sha256": "67344c2f3115f19595924188a8b4c525e0771acf9c2c9a7ca7085fbfece8bf38",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Back/Previews/back_sun_preview.png",
+      "bytes": 2924751,
+      "sha256": "9d25f5f69e6b80b1931f4337d2482f046617fb75b9e0fe51d9708718ac796e38",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Back/QA_REPORT.json",
+      "bytes": 4326,
+      "sha256": "36dc93e76091655e9540a1eff4c7c2ad9b6b53cc1922578173e6c68dd0aa2655"
+    },
+    {
+      "path": "Back/Symbols/attack_spade.png",
+      "bytes": 5508,
+      "sha256": "7e15aacfb54cd40827b67194f67342fab6327d2c4553825a8171ce350aa61bdb",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Back/Symbols/attack_spade_mask.png",
+      "bytes": 5530,
+      "sha256": "650ded349a828b731ae93a0ffe59038db7cdfa8c58e1540b3e1cd25cd5f1a566",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Back/Symbols/charge_full.png",
+      "bytes": 4707,
+      "sha256": "2d64a8710463417b26dba1f4e6d98401bcf2d5c3988bd9a1317aaacb35d70c5c",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Back/Symbols/charge_full_mask.png",
+      "bytes": 4789,
+      "sha256": "d312901cc69b90ee62ef7baa99467a7ef3690aa79ee94ac47ea5a308279c97e8",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Back/Symbols/charge_ring.png",
+      "bytes": 7208,
+      "sha256": "bfe619d76468d1ffe63a498b5965c09645ee5daf06afe09be2e4e65e02154d77",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Back/Symbols/charge_ring_mask.png",
+      "bytes": 7145,
+      "sha256": "7fea85ee39be605796d79fc5eba29af1f5016ee18b4aba1e9f19d464030fb9fe",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Back/Symbols/defense_club_B.png",
+      "bytes": 6784,
+      "sha256": "2036d22289fc0899afd51eb3ac191e27898a0ee526af3bfa9876880392de121b",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Back/Symbols/defense_club_B_mask.png",
+      "bytes": 6899,
+      "sha256": "79ee86f903b958fb1aa55cf0df0d084f0b9c6044e005f5505cb3957a893ee148",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Back/Symbols/faction_moon.png",
+      "bytes": 5412,
+      "sha256": "f572ef709a3be44d30f693cbf44f7cb69e5fec9897895b9fd06769d6cdaba26f",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Back/Symbols/faction_moon_mask.png",
+      "bytes": 5306,
+      "sha256": "8390b5d63da29547fa8c24d83e8c216c395a6c914f4f7cdcee697860c75a121d",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Back/Symbols/faction_saturn.png",
+      "bytes": 4598,
+      "sha256": "7d051ab20534d7d3c32d400399f1b2816c81bea788e119657c336c7746175796",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Back/Symbols/faction_saturn_mask.png",
+      "bytes": 4593,
+      "sha256": "0aa67a92b1dd99f106e4a6a19147d767de3016d5ddafda235552dc77d6cbb6d6",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Back/Symbols/faction_sun.png",
+      "bytes": 9107,
+      "sha256": "18c422b917ab1cd0f561be6e7d5c882284f8789907791102f75ca9dd12035cf4",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Back/Symbols/faction_sun_mask.png",
+      "bytes": 8904,
+      "sha256": "c69b93af527205536df9c68751e47c658bcb6f874ea789666a1350365824768d",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Back/Symbols/star.png",
+      "bytes": 5676,
+      "sha256": "fcc74dbd2ad018c7358e8737e534ca365f82fd331f390a78f4d53c12fc3bd639",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Back/Symbols/star_mask.png",
+      "bytes": 5568,
+      "sha256": "3bf536cd2994bb1a2622a5ca6ac8856a616a44c3cfe6825598d0cb21c083ec16",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Back/symbols_normalized_atlas.png",
+      "bytes": 71431,
+      "sha256": "3f463c144d161fa09a54ffe4c27dda7579074a5909869b294beca51cbaf0ea7a",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Back/Template/back_artwork_overlay.png",
+      "bytes": 445099,
+      "sha256": "9125469e72eb6cd81a7aeee1641b7136ecbb177fc9fc98945405a697237a7bd6",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Back/Template/back_clean.png",
+      "bytes": 2949263,
+      "sha256": "319a67b95562cc3d10af3860d95599ac55d05ed792a44e93579bfbd97bf3bce8",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Back/Template/back_frame.png",
+      "bytes": 268443,
+      "sha256": "0538d0ba0d1e73430363102949ba6710e7f661940e2deba29ea278fd816cbdbf",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Back/Template/back_frame.svg",
+      "bytes": 358059,
+      "sha256": "caeded92c2936e1a06e872ef8ef66aecef9fe28be97adfe41c58c7e38f8bbb30"
+    },
+    {
+      "path": "Back/Template/back_paper.png",
+      "bytes": 2787465,
+      "sha256": "92b4c00b844eb8df001bd20c824216bb1e7b3adbde5e4d2501a051cb664c7f0a",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "FINAL_PREVIEW.png",
+      "bytes": 1159109,
+      "sha256": "7cfaf19ada4337de8eb32a749fcdbbabd19ecac4834d9c678e323186b2c96f39",
+      "size": [
+        1520,
+        1080
+      ],
+      "mode": "RGB"
+    },
+    {
+      "path": "Front/Indicators/attack_empty.png",
+      "bytes": 3034,
+      "sha256": "7686372c7892fa763c748c3aeb89b96df1d6781f47967eebb91d141c0fe9a9b1",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Front/Indicators/attack_empty_mask.png",
+      "bytes": 2468,
+      "sha256": "56e6b87473c170bd2ba195d14a1da57261131a0841e3af233b36d206d2bd59dc",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Front/Indicators/attack_full.png",
+      "bytes": 2690,
+      "sha256": "5e8c783c57c4a1dbc545e25d24203ccdfb6bf211458c358bd7cf354b8a570664",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Front/Indicators/attack_full_mask.png",
+      "bytes": 2155,
+      "sha256": "4758d80ed8efc0862a314d21c203564c7f3db78c6fbb4e61aafa6fa2660d0116",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Front/Indicators/drop_empty.png",
+      "bytes": 7748,
+      "sha256": "f6a00aaf9f1e343e1112a4124a4c11139c0b9b51953e4721d0e5daea38745af6",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Front/Indicators/drop_empty_mask.png",
+      "bytes": 7673,
+      "sha256": "c4e449f75aae55d1f120bad6345da258054a9250cf4ecad57526f375a91c9861",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Front/Indicators/drop_full.png",
+      "bytes": 5819,
+      "sha256": "c732a680c4a36d146b9ce8e40cfee0c9a7912b8af07a8d1214b3b1c9fee226f2",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Front/Indicators/drop_full_mask.png",
+      "bytes": 5652,
+      "sha256": "090bf4dc3d8d138a5d44fb69bf4f1a1c994512ee852522c198b057199e54cb34",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Front/layout_manifest.json",
+      "bytes": 7384,
+      "sha256": "66c764568b16603d77ccecb6da0378b411288d77bdcc6c0c9e1f44641b2ad0a5"
+    },
+    {
+      "path": "Front/Previews/front_empty_overlay.png",
+      "bytes": 129578,
+      "sha256": "ca9936266716eafe7c4d732ae0629e23bff745a3d681c947c14a1ec505388daa",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Front/Previews/front_empty_preview.png",
+      "bytes": 1997048,
+      "sha256": "aea0ebb00e04d8ef64d1e9e6d1ba2c2b1e682e29b57b8a749708e2251281ac71",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Front/Previews/front_moon_overlay.png",
+      "bytes": 101257,
+      "sha256": "8333e300625c94d3234cac2ec78b902156c6f6c1982d925b9f78a997aec24cfb",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Front/Previews/front_moon_preview.png",
+      "bytes": 1966291,
+      "sha256": "c3318cb8377fa8c3c27f8ee3da0cecb84145ac704d640af361dbc4417b96eee6",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Front/Previews/front_saturn_overlay.png",
+      "bytes": 98500,
+      "sha256": "d675fdd3d34a17505dbc9ada52e18b71a469c064080a0d80d32913283cb30b83",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Front/Previews/front_saturn_preview.png",
+      "bytes": 1964500,
+      "sha256": "60e0cd7a24efebd095d7f8cf7b96002466df22bd87a29ec8ab5a7116bb16a0e5",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Front/Previews/front_sun_overlay.png",
+      "bytes": 116921,
+      "sha256": "1b650c97e3caac86ae59cb7aea553c7dbbe2ecfbc659f9d5536127d7f2106b74",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Front/Previews/front_sun_preview.png",
+      "bytes": 1972689,
+      "sha256": "e32dacd58b133292b697aab98cc983f4e302a1a1a913df8828bb33270463c1e4",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Front/QA_REPORT.json",
+      "bytes": 4027,
+      "sha256": "af74bb026e06e743dda62a4b2326345adf1d444231c6fc5a2487b5915452fdf3"
+    },
+    {
+      "path": "Front/Symbols/charge_full.png",
+      "bytes": 7696,
+      "sha256": "1a674bdbb5ba878d2c4205f808ede39b82c806d749b3942c75bf952dd4380e22",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Front/Symbols/charge_ring.png",
+      "bytes": 10498,
+      "sha256": "48d7d0f1e11d1d4cc5e012eec160b6a2c9e18d69ea527c5f019a58c450960b52",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Front/Symbols/faction_moon.png",
+      "bytes": 8961,
+      "sha256": "9345a9c1a387241f0bfce2306f2f1f59b455ee0c7f657cc1694050b07de1060d",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Front/Symbols/faction_moon_mask.png",
+      "bytes": 5306,
+      "sha256": "8390b5d63da29547fa8c24d83e8c216c395a6c914f4f7cdcee697860c75a121d",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Front/Symbols/faction_saturn.png",
+      "bytes": 7609,
+      "sha256": "38d91b70f20ca06d7235e72fe695cabe83bb1af545af18e0b2cfcbd7ec5da9bc",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Front/Symbols/faction_saturn_mask.png",
+      "bytes": 4593,
+      "sha256": "0aa67a92b1dd99f106e4a6a19147d767de3016d5ddafda235552dc77d6cbb6d6",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Front/Symbols/faction_sun.png",
+      "bytes": 15782,
+      "sha256": "bbce42249e99a4f8bbd8de7535a66b52eb9ed75193128a238e72ac362c994991",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Front/Symbols/faction_sun_mask.png",
+      "bytes": 8904,
+      "sha256": "c69b93af527205536df9c68751e47c658bcb6f874ea789666a1350365824768d",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Front/Symbols/star.png",
+      "bytes": 9365,
+      "sha256": "d5037a110c2793197ca129cc11b0b4c03a82dd5f6a68a05ceadfc48a4012fe3d",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Front/symbols_normalized_atlas.png",
+      "bytes": 85141,
+      "sha256": "89b43409e164b9491fd7337c8c148534d739f205f1c9ee14aa738f63869a1433",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Front/Template/charge_backplates.png",
+      "bytes": 13475,
+      "sha256": "6d0d0fe70008045d5bac5561bbc3c5e140963202c4fbf1cba1ab6a806a37a4a7",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Front/Template/front_clean.png",
+      "bytes": 1940928,
+      "sha256": "c9cf1f74fa8b36144564a407c38b24387c079256ead5d1ca1b6feb384e79624b",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Front/Template/front_frame.png",
+      "bytes": 47539,
+      "sha256": "eebc488fac62b4819896f080d7c950addaf85f97b414bdc9006e2ae3f88c95ab",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Front/Template/front_frame.svg",
+      "bytes": 63523,
+      "sha256": "db8450f9ea682672fc7708017b6d3b7fefff34fabc4eb74cdf106110383cf9cf"
+    },
+    {
+      "path": "Front/Template/front_paper.png",
+      "bytes": 2002044,
+      "sha256": "ae90a1d09e849f93988b968509ba162bbd726d4a5bdf07902a7c80d1766ee306",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Optional/TextTopLimiter/placement.json",
+      "bytes": 540,
+      "sha256": "97f4f06b2bc63c5e6aaa3941c75607567e8686f6e3420eadffb9084f4e1f402e"
+    },
+    {
+      "path": "Optional/TextTopLimiter/text_top_limiter.png",
+      "bytes": 623,
+      "sha256": "c00be68189f441489c9a8f3c0e3de3660a306c88063a3eeb0d38b835de9fd378",
+      "size": [
+        480,
+        24
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Optional/TextTopLimiter/text_top_limiter.svg",
+      "bytes": 180,
+      "sha256": "09ca02c3ecd3974d9bebbed591291ba61eb59f45b72cf289ff09d3ab2e32aae0"
+    },
+    {
+      "path": "Optional/TextTopLimiter/text_top_limiter_mask.png",
+      "bytes": 494,
+      "sha256": "a5eb4af7256e015cafc10a51adc0fe53366916df9a0e96dc3499b9dec6ec8d8e",
+      "size": [
+        480,
+        24
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "Optional/TextTopLimiter/text_top_limiter_overlay.png",
+      "bytes": 6707,
+      "sha256": "8bf0d5db8485a1a53a3d308d96c179a3de0f654ac2448c74edeebf0038e238cd",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "QA_REPORT.json",
+      "bytes": 387,
+      "sha256": "14881a0f3001e0725c561e444dc08f1d781eadda9ea48f9cadd9cac3d8142e62"
+    },
+    {
+      "path": "README.md",
+      "bytes": 3572,
+      "sha256": "94cfa5d2c2ca88790e4615284ef52fdbb093b112bc287dd4ba3202c1d8690ea1"
+    }
+  ]
+}

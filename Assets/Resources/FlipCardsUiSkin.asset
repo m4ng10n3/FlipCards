@@ -156,25 +156,25 @@ MonoBehaviour:
   - key: btn_steel_press
     sprite: {fileID: 21300000, guid: 3731785877d91b647afffe609af18c4a, type: 3}
   - key: card_back
-    sprite: {fileID: 21300000, guid: de22143fab5981f48aacbe5cb79c8eac, type: 3}
+    sprite: {fileID: 21300000, guid: df417a8dca1ea1a4ca2c6ca3ea23efab, type: 3}
   - key: card_back_A
-    sprite: {fileID: 21300000, guid: 69e23e2417ca10d4a82ae3646645371d, type: 3}
+    sprite: {fileID: 21300000, guid: df417a8dca1ea1a4ca2c6ca3ea23efab, type: 3}
   - key: card_back_B
-    sprite: {fileID: 21300000, guid: 1150e0837fcf631498daab9d9ebfeb0a, type: 3}
+    sprite: {fileID: 21300000, guid: df417a8dca1ea1a4ca2c6ca3ea23efab, type: 3}
   - key: card_back_C
-    sprite: {fileID: 21300000, guid: cefbaa061dfe3874483a4b5d9a7ace55, type: 3}
+    sprite: {fileID: 21300000, guid: df417a8dca1ea1a4ca2c6ca3ea23efab, type: 3}
   - key: card_back_plain
-    sprite: {fileID: 21300000, guid: de22143fab5981f48aacbe5cb79c8eac, type: 3}
+    sprite: {fileID: 21300000, guid: df417a8dca1ea1a4ca2c6ca3ea23efab, type: 3}
   - key: card_front
-    sprite: {fileID: 21300000, guid: 1f43810162d86be40ace997c503fe9f4, type: 3}
+    sprite: {fileID: 21300000, guid: 6c8136fa61354ce4c9fd87e7cbaed12a, type: 3}
   - key: card_front_A
-    sprite: {fileID: 21300000, guid: 1f43810162d86be40ace997c503fe9f4, type: 3}
+    sprite: {fileID: 21300000, guid: 6c8136fa61354ce4c9fd87e7cbaed12a, type: 3}
   - key: card_front_B
-    sprite: {fileID: 21300000, guid: 1f43810162d86be40ace997c503fe9f4, type: 3}
+    sprite: {fileID: 21300000, guid: 6c8136fa61354ce4c9fd87e7cbaed12a, type: 3}
   - key: card_front_C
-    sprite: {fileID: 21300000, guid: 1f43810162d86be40ace997c503fe9f4, type: 3}
+    sprite: {fileID: 21300000, guid: 6c8136fa61354ce4c9fd87e7cbaed12a, type: 3}
   - key: card_front_neutral
-    sprite: {fileID: 21300000, guid: 1f43810162d86be40ace997c503fe9f4, type: 3}
+    sprite: {fileID: 21300000, guid: 6c8136fa61354ce4c9fd87e7cbaed12a, type: 3}
   - key: card_rim_A
     sprite: {fileID: 21300000, guid: bd1f6f2626ea15143b1f6be32d3dd417, type: 3}
   - key: card_rim_B
@@ -396,17 +396,13 @@ MonoBehaviour:
   - key: tile_static
     sprite: {fileID: 21300000, guid: 1a9bf579555778a47891a3ebf394b707, type: 3}
   - key: glyph_sword
-    sprite: {fileID: 21300000, guid: eb8cd57ecba428f418368d9261195e8f, type: 3}
+    sprite: {fileID: 21300000, guid: d95acf6e8db1c81438bd5d88aa969a43, type: 3}
   - key: glyph_shield
-    sprite: {fileID: 21300000, guid: b6c6748de5027b94d8feb6289c62794b, type: 3}
+    sprite: {fileID: 21300000, guid: 7128996026836704d81af9b2f77baf48, type: 3}
   - key: glyph_broken
     sprite: {fileID: 21300000, guid: e6b5d15344eeeab47b0d1c9c92354293, type: 3}
   - key: card_neutral
-    sprite: {fileID: 21300000, guid: efa0fca2434aff141b09ad0a31cceeaa, type: 3}
-  - key: stat_ink_fill
-    sprite: {fileID: 21300000, guid: 4e5e0a770cc758541b7324c7930d2ec1, type: 3}
-  - key: back_seal
-    sprite: {fileID: 21300000, guid: cb7ffef66f56adf49a37f2df3807b287, type: 3}
+    sprite: {fileID: 21300000, guid: df417a8dca1ea1a4ca2c6ca3ea23efab, type: 3}
   - key: lamp_round_off
     sprite: {fileID: 21300000, guid: ef50f873895a6564390ff32b042246e4, type: 2}
   - key: lamp_spear_off
@@ -419,24 +415,6 @@ MonoBehaviour:
     sprite: {fileID: 21300000, guid: b12abf1503ad69b439f97d93fe535989, type: 2}
   - key: lamp_shield_on
     sprite: {fileID: 21300000, guid: 7fe2f394d67abdd4b872c27e3b581007, type: 2}
-  - key: engraved_sword
-    sprite: {fileID: 21300000, guid: 30e9df23c09c1a34fae76e6904d47afe, type: 2}
-  - key: engraved_shield
-    sprite: {fileID: 21300000, guid: 4392db6669084e14585bc1ec4fd19178, type: 2}
-  - key: engraved_heart
-    sprite: {fileID: 21300000, guid: ea712cdfdee9f0d45826345078c0389a, type: 2}
-  - key: engraved_point_on
-    sprite: {fileID: 21300000, guid: 339ce3baeeffb5b438f4f9bfeaca480a, type: 2}
-  - key: engraved_point_off
-    sprite: {fileID: 21300000, guid: 5a26f5889c5e1ec4cb3f1652f7f8f711, type: 2}
-  - key: engraved_terminal
-    sprite: {fileID: 21300000, guid: a3fd81b2e5add204485c25c89ee3dd7e, type: 2}
-  - key: engraved_family_A
-    sprite: {fileID: 21300000, guid: 87bedbc24947f5a4a8801ce3064fdae0, type: 2}
-  - key: engraved_family_B
-    sprite: {fileID: 21300000, guid: 913bc54069de3c14e85627e2fbf57eb8, type: 2}
-  - key: engraved_family_C
-    sprite: {fileID: 21300000, guid: 8ecd3095291e50f4f92f602fbe7e3ea5, type: 2}
   - key: slot_name_A
     sprite: {fileID: 21300000, guid: 1472d102c366e8843b63c4f9fa468d49, type: 2}
   - key: slot_name_B
@@ -445,4 +423,108 @@ MonoBehaviour:
     sprite: {fileID: 21300000, guid: 934458dd03722714d9b3d977f0406675, type: 2}
   - key: slot_paper
     sprite: {fileID: 21300000, guid: c19c4a93a731c4c4d99566441d2a8b49, type: 2}
+  - key: final_front_charge_full
+    sprite: {fileID: 21300000, guid: 4b22cb24e1bc5504c9e6dd2ccc38fe99, type: 3}
+  - key: final_front_charge_ring
+    sprite: {fileID: 21300000, guid: 1bc2a23afe125b7459b902bd97fe4d51, type: 3}
+  - key: final_front_faction_moon
+    sprite: {fileID: 21300000, guid: aa5e879c44897124e9abcd80c6d4a80b, type: 3}
+  - key: final_front_faction_moon_mask
+    sprite: {fileID: 21300000, guid: 75630922d4151904fb581db7a5a4f48a, type: 3}
+  - key: final_front_faction_saturn
+    sprite: {fileID: 21300000, guid: 09e24ec638349fd4a803ca58cc4430c2, type: 3}
+  - key: final_front_faction_saturn_mask
+    sprite: {fileID: 21300000, guid: 8ddd18a4974215d4e865e24e18504511, type: 3}
+  - key: final_front_faction_sun
+    sprite: {fileID: 21300000, guid: b7beaa7d84c963f4eb0742899779b80e, type: 3}
+  - key: final_front_faction_sun_mask
+    sprite: {fileID: 21300000, guid: 9bd4f5873db086d4a89939bda54f8f92, type: 3}
+  - key: final_front_star
+    sprite: {fileID: 21300000, guid: 8494977e64b3a7a47ac33cd9809b4e61, type: 3}
+  - key: final_front_attack_empty
+    sprite: {fileID: 21300000, guid: 00cd5501861faa54f9d661947c626bda, type: 3}
+  - key: final_front_attack_empty_mask
+    sprite: {fileID: 21300000, guid: b0777ce7e7e8d7a4abf8487e3e7049a7, type: 3}
+  - key: final_front_attack_full
+    sprite: {fileID: 21300000, guid: 3988813acaaf4ad4599e6bbba54e911c, type: 3}
+  - key: final_front_attack_full_mask
+    sprite: {fileID: 21300000, guid: e0079a5affcc78945a1e819e9c16be52, type: 3}
+  - key: final_front_drop_empty
+    sprite: {fileID: 21300000, guid: b0b22b6e0df53d440903644a1e4f5ead, type: 3}
+  - key: final_front_drop_empty_mask
+    sprite: {fileID: 21300000, guid: b05625887149b9c409798dea622e1dd4, type: 3}
+  - key: final_front_drop_full
+    sprite: {fileID: 21300000, guid: f4ad5d4f08ff98e4d9db8ee28617c51d, type: 3}
+  - key: final_front_drop_full_mask
+    sprite: {fileID: 21300000, guid: 6e38377274c258c4aa3c7e48b3e58d32, type: 3}
+  - key: final_front_charge_backplates
+    sprite: {fileID: 21300000, guid: ed7c986483d403644b7913237e6e96bf, type: 3}
+  - key: final_front_front_clean
+    sprite: {fileID: 21300000, guid: 6c8136fa61354ce4c9fd87e7cbaed12a, type: 3}
+  - key: final_front_front_frame
+    sprite: {fileID: 21300000, guid: 92500bd141acc9e4a8ffc1534e12d2ba, type: 3}
+  - key: final_front_front_paper
+    sprite: {fileID: 21300000, guid: 6a8e55d24e8cc244e9b34f6128d40d82, type: 3}
+  - key: final_back_attack_spade
+    sprite: {fileID: 21300000, guid: 790d7c18888a64e418c360afa1e6ff6c, type: 3}
+  - key: final_back_attack_spade_mask
+    sprite: {fileID: 21300000, guid: d95acf6e8db1c81438bd5d88aa969a43, type: 3}
+  - key: final_back_charge_full
+    sprite: {fileID: 21300000, guid: 65ff75bdeca815e42a734afa260419ff, type: 3}
+  - key: final_back_charge_full_mask
+    sprite: {fileID: 21300000, guid: 8d243e30890de5546a081b680d945383, type: 3}
+  - key: final_back_charge_ring
+    sprite: {fileID: 21300000, guid: 78bf86bc1c6076c4f96759bfef5665c4, type: 3}
+  - key: final_back_charge_ring_mask
+    sprite: {fileID: 21300000, guid: 7dbb876de58564042821eff89237a220, type: 3}
+  - key: final_back_defense_club_B
+    sprite: {fileID: 21300000, guid: d20e45965d1c3384b926c64297fdc9ae, type: 3}
+  - key: final_back_defense_club_B_mask
+    sprite: {fileID: 21300000, guid: 7128996026836704d81af9b2f77baf48, type: 3}
+  - key: final_back_faction_moon
+    sprite: {fileID: 21300000, guid: 77030e0f18511674eb91b8ba31397e11, type: 3}
+  - key: final_back_faction_moon_mask
+    sprite: {fileID: 21300000, guid: b3b4d03312f29d44b8fad1eeeb0ca740, type: 3}
+  - key: final_back_faction_saturn
+    sprite: {fileID: 21300000, guid: 52a01802e60eca54eb5ada463a01b691, type: 3}
+  - key: final_back_faction_saturn_mask
+    sprite: {fileID: 21300000, guid: f58eabe1ba18dc84faecd8d1b2201992, type: 3}
+  - key: final_back_faction_sun
+    sprite: {fileID: 21300000, guid: e0b3537e61bc4cb40a3bd96ad4a96277, type: 3}
+  - key: final_back_faction_sun_mask
+    sprite: {fileID: 21300000, guid: 59f01d581ed22fb4688a21147f74cf8e, type: 3}
+  - key: final_back_star
+    sprite: {fileID: 21300000, guid: 3bdc3239043213149b1cec97ee6c8957, type: 3}
+  - key: final_back_star_mask
+    sprite: {fileID: 21300000, guid: 1a509ee504e5e694bab7a7593e4852b6, type: 3}
+  - key: final_back_defense_empty
+    sprite: {fileID: 21300000, guid: 834095de22f0f2e4e8e556f89b8871bd, type: 3}
+  - key: final_back_defense_empty_mask
+    sprite: {fileID: 21300000, guid: 4fda9483c82e8e14a85fa11c46961a51, type: 3}
+  - key: final_back_defense_full
+    sprite: {fileID: 21300000, guid: faa01d7222390c548a139bf0837ddf91, type: 3}
+  - key: final_back_defense_full_mask
+    sprite: {fileID: 21300000, guid: 6d54d600063984a41ac3ff397b278b6c, type: 3}
+  - key: final_back_drop_empty
+    sprite: {fileID: 21300000, guid: fd3188ad8d8c86448a564a10657da0aa, type: 3}
+  - key: final_back_drop_empty_mask
+    sprite: {fileID: 21300000, guid: d7acbd68f5ff15e47af8cc4dc28e265d, type: 3}
+  - key: final_back_drop_full
+    sprite: {fileID: 21300000, guid: 116e5fd1a3f0b914985b22d49dff5b28, type: 3}
+  - key: final_back_drop_full_mask
+    sprite: {fileID: 21300000, guid: 0785bf4d969d74740b8cb152db6b2824, type: 3}
+  - key: final_back_back_artwork_overlay
+    sprite: {fileID: 21300000, guid: 17ab6eb361b67cb4385d679f6ece9471, type: 3}
+  - key: final_back_back_clean
+    sprite: {fileID: 21300000, guid: df417a8dca1ea1a4ca2c6ca3ea23efab, type: 3}
+  - key: final_back_back_frame
+    sprite: {fileID: 21300000, guid: 26350ea072879c0428c71288b61f06e1, type: 3}
+  - key: final_back_back_paper
+    sprite: {fileID: 21300000, guid: c7505289f38772e4993cac192dab29bb, type: 3}
+  - key: glyph_flame
+    sprite: {fileID: 21300000, guid: 9bd4f5873db086d4a89939bda54f8f92, type: 3}
+  - key: glyph_wave
+    sprite: {fileID: 21300000, guid: 75630922d4151904fb581db7a5a4f48a, type: 3}
+  - key: glyph_thorn
+    sprite: {fileID: 21300000, guid: 8ddd18a4974215d4e865e24e18504511, type: 3}
   neonMonte: 1

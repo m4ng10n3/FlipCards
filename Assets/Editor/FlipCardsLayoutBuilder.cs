@@ -190,10 +190,8 @@ public static class FlipCardsLayoutBuilder
                 // Graphic su cui gira CardShaderGraph. Comprimerlo per far posto
                 // ai chip vorrebbe dire rimpicciolire lo shader.
                 Place(cell, "Template", 0f, 0f, CardW, CardH);
-                Place(cell, "Name", CardOverlay.NameX + 10f, CardOverlay.NameY + 4f,
-                                    CardOverlay.NameW - 44f, CardOverlay.NameH - 8f);
-                Place(cell, "imagecharacter", CardOverlay.ArtX, CardOverlay.ArtY,
-                                              CardOverlay.ArtW, CardOverlay.ArtH);
+                Place(cell, "Name", FinalCardLayout.Title.x, FinalCardLayout.Title.y, FinalCardLayout.Title.width, FinalCardLayout.Title.height);
+                Place(cell, "imagecharacter", FinalCardLayout.Artwork.x, FinalCardLayout.Artwork.y, FinalCardLayout.Artwork.width, FinalCardLayout.Artwork.height);
 
                 ApplyCardTemplate(root, cell);
                 var portrait = cell.Find("imagecharacter")?.GetComponent<Image>();
@@ -221,7 +219,7 @@ public static class FlipCardsLayoutBuilder
                 Place(cell, "HP", CardOverlay.StatTextX(1), CardOverlay.StatY,
                                   CardOverlay.StatTextW, CardOverlay.StatH);
 
-                StyleText(cell, "Name", 20, TextAnchor.MiddleLeft, GamePalette.Ink);
+                StyleText(cell, "Name", 20, TextAnchor.MiddleCenter, GamePalette.Ink);
                 StyleText(cell, "FrontDamage", 26, TextAnchor.MiddleCenter, GamePalette.Ink);
                 StyleText(cell, "HP", 22, TextAnchor.MiddleCenter, GamePalette.Ink);
 
@@ -356,7 +354,7 @@ public static class FlipCardsLayoutBuilder
         // qualcosa. `card_back_plain` e' il dorso che si vede nella pila del
         // mazzo, ed e' quello che deve vedersi anche in campo: la fazione la
         // portano il bordo e i simboli che monta CardOverlay.
-        var back = front ?? KitSprite($"card/card_back_{definition.faction}")
+        var back = NeonMonteSkinBuilder.FinalArt("Back/Template/back_clean") ?? KitSprite($"card/card_back_{definition.faction}")
                 ?? KitSprite("card/card_back_plain")
                 ?? KitSprite("card/card_back");
         if (front == null && back == null) return;
@@ -1158,23 +1156,23 @@ public static class FlipCardsLayoutBuilder
     {
         var box = Zone("Legend", rail, 0f, RailLegendY, RailW, RailLegendH);
 
-        var title = UiBuild.Text("Title", box, "ROMBO = 1   /   LINEA = 0", 13f, GamePalette.TextMuted,
+        var title = UiBuild.Text("Title", box, "PIENO = 1   /   VUOTO = 0", 13f, GamePalette.TextMuted,
                                  TextAlignmentOptions.Left, FontStyles.Bold);
         UiBuild.Band(title.rectTransform, 12f, 10f, RailW - 24f, 20f);
 
         float y = 38f;
         y = LegendGroup(box, y, "SINERGIA — NEL COLORE DELLA FAMIGLIA");
         y = LegendGlyphRow(box, y, GlyphSprites.Kind.Sword, GamePalette.TextPrimary,
-                           "tacche", "attacco a chi ha accanto");
+                           "numero", "attacco a chi ha accanto");
         y = LegendGlyphRow(box, y, GlyphSprites.Kind.Shield, GamePalette.TextPrimary,
-                           "tacche", "guardia a chi ha accanto");
+                           "numero", "guardia a chi ha accanto");
         y = LegendGlyphRow(box, y, GlyphSprites.Kind.BrokenShield, GamePalette.Danger,
                            "risonanza", "su carta e casella: nessuno para");
 
-        y = LegendGroup(box, y + 6f, "LE TUE CARTE");
+        y = LegendGroup(box, y + 6f, "CARTE: GOCCE / LANCE / SCUDI");
         y = LegendRow(box, y, GamePalette.Fronte, "RITRATTO", "scoperta: attacca");
         y = LegendRow(box, y, GamePalette.Retro, "SIGILLO", "coperta: para ed e' insegna");
-        y = LegendRow(box, y, GamePalette.Charge, "ROSA", "cariche: bonus al colpo");
+        y = LegendRow(box, y, GamePalette.Paper, "CERCHI", "cariche: bonus al colpo");
 
         y = LegendGroup(box, y + 6f, "CASSA: 1 LUCE = 1 PUNTO");
         y = LegendRow(box, y, GamePalette.Danger, "VITA", "tonde rosse: HP rimasti");

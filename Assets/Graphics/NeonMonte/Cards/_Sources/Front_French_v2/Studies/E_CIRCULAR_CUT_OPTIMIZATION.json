@@ -1,0 +1,53 @@
+{
+  "B": [
+    668,
+    571
+  ],
+  "C": [
+    622.0,
+    624.0
+  ],
+  "center": [
+    525.24,
+    734.18
+  ],
+  "radius": 146.63604604598416,
+  "neck_width": 63.21363099473729,
+  "score": 7.95427042558736,
+  "tangent_change_degrees": 78.18656416341486,
+  "width_ratio": 0.7734939759036145,
+  "outside_samples": 3,
+  "A": [
+    347,
+    2
+  ],
+  "D": [
+    416,
+    832
+  ],
+  "old_B": [
+    586,
+    645
+  ],
+  "old_C": [
+    418,
+    630
+  ],
+  "source_size": [
+    694,
+    832
+  ],
+  "feasible_candidates": 2082,
+  "target_width_height_ratio": 0.75,
+  "target_neck_to_foot_ratio": 0.72,
+  "template_scale": 0.12530120481927712,
+  "neck_width_at_24px_height": 1.8278640287634877,
+  "objective": "((width/height-.75)/.04)^2 + ((neck/foot-.72)/.10)^2 + .15*(tangent_change_degrees/35)^2",
+  "constraints": "D fixed; C moves outward; B on same contour; 45..170 source px between B and C in x; neck >=25% foot; circular cut; at most 3 of 157 samples outside raster boundary, subsequently clipped; mirror symmetric final alpha",
+  "scope": "Best sampled feasible candidate under declared aesthetic criteria; not a universal aesthetic optimum.",
+  "sampling": "C every 2 source pixels, B every 2 pixels; circle center offset step .005 of perpendicular chord vector",
+  "template_ink_size": [
+    80.19277108433735,
+    104
+  ]
+}

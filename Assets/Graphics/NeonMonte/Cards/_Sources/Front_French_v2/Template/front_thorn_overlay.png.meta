@@ -1,0 +1,715 @@
+fileFormatVersion: 2
+guid: 5bef24dee9ec7cd458cad7ba79917d8a
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 3857573100879394195
+    second: front_thorn_overlay_0
+  - first:
+      213: 2395446884692775023
+    second: front_thorn_overlay_1
+  - first:
+      213: -13758161737581201
+    second: front_thorn_overlay_2
+  - first:
+      213: 5626324765522720105
+    second: front_thorn_overlay_3
+  - first:
+      213: -195198487106271445
+    second: front_thorn_overlay_4
+  - first:
+      213: -8990436026658230385
+    second: front_thorn_overlay_5
+  - first:
+      213: -8820772126178214253
+    second: front_thorn_overlay_6
+  - first:
+      213: -8012585992565037060
+    second: front_thorn_overlay_7
+  - first:
+      213: 2049067047792586395
+    second: front_thorn_overlay_8
+  - first:
+      213: 830918088018482741
+    second: front_thorn_overlay_9
+  - first:
+      213: -6844828416455303434
+    second: front_thorn_overlay_10
+  - first:
+      213: -7058469299269553003
+    second: front_thorn_overlay_11
+  - first:
+      213: 7483709979195134478
+    second: front_thorn_overlay_12
+  - first:
+      213: 4695579413184177525
+    second: front_thorn_overlay_13
+  - first:
+      213: -7346073449505021789
+    second: front_thorn_overlay_14
+  - first:
+      213: -8430888553571252554
+    second: front_thorn_overlay_15
+  - first:
+      213: -7506287758315387553
+    second: front_thorn_overlay_16
+  - first:
+      213: -4603113570093633047
+    second: front_thorn_overlay_17
+  - first:
+      213: -3195180670566672641
+    second: front_thorn_overlay_18
+  - first:
+      213: 3187413404918461246
+    second: front_thorn_overlay_19
+  - first:
+      213: -4235887479011505012
+    second: front_thorn_overlay_20
+  - first:
+      213: 7935080076351903534
+    second: front_thorn_overlay_21
+  - first:
+      213: -4154567305378359205
+    second: front_thorn_overlay_22
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: front_thorn_overlay_0
+      rect:
+        serializedVersion: 2
+        x: 55
+        y: 1271
+        width: 170
+        height: 170
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 395b4050c4ad88530800000000000000
+      internalID: 3857573100879394195
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_thorn_overlay_1
+      rect:
+        serializedVersion: 2
+        x: 225
+        y: 1440
+        width: 47
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f60dd6000465e3120800000000000000
+      internalID: 2395446884692775023
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_thorn_overlay_2
+      rect:
+        serializedVersion: 2
+        x: 882
+        y: 1326
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f6d7ed8560f1fcff0800000000000000
+      internalID: -13758161737581201
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_thorn_overlay_3
+      rect:
+        serializedVersion: 2
+        x: 95
+        y: 1106
+        width: 90
+        height: 90
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 965f6ff8098b41e40800000000000000
+      internalID: 5626324765522720105
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_thorn_overlay_4
+      rect:
+        serializedVersion: 2
+        x: 882
+        y: 1186
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b27465b92048a4df0800000000000000
+      internalID: -195198487106271445
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_thorn_overlay_5
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 990
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f8f692f211e8b3380800000000000000
+      internalID: -8990436026658230385
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_thorn_overlay_6
+      rect:
+        serializedVersion: 2
+        x: 882
+        y: 1046
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 39efa765c72569580800000000000000
+      internalID: -8820772126178214253
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_thorn_overlay_7
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 850
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cf7e3e40e739dc090800000000000000
+      internalID: -8012585992565037060
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_thorn_overlay_8
+      rect:
+        serializedVersion: 2
+        x: 882
+        y: 906
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b9ea2a0af9fbf6c10800000000000000
+      internalID: 2049067047792586395
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_thorn_overlay_9
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 710
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 536d9c14993088b00800000000000000
+      internalID: 830918088018482741
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_thorn_overlay_10
+      rect:
+        serializedVersion: 2
+        x: 882
+        y: 766
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6fe9ea812d84201a0800000000000000
+      internalID: -6844828416455303434
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_thorn_overlay_11
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 570
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 594b907d1974b0e90800000000000000
+      internalID: -7058469299269553003
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_thorn_overlay_12
+      rect:
+        serializedVersion: 2
+        x: 882
+        y: 626
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e02d8ff539a7bd760800000000000000
+      internalID: 7483709979195134478
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_thorn_overlay_13
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 430
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 575ea79199c0a2140800000000000000
+      internalID: 4695579413184177525
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_thorn_overlay_14
+      rect:
+        serializedVersion: 2
+        x: 882
+        y: 486
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3a0235c6e118d0a90800000000000000
+      internalID: -7346073449505021789
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_thorn_overlay_15
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 290
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6b68a7f77877ffa80800000000000000
+      internalID: -8430888553571252554
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_thorn_overlay_16
+      rect:
+        serializedVersion: 2
+        x: 845
+        y: 297
+        width: 78
+        height: 176
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f558fb7cd0f44d790800000000000000
+      internalID: -7506287758315387553
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_thorn_overlay_17
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 150
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9e1f9c9a8947e10c0800000000000000
+      internalID: -4603113570093633047
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_thorn_overlay_18
+      rect:
+        serializedVersion: 2
+        x: 799
+        y: 95
+        width: 170
+        height: 170
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ff6dda1eb1078a3d0800000000000000
+      internalID: -3195180670566672641
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_thorn_overlay_19
+      rect:
+        serializedVersion: 2
+        x: 449
+        y: 61
+        width: 34
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e33bb78aa97fb3c20800000000000000
+      internalID: 3187413404918461246
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_thorn_overlay_20
+      rect:
+        serializedVersion: 2
+        x: 495
+        y: 61
+        width: 34
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c8c8ef0d7ca1735c0800000000000000
+      internalID: -4235887479011505012
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_thorn_overlay_21
+      rect:
+        serializedVersion: 2
+        x: 541
+        y: 61
+        width: 34
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e271c3f99411f1e60800000000000000
+      internalID: 7935080076351903534
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_thorn_overlay_22
+      rect:
+        serializedVersion: 2
+        x: 753
+        y: 50
+        width: 47
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b58987f2c030856c0800000000000000
+      internalID: -4154567305378359205
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      front_thorn_overlay_0: 3857573100879394195
+      front_thorn_overlay_1: 2395446884692775023
+      front_thorn_overlay_10: -6844828416455303434
+      front_thorn_overlay_11: -7058469299269553003
+      front_thorn_overlay_12: 7483709979195134478
+      front_thorn_overlay_13: 4695579413184177525
+      front_thorn_overlay_14: -7346073449505021789
+      front_thorn_overlay_15: -8430888553571252554
+      front_thorn_overlay_16: -7506287758315387553
+      front_thorn_overlay_17: -4603113570093633047
+      front_thorn_overlay_18: -3195180670566672641
+      front_thorn_overlay_19: 3187413404918461246
+      front_thorn_overlay_2: -13758161737581201
+      front_thorn_overlay_20: -4235887479011505012
+      front_thorn_overlay_21: 7935080076351903534
+      front_thorn_overlay_22: -4154567305378359205
+      front_thorn_overlay_3: 5626324765522720105
+      front_thorn_overlay_4: -195198487106271445
+      front_thorn_overlay_5: -8990436026658230385
+      front_thorn_overlay_6: -8820772126178214253
+      front_thorn_overlay_7: -8012585992565037060
+      front_thorn_overlay_8: 2049067047792586395
+      front_thorn_overlay_9: 830918088018482741
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

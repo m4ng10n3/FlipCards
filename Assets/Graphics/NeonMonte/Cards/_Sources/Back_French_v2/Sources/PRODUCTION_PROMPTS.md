@@ -1,0 +1,12 @@
+# Sorgenti raster del retro
+
+Generazione con image_gen integrato; successiva estrazione alpha, normalizzazione e composizione deterministica con Pillow/NumPy come richiesto per il fronte. I file generati contenevano sfondi a scacchi RGB: lo script rimuove il grigio esterno della carta e recupera solo i due inchiostri dell'ornamento.
+
+## paper
+
+Use case: precise-object-edit. Make ONE production texture 1024x1536 from the supplied card_back.png. Keep the original aged CREAM OUTER PAPER EDGE and the thin cream outer rectangular border at x~45/y~45 faithfully. Inside that outer border, remove ALL artwork, ALL eyes, ALL diamonds, ALL inner scalloped framing, ALL ornament, ALL symbols. Restore a continuous softly textured flat VERMILION RED PRINTED PAPER field matching the original red ink. Uniform restrained grain, not cloudy, not a photograph. The WHOLE interior from x=65..959,y=65..1471 is EMPTY RED PAPER, with absolutely NO marks or lines except tiny paper wear. No stars. The outside silhouette of the card should have TRUE transparency outside the worn cream paper edge, not black corners. Single full-frame portrait blank card-back paper texture only. This will be precisely composited with separate frame and sprites in code; do not add placeholders or guide marks.
+
+## ornament
+
+Use case: background-extraction. Extract ONLY the original CENTRAL OCCULT ORNAMENT from this card_back.png as ONE transparent PNG asset. Include the THREE cream-and-black eyes inside the black/cream edged tilted DIAMOND, the four small star/diamond terminals, and the elegant interlacing thin oval filigree behind it with short pointed vertical finials above and below. Faithfully preserve original design and three-eye arrangement. Exclude the OUTER rectangular card border and all side upright framing/scalloped caps. Absolutely NO large red paper rectangle. All surrounding space and all red regions between fine ornamental lines must be genuinely transparent alpha=0. The cream eye whites and near-black ink remain opaque; even the red ground INSIDE the central diamond becomes transparent so the ornament can be laid over red paper. No fake checkerboard, no white backing, no drop shadow. Tall isolated decoration ratio about 0.72 wide to height centered with generous transparent margin. Flat printed woodcut ivory #E8D9B5 and near-black #192124, no extra color. ONE ornament asset, no text, no stats, no added eyes. Output portrait transparent PNG.
+

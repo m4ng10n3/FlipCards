@@ -1,0 +1,559 @@
+fileFormatVersion: 2
+guid: fc9b55d24dc25aa4cbdfdf56c336ba02
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -3294242632331839463
+    second: orbit_generated_0
+  - first:
+      213: 5605915718974699500
+    second: orbit_generated_1
+  - first:
+      213: 882462644188826581
+    second: orbit_generated_2
+  - first:
+      213: -1800155542907742056
+    second: orbit_generated_3
+  - first:
+      213: 6854708839064508759
+    second: orbit_generated_4
+  - first:
+      213: 4231217083168098978
+    second: orbit_generated_5
+  - first:
+      213: 1031893704100394040
+    second: orbit_generated_6
+  - first:
+      213: 3602938719743361096
+    second: orbit_generated_7
+  - first:
+      213: 3852219453594068499
+    second: orbit_generated_8
+  - first:
+      213: 3062672139606382724
+    second: orbit_generated_9
+  - first:
+      213: -2347710150310272409
+    second: orbit_generated_10
+  - first:
+      213: -5382531310709435086
+    second: orbit_generated_11
+  - first:
+      213: 6899341862567852576
+    second: orbit_generated_12
+  - first:
+      213: -4070603676952461200
+    second: orbit_generated_13
+  - first:
+      213: -4838382512245866816
+    second: orbit_generated_14
+  - first:
+      213: 7927358580872598635
+    second: orbit_generated_15
+  - first:
+      213: -8082338051437451242
+    second: orbit_generated_16
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: orbit_generated_0
+      rect:
+        serializedVersion: 2
+        x: 426
+        y: 1148
+        width: 154
+        height: 106
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 918b9ef87cf7842d0800000000000000
+      internalID: -3294242632331839463
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_generated_1
+      rect:
+        serializedVersion: 2
+        x: 619
+        y: 1161
+        width: 95
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ce7f34e15a63ccd40800000000000000
+      internalID: 5605915718974699500
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_generated_2
+      rect:
+        serializedVersion: 2
+        x: 712
+        y: 1176
+        width: 13
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5db4d6279132f3c00800000000000000
+      internalID: 882462644188826581
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_generated_3
+      rect:
+        serializedVersion: 2
+        x: 731
+        y: 1205
+        width: 68
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 898988442109407e0800000000000000
+      internalID: -1800155542907742056
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_generated_4
+      rect:
+        serializedVersion: 2
+        x: 731
+        y: 1152
+        width: 26
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7599b2f0f51d02f50800000000000000
+      internalID: 6854708839064508759
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_generated_5
+      rect:
+        serializedVersion: 2
+        x: 820
+        y: 1162
+        width: 81
+        height: 54
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2aa8cc9e48d48ba30800000000000000
+      internalID: 4231217083168098978
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_generated_6
+      rect:
+        serializedVersion: 2
+        x: 852
+        y: 1193
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 834bdde4bd5025e00800000000000000
+      internalID: 1031893704100394040
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_generated_7
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 457
+        width: 122
+        height: 471
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 840cdc92da5300230800000000000000
+      internalID: 3602938719743361096
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_generated_8
+      rect:
+        serializedVersion: 2
+        x: 104
+        y: 0
+        width: 1145
+        height: 1140
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 316e250ee25d57530800000000000000
+      internalID: 3852219453594068499
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_generated_9
+      rect:
+        serializedVersion: 2
+        x: 1105
+        y: 283
+        width: 22
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 48859b0951cc08a20800000000000000
+      internalID: 3062672139606382724
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_generated_10
+      rect:
+        serializedVersion: 2
+        x: 313
+        y: 122
+        width: 12
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7626d279e024b6fd0800000000000000
+      internalID: -2347710150310272409
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_generated_11
+      rect:
+        serializedVersion: 2
+        x: 313
+        y: 114
+        width: 10
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2351fb07a486d45b0800000000000000
+      internalID: -5382531310709435086
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_generated_12
+      rect:
+        serializedVersion: 2
+        x: 321
+        y: 115
+        width: 10
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 02ab656aed26fbf50800000000000000
+      internalID: 6899341862567852576
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_generated_13
+      rect:
+        serializedVersion: 2
+        x: 325
+        y: 108
+        width: 8
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 07089d5d58f4287c0800000000000000
+      internalID: -4070603676952461200
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_generated_14
+      rect:
+        serializedVersion: 2
+        x: 329
+        y: 104
+        width: 6
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0ce7f1e6dbc9adcb0800000000000000
+      internalID: -4838382512245866816
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_generated_15
+      rect:
+        serializedVersion: 2
+        x: 334
+        y: 104
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b645e0cd0a2a30e60800000000000000
+      internalID: 7927358580872598635
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_generated_16
+      rect:
+        serializedVersion: 2
+        x: 683
+        y: 65
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 618a2714d54c5df80800000000000000
+      internalID: -8082338051437451242
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      orbit_generated_0: -3294242632331839463
+      orbit_generated_1: 5605915718974699500
+      orbit_generated_10: -2347710150310272409
+      orbit_generated_11: -5382531310709435086
+      orbit_generated_12: 6899341862567852576
+      orbit_generated_13: -4070603676952461200
+      orbit_generated_14: -4838382512245866816
+      orbit_generated_15: 7927358580872598635
+      orbit_generated_16: -8082338051437451242
+      orbit_generated_2: 882462644188826581
+      orbit_generated_3: -1800155542907742056
+      orbit_generated_4: 6854708839064508759
+      orbit_generated_5: 4231217083168098978
+      orbit_generated_6: 1031893704100394040
+      orbit_generated_7: 3602938719743361096
+      orbit_generated_8: 3852219453594068499
+      orbit_generated_9: 3062672139606382724
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

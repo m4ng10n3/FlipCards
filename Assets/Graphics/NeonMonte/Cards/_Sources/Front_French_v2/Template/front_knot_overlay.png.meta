@@ -1,0 +1,715 @@
+fileFormatVersion: 2
+guid: 1128b49cca0e7c348a7ac0a5f64359f1
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 8561257020416334969
+    second: front_knot_overlay_0
+  - first:
+      213: -8449978849014233353
+    second: front_knot_overlay_1
+  - first:
+      213: 315449225285189849
+    second: front_knot_overlay_2
+  - first:
+      213: -6412139720289090210
+    second: front_knot_overlay_3
+  - first:
+      213: -3082628843151460491
+    second: front_knot_overlay_4
+  - first:
+      213: -2785092869930925403
+    second: front_knot_overlay_5
+  - first:
+      213: -4306056957491214386
+    second: front_knot_overlay_6
+  - first:
+      213: 7359477616616090585
+    second: front_knot_overlay_7
+  - first:
+      213: -8807524549707201897
+    second: front_knot_overlay_8
+  - first:
+      213: 1810069029464361477
+    second: front_knot_overlay_9
+  - first:
+      213: 8311996325283664068
+    second: front_knot_overlay_10
+  - first:
+      213: 8168014544957298147
+    second: front_knot_overlay_11
+  - first:
+      213: 6308181931800204657
+    second: front_knot_overlay_12
+  - first:
+      213: 1479304762139068412
+    second: front_knot_overlay_13
+  - first:
+      213: -2595695768168692033
+    second: front_knot_overlay_14
+  - first:
+      213: -3037776075271725142
+    second: front_knot_overlay_15
+  - first:
+      213: -3196742145953080422
+    second: front_knot_overlay_16
+  - first:
+      213: -7374348097444767779
+    second: front_knot_overlay_17
+  - first:
+      213: 6598607579455495755
+    second: front_knot_overlay_18
+  - first:
+      213: -1724209727540660552
+    second: front_knot_overlay_19
+  - first:
+      213: 8002966636557865704
+    second: front_knot_overlay_20
+  - first:
+      213: 3191197727787943652
+    second: front_knot_overlay_21
+  - first:
+      213: -4000517196614309944
+    second: front_knot_overlay_22
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: front_knot_overlay_0
+      rect:
+        serializedVersion: 2
+        x: 55
+        y: 1271
+        width: 170
+        height: 170
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 97c1cbc86e1bfc670800000000000000
+      internalID: 8561257020416334969
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_knot_overlay_1
+      rect:
+        serializedVersion: 2
+        x: 225
+        y: 1440
+        width: 47
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7f641f8b105abba80800000000000000
+      internalID: -8449978849014233353
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_knot_overlay_2
+      rect:
+        serializedVersion: 2
+        x: 882
+        y: 1326
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9d0cbc92663b06400800000000000000
+      internalID: 315449225285189849
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_knot_overlay_3
+      rect:
+        serializedVersion: 2
+        x: 95
+        y: 1106
+        width: 90
+        height: 90
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e550ff9b5e08307a0800000000000000
+      internalID: -6412139720289090210
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_knot_overlay_4
+      rect:
+        serializedVersion: 2
+        x: 882
+        y: 1186
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 577759d466d4835d0800000000000000
+      internalID: -3082628843151460491
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_knot_overlay_5
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 990
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5a24b457acc5959d0800000000000000
+      internalID: -2785092869930925403
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_knot_overlay_6
+      rect:
+        serializedVersion: 2
+        x: 882
+        y: 1046
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ec7032af200dd34c0800000000000000
+      internalID: -4306056957491214386
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_knot_overlay_7
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 850
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9db27de66ed122660800000000000000
+      internalID: 7359477616616090585
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_knot_overlay_8
+      rect:
+        serializedVersion: 2
+        x: 882
+        y: 906
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7928b28161365c580800000000000000
+      internalID: -8807524549707201897
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_knot_overlay_9
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 710
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 50ac8203138ae1910800000000000000
+      internalID: 1810069029464361477
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_knot_overlay_10
+      rect:
+        serializedVersion: 2
+        x: 882
+        y: 766
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4c092e67e942a5370800000000000000
+      internalID: 8311996325283664068
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_knot_overlay_11
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 570
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3e55760e3fd9a5170800000000000000
+      internalID: 8168014544957298147
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_knot_overlay_12
+      rect:
+        serializedVersion: 2
+        x: 882
+        y: 626
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1751d777b0a2b8750800000000000000
+      internalID: 6308181931800204657
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_knot_overlay_13
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 430
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cf7c7dde7db878410800000000000000
+      internalID: 1479304762139068412
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_knot_overlay_14
+      rect:
+        serializedVersion: 2
+        x: 882
+        y: 486
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fb60251937c3afbd0800000000000000
+      internalID: -2595695768168692033
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_knot_overlay_15
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 290
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aaf9f3e11c6a7d5d0800000000000000
+      internalID: -3037776075271725142
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_knot_overlay_16
+      rect:
+        serializedVersion: 2
+        x: 845
+        y: 297
+        width: 78
+        height: 176
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a9b52ff84f3e2a3d0800000000000000
+      internalID: -3196742145953080422
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_knot_overlay_17
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 150
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dd71ab1f97d09a990800000000000000
+      internalID: -7374348097444767779
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_knot_overlay_18
+      rect:
+        serializedVersion: 2
+        x: 799
+        y: 95
+        width: 170
+        height: 170
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b4e15a1f1a6f29b50800000000000000
+      internalID: 6598607579455495755
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_knot_overlay_19
+      rect:
+        serializedVersion: 2
+        x: 449
+        y: 61
+        width: 34
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8b67aa753606218e0800000000000000
+      internalID: -1724209727540660552
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_knot_overlay_20
+      rect:
+        serializedVersion: 2
+        x: 495
+        y: 61
+        width: 34
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8e2955121cf301f60800000000000000
+      internalID: 8002966636557865704
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_knot_overlay_21
+      rect:
+        serializedVersion: 2
+        x: 541
+        y: 61
+        width: 34
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4e685dcfc69694c20800000000000000
+      internalID: 3191197727787943652
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_knot_overlay_22
+      rect:
+        serializedVersion: 2
+        x: 753
+        y: 50
+        width: 47
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8c766f92ece4b78c0800000000000000
+      internalID: -4000517196614309944
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      front_knot_overlay_0: 8561257020416334969
+      front_knot_overlay_1: -8449978849014233353
+      front_knot_overlay_10: 8311996325283664068
+      front_knot_overlay_11: 8168014544957298147
+      front_knot_overlay_12: 6308181931800204657
+      front_knot_overlay_13: 1479304762139068412
+      front_knot_overlay_14: -2595695768168692033
+      front_knot_overlay_15: -3037776075271725142
+      front_knot_overlay_16: -3196742145953080422
+      front_knot_overlay_17: -7374348097444767779
+      front_knot_overlay_18: 6598607579455495755
+      front_knot_overlay_19: -1724209727540660552
+      front_knot_overlay_2: 315449225285189849
+      front_knot_overlay_20: 8002966636557865704
+      front_knot_overlay_21: 3191197727787943652
+      front_knot_overlay_22: -4000517196614309944
+      front_knot_overlay_3: -6412139720289090210
+      front_knot_overlay_4: -3082628843151460491
+      front_knot_overlay_5: -2785092869930925403
+      front_knot_overlay_6: -4306056957491214386
+      front_knot_overlay_7: 7359477616616090585
+      front_knot_overlay_8: -8807524549707201897
+      front_knot_overlay_9: 1810069029464361477
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

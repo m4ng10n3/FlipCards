@@ -1,0 +1,239 @@
+{
+  "canvas": [
+    1024,
+    1536
+  ],
+  "independent_back_layout": true,
+  "rail_geometry_mirrors_horizontally": true,
+  "caps_mirror_vertically": true,
+  "single_faction_inside_panel": true,
+  "left_count": 7,
+  "right_count": 7,
+  "step": 148,
+  "stat_headers": 0,
+  "left_alignment": true,
+  "right_alignment": true,
+  "preview_values": {
+    "health": 3,
+    "defense": 4,
+    "charges": 1,
+    "attack_banner": 2
+  },
+  "files": {
+    "defense_club_B": {
+      "size": [
+        256,
+        256
+      ],
+      "bbox": [
+        38,
+        32,
+        217,
+        224
+      ],
+      "alpha_zero_pixels": 48330
+    },
+    "attack_spade": {
+      "size": [
+        256,
+        256
+      ],
+      "bbox": [
+        56,
+        32,
+        200,
+        224
+      ],
+      "alpha_zero_pixels": 52856
+    },
+    "star": {
+      "size": [
+        256,
+        256
+      ],
+      "bbox": [
+        35,
+        32,
+        220,
+        224
+      ],
+      "alpha_zero_pixels": 55345
+    },
+    "charge_ring": {
+      "size": [
+        256,
+        256
+      ],
+      "bbox": [
+        37,
+        37,
+        219,
+        219
+      ],
+      "alpha_zero_pixels": 61093
+    },
+    "charge_full": {
+      "size": [
+        256,
+        256
+      ],
+      "bbox": [
+        37,
+        37,
+        219,
+        219
+      ],
+      "alpha_zero_pixels": 40198
+    },
+    "faction_sun": {
+      "size": [
+        256,
+        256
+      ],
+      "bbox": [
+        32,
+        33,
+        224,
+        222
+      ],
+      "alpha_zero_pixels": 49784
+    },
+    "faction_moon": {
+      "size": [
+        256,
+        256
+      ],
+      "bbox": [
+        64,
+        32,
+        191,
+        224
+      ],
+      "alpha_zero_pixels": 54473
+    },
+    "faction_saturn": {
+      "size": [
+        256,
+        256
+      ],
+      "bbox": [
+        66,
+        32,
+        189,
+        224
+      ],
+      "alpha_zero_pixels": 54216
+    },
+    "drop_full": {
+      "size": [
+        256,
+        256
+      ],
+      "bbox": [
+        32,
+        68,
+        224,
+        188
+      ],
+      "alpha_zero_pixels": 51530
+    },
+    "drop_empty": {
+      "size": [
+        256,
+        256
+      ],
+      "bbox": [
+        32,
+        68,
+        224,
+        188
+      ],
+      "alpha_zero_pixels": 57525
+    },
+    "attack_full": {
+      "size": [
+        256,
+        256
+      ],
+      "bbox": [
+        32,
+        68,
+        224,
+        188
+      ],
+      "alpha_zero_pixels": 53808
+    },
+    "attack_empty": {
+      "size": [
+        256,
+        256
+      ],
+      "bbox": [
+        32,
+        68,
+        224,
+        188
+      ],
+      "alpha_zero_pixels": 60567
+    },
+    "defense_full": {
+      "size": [
+        256,
+        256
+      ],
+      "bbox": [
+        32,
+        68,
+        224,
+        188
+      ],
+      "alpha_zero_pixels": 49214
+    },
+    "defense_empty": {
+      "size": [
+        256,
+        256
+      ],
+      "bbox": [
+        32,
+        68,
+        224,
+        188
+      ],
+      "alpha_zero_pixels": 59467
+    }
+  },
+  "paper_exterior_grey_removed": 1947,
+  "paper_exterior_grey_remaining": 0,
+  "ornament_alpha_zero_pixels": 288682,
+  "drop_bounds_match": true,
+  "drop_alpha_matches_master": true,
+  "drop_genuine_transparency": true,
+  "attack_bounds_match": true,
+  "attack_alpha_matches_master": true,
+  "attack_genuine_transparency": true,
+  "defense_bounds_match": true,
+  "defense_alpha_matches_master": true,
+  "defense_genuine_transparency": true,
+  "attack_primary_tip_rotated_left": true,
+  "defense_primary_tip_rotated_left": true,
+  "drop_original_rgba_unchanged": true,
+  "secondary_cap_join_exact": true,
+  "defense_top_to_bottom_raster_checks": {
+    "0": true,
+    "1": true,
+    "4": true,
+    "7": true
+  },
+  "outer_pip_clearance_pixels": 50.0,
+  "tip_to_frame_cusp_clearance_pixels": {
+    "drop": 20.0,
+    "defense": 20.0
+  },
+  "pip_frame_overlap_pixels": 0,
+  "faction_ornament_overlap_pixels": 0,
+  "header_frame_overlap_pixels": 0,
+  "ornament_frame_overlap_pixels": 0,
+  "drop_state_bounds_match": true,
+  "defense_state_bounds_match": true
+}

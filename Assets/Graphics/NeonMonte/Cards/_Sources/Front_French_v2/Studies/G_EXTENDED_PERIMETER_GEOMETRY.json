@@ -1,0 +1,61 @@
+{
+  "B": [
+    692,
+    482
+  ],
+  "C": [
+    528.0,
+    657.0
+  ],
+  "U": [
+    318.0,
+    525.0
+  ],
+  "V": [
+    434.0,
+    744.5
+  ],
+  "D": [
+    498.0,
+    832.0
+  ],
+  "neck_width": 121.7621474609374,
+  "score": 3.937765671114506,
+  "source_size": [
+    694,
+    832
+  ],
+  "feasible_candidates": 2669,
+  "template_scale": 0.12530120481927712,
+  "template_ink_size": [
+    86.45783132530121,
+    104
+  ],
+  "neck_px_at_24_height": 3.5208331795933705,
+  "curve_type": "cubic Bezier, not circular",
+  "D_anchor": "outermost bottom-right corner of the original spade contour; left point mirrored",
+  "old_B": [
+    658,
+    586
+  ],
+  "old_C": [
+    610,
+    632
+  ],
+  "vertical_gaps": [
+    175,
+    175
+  ],
+  "C_D_horizontal_gap": 30.0,
+  "retained_source_area_before_after": [
+    0.6515497353703982,
+    0.8371958703342719
+  ],
+  "B_C_source_perimeter_fraction_before_after": [
+    0.05331820760068066,
+    0.19228587634713556
+  ],
+  "objective": "(vertical_gap_difference/8)^2+((C.x-D.x-32)/24)^2+((neck/blade_width-.25)/.06)^2+.12*((rise/span-.22)/.12)^2+.05*((reach-.85)/.35)^2",
+  "qualification": "Best sampled feasible candidate under declared aesthetic targets, not a universal optimum.",
+  "verification": "PNG within source silhouette and exactly mirror symmetric; SVG cubic analytic with raster contour sampling for B-C."
+}

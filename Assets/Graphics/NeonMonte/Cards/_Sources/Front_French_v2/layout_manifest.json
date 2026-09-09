@@ -1,0 +1,459 @@
+{
+  "layout_revision": "tattoo-relief-front-v7",
+  "canvas": [
+    1024,
+    1536
+  ],
+  "coordinates": "top-left origin, y down",
+  "runtime_card_size": [
+    224,
+    336
+  ],
+  "frame_art": {
+    "file": "Template/front_frame_tattoo.png",
+    "generated_source": "Sources/frame_tattoo_generated.png",
+    "geometry": "Template/front_frame_geometry.svg",
+    "technique": "charcoal contour, ivory raised ridge, subtle paper recess, generated ink stippling",
+    "svg_format": "front_frame.svg embeds finished RGBA; geometry SVG remains editable"
+  },
+  "stat_headers": [],
+  "clean_template": "Template/front_clean.png",
+  "clean_has_baked_stats": false,
+  "base_has_text_separator": false,
+  "symbol_canvas": [
+    256,
+    256
+  ],
+  "indicator_canvas": [
+    256,
+    256
+  ],
+  "faction_centers": [
+    [
+      140,
+      180
+    ],
+    [
+      884,
+      1356
+    ]
+  ],
+  "faction_full_sprite_render_size": [
+    224,
+    224
+  ],
+  "second_faction_rotation_degrees": 180,
+  "inner_vertical_open_endpoints": [
+    [
+      250,
+      180
+    ],
+    [
+      774,
+      1356
+    ]
+  ],
+  "inner_vertical_endpoint_rule": "Y equals the center Y of the adjacent faction symbol",
+  "faction_designs": [
+    {
+      "id": "sun",
+      "design_label": "SOLE",
+      "file": "Symbols/faction_sun.png",
+      "preview": "Template/front_sun_preview.png"
+    },
+    {
+      "id": "moon",
+      "design_label": "LUNA",
+      "file": "Symbols/faction_moon.png",
+      "preview": "Template/front_moon_preview.png"
+    },
+    {
+      "id": "saturn",
+      "design_label": "SATURNO",
+      "file": "Symbols/faction_saturn.png",
+      "preview": "Template/front_saturn_preview.png"
+    }
+  ],
+  "inner_margin": {
+    "left_axis": 140,
+    "right_axis": 884,
+    "scallop_depth": 16,
+    "cusp_span": 60,
+    "stroke": 4,
+    "corners": "curved, with a short companion rule echoing the back",
+    "outer_radius": 36
+  },
+  "text_top_limiter": {
+    "file": "Template/text_top_limiter.png",
+    "mask": "Template/text_top_limiter_mask.png",
+    "svg": "Template/text_top_limiter.svg",
+    "overlay": "Template/text_top_limiter_overlay.png",
+    "sprite_size": [
+      480,
+      24
+    ],
+    "center": [
+      479,
+      1292
+    ],
+    "align_to": "safe_regions.ability horizontal center",
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "stroke": 2.5,
+    "opacity": 0.6274509803921569,
+    "baked_in_clean": false,
+    "adjustment": "move center Y to set text area height; sprite height controls transparent padding, not ink thickness",
+    "preview": "Template/front_sun_with_text_limiter_preview.png"
+  },
+  "left_tallies": {
+    "centers": [
+      [
+        94,
+        360
+      ],
+      [
+        94,
+        526
+      ],
+      [
+        94,
+        692
+      ],
+      [
+        94,
+        858
+      ],
+      [
+        94,
+        1024
+      ],
+      [
+        94,
+        1190
+      ],
+      [
+        94,
+        1356
+      ]
+    ],
+    "cusps": [
+      [
+        156,
+        360
+      ],
+      [
+        156,
+        526
+      ],
+      [
+        156,
+        692
+      ],
+      [
+        156,
+        858
+      ],
+      [
+        156,
+        1024
+      ],
+      [
+        156,
+        1190
+      ],
+      [
+        156,
+        1356
+      ]
+    ],
+    "count": 7,
+    "step": 166,
+    "full": "Indicators/drop_full.png",
+    "empty": "Indicators/drop_empty.png",
+    "ink_size": [
+      94,
+      59
+    ],
+    "alpha_bbox": [
+      32,
+      68,
+      224,
+      188
+    ],
+    "sprite_canvas": [
+      256,
+      256
+    ],
+    "full_sprite_render_size": [
+      125.33333333333333,
+      125.86666666666666
+    ],
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "tip": "right/inward",
+    "source_transform": "original unchanged",
+    "runtime_rotation_degrees": 0
+  },
+  "right_tallies": {
+    "centers": [
+      [
+        930,
+        180
+      ],
+      [
+        930,
+        346
+      ],
+      [
+        930,
+        512
+      ],
+      [
+        930,
+        678
+      ],
+      [
+        930,
+        844
+      ],
+      [
+        930,
+        1010
+      ],
+      [
+        930,
+        1176
+      ]
+    ],
+    "cusps": [
+      [
+        868,
+        180
+      ],
+      [
+        868,
+        346
+      ],
+      [
+        868,
+        512
+      ],
+      [
+        868,
+        678
+      ],
+      [
+        868,
+        844
+      ],
+      [
+        868,
+        1010
+      ],
+      [
+        868,
+        1176
+      ]
+    ],
+    "count": 7,
+    "step": 166,
+    "full": "Indicators/attack_full.png",
+    "empty": "Indicators/attack_empty.png",
+    "source": "../SharedCardAssets/Sources/attack_rhombic_spear.png",
+    "ink_size": [
+      94,
+      59
+    ],
+    "alpha_bbox": [
+      32,
+      68,
+      224,
+      188
+    ],
+    "sprite_canvas": [
+      256,
+      256
+    ],
+    "full_sprite_render_size": [
+      125.33333333333333,
+      125.86666666666666
+    ],
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "tip": "left/inward",
+    "source_transform": "horizontal mirror",
+    "runtime_rotation_degrees": 0
+  },
+  "safe_regions": {
+    "title": [
+      300,
+      112,
+      790,
+      214
+    ],
+    "artwork": [
+      254,
+      282,
+      770,
+      1254
+    ],
+    "ability": [
+      234,
+      1322,
+      724,
+      1424
+    ]
+  },
+  "charges": [
+    [
+      466,
+      1458
+    ],
+    [
+      512,
+      1458
+    ],
+    [
+      558,
+      1458
+    ]
+  ],
+  "charge_backplates": "Template/charge_backplates.png",
+  "atlas": {
+    "faction_sun": {
+      "rect_top_left": [
+        0,
+        0,
+        256,
+        256
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "faction_moon": {
+      "rect_top_left": [
+        256,
+        0,
+        256,
+        256
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "faction_saturn": {
+      "rect_top_left": [
+        512,
+        0,
+        256,
+        256
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "star": {
+      "rect_top_left": [
+        768,
+        0,
+        256,
+        256
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "charge_ring": {
+      "rect_top_left": [
+        0,
+        256,
+        256,
+        256
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "charge_full": {
+      "rect_top_left": [
+        256,
+        256,
+        256,
+        256
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "drop_full": {
+      "rect_top_left": [
+        512,
+        256,
+        256,
+        256
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "drop_empty": {
+      "rect_top_left": [
+        768,
+        256,
+        256,
+        256
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "attack_full": {
+      "rect_top_left": [
+        0,
+        512,
+        256,
+        256
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "attack_empty": {
+      "rect_top_left": [
+        256,
+        512,
+        256,
+        256
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  "import": {
+    "textureType": "Sprite",
+    "filterMode": "Point",
+    "compression": "None",
+    "mipmaps": false,
+    "pixelsPerUnit": 1,
+    "alphaIsTransparency": true
+  },
+  "notes": "No heart or attack header: glyph pips identify the statistic. Drop right; rhombic spear point mirrored left. No artwork/title/ability baked into clean base."
+}

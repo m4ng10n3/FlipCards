@@ -1,0 +1,871 @@
+fileFormatVersion: 2
+guid: bb34cf7b39ba67142bab141f2b48526c
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 6753712856987224787
+    second: front_threshold_overlay_0
+  - first:
+      213: -4405498217854308744
+    second: front_threshold_overlay_1
+  - first:
+      213: -2450785093655780575
+    second: front_threshold_overlay_2
+  - first:
+      213: -1275769497416652478
+    second: front_threshold_overlay_3
+  - first:
+      213: 4332404729922459775
+    second: front_threshold_overlay_4
+  - first:
+      213: 2826928680850582177
+    second: front_threshold_overlay_5
+  - first:
+      213: -225883396644513123
+    second: front_threshold_overlay_6
+  - first:
+      213: -5666072729424780462
+    second: front_threshold_overlay_7
+  - first:
+      213: 5667353716322254731
+    second: front_threshold_overlay_8
+  - first:
+      213: -7591977025308703409
+    second: front_threshold_overlay_9
+  - first:
+      213: 5188779167790069145
+    second: front_threshold_overlay_10
+  - first:
+      213: -8539112543456773141
+    second: front_threshold_overlay_11
+  - first:
+      213: -1599525769937156853
+    second: front_threshold_overlay_12
+  - first:
+      213: -4720895774891687846
+    second: front_threshold_overlay_13
+  - first:
+      213: -7693447000887172665
+    second: front_threshold_overlay_14
+  - first:
+      213: 3351323532942473471
+    second: front_threshold_overlay_15
+  - first:
+      213: 2459258670340231715
+    second: front_threshold_overlay_16
+  - first:
+      213: -7064234865816028296
+    second: front_threshold_overlay_17
+  - first:
+      213: 356197721537767928
+    second: front_threshold_overlay_18
+  - first:
+      213: 5267793809216345825
+    second: front_threshold_overlay_19
+  - first:
+      213: 6959398166826902102
+    second: front_threshold_overlay_20
+  - first:
+      213: -1841985502001474164
+    second: front_threshold_overlay_21
+  - first:
+      213: -8607102610815161982
+    second: front_threshold_overlay_22
+  - first:
+      213: -2341802989767491096
+    second: front_threshold_overlay_23
+  - first:
+      213: 8952390076373818187
+    second: front_threshold_overlay_24
+  - first:
+      213: -8504726532211343911
+    second: front_threshold_overlay_25
+  - first:
+      213: -536451839988004250
+    second: front_threshold_overlay_26
+  - first:
+      213: -3359634618277922023
+    second: front_threshold_overlay_27
+  - first:
+      213: -4620691194831606888
+    second: front_threshold_overlay_28
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: front_threshold_overlay_0
+      rect:
+        serializedVersion: 2
+        x: 90
+        y: 1421
+        width: 100
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3da46bb8f020abd50800000000000000
+      internalID: 6753712856987224787
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_threshold_overlay_1
+      rect:
+        serializedVersion: 2
+        x: 225
+        y: 1440
+        width: 47
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 87e6d2256b68cd2c0800000000000000
+      internalID: -4405498217854308744
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_threshold_overlay_2
+      rect:
+        serializedVersion: 2
+        x: 55
+        y: 1274
+        width: 73
+        height: 157
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 12323df21ff0dfdd0800000000000000
+      internalID: -2450785093655780575
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_threshold_overlay_3
+      rect:
+        serializedVersion: 2
+        x: 153
+        y: 1273
+        width: 72
+        height: 158
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 249a333c66e8b4ee0800000000000000
+      internalID: -1275769497416652478
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_threshold_overlay_4
+      rect:
+        serializedVersion: 2
+        x: 882
+        y: 1326
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f781046d52bcf1c30800000000000000
+      internalID: 4332404729922459775
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_threshold_overlay_5
+      rect:
+        serializedVersion: 2
+        x: 116
+        y: 1271
+        width: 48
+        height: 39
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1aa667358a44b3720800000000000000
+      internalID: 2826928680850582177
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_threshold_overlay_6
+      rect:
+        serializedVersion: 2
+        x: 95
+        y: 1106
+        width: 90
+        height: 90
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d9a585e5f308ddcf0800000000000000
+      internalID: -225883396644513123
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_threshold_overlay_7
+      rect:
+        serializedVersion: 2
+        x: 882
+        y: 1186
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 253ab1b6fd01e51b0800000000000000
+      internalID: -5666072729424780462
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_threshold_overlay_8
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 990
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b8fb0e59d2c76ae40800000000000000
+      internalID: 5667353716322254731
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_threshold_overlay_9
+      rect:
+        serializedVersion: 2
+        x: 882
+        y: 1046
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f454c879e11e3a690800000000000000
+      internalID: -7591977025308703409
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_threshold_overlay_10
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 850
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 995f21a692f320840800000000000000
+      internalID: 5188779167790069145
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_threshold_overlay_11
+      rect:
+        serializedVersion: 2
+        x: 882
+        y: 906
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: beb3d26426afe7980800000000000000
+      internalID: -8539112543456773141
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_threshold_overlay_12
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 710
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b0500d179c75dc9e0800000000000000
+      internalID: -1599525769937156853
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_threshold_overlay_13
+      rect:
+        serializedVersion: 2
+        x: 882
+        y: 766
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a5040fb1e420c7eb0800000000000000
+      internalID: -4720895774891687846
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_threshold_overlay_14
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 570
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7c163ddd6b26b3590800000000000000
+      internalID: -7693447000887172665
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_threshold_overlay_15
+      rect:
+        serializedVersion: 2
+        x: 882
+        y: 626
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ff871744ffa428e20800000000000000
+      internalID: 3351323532942473471
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_threshold_overlay_16
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 430
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 322dd602bba012220800000000000000
+      internalID: 2459258670340231715
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_threshold_overlay_17
+      rect:
+        serializedVersion: 2
+        x: 882
+        y: 486
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 87b3b1541dbc6fd90800000000000000
+      internalID: -7064234865816028296
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_threshold_overlay_18
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 290
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8f9ef06c0f771f400800000000000000
+      internalID: 356197721537767928
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_threshold_overlay_19
+      rect:
+        serializedVersion: 2
+        x: 845
+        y: 297
+        width: 78
+        height: 176
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1e6975c3f86fa1940800000000000000
+      internalID: 5267793809216345825
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_threshold_overlay_20
+      rect:
+        serializedVersion: 2
+        x: 799
+        y: 105
+        width: 72
+        height: 158
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 652e830a2cfb49060800000000000000
+      internalID: 6959398166826902102
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_threshold_overlay_21
+      rect:
+        serializedVersion: 2
+        x: 860
+        y: 226
+        width: 48
+        height: 39
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c8558c7f1f3ff66e0800000000000000
+      internalID: -1841985502001474164
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_threshold_overlay_22
+      rect:
+        serializedVersion: 2
+        x: 896
+        y: 105
+        width: 73
+        height: 157
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 289660127cd6d8880800000000000000
+      internalID: -8607102610815161982
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_threshold_overlay_23
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 150
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8e106f4969e308fd0800000000000000
+      internalID: -2341802989767491096
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_threshold_overlay_24
+      rect:
+        serializedVersion: 2
+        x: 449
+        y: 61
+        width: 34
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b4b5ef8b7574d3c70800000000000000
+      internalID: 8952390076373818187
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_threshold_overlay_25
+      rect:
+        serializedVersion: 2
+        x: 495
+        y: 61
+        width: 34
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9ddf3b7674429f980800000000000000
+      internalID: -8504726532211343911
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_threshold_overlay_26
+      rect:
+        serializedVersion: 2
+        x: 541
+        y: 61
+        width: 34
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 66a096ec4e32e88f0800000000000000
+      internalID: -536451839988004250
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_threshold_overlay_27
+      rect:
+        serializedVersion: 2
+        x: 753
+        y: 50
+        width: 47
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 91b70726d1e2061d0800000000000000
+      internalID: -3359634618277922023
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_threshold_overlay_28
+      rect:
+        serializedVersion: 2
+        x: 834
+        y: 95
+        width: 100
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 89b694bf6d100efb0800000000000000
+      internalID: -4620691194831606888
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      front_threshold_overlay_0: 6753712856987224787
+      front_threshold_overlay_1: -4405498217854308744
+      front_threshold_overlay_10: 5188779167790069145
+      front_threshold_overlay_11: -8539112543456773141
+      front_threshold_overlay_12: -1599525769937156853
+      front_threshold_overlay_13: -4720895774891687846
+      front_threshold_overlay_14: -7693447000887172665
+      front_threshold_overlay_15: 3351323532942473471
+      front_threshold_overlay_16: 2459258670340231715
+      front_threshold_overlay_17: -7064234865816028296
+      front_threshold_overlay_18: 356197721537767928
+      front_threshold_overlay_19: 5267793809216345825
+      front_threshold_overlay_2: -2450785093655780575
+      front_threshold_overlay_20: 6959398166826902102
+      front_threshold_overlay_21: -1841985502001474164
+      front_threshold_overlay_22: -8607102610815161982
+      front_threshold_overlay_23: -2341802989767491096
+      front_threshold_overlay_24: 8952390076373818187
+      front_threshold_overlay_25: -8504726532211343911
+      front_threshold_overlay_26: -536451839988004250
+      front_threshold_overlay_27: -3359634618277922023
+      front_threshold_overlay_28: -4620691194831606888
+      front_threshold_overlay_3: -1275769497416652478
+      front_threshold_overlay_4: 4332404729922459775
+      front_threshold_overlay_5: 2826928680850582177
+      front_threshold_overlay_6: -225883396644513123
+      front_threshold_overlay_7: -5666072729424780462
+      front_threshold_overlay_8: 5667353716322254731
+      front_threshold_overlay_9: -7591977025308703409
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

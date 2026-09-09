@@ -1,0 +1,57 @@
+{
+  "reference": "Segoe UI Symbol U+2660",
+  "source_size": [
+    694,
+    832
+  ],
+  "anchors": {
+    "A": [
+      347,
+      2
+    ],
+    "P": [
+      693,
+      466
+    ],
+    "B": [
+      586,
+      645
+    ],
+    "C": [
+      418,
+      630
+    ],
+    "D": [
+      416,
+      832
+    ],
+    "D'": [
+      278,
+      832
+    ],
+    "C'": [
+      276,
+      630
+    ],
+    "B'": [
+      111,
+      646
+    ],
+    "P'": [
+      2,
+      466
+    ]
+  },
+  "operation": "intersection of original glyph and cut mask retaining original B-C contour arcs on both sides",
+  "retained_arcs": [
+    "B-C",
+    "C'-B'"
+  ],
+  "all_anchors_on_source_contour": true,
+  "result_subset_of_original": true,
+  "template_ink_size": [
+    86.58,
+    104
+  ],
+  "note": "New study D; current template B unchanged."
+}

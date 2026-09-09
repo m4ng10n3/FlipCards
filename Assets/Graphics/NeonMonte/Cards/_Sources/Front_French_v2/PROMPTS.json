@@ -1,0 +1,5 @@
+{
+  "method": "Built-in image_gen, followed by geometric refinement explicitly requested by user.",
+  "prompt_set": "PROMPTS.md",
+  "geometric_assembly": "build_assets.py"
+}

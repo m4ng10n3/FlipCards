@@ -1,0 +1,715 @@
+fileFormatVersion: 2
+guid: 1e79b7a632c39394eb9f69ee592bce4f
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 820598356206006876
+    second: front_flame_overlay_0
+  - first:
+      213: -6902779046337878342
+    second: front_flame_overlay_1
+  - first:
+      213: 739364014053425047
+    second: front_flame_overlay_2
+  - first:
+      213: 569151703596110476
+    second: front_flame_overlay_3
+  - first:
+      213: 5742597089035248296
+    second: front_flame_overlay_4
+  - first:
+      213: -7579080943334307940
+    second: front_flame_overlay_5
+  - first:
+      213: 191101985453925683
+    second: front_flame_overlay_6
+  - first:
+      213: 8004955351457184029
+    second: front_flame_overlay_7
+  - first:
+      213: 4789305771026168238
+    second: front_flame_overlay_8
+  - first:
+      213: 8508808178278283582
+    second: front_flame_overlay_9
+  - first:
+      213: 8936142929815179950
+    second: front_flame_overlay_10
+  - first:
+      213: 1389459543313096856
+    second: front_flame_overlay_11
+  - first:
+      213: 8707033593701291616
+    second: front_flame_overlay_12
+  - first:
+      213: 1350206997149414672
+    second: front_flame_overlay_13
+  - first:
+      213: 681024273418386492
+    second: front_flame_overlay_14
+  - first:
+      213: 8439948263426820730
+    second: front_flame_overlay_15
+  - first:
+      213: 1428059576041944353
+    second: front_flame_overlay_16
+  - first:
+      213: -7505853331628081612
+    second: front_flame_overlay_17
+  - first:
+      213: -5166706561074837094
+    second: front_flame_overlay_18
+  - first:
+      213: -2331999793691331905
+    second: front_flame_overlay_19
+  - first:
+      213: 6244189867360801633
+    second: front_flame_overlay_20
+  - first:
+      213: -6186134650713577540
+    second: front_flame_overlay_21
+  - first:
+      213: 6245549962697822045
+    second: front_flame_overlay_22
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: front_flame_overlay_0
+      rect:
+        serializedVersion: 2
+        x: 55
+        y: 1271
+        width: 170
+        height: 170
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c52bde47bd9536b00800000000000000
+      internalID: 820598356206006876
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_flame_overlay_1
+      rect:
+        serializedVersion: 2
+        x: 225
+        y: 1440
+        width: 47
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ab66504a7076430a0800000000000000
+      internalID: -6902779046337878342
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_flame_overlay_2
+      rect:
+        serializedVersion: 2
+        x: 882
+        y: 1326
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 79f7c5947afb24a00800000000000000
+      internalID: 739364014053425047
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_flame_overlay_3
+      rect:
+        serializedVersion: 2
+        x: 95
+        y: 1106
+        width: 90
+        height: 90
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c82972c757806e700800000000000000
+      internalID: 569151703596110476
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_flame_overlay_4
+      rect:
+        serializedVersion: 2
+        x: 882
+        y: 1186
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8a2632c70adc1bf40800000000000000
+      internalID: 5742597089035248296
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_flame_overlay_5
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 990
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c9740a8a902b1d690800000000000000
+      internalID: -7579080943334307940
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_flame_overlay_6
+      rect:
+        serializedVersion: 2
+        x: 882
+        y: 1046
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3356ad64e3ee6a200800000000000000
+      internalID: 191101985453925683
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_flame_overlay_7
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 850
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d19b776ea70571f60800000000000000
+      internalID: 8004955351457184029
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_flame_overlay_8
+      rect:
+        serializedVersion: 2
+        x: 882
+        y: 906
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ea93eb25938077240800000000000000
+      internalID: 4789305771026168238
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_flame_overlay_9
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 710
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e393730e4fb551670800000000000000
+      internalID: 8508808178278283582
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_flame_overlay_10
+      rect:
+        serializedVersion: 2
+        x: 882
+        y: 766
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ea290c126ae830c70800000000000000
+      internalID: 8936142929815179950
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_flame_overlay_11
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 570
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 89024fcc71a584310800000000000000
+      internalID: 1389459543313096856
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_flame_overlay_12
+      rect:
+        serializedVersion: 2
+        x: 882
+        y: 626
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 06655ffebe895d870800000000000000
+      internalID: 8707033593701291616
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_flame_overlay_13
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 430
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 01576563c16ecb210800000000000000
+      internalID: 1350206997149414672
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_flame_overlay_14
+      rect:
+        serializedVersion: 2
+        x: 882
+        y: 486
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c3c758ce7fb737900800000000000000
+      internalID: 681024273418386492
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_flame_overlay_15
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 290
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a7a0b349a38b02570800000000000000
+      internalID: 8439948263426820730
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_flame_overlay_16
+      rect:
+        serializedVersion: 2
+        x: 845
+        y: 297
+        width: 78
+        height: 176
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 12533144e9c71d310800000000000000
+      internalID: 1428059576041944353
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_flame_overlay_17
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 150
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 43e3020a92ad5d790800000000000000
+      internalID: -7505853331628081612
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_flame_overlay_18
+      rect:
+        serializedVersion: 2
+        x: 799
+        y: 95
+        width: 170
+        height: 170
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a994470d1cb2c48b0800000000000000
+      internalID: -5166706561074837094
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_flame_overlay_19
+      rect:
+        serializedVersion: 2
+        x: 449
+        y: 61
+        width: 34
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fb27eb80b8213afd0800000000000000
+      internalID: -2331999793691331905
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_flame_overlay_20
+      rect:
+        serializedVersion: 2
+        x: 495
+        y: 61
+        width: 34
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 163522ae991d7a650800000000000000
+      internalID: 6244189867360801633
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_flame_overlay_21
+      rect:
+        serializedVersion: 2
+        x: 541
+        y: 61
+        width: 34
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cb76b7b8f4f662aa0800000000000000
+      internalID: -6186134650713577540
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_flame_overlay_22
+      rect:
+        serializedVersion: 2
+        x: 753
+        y: 50
+        width: 47
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d5fce89c996aca650800000000000000
+      internalID: 6245549962697822045
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      front_flame_overlay_0: 820598356206006876
+      front_flame_overlay_1: -6902779046337878342
+      front_flame_overlay_10: 8936142929815179950
+      front_flame_overlay_11: 1389459543313096856
+      front_flame_overlay_12: 8707033593701291616
+      front_flame_overlay_13: 1350206997149414672
+      front_flame_overlay_14: 681024273418386492
+      front_flame_overlay_15: 8439948263426820730
+      front_flame_overlay_16: 1428059576041944353
+      front_flame_overlay_17: -7505853331628081612
+      front_flame_overlay_18: -5166706561074837094
+      front_flame_overlay_19: -2331999793691331905
+      front_flame_overlay_2: 739364014053425047
+      front_flame_overlay_20: 6244189867360801633
+      front_flame_overlay_21: -6186134650713577540
+      front_flame_overlay_22: 6245549962697822045
+      front_flame_overlay_3: 569151703596110476
+      front_flame_overlay_4: 5742597089035248296
+      front_flame_overlay_5: -7579080943334307940
+      front_flame_overlay_6: 191101985453925683
+      front_flame_overlay_7: 8004955351457184029
+      front_flame_overlay_8: 4789305771026168238
+      front_flame_overlay_9: 8508808178278283582
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

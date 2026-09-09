@@ -10,11 +10,13 @@ public static class NeonMonteSkinBuilder
     public const string Root = "Assets/Graphics/NeonMonte";
     const string Kit = "Assets/Graphics/FlipCards_ArcadeHorrorUI/ArcadeHorrorUI/2x";
 
-    public static Sprite Art(string name) => AssetDatabase.LoadAssetAtPath<Sprite>($"{Root}/{name}.png");
+    public static Sprite Art(string name) => AssetDatabase.LoadAssetAtPath<Sprite>(NeonMonteAssetOrganization.ArtPath(name));
+
+    public static Sprite FinalArt(string path) => AssetDatabase.LoadAssetAtPath<Sprite>(NeonMonteAssetOrganization.Final + "/" + path + ".png");
 
     public static Material PaperMaterial()
     {
-        const string path = Root + "/PrintedPaper.mat";
+        const string path = Root + "/Runtime/Materials/PrintedPaper.mat";
         var shader = Shader.Find("FlipCards/Printed Paper");
         if (shader == null) return null;
         var material = AssetDatabase.LoadAssetAtPath<Material>(path);
@@ -43,7 +45,7 @@ public static class NeonMonteSkinBuilder
         if (edition == Editions.REGULAR) return PaperMaterial();
         var original = AssetDatabase.LoadAssetAtPath<Material>("Assets/Materials/Shader Graphs_CardShaderGraph.mat");
         if (original == null) return PaperMaterial();
-        string path = Root + "/Card_" + edition + ".mat";
+        string path = Root + "/Runtime/Materials/Card_" + edition + ".mat";
         var material = AssetDatabase.LoadAssetAtPath<Material>(path);
         if (material == null) { material = new Material(original); AssetDatabase.CreateAsset(material, path); }
         foreach (var keyword in material.enabledKeywords)
@@ -57,8 +59,13 @@ public static class NeonMonteSkinBuilder
 
     public static void Prepare()
     {
-        if (!File.Exists(Root + "/card_front.png") || !File.Exists(Root + "/card_back.png")) return;
-        foreach (var path in Directory.GetFiles(Root, "*.png")) Import(path.Replace('\\', '/'), Vector4.zero);
+        NeonMonteAssetOrganization.Organize();
+        foreach (var path in Directory.GetFiles(Root + "/Runtime", "*.png", SearchOption.AllDirectories))
+            if (!path.Replace('\\', '/').Contains("/Chrome/")) Import(path.Replace('\\', '/'), Vector4.zero);
+        foreach (var face in new[] { "Front", "Back" })
+            foreach (var directory in new[] { "Template", "Indicators", "Symbols" })
+                foreach (var path in Directory.GetFiles(NeonMonteAssetOrganization.Final + "/" + face + "/" + directory, "*.png"))
+                    Import(path.Replace('\\', '/'), Vector4.zero);
         PrepareDisplayFont();
         var pathSkin = "Assets/Resources/FlipCardsUiSkin.asset";
         var skin = AssetDatabase.LoadAssetAtPath<UiSkin>(pathSkin);
@@ -74,11 +81,11 @@ public static class NeonMonteSkinBuilder
             var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(AssetDatabase.GUIDToAssetPath(guid));
             if (sprite != null) entries[sprite.name] = sprite;
         }
-        Directory.CreateDirectory(Root + "/Chrome");
+        Directory.CreateDirectory(Root + "/Runtime/Chrome");
         foreach (var key in new List<string>(entries.Keys))
         {
-            if (key.StartsWith("card_front")) entries[key] = Art("card_engraved_base") ?? Art(key) ?? Art("card_front");
-            else if (key.StartsWith("card_back")) entries[key] = Art(key) ?? Art("card_back");
+            if (key.StartsWith("card_front")) entries[key] = FinalArt("Front/Template/front_clean");
+            else if (key.StartsWith("card_back")) entries[key] = FinalArt("Back/Template/back_clean");
             else if (key == "board_bg") entries[key] = Art("board") ?? entries[key];
             else if (key == "reel_backing") entries[key] = Art("reel_housing") ?? entries[key];
             else if (IsChrome(key)) entries[key] = Chrome(key, entries[key]);
@@ -93,6 +100,16 @@ public static class NeonMonteSkinBuilder
             }
         }
         PrepareParts(entries);
+        entries["card_neutral"] = FinalArt("Back/Template/back_clean");
+        foreach (var face in new[] { "Front", "Back" })
+            foreach (var folder in new[] { "Symbols", "Indicators", "Template" })
+                foreach (var path in Directory.GetFiles(NeonMonteAssetOrganization.Final + "/" + face + "/" + folder, "*.png"))
+                    entries["final_" + face.ToLowerInvariant() + "_" + Path.GetFileNameWithoutExtension(path)] = AssetDatabase.LoadAssetAtPath<Sprite>(path.Replace('\\', '/'));
+        var families = new[] { "sun", "moon", "saturn" };
+        var glyphs = new[] { "flame", "wave", "thorn" };
+        for (int i = 0; i < 3; i++) entries["glyph_" + glyphs[i]] = FinalArt("Front/Symbols/faction_" + families[i] + "_mask");
+        entries["glyph_sword"] = FinalArt("Back/Symbols/attack_spade_mask");
+        entries["glyph_shield"] = FinalArt("Back/Symbols/defense_club_B_mask");
         skin.entries.Clear();
         foreach (var pair in entries)
             if (pair.Value != null) skin.entries.Add(new UiSkin.Entry { key = pair.Key, sprite = pair.Value });
@@ -103,11 +120,11 @@ public static class NeonMonteSkinBuilder
         AssetDatabase.SaveAssets();
     }
 
-    public static Sprite SlotPaper => AssetDatabase.LoadAssetAtPath<Sprite>($"{Root}/Chrome/slot_paper.asset");
+    public static Sprite SlotPaper => AssetDatabase.LoadAssetAtPath<Sprite>($"{Root}/Runtime/Chrome/slot_paper.asset");
 
     static Sprite Part(string name, Texture2D texture, Rect rect, float ppu = 1f, Vector4 border = default, bool inkCut = false)
     {
-        string path = $"{Root}/Chrome/{name}.asset";
+        string path = $"{Root}/Runtime/Chrome/{name}.asset";
         var sprite = Sprite.Create(texture, rect, new Vector2(.5f, .5f), ppu, 0, inkCut ? SpriteMeshType.Tight : SpriteMeshType.FullRect, border);
         sprite.name = name;
         if (inkCut) CutInkSilhouette(sprite, texture);
@@ -121,9 +138,9 @@ public static class NeonMonteSkinBuilder
 
     static void PrepareParts(Dictionary<string, Sprite> entries)
     {
-        foreach (var key in new[] { "card_neutral", "stat_ink_fill", "back_seal" })
+        foreach (var key in new[] { "card_neutral" })
             if (Art(key) != null) entries[key] = Art(key);
-        var lamps = AssetDatabase.LoadAssetAtPath<Texture2D>(Root + "/cabinet_lamps.png");
+        var lamps = AssetDatabase.LoadAssetAtPath<Texture2D>(NeonMonteAssetOrganization.ArtPath("cabinet_lamps"));
         if (lamps != null)
         {
             var names = new[] { "round", "spear", "shield" };
@@ -135,8 +152,8 @@ public static class NeonMonteSkinBuilder
                 entries[key] = Part(key, lamps, new Rect(col * w + w*.13f, row * h + h*.13f, w*.74f, h*.74f));
             }
         }
-        PrepareEngravedParts(entries);
-        var headers = AssetDatabase.LoadAssetAtPath<Texture2D>(Root + "/slot_name_frames.png");
+        // Final cards use delivered individual sprites instead of the old engraved sheet.
+        var headers = AssetDatabase.LoadAssetAtPath<Texture2D>(NeonMonteAssetOrganization.ArtPath("slot_name_frames"));
         if (headers != null)
         {
             // Three equal source rows; the suit is part of each printed name frame.
@@ -150,7 +167,7 @@ public static class NeonMonteSkinBuilder
             entries["slot_paper"] = Part("slot_paper", headers,
                 new Rect(headers.width*.5f, headers.height*.74f, headers.height*.08f, headers.height*.08f));
         }
-        var cabinet = AssetDatabase.LoadAssetAtPath<Texture2D>(Root + "/cabinet_body.png");
+        var cabinet = AssetDatabase.LoadAssetAtPath<Texture2D>(NeonMonteAssetOrganization.ArtPath("cabinet_body"));
         if (cabinet != null)
             entries["reel_backing"] = Part("CabinetBody", cabinet, new Rect(0, 0, cabinet.width, cabinet.height),
                 3f, new Vector4(cabinet.width*.04f, cabinet.height*.2f, cabinet.width*.105f, cabinet.height*.17f));
@@ -158,7 +175,7 @@ public static class NeonMonteSkinBuilder
 
     static void PrepareEngravedParts(Dictionary<string, Sprite> entries)
     {
-        string path = Root + "/card_engraved_parts.png";
+        string path = NeonMonteAssetOrganization.ArtPath("card_engraved_parts");
         var importer = AssetImporter.GetAtPath(path) as TextureImporter;
         if (importer == null) return;
         if (!importer.isReadable) { importer.isReadable = true; importer.SaveAndReimport(); }
@@ -233,7 +250,7 @@ public static class NeonMonteSkinBuilder
         key.StartsWith("card_rim_") || key.EndsWith("slot_empty") || key.StartsWith("hand_dock_") ||
         key == "hand_lift" || key == "deck_pulse" || key.StartsWith("badge_") || key.StartsWith("micro_");
 
-    public static Font DisplaySource => AssetDatabase.LoadAssetAtPath<Font>(Root + "/Fonts/VT323-Regular.ttf");
+    public static Font DisplaySource => AssetDatabase.LoadAssetAtPath<Font>(Root + "/Runtime/Fonts/VT323-Regular.ttf");
 
     static void PrepareDisplayFont()
     {
@@ -263,7 +280,7 @@ public static class NeonMonteSkinBuilder
 
     static Sprite Chrome(string key, Sprite source)
     {
-        string path = $"{Root}/Chrome/{key}.png";
+        string path = $"{Root}/Runtime/Chrome/{key}.png";
         // Retain source dimensions: reel glass/payline use sprite height as geometry.
         int w = Mathf.RoundToInt(source.rect.width), h = Mathf.RoundToInt(source.rect.height);
         bool ring = key.StartsWith("card_rim") || key.StartsWith("reel_cell") || key == "reel_frame" ||

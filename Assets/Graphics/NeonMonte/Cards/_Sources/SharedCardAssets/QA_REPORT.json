@@ -1,0 +1,116 @@
+{
+  "checks": {
+    "drop_bounds_match": true,
+    "drop_alpha_matches_master": true,
+    "drop_genuine_transparency": true,
+    "attack_bounds_match": true,
+    "attack_alpha_matches_master": true,
+    "attack_genuine_transparency": true,
+    "defense_bounds_match": true,
+    "defense_alpha_matches_master": true,
+    "defense_genuine_transparency": true,
+    "attack_primary_tip_rotated_left": true,
+    "defense_primary_tip_rotated_left": true,
+    "drop_original_rgba_unchanged": true,
+    "drop_full_same_alpha_both_faces": true,
+    "drop_empty_same_alpha_both_faces": true,
+    "attack_full_same_alpha_both_faces": true,
+    "attack_empty_same_alpha_both_faces": true,
+    "defense_full_same_alpha_both_faces": true,
+    "defense_empty_same_alpha_both_faces": true,
+    "front_no_stat_headers": true,
+    "front_seven_each_side": true,
+    "front_no_pip_frame_overlap": true,
+    "back_no_stat_headers": true,
+    "back_seven_each_side": true,
+    "back_no_pip_frame_overlap": true
+  },
+  "all_passed": true,
+  "glyphs": {
+    "drop": {
+      "ink_size": [
+        94,
+        59
+      ],
+      "alpha_bbox": [
+        32,
+        68,
+        224,
+        188
+      ],
+      "sprite_canvas": [
+        256,
+        256
+      ],
+      "full_sprite_render_size": [
+        125.33333333333333,
+        125.86666666666666
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "tip": "right/inward",
+      "source_transform": "original unchanged",
+      "runtime_rotation_degrees": 0
+    },
+    "attack": {
+      "ink_size": [
+        94,
+        59
+      ],
+      "alpha_bbox": [
+        32,
+        68,
+        224,
+        188
+      ],
+      "sprite_canvas": [
+        256,
+        256
+      ],
+      "full_sprite_render_size": [
+        125.33333333333333,
+        125.86666666666666
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "tip": "left/inward",
+      "source_transform": "horizontal mirror",
+      "runtime_rotation_degrees": 0
+    },
+    "defense": {
+      "ink_size": [
+        94,
+        59
+      ],
+      "alpha_bbox": [
+        32,
+        68,
+        224,
+        188
+      ],
+      "sprite_canvas": [
+        256,
+        256
+      ],
+      "full_sprite_render_size": [
+        125.33333333333333,
+        125.86666666666666
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "tip": "left/inward",
+      "source_transform": "90 degrees clockwise",
+      "runtime_rotation_degrees": 0
+    }
+  },
+  "preview_size": [
+    224,
+    336
+  ]
+}

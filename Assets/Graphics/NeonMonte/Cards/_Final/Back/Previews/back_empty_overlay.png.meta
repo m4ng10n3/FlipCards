@@ -1,0 +1,585 @@
+fileFormatVersion: 2
+guid: bed79104d3e709d44a5f2ec720bbadbb
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 4398024416170508155
+    second: back_empty_overlay_0
+  - first:
+      213: -1193897163858257517
+    second: back_empty_overlay_1
+  - first:
+      213: -4882303728600214408
+    second: back_empty_overlay_2
+  - first:
+      213: -7615268470646064489
+    second: back_empty_overlay_3
+  - first:
+      213: 7811381807752875544
+    second: back_empty_overlay_4
+  - first:
+      213: 8376481430849998349
+    second: back_empty_overlay_5
+  - first:
+      213: -806527584106627784
+    second: back_empty_overlay_6
+  - first:
+      213: 3256602025822817857
+    second: back_empty_overlay_7
+  - first:
+      213: 6063316953576219753
+    second: back_empty_overlay_8
+  - first:
+      213: -3860338403795217642
+    second: back_empty_overlay_9
+  - first:
+      213: -5868194893267155696
+    second: back_empty_overlay_10
+  - first:
+      213: 6638762187653472667
+    second: back_empty_overlay_11
+  - first:
+      213: 7957953395038829523
+    second: back_empty_overlay_12
+  - first:
+      213: 6031503253897807418
+    second: back_empty_overlay_13
+  - first:
+      213: -1578485199679512432
+    second: back_empty_overlay_14
+  - first:
+      213: 4096546492511429169
+    second: back_empty_overlay_15
+  - first:
+      213: 7195537529823821543
+    second: back_empty_overlay_16
+  - first:
+      213: -7290766746737004115
+    second: back_empty_overlay_17
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: back_empty_overlay_0
+      rect:
+        serializedVersion: 2
+        x: 99
+        y: 1177
+        width: 110
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b7f765f97ebe80d30800000000000000
+      internalID: 4398024416170508155
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_empty_overlay_1
+      rect:
+        serializedVersion: 2
+        x: 437
+        y: 1128
+        width: 150
+        height: 149
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 399d1e1eadc6e6fe0800000000000000
+      internalID: -1193897163858257517
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_empty_overlay_2
+      rect:
+        serializedVersion: 2
+        x: 815
+        y: 1177
+        width: 110
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 874183b50a29e3cb0800000000000000
+      internalID: -4882303728600214408
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_empty_overlay_3
+      rect:
+        serializedVersion: 2
+        x: 99
+        y: 1029
+        width: 110
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 79ab8e16ca1215690800000000000000
+      internalID: -7615268470646064489
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_empty_overlay_4
+      rect:
+        serializedVersion: 2
+        x: 815
+        y: 1029
+        width: 110
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 81e0f002e5a976c60800000000000000
+      internalID: 7811381807752875544
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_empty_overlay_5
+      rect:
+        serializedVersion: 2
+        x: 99
+        y: 881
+        width: 110
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d0e48791b7d3f3470800000000000000
+      internalID: 8376481430849998349
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_empty_overlay_6
+      rect:
+        serializedVersion: 2
+        x: 815
+        y: 881
+        width: 110
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 83d35c77f63aec4f0800000000000000
+      internalID: -806527584106627784
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_empty_overlay_7
+      rect:
+        serializedVersion: 2
+        x: 99
+        y: 733
+        width: 110
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 14e8cfbc946c13d20800000000000000
+      internalID: 3256602025822817857
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_empty_overlay_8
+      rect:
+        serializedVersion: 2
+        x: 815
+        y: 733
+        width: 110
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 964a38af4aa352450800000000000000
+      internalID: 6063316953576219753
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_empty_overlay_9
+      rect:
+        serializedVersion: 2
+        x: 99
+        y: 585
+        width: 110
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 613dcf8bca25d6ac0800000000000000
+      internalID: -3860338403795217642
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_empty_overlay_10
+      rect:
+        serializedVersion: 2
+        x: 815
+        y: 585
+        width: 110
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 015cc0ae5dbff8ea0800000000000000
+      internalID: -5868194893267155696
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_empty_overlay_11
+      rect:
+        serializedVersion: 2
+        x: 99
+        y: 437
+        width: 110
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b916167390f912c50800000000000000
+      internalID: 6638762187653472667
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_empty_overlay_12
+      rect:
+        serializedVersion: 2
+        x: 815
+        y: 437
+        width: 110
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3db37622374507e60800000000000000
+      internalID: 7957953395038829523
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_empty_overlay_13
+      rect:
+        serializedVersion: 2
+        x: 99
+        y: 289
+        width: 110
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a36013ec04434b350800000000000000
+      internalID: 6031503253897807418
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_empty_overlay_14
+      rect:
+        serializedVersion: 2
+        x: 815
+        y: 289
+        width: 110
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 09024e5f218181ae0800000000000000
+      internalID: -1578485199679512432
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_empty_overlay_15
+      rect:
+        serializedVersion: 2
+        x: 430
+        y: 102
+        width: 40
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 132240c945bd9d830800000000000000
+      internalID: 4096546492511429169
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_empty_overlay_16
+      rect:
+        serializedVersion: 2
+        x: 492
+        y: 102
+        width: 40
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7eef321824fabd360800000000000000
+      internalID: 7195537529823821543
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_empty_overlay_17
+      rect:
+        serializedVersion: 2
+        x: 554
+        y: 102
+        width: 40
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: da1b280a54ef1da90800000000000000
+      internalID: -7290766746737004115
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      back_empty_overlay_0: 4398024416170508155
+      back_empty_overlay_1: -1193897163858257517
+      back_empty_overlay_10: -5868194893267155696
+      back_empty_overlay_11: 6638762187653472667
+      back_empty_overlay_12: 7957953395038829523
+      back_empty_overlay_13: 6031503253897807418
+      back_empty_overlay_14: -1578485199679512432
+      back_empty_overlay_15: 4096546492511429169
+      back_empty_overlay_16: 7195537529823821543
+      back_empty_overlay_17: -7290766746737004115
+      back_empty_overlay_2: -4882303728600214408
+      back_empty_overlay_3: -7615268470646064489
+      back_empty_overlay_4: 7811381807752875544
+      back_empty_overlay_5: 8376481430849998349
+      back_empty_overlay_6: -806527584106627784
+      back_empty_overlay_7: 3256602025822817857
+      back_empty_overlay_8: 6063316953576219753
+      back_empty_overlay_9: -3860338403795217642
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

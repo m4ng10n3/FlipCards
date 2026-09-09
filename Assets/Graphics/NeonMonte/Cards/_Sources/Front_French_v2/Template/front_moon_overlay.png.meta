@@ -1,0 +1,663 @@
+fileFormatVersion: 2
+guid: 6df9ccdd75a2be94ea2a993cff95f2ae
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -1025222136776781659
+    second: front_moon_overlay_0
+  - first:
+      213: 8967466596865357122
+    second: front_moon_overlay_1
+  - first:
+      213: -7501721171883988503
+    second: front_moon_overlay_2
+  - first:
+      213: -3076169352854129789
+    second: front_moon_overlay_3
+  - first:
+      213: -8321262440964704506
+    second: front_moon_overlay_4
+  - first:
+      213: 649115529943707873
+    second: front_moon_overlay_5
+  - first:
+      213: 5624190779419091336
+    second: front_moon_overlay_6
+  - first:
+      213: -7385404689734581450
+    second: front_moon_overlay_7
+  - first:
+      213: -2372614243781809297
+    second: front_moon_overlay_8
+  - first:
+      213: 7205856979217195734
+    second: front_moon_overlay_9
+  - first:
+      213: 7371963560124967198
+    second: front_moon_overlay_10
+  - first:
+      213: -6068371987363480513
+    second: front_moon_overlay_11
+  - first:
+      213: 8028797724262702976
+    second: front_moon_overlay_12
+  - first:
+      213: 3734458021806764689
+    second: front_moon_overlay_13
+  - first:
+      213: -3702472549117272185
+    second: front_moon_overlay_14
+  - first:
+      213: 1597200439574920236
+    second: front_moon_overlay_15
+  - first:
+      213: 27620209979411251
+    second: front_moon_overlay_16
+  - first:
+      213: 7384334890102081880
+    second: front_moon_overlay_17
+  - first:
+      213: 5542310466279763034
+    second: front_moon_overlay_18
+  - first:
+      213: 7190239472241383156
+    second: front_moon_overlay_19
+  - first:
+      213: -7852924102581344288
+    second: front_moon_overlay_20
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: front_moon_overlay_0
+      rect:
+        serializedVersion: 2
+        x: 82
+        y: 1269
+        width: 117
+        height: 174
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5a09d8106eda5c1f0800000000000000
+      internalID: -1025222136776781659
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_moon_overlay_1
+      rect:
+        serializedVersion: 2
+        x: 225
+        y: 1440
+        width: 47
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2453751bb57d27c70800000000000000
+      internalID: 8967466596865357122
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_moon_overlay_2
+      rect:
+        serializedVersion: 2
+        x: 882
+        y: 1326
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9e9e3d9075884e790800000000000000
+      internalID: -7501721171883988503
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_moon_overlay_3
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 1146
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 383bf2695404f45d0800000000000000
+      internalID: -3076169352854129789
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_moon_overlay_4
+      rect:
+        serializedVersion: 2
+        x: 882
+        y: 1160
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 607bf7bd5efe48c80800000000000000
+      internalID: -8321262440964704506
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_moon_overlay_5
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 980
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1e0fb74a22f120900800000000000000
+      internalID: 649115529943707873
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_moon_overlay_6
+      rect:
+        serializedVersion: 2
+        x: 882
+        y: 994
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8816d4437b32d0e40800000000000000
+      internalID: 5624190779419091336
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_moon_overlay_7
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 814
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 633cdd17095c18990800000000000000
+      internalID: -7385404689734581450
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_moon_overlay_8
+      rect:
+        serializedVersion: 2
+        x: 882
+        y: 828
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f6b6a5a7ae7c21fd0800000000000000
+      internalID: -2372614243781809297
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_moon_overlay_9
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 648
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6d2a28c8eb8500460800000000000000
+      internalID: 7205856979217195734
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_moon_overlay_10
+      rect:
+        serializedVersion: 2
+        x: 882
+        y: 662
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e196f52bcc97e4660800000000000000
+      internalID: 7371963560124967198
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_moon_overlay_11
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 482
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f3cb44044dfc8cba0800000000000000
+      internalID: -6068371987363480513
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_moon_overlay_12
+      rect:
+        serializedVersion: 2
+        x: 882
+        y: 496
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 08f9428edf40c6f60800000000000000
+      internalID: 8028797724262702976
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_moon_overlay_13
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 316
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 192766ae8c573d330800000000000000
+      internalID: 3734458021806764689
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_moon_overlay_14
+      rect:
+        serializedVersion: 2
+        x: 882
+        y: 330
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 78fda3745dc2e9cc0800000000000000
+      internalID: -3702472549117272185
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_moon_overlay_15
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 150
+        width: 96
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c2cf5f366556a2610800000000000000
+      internalID: 1597200439574920236
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_moon_overlay_16
+      rect:
+        serializedVersion: 2
+        x: 825
+        y: 93
+        width: 117
+        height: 174
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 33bc1744f60226000800000000000000
+      internalID: 27620209979411251
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_moon_overlay_17
+      rect:
+        serializedVersion: 2
+        x: 449
+        y: 61
+        width: 34
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 859ce0b657d6a7660800000000000000
+      internalID: 7384334890102081880
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_moon_overlay_18
+      rect:
+        serializedVersion: 2
+        x: 495
+        y: 61
+        width: 34
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a5ce881310e3aec40800000000000000
+      internalID: 5542310466279763034
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_moon_overlay_19
+      rect:
+        serializedVersion: 2
+        x: 541
+        y: 61
+        width: 34
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4f690f854bcd8c360800000000000000
+      internalID: 7190239472241383156
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: front_moon_overlay_20
+      rect:
+        serializedVersion: 2
+        x: 753
+        y: 50
+        width: 47
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0e72981a22fc40390800000000000000
+      internalID: -7852924102581344288
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      front_moon_overlay_0: -1025222136776781659
+      front_moon_overlay_1: 8967466596865357122
+      front_moon_overlay_10: 7371963560124967198
+      front_moon_overlay_11: -6068371987363480513
+      front_moon_overlay_12: 8028797724262702976
+      front_moon_overlay_13: 3734458021806764689
+      front_moon_overlay_14: -3702472549117272185
+      front_moon_overlay_15: 1597200439574920236
+      front_moon_overlay_16: 27620209979411251
+      front_moon_overlay_17: 7384334890102081880
+      front_moon_overlay_18: 5542310466279763034
+      front_moon_overlay_19: 7190239472241383156
+      front_moon_overlay_2: -7501721171883988503
+      front_moon_overlay_20: -7852924102581344288
+      front_moon_overlay_3: -3076169352854129789
+      front_moon_overlay_4: -8321262440964704506
+      front_moon_overlay_5: 649115529943707873
+      front_moon_overlay_6: 5624190779419091336
+      front_moon_overlay_7: -7385404689734581450
+      front_moon_overlay_8: -2372614243781809297
+      front_moon_overlay_9: 7205856979217195734
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

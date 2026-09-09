@@ -1,0 +1,12 @@
+{
+  "source": "attack_G_extended_perimeter.svg",
+  "method": "arc-length Gaussian contour smoothing, continuous cubic SVG interpolation, sharp tip preserved",
+  "smoothing_sigma_source_px": 16.0,
+  "maximum_contour_displacement_source_px": 11.067786141813063,
+  "geometry": "two flat contiguous faces, transparent background, mirror-symmetric raster alpha",
+  "template_ink_size": [
+    86.70843373493976,
+    104
+  ],
+  "note": "New study H; current template unchanged."
+}

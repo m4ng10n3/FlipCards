@@ -252,7 +252,7 @@ public class SlotOverlay : MonoBehaviour,
             UiBuild.Fill(nameBar, GamePalette.WithAlpha(Color.black, 0.5f));
         }
 
-        if (UiSkin.Active != null && UiSkin.Active.neonMonte)
+        if (UiSkin.Active != null && UiSkin.Active.neonMonte && UiSkin.Sprite("final_front_front_clean") == null)
         {
             var nameFrame = UiBuild.Rect("FamilyNameFrame", _rt);
             UiBuild.Band(nameFrame, 56f, 4f, 240f, 46f);
@@ -371,9 +371,11 @@ public class SlotOverlay : MonoBehaviour,
 
     void BuildFactionTag(SlotDefinition.Spec def)
     {
-        if (UiSkin.Active != null && UiSkin.Active.neonMonte) return;
+        if (UiSkin.Active != null && UiSkin.Active.neonMonte && UiSkin.Sprite("final_front_front_clean") == null) return;
         var rt = UiBuild.Rect("FactionTag", _rt);
         UiBuild.Band(rt, FactionX, FactionY, FactionSize, FactionSize);
+        if (UiSkin.Sprite("final_front_front_clean") != null)
+            UiBuild.Band(rt, 62f, 7f, 36f, 36f);
         GlyphSprites.Stamp(rt, def.faction);
     }
 

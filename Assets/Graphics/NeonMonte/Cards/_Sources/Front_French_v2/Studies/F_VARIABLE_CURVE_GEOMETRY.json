@@ -1,0 +1,40 @@
+{
+  "B": [
+    658,
+    586
+  ],
+  "C": [
+    610.0,
+    632.0
+  ],
+  "U": [
+    285.2,
+    524.0
+  ],
+  "V": [
+    418.0,
+    764.0
+  ],
+  "D": [
+    498.0,
+    832.0
+  ],
+  "neck_width": 110.2017437500001,
+  "score": 3.4380456540076816,
+  "source_size": [
+    694,
+    832
+  ],
+  "feasible_candidates": 195,
+  "template_scale": 0.12530120481927712,
+  "template_ink_size": [
+    77.6867469879518,
+    104
+  ],
+  "neck_px_at_24_height": 3.1865564457831357,
+  "curve_type": "cubic Bezier, not circular",
+  "D_anchor": "outermost bottom-right corner of the original spade contour; left point mirrored",
+  "objective": "((width_ratio-.75)/.04)^2+((neck/blade_width-.25)/.06)^2+.12*((rise/span-.22)/.12)^2+.05*((reach-1.25)/.35)^2",
+  "qualification": "Best sampled feasible candidate under declared aesthetic targets, not a universal optimum.",
+  "verification": "PNG within source silhouette and exactly mirror symmetric; SVG cubic analytic with raster contour sampling for B-C."
+}

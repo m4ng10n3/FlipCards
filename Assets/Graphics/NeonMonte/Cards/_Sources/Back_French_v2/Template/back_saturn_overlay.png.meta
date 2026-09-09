@@ -1,0 +1,637 @@
+fileFormatVersion: 2
+guid: c7cd378ae8b5763418ddb4d686bea55d
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 7794114849690200879
+    second: back_saturn_overlay_0
+  - first:
+      213: 1798926327248561410
+    second: back_saturn_overlay_1
+  - first:
+      213: 5695080022617499098
+    second: back_saturn_overlay_2
+  - first:
+      213: 4951637440261840542
+    second: back_saturn_overlay_3
+  - first:
+      213: 6464570281071016018
+    second: back_saturn_overlay_4
+  - first:
+      213: 3528037771915179437
+    second: back_saturn_overlay_5
+  - first:
+      213: 421038199222217035
+    second: back_saturn_overlay_6
+  - first:
+      213: 8779271960378759598
+    second: back_saturn_overlay_7
+  - first:
+      213: -744295635335201760
+    second: back_saturn_overlay_8
+  - first:
+      213: 3458699094554112056
+    second: back_saturn_overlay_9
+  - first:
+      213: 7535841416477869047
+    second: back_saturn_overlay_10
+  - first:
+      213: -2997165593162615762
+    second: back_saturn_overlay_11
+  - first:
+      213: 8439074785006007182
+    second: back_saturn_overlay_12
+  - first:
+      213: 8309654805798839231
+    second: back_saturn_overlay_13
+  - first:
+      213: 4669194037999275927
+    second: back_saturn_overlay_14
+  - first:
+      213: 5108289839382073297
+    second: back_saturn_overlay_15
+  - first:
+      213: -4287442570796829739
+    second: back_saturn_overlay_16
+  - first:
+      213: -1181573768490720275
+    second: back_saturn_overlay_17
+  - first:
+      213: 1568193269454731024
+    second: back_saturn_overlay_18
+  - first:
+      213: 5567709262409442039
+    second: back_saturn_overlay_19
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: back_saturn_overlay_0
+      rect:
+        serializedVersion: 2
+        x: 425
+        y: 1335
+        width: 82
+        height: 110
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f2ba16a29224a2c60800000000000000
+      internalID: 7794114849690200879
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_saturn_overlay_1
+      rect:
+        serializedVersion: 2
+        x: 537
+        y: 1344
+        width: 61
+        height: 92
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 205afb8a6f117f810800000000000000
+      internalID: 1798926327248561410
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_saturn_overlay_2
+      rect:
+        serializedVersion: 2
+        x: 99
+        y: 1177
+        width: 110
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ad52a835b1df80f40800000000000000
+      internalID: 5695080022617499098
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_saturn_overlay_3
+      rect:
+        serializedVersion: 2
+        x: 462
+        y: 1128
+        width: 99
+        height: 148
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e9ed45b5400c7b440800000000000000
+      internalID: 4951637440261840542
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_saturn_overlay_4
+      rect:
+        serializedVersion: 2
+        x: 815
+        y: 1177
+        width: 110
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 258f8cc7b64c6b950800000000000000
+      internalID: 6464570281071016018
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_saturn_overlay_5
+      rect:
+        serializedVersion: 2
+        x: 99
+        y: 1029
+        width: 110
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: da53a2549ab16f030800000000000000
+      internalID: 3528037771915179437
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_saturn_overlay_6
+      rect:
+        serializedVersion: 2
+        x: 815
+        y: 1029
+        width: 110
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b49a28de204d7d500800000000000000
+      internalID: 421038199222217035
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_saturn_overlay_7
+      rect:
+        serializedVersion: 2
+        x: 99
+        y: 881
+        width: 110
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ea95ce8555d36d970800000000000000
+      internalID: 8779271960378759598
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_saturn_overlay_8
+      rect:
+        serializedVersion: 2
+        x: 815
+        y: 881
+        width: 110
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 02cb8f7201bbba5f0800000000000000
+      internalID: -744295635335201760
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_saturn_overlay_9
+      rect:
+        serializedVersion: 2
+        x: 99
+        y: 733
+        width: 110
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 830fcd36084cfff20800000000000000
+      internalID: 3458699094554112056
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_saturn_overlay_10
+      rect:
+        serializedVersion: 2
+        x: 815
+        y: 733
+        width: 110
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7f307d877dfa49860800000000000000
+      internalID: 7535841416477869047
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_saturn_overlay_11
+      rect:
+        serializedVersion: 2
+        x: 99
+        y: 585
+        width: 110
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e24f48ec5cde766d0800000000000000
+      internalID: -2997165593162615762
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_saturn_overlay_12
+      rect:
+        serializedVersion: 2
+        x: 815
+        y: 585
+        width: 110
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e833d390ecd9d1570800000000000000
+      internalID: 8439074785006007182
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_saturn_overlay_13
+      rect:
+        serializedVersion: 2
+        x: 99
+        y: 437
+        width: 110
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fb3e1c9f403d15370800000000000000
+      internalID: 8309654805798839231
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_saturn_overlay_14
+      rect:
+        serializedVersion: 2
+        x: 815
+        y: 437
+        width: 110
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 79f81563d3f4cc040800000000000000
+      internalID: 4669194037999275927
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_saturn_overlay_15
+      rect:
+        serializedVersion: 2
+        x: 99
+        y: 289
+        width: 110
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1df0b164b8a44e640800000000000000
+      internalID: 5108289839382073297
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_saturn_overlay_16
+      rect:
+        serializedVersion: 2
+        x: 815
+        y: 289
+        width: 110
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5d374cc92b1ff74c0800000000000000
+      internalID: -4287442570796829739
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_saturn_overlay_17
+      rect:
+        serializedVersion: 2
+        x: 430
+        y: 102
+        width: 40
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: de3e035fae43a9fe0800000000000000
+      internalID: -1181573768490720275
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_saturn_overlay_18
+      rect:
+        serializedVersion: 2
+        x: 492
+        y: 102
+        width: 40
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 017f10d487753c510800000000000000
+      internalID: 1568193269454731024
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_saturn_overlay_19
+      rect:
+        serializedVersion: 2
+        x: 554
+        y: 102
+        width: 40
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7f2219e331a744d40800000000000000
+      internalID: 5567709262409442039
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      back_saturn_overlay_0: 7794114849690200879
+      back_saturn_overlay_1: 1798926327248561410
+      back_saturn_overlay_10: 7535841416477869047
+      back_saturn_overlay_11: -2997165593162615762
+      back_saturn_overlay_12: 8439074785006007182
+      back_saturn_overlay_13: 8309654805798839231
+      back_saturn_overlay_14: 4669194037999275927
+      back_saturn_overlay_15: 5108289839382073297
+      back_saturn_overlay_16: -4287442570796829739
+      back_saturn_overlay_17: -1181573768490720275
+      back_saturn_overlay_18: 1568193269454731024
+      back_saturn_overlay_19: 5567709262409442039
+      back_saturn_overlay_2: 5695080022617499098
+      back_saturn_overlay_3: 4951637440261840542
+      back_saturn_overlay_4: 6464570281071016018
+      back_saturn_overlay_5: 3528037771915179437
+      back_saturn_overlay_6: 421038199222217035
+      back_saturn_overlay_7: 8779271960378759598
+      back_saturn_overlay_8: -744295635335201760
+      back_saturn_overlay_9: 3458699094554112056
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

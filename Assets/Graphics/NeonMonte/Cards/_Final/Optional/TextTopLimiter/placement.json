@@ -1,0 +1,23 @@
+{
+  "file": "text_top_limiter.png",
+  "mask": "text_top_limiter_mask.png",
+  "svg": "text_top_limiter.svg",
+  "overlay": "text_top_limiter_overlay.png",
+  "sprite_size": [
+    480,
+    24
+  ],
+  "center": [
+    479,
+    1292
+  ],
+  "align_to": "safe_regions.ability horizontal center",
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "stroke": 2.5,
+  "opacity": 0.6274509803921569,
+  "baked_in_clean": false,
+  "adjustment": "move center Y to set text area height; sprite height controls transparent padding, not ink thickness"
+}

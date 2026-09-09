@@ -1,0 +1,637 @@
+fileFormatVersion: 2
+guid: 223220c7e797a5f43b945dee80e36e08
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 1607520644790795097
+    second: back_defense_banner_overlay_0
+  - first:
+      213: -7694581317417131885
+    second: back_defense_banner_overlay_1
+  - first:
+      213: 7741892724870716719
+    second: back_defense_banner_overlay_2
+  - first:
+      213: -2908042109954175668
+    second: back_defense_banner_overlay_3
+  - first:
+      213: 6139843881899538988
+    second: back_defense_banner_overlay_4
+  - first:
+      213: -4265713576819695261
+    second: back_defense_banner_overlay_5
+  - first:
+      213: 3904305538414094245
+    second: back_defense_banner_overlay_6
+  - first:
+      213: -1675242097060652196
+    second: back_defense_banner_overlay_7
+  - first:
+      213: 9074362957173159542
+    second: back_defense_banner_overlay_8
+  - first:
+      213: 8989293704799566483
+    second: back_defense_banner_overlay_9
+  - first:
+      213: 7013669173884279127
+    second: back_defense_banner_overlay_10
+  - first:
+      213: -3858318355055528610
+    second: back_defense_banner_overlay_11
+  - first:
+      213: 8070936419314404553
+    second: back_defense_banner_overlay_12
+  - first:
+      213: -9094481202698640574
+    second: back_defense_banner_overlay_13
+  - first:
+      213: -8752531880993908780
+    second: back_defense_banner_overlay_14
+  - first:
+      213: 5386998422564979614
+    second: back_defense_banner_overlay_15
+  - first:
+      213: 3846331411383869314
+    second: back_defense_banner_overlay_16
+  - first:
+      213: 1599300549396203273
+    second: back_defense_banner_overlay_17
+  - first:
+      213: 3291200269446744897
+    second: back_defense_banner_overlay_18
+  - first:
+      213: -5454483891064282880
+    second: back_defense_banner_overlay_19
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: back_defense_banner_overlay_0
+      rect:
+        serializedVersion: 2
+        x: 415
+        y: 1336
+        width: 102
+        height: 109
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 95bbcd9628f0f4610800000000000000
+      internalID: 1607520644790795097
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_defense_banner_overlay_1
+      rect:
+        serializedVersion: 2
+        x: 537
+        y: 1344
+        width: 61
+        height: 92
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 390aef73f0b573590800000000000000
+      internalID: -7694581317417131885
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_defense_banner_overlay_2
+      rect:
+        serializedVersion: 2
+        x: 99
+        y: 1177
+        width: 110
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f2d991b3a6ab07b60800000000000000
+      internalID: 7741892724870716719
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_defense_banner_overlay_3
+      rect:
+        serializedVersion: 2
+        x: 437
+        y: 1128
+        width: 150
+        height: 149
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c4dcd44cb1f84a7d0800000000000000
+      internalID: -2908042109954175668
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_defense_banner_overlay_4
+      rect:
+        serializedVersion: 2
+        x: 815
+        y: 1177
+        width: 110
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c2a3af4fa7b153550800000000000000
+      internalID: 6139843881899538988
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_defense_banner_overlay_5
+      rect:
+        serializedVersion: 2
+        x: 99
+        y: 1029
+        width: 110
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 361e9144a142dc4c0800000000000000
+      internalID: -4265713576819695261
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_defense_banner_overlay_6
+      rect:
+        serializedVersion: 2
+        x: 815
+        y: 1029
+        width: 110
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5a723c78331ee2630800000000000000
+      internalID: 3904305538414094245
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_defense_banner_overlay_7
+      rect:
+        serializedVersion: 2
+        x: 99
+        y: 881
+        width: 110
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c5b5be3403850c8e0800000000000000
+      internalID: -1675242097060652196
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_defense_banner_overlay_8
+      rect:
+        serializedVersion: 2
+        x: 815
+        y: 881
+        width: 110
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 676f441180d9eed70800000000000000
+      internalID: 9074362957173159542
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_defense_banner_overlay_9
+      rect:
+        serializedVersion: 2
+        x: 99
+        y: 733
+        width: 110
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 39abb384ff260cc70800000000000000
+      internalID: 8989293704799566483
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_defense_banner_overlay_10
+      rect:
+        serializedVersion: 2
+        x: 815
+        y: 733
+        width: 110
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 759da7124fe855160800000000000000
+      internalID: 7013669173884279127
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_defense_banner_overlay_11
+      rect:
+        serializedVersion: 2
+        x: 99
+        y: 585
+        width: 110
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e55bb88f5ef747ac0800000000000000
+      internalID: -3858318355055528610
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_defense_banner_overlay_12
+      rect:
+        serializedVersion: 2
+        x: 815
+        y: 585
+        width: 110
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9cc8ff569e9b10070800000000000000
+      internalID: 8070936419314404553
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_defense_banner_overlay_13
+      rect:
+        serializedVersion: 2
+        x: 99
+        y: 437
+        width: 110
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2432ea0e789e9c180800000000000000
+      internalID: -9094481202698640574
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_defense_banner_overlay_14
+      rect:
+        serializedVersion: 2
+        x: 815
+        y: 437
+        width: 110
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4d7931c80a2c88680800000000000000
+      internalID: -8752531880993908780
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_defense_banner_overlay_15
+      rect:
+        serializedVersion: 2
+        x: 99
+        y: 289
+        width: 110
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e934396168672ca40800000000000000
+      internalID: 5386998422564979614
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_defense_banner_overlay_16
+      rect:
+        serializedVersion: 2
+        x: 815
+        y: 289
+        width: 110
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 28f56f73a0ae06530800000000000000
+      internalID: 3846331411383869314
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_defense_banner_overlay_17
+      rect:
+        serializedVersion: 2
+        x: 430
+        y: 102
+        width: 40
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 90709df406bd13610800000000000000
+      internalID: 1599300549396203273
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_defense_banner_overlay_18
+      rect:
+        serializedVersion: 2
+        x: 492
+        y: 102
+        width: 40
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 14b0b012531bcad20800000000000000
+      internalID: 3291200269446744897
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: back_defense_banner_overlay_19
+      rect:
+        serializedVersion: 2
+        x: 554
+        y: 102
+        width: 40
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 001e508dcc7cd44b0800000000000000
+      internalID: -5454483891064282880
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      back_defense_banner_overlay_0: 1607520644790795097
+      back_defense_banner_overlay_1: -7694581317417131885
+      back_defense_banner_overlay_10: 7013669173884279127
+      back_defense_banner_overlay_11: -3858318355055528610
+      back_defense_banner_overlay_12: 8070936419314404553
+      back_defense_banner_overlay_13: -9094481202698640574
+      back_defense_banner_overlay_14: -8752531880993908780
+      back_defense_banner_overlay_15: 5386998422564979614
+      back_defense_banner_overlay_16: 3846331411383869314
+      back_defense_banner_overlay_17: 1599300549396203273
+      back_defense_banner_overlay_18: 3291200269446744897
+      back_defense_banner_overlay_19: -5454483891064282880
+      back_defense_banner_overlay_2: 7741892724870716719
+      back_defense_banner_overlay_3: -2908042109954175668
+      back_defense_banner_overlay_4: 6139843881899538988
+      back_defense_banner_overlay_5: -4265713576819695261
+      back_defense_banner_overlay_6: 3904305538414094245
+      back_defense_banner_overlay_7: -1675242097060652196
+      back_defense_banner_overlay_8: 9074362957173159542
+      back_defense_banner_overlay_9: 8989293704799566483
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

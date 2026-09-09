@@ -1,0 +1,193 @@
+{
+  "drop_bounds_match": true,
+  "drop_alpha_matches_master": true,
+  "drop_genuine_transparency": true,
+  "attack_bounds_match": true,
+  "attack_alpha_matches_master": true,
+  "attack_genuine_transparency": true,
+  "defense_bounds_match": true,
+  "defense_alpha_matches_master": true,
+  "defense_genuine_transparency": true,
+  "attack_primary_tip_rotated_left": true,
+  "defense_primary_tip_rotated_left": true,
+  "drop_original_rgba_unchanged": true,
+  "stat_headers": 0,
+  "left_count": 7,
+  "right_count": 7,
+  "step": 166,
+  "horizontal_relief_run_uniform": true,
+  "inner_vertical_ends_at_faction_center": true,
+  "frame_rotation_equal": true,
+  "paired_stations": true,
+  "left_cusps_aligned": true,
+  "right_cusps_aligned": true,
+  "pip_frame_overlap_pixels": 0,
+  "pip_faction_overlap_pixels": 0,
+  "text_limiter_has_alpha": true,
+  "text_limiter_frame_overlap_pixels": 0,
+  "text_limiter_faction_overlap_pixels": 0,
+  "assets": {
+    "drop_full": {
+      "ink_size": [
+        94,
+        59
+      ],
+      "alpha_bbox": [
+        32,
+        68,
+        224,
+        188
+      ],
+      "sprite_canvas": [
+        256,
+        256
+      ],
+      "full_sprite_render_size": [
+        125.33333333333333,
+        125.86666666666666
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "tip": "right/inward",
+      "source_transform": "original unchanged",
+      "runtime_rotation_degrees": 0
+    },
+    "drop_empty": {
+      "ink_size": [
+        94,
+        59
+      ],
+      "alpha_bbox": [
+        32,
+        68,
+        224,
+        188
+      ],
+      "sprite_canvas": [
+        256,
+        256
+      ],
+      "full_sprite_render_size": [
+        125.33333333333333,
+        125.86666666666666
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "tip": "right/inward",
+      "source_transform": "original unchanged",
+      "runtime_rotation_degrees": 0
+    },
+    "attack_full": {
+      "ink_size": [
+        94,
+        59
+      ],
+      "alpha_bbox": [
+        32,
+        68,
+        224,
+        188
+      ],
+      "sprite_canvas": [
+        256,
+        256
+      ],
+      "full_sprite_render_size": [
+        125.33333333333333,
+        125.86666666666666
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "tip": "left/inward",
+      "source_transform": "horizontal mirror",
+      "runtime_rotation_degrees": 0
+    },
+    "attack_empty": {
+      "ink_size": [
+        94,
+        59
+      ],
+      "alpha_bbox": [
+        32,
+        68,
+        224,
+        188
+      ],
+      "sprite_canvas": [
+        256,
+        256
+      ],
+      "full_sprite_render_size": [
+        125.33333333333333,
+        125.86666666666666
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "tip": "left/inward",
+      "source_transform": "horizontal mirror",
+      "runtime_rotation_degrees": 0
+    },
+    "defense_full": {
+      "ink_size": [
+        94,
+        59
+      ],
+      "alpha_bbox": [
+        32,
+        68,
+        224,
+        188
+      ],
+      "sprite_canvas": [
+        256,
+        256
+      ],
+      "full_sprite_render_size": [
+        125.33333333333333,
+        125.86666666666666
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "tip": "left/inward",
+      "source_transform": "90 degrees clockwise",
+      "runtime_rotation_degrees": 0
+    },
+    "defense_empty": {
+      "ink_size": [
+        94,
+        59
+      ],
+      "alpha_bbox": [
+        32,
+        68,
+        224,
+        188
+      ],
+      "sprite_canvas": [
+        256,
+        256
+      ],
+      "full_sprite_render_size": [
+        125.33333333333333,
+        125.86666666666666
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "tip": "left/inward",
+      "source_transform": "90 degrees clockwise",
+      "runtime_rotation_degrees": 0
+    }
+  }
+}

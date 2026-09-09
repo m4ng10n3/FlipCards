@@ -1,0 +1,13 @@
+{
+  "all_passed": true,
+  "checks": {
+    "front_clean_is_paper_plus_final_frame": true,
+    "front_no_tally_frame_overlap": true,
+    "back_no_tally_frame_overlap": true,
+    "front_frame_faction_alignment": true,
+    "back_shields_fill_from_top": true,
+    "separator_only_optional": true,
+    "front_manifest_paths_exist": true,
+    "back_manifest_paths_exist": true
+  }
+}
