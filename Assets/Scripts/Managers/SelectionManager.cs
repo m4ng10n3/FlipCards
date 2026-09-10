@@ -68,6 +68,7 @@ public class SelectionManager : MonoBehaviour
     /// </summary>
     public bool ClearIfClickedAway(Vector2 screenPosition)
     {
+        if (TableOverlayController.IsOpen) return false;
         if (SelectedOwned == null && SelectedEmptySpot == null) return false;
         if (PointerOverSelectable(screenPosition)) return false;
 

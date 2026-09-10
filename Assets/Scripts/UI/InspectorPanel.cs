@@ -104,8 +104,8 @@ public class InspectorPanel : MonoBehaviour
         // della corsia qui sotto.
         Stat("HP", $"{inst.health} / {def.maxHealth}");
         Stat("Cariche", inst.flipCharge > 0
-            ? $"{inst.flipCharge} / {CardInstance.MaxFlipCharge}  <color=#ff2fd0>+{inst.flipCharge} al colpo, gia' nel totale</color>"
-            : $"0 / {CardInstance.MaxFlipCharge}  <color=#8888aa>(una per turno stando coperta)</color>");
+            ? $"{inst.flipCharge} / {CardInstance.MaxFlipCharge}  <color=#8E2A78>+{inst.flipCharge} al colpo, gia' nel totale</color>"
+            : $"0 / {CardInstance.MaxFlipCharge}  <color=#6E7080>(una per turno stando coperta)</color>");
         Stat("Instabilita'", FlipRisk(def));
 
         if (inst.incomingDamageOverride.HasValue)
@@ -121,6 +121,21 @@ public class InspectorPanel : MonoBehaviour
         SetHint($"Doppio clic: flip {gm?.flipCardCost ?? 1} AP / trascina: scambio {gm?.swapCardCost ?? 1} AP");
     }
 
+    /// <summary>Explicit selection from the modal, independent of hover or gameplay clicks.</summary>
+    public void InspectSelection(Object source)
+    {
+        _pinned = null;
+        if (source is CardView card) ShowCard(card);
+        else if (source is CardDefinition definition) ShowCardPreview(definition);
+        else if (source is SlotView slot) ShowSlot(slot);
+        _pinned = source;
+        if (bodyText != null)
+        {
+            var scroll = bodyText.GetComponentInParent<ScrollRect>();
+            if (scroll != null) scroll.verticalNormalizedPosition = 1;
+        }
+    }
+
     /// <summary>
     /// Il conto di questa corsia, riga per riga, con la causa di ogni modifica.
     ///
@@ -128,7 +143,7 @@ public class InspectorPanel : MonoBehaviour
     /// vogliono dire niente da sole: l'attacco dipende da chi le sta accanto,
     /// la guardia dipende da chi ha davanti, e tutte due cambiano a ogni giro
     /// perche' il rullo cambia le caselle e il caos rimescola la fila. Un
-    /// "3 <color=#5ad98c>+1</color>" dice al giocatore che qualcosa gli sta
+    /// "3 <color=#1F7A3A>+1</color>" dice al giocatore che qualcosa gli sta
     /// dando un bonus, ma non che cosa, quindi non gli dice come averne due —
     /// ed e' esattamente la mossa che deve imparare a fare.
     ///
@@ -142,7 +157,7 @@ public class InspectorPanel : MonoBehaviour
         if (gm == null || lane < 0)
         {
             Section("Fuori dal campo");
-            Line("<color=#66667a>Il conto si legge quando la carta e' in una corsia.</color>");
+            Line("<color=#7A8078>Il conto si legge quando la carta e' in una corsia.</color>");
             return;
         }
 
@@ -150,7 +165,7 @@ public class InspectorPanel : MonoBehaviour
         Section($"Il conto della corsia {lane + 1}");
 
         if (resonant)
-            Line($"<color=#ff2b3c><b>RISONANZA</b></color> stessa famiglia {GamePalette.FactionName(card.def.faction)} in corsia: " +
+            Line($"<color=#A31220><b>RISONANZA</b></color> stessa famiglia {GamePalette.FactionName(card.def.faction)} in corsia: " +
                  "<b>nessuno dei due para</b>.");
 
         // ── Quello che fai tu ────────────────────────────────────────────────
@@ -174,7 +189,7 @@ public class InspectorPanel : MonoBehaviour
             int net = Mathf.Max(0, atk - guard);
             string slotName = SlotName(slot);
 
-            Line($"<color=#8b93a3>Colpisci {slotName}</color>");
+            Line($"<color=#5E6A66>Colpisci {slotName}</color>");
             Plus(card.def.frontDamage, "attacco base", GreyHex);
             if (card.flipCharge > 0) Plus(card.flipCharge, "cariche accumulate", ChargeHex);
             foreach (var r in _atkReasons) Plus(r.amount, r.ToString(), FactionHex(card.def.faction));
@@ -184,7 +199,7 @@ public class InspectorPanel : MonoBehaviour
             Total(net, "colpo netto", net > 0 ? GoodHex : GreyHex);
 
             if (net > slot.health)
-                Line($"   <color=#3dff7a><b>SFONDA</b></color>: le restano {slot.health}, " +
+                Line($"   <color=#1F7A3A><b>SFONDA</b></color>: le restano {slot.health}, " +
                      $"i {net - slot.health} in eccesso <b>li paga il boss</b>.");
             else if (net == slot.health)
                 Line($"   La rompe esatta: fuori dal rullo, ma <b>il boss non paga niente</b>. " +
@@ -194,7 +209,7 @@ public class InspectorPanel : MonoBehaviour
                      $"Per sfondarla adesso servirebbero <b>{slot.health + guard + 1}</b> di attacco, " +
                      $"cioe' <b>{slot.health + guard + 1 - atk}</b> in piu' di quelli che hai.");
             else
-                Line("   <color=#ff2b3c>Non passa la guardia</color>: nessun danno.");
+                Line("   <color=#A31220>Non passa la guardia</color>: nessun danno.");
         }
 
         // ── Quello che ti arriva ─────────────────────────────────────────────
@@ -202,7 +217,7 @@ public class InspectorPanel : MonoBehaviour
 
         if (slot.side != Side.Fronte)
         {
-            Line($"<color=#8b93a3>{SlotName(slot)} e' trattenuta: questo giro non colpisce.</color>");
+            Line($"<color=#5E6A66>{SlotName(slot)} e' trattenuta: questo giro non colpisce.</color>");
             return;
         }
 
@@ -212,7 +227,7 @@ public class InspectorPanel : MonoBehaviour
         int incoming = slot.def.atkDamage + slot.tempAtkBonus;
         int arrives = Mathf.Max(0, incoming - mine);
 
-        Line($"<color=#8b93a3>Ti risponde {SlotName(slot)}</color>");
+        Line($"<color=#5E6A66>Ti risponde {SlotName(slot)}</color>");
         Plus(incoming, $"attacco di {SlotName(slot)}", DangerHex);
 
         // In risonanza la guardia non si sottrae affatto: mostrarne i pezzi e poi
@@ -230,14 +245,14 @@ public class InspectorPanel : MonoBehaviour
         Total(arrives, "in arrivo", arrives > 0 ? DangerHex : GreyHex);
 
         if (arrives > card.health)
-            Line($"   <color=#ff2b3c><b>PASSA</b></color>: hai {card.health} HP, " +
+            Line($"   <color=#A31220><b>PASSA</b></color>: hai {card.health} HP, " +
                  $"i {arrives - card.health} in eccesso <b>li paghi tu</b>.");
         else if (arrives == card.health)
-            Line($"   Hai {card.health} HP: <color=#ff2b3c>la carta cade</color>, ma non passa niente.");
+            Line($"   Hai {card.health} HP: <color=#A31220>la carta cade</color>, ma non passa niente.");
         else if (arrives > 0)
             Line($"   Hai {card.health} HP: regge, te ne restano {card.health - arrives}.");
         else
-            Line("   <color=#3dff7a>Parato del tutto.</color>");
+            Line("   <color=#1F7A3A>Parato del tutto.</color>");
     }
 
     /// <summary>
@@ -256,14 +271,14 @@ public class InspectorPanel : MonoBehaviour
         Section("A chi serve adesso");
         if (_bannerTargets.Count == 0)
         {
-            Line($"<color=#ff2b3c>A nessuno</color>: nelle corsie accanto non c'e' " +
+            Line($"<color=#A31220>A nessuno</color>: nelle corsie accanto non c'e' " +
                  $"nessuna carta {GamePalette.FactionName(card.def.faction)} che possa usarla.");
-            Line("<color=#8b93a3>Spostarla accanto a una della sua fazione la accende.</color>");
+            Line("<color=#5E6A66>Spostarla accanto a una della sua fazione la accende.</color>");
             return;
         }
 
         foreach (var t in _bannerTargets)
-            Line($"<color=#5ad98c>+{t.amount}</color> a <b>{t.who}</b>, corsia {t.lane}");
+            Line($"<color=#1F7A3A>+{t.amount}</color> a <b>{t.who}</b>, corsia {t.lane}");
     }
 
     /// <summary>
@@ -288,24 +303,28 @@ public class InspectorPanel : MonoBehaviour
         Section("Da cosa vengono i bonus");
 
         foreach (var e in attack.Entries)
-            Plus(e.amount, $"<color=#ff8a8a>attacco</color> · {e.reason}", DangerHex);
+            Plus(e.amount, $"<color=#A34A3A>attacco</color> · {e.reason}", DangerHex);
 
         foreach (var e in block.Entries)
-            Plus(e.amount, $"<color=#38e8ff>guardia</color> · {e.reason}", RetroHex);
+            Plus(e.amount, $"<color=#1E6E7A>guardia</color> · {e.reason}", RetroHex);
     }
 
     static string SlotName(SlotInstance slot)
         => (slot.PoolNumber > 0 ? $"#{slot.PoolNumber} " : string.Empty) + slot.def.SlotName;
 
-    // Colori dei numeri del conto: gli stessi significati della palette.
-    const string GreyHex = "8b93a3";
-    const string RetroHex = "38e8ff";
-    const string DangerHex = "ff2b3c";
-    const string GoodHex = "3dff7a";
-    const string ChargeHex = "ff2fd0";
+    // Colori dei numeri del conto: gli stessi significati della palette, ma
+    // scuriti. L'ispettore ora vive sulle pagine d'avorio del libretto, e i
+    // valori accesi pensati per il fondo nero (ciano elettrico, verde neon) su
+    // carta chiara sparivano. I significati non cambiano: rosso = ti arriva,
+    // verde = passa, ciano = guardia, grigio = base.
+    const string GreyHex = "5E6A66";
+    const string RetroHex = "1E6E7A";
+    const string DangerHex = "A31220";
+    const string GoodHex = "1F7A3A";
+    const string ChargeHex = "8E2A78";
 
     static string FactionHex(Faction faction)
-        => ColorUtility.ToHtmlStringRGB(GamePalette.FactionColor(faction));
+        => ColorUtility.ToHtmlStringRGB(GamePalette.InkFaction(faction));
 
     /// <summary>
     /// Una riga del conto: il verso e il numero in colonna, poi la ragione.
@@ -415,7 +434,7 @@ public class InspectorPanel : MonoBehaviour
             Section("Risonanza");
             Line("Stessa fazione della tua carta in questa corsia: <b>nessuno dei due para</b>.");
             Line("Il tuo colpo passa la sua guardia, <b>e il suo passa la tua</b>.");
-            Line("<color=#8b93a3>E' il modo piu' economico di sfondare una lastra, " +
+            Line("<color=#5E6A66>E' il modo piu' economico di sfondare una lastra, " +
                  "e il modo piu' rapido di perdere la carta che la copre. " +
                  "Lo scudo spezzato sta su tutte due le celle finche' dura.</color>");
         }
@@ -428,12 +447,12 @@ public class InspectorPanel : MonoBehaviour
             : "Le ferite restano sulla casella: se il rullo la ripesca, torna come l'hai lasciata.");
         Line($"Per finirla serve <b>{inst.health + (resonantLane ? 0 : inst.ComputeSelfBlock())}</b> di attacco. " +
              "Tutto quello che eccede <b>lo paga il boss</b>.");
-        Line("<color=#8b93a3>Ucciderla la toglie dal rullo per il resto della partita.</color>");
+        Line("<color=#5E6A66>Ucciderla la toglie dal rullo per il resto della partita.</color>");
 
         Section("Posizioni possibili del rullo");
         if (inst.PatternLength == 0)
         {
-            Line("<color=#66667a>fisso: colpisce a ogni giro</color>");
+            Line("<color=#7A8078>fisso: colpisce a ogni giro</color>");
         }
         else
         {
@@ -442,7 +461,7 @@ public class InspectorPanel : MonoBehaviour
             {
                 var side = inst.PatternSideAt(i);
                 string label = side == Side.Fronte ? "COLPISCE" : "TRATTIENE";
-                string hex = ColorUtility.ToHtmlStringRGB(GamePalette.SideColor(side));
+                string hex = ColorUtility.ToHtmlStringRGB(GamePalette.InkSide(side));
                 line.Append(i == inst.PatternStep
                     ? $"<b><color=#{hex}>[{label}]</color></b>  "
                     : $"<color=#{hex}>{label}</color>  ");
@@ -511,7 +530,7 @@ public class InspectorPanel : MonoBehaviour
         _source = null;
         _pinned = null;
         if (titleText != null) titleText.text = "ISPETTORE";
-        if (subtitleText != null) subtitleText.text = "passa il puntatore su una carta o su uno slot";
+        if (subtitleText != null) subtitleText.text = TableOverlayController.IsOpen ? "Scegli Campo, Mano o Rullo e seleziona un elemento." : "passa il puntatore su una carta o su uno slot";
         if (sideStrip != null) sideStrip.color = GamePalette.WithAlpha(GamePalette.Neutral, 0.35f);
         if (sideText != null) sideText.text = string.Empty;
         if (bodyText != null) bodyText.text = string.Empty;
@@ -524,26 +543,26 @@ public class InspectorPanel : MonoBehaviour
     {
         if (titleText != null) titleText.text = title;
         if (subtitleText != null) subtitleText.text = subtitle;
-        if (sideStrip != null) sideStrip.color = GamePalette.SideColor(side);
+        if (sideStrip != null) sideStrip.color = GamePalette.InkSide(side);
         if (sideText != null)
         {
             sideText.text = side.ToString().ToUpperInvariant();
-            sideText.color = GamePalette.SideColor(side);
+            sideText.color = GamePalette.InkSide(side);
         }
     }
 
-    void SetHint(string text) { if (hintText != null) hintText.text = text; }
+    void SetHint(string text) { if (hintText != null) hintText.text = TableOverlayController.IsOpen ? "Scorri per leggere la scheda. Chiudi o premi Esc per tornare al gioco." : text; }
 
     void Stat(string label, string value)
-        => _sb.Append("<color=#8b93a3>").Append(label).Append("</color>  <b>").Append(value).Append("</b>\n");
+        => _sb.Append("<color=#5E6A66>").Append(label).Append("</color>  <b>").Append(value).Append("</b>\n");
 
     void Section(string label)
-        => _sb.Append('\n').Append("<color=#5c6478>── ").Append(label).Append(" ──</color>\n");
+        => _sb.Append('\n').Append("<color=#6E7A74>── ").Append(label).Append(" ──</color>\n");
 
     void Line(string text) => _sb.Append(text).Append('\n');
 
     static string Delta(int baseValue, int bonus)
-        => bonus > 0 ? $"{baseValue} <color=#5ad98c>+{bonus}</color>" : baseValue.ToString();
+        => bonus > 0 ? $"{baseValue} <color=#1F7A3A>+{bonus}</color>" : baseValue.ToString();
 
     /// <summary>
     /// Quanto e' probabile che il fine turno la giri da sola. Non e' una
@@ -556,9 +575,9 @@ public class InspectorPanel : MonoBehaviour
     {
         int max = GameManager.Instance != null ? GameManager.Instance.ChaosFlips : 0;
         float chance = Mathf.Clamp01(def.endTurnFlipChance);
-        string grade = chance >= 0.5f  ? "<color=#ff2b3c>alta</color>"
-                     : chance >= 0.35f ? "<color=#ffb000>media</color>"
-                     :                   "<color=#3dff7a>bassa</color>";
+        string grade = chance >= 0.5f  ? "<color=#A31220>alta</color>"
+                     : chance >= 0.35f ? "<color=#8A6A22>media</color>"
+                     :                   "<color=#1F7A3A>bassa</color>";
         return $"{grade} ({Mathf.RoundToInt(chance * 100f)}%) · il fine turno gira fino a {max} carte";
     }
 
@@ -588,7 +607,7 @@ public class InspectorPanel : MonoBehaviour
             Line($"+{def.backBonusPAIfTwoRetroSameFaction} AP con due {GamePalette.FactionName(def.faction)} coperte, una volta per turno");
             any = true;
         }
-        if (!any) Line("<color=#66667a>nessuna: da coperta e' soltanto un muro</color>");
+        if (!any) Line("<color=#7A8078>nessuna: da coperta e' soltanto un muro</color>");
     }
 
     /// <summary>Le abilita' sono componenti sul prefab: il nome del tipo e' l'unica etichetta che hanno.</summary>
@@ -601,6 +620,6 @@ public class InspectorPanel : MonoBehaviour
         Section("Abilita'");
         foreach (var ability in abilities)
             // U+2666: il rombo U+25C6 non esiste in LiberationSans ne' nei suoi fallback
-            Line($"<color=#d9b25a>♦</color> {AbilityCatalog.Describe(ability)}");
+            Line($"<color=#8A6A22>♦</color> {AbilityCatalog.Describe(ability)}");
     }
 }

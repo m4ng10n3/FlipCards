@@ -114,13 +114,12 @@ public static class FlipCardsLayoutBuilder
         _boardBg = KitSprite("board/board_bg");
 
         ResizePrefabs();
-        BuildScene();
+        MedallionSceneBuilder.Build();
 
         EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
         EditorSceneManager.SaveOpenScenes();
-        Debug.Log($"[Layout] Ricostruito sul tabellone del kit: rail 294, campo 1178, colonna destra 400; " +
-                  $"carte {CardW}x{CardH}, caselle {SlotW}x{SlotH}, passo di corsia {LanePitch}. " +
-                  (HasBackdrop ? "Fondo board_bg del kit attivo." : "board_bg non trovato: fondi a tinta piatta."));
+        Debug.Log("[Layout] Neon Monte / medaglione: scena 1920x1080, tre corsie a passo 358; " +
+                  "Dettaglio e Legenda in overlay. Prefab e scena salvati.");
     }
 
     static Sprite KitSprite(string relativePath)
@@ -481,6 +480,9 @@ public static class FlipCardsLayoutBuilder
             if (root.GetComponent<SlotOverlay>() == null)
                 root.AddComponent<SlotOverlay>();
 
+            if (UiSkin.Sprite("scene_cabinet") != null && root.GetComponent<ReelPrintedAttack>() == null)
+                root.AddComponent<ReelPrintedAttack>();
+
             PrefabUtility.SaveAsPrefabAsset(root, path);
         }
         finally { PrefabUtility.UnloadPrefabContents(root); }
@@ -735,7 +737,8 @@ public static class FlipCardsLayoutBuilder
     //  2. Scena
     // ══════════════════════════════════════════════════════════════════════════
 
-    static void BuildScene()
+    // Historical band layout, retained only as a reference. Rebuild uses MedallionSceneBuilder.
+    static void BuildLegacyScene()
     {
         var gm = Object.FindAnyObjectByType<GameManager>();
         var hand = Object.FindAnyObjectByType<HandManager>();
@@ -1449,7 +1452,7 @@ public static class FlipCardsLayoutBuilder
         img.preserveAspect = false;
     }
 
-    static void BuildEndPanel(RectTransform root, HudController hud)
+    internal static void BuildEndPanel(RectTransform root, HudController hud)
     {
         var panel = UiBuild.Rect("EndMatchPanel", root);
         UiBuild.Band(panel, 0f, 0f, RefW, RefH);
@@ -1472,7 +1475,7 @@ public static class FlipCardsLayoutBuilder
 
     // ── Cablaggio ─────────────────────────────────────────────────────────────
 
-    static void WireGameManager(GameManager gm, Transform playerBoard, Transform aiBoard,
+    internal static void WireGameManager(GameManager gm, Transform playerBoard, Transform aiBoard,
                                 Button attack, Button endTurn, TMP_Text log)
     {
         var so = new SerializedObject(gm);
@@ -1488,7 +1491,7 @@ public static class FlipCardsLayoutBuilder
         so.ApplyModifiedPropertiesWithoutUndo();
     }
 
-    static void WireHandManager(HandManager hand, Transform handRoot, Transform spawnPoint)
+    internal static void WireHandManager(HandManager hand, Transform handRoot, Transform spawnPoint)
     {
         var so = new SerializedObject(hand);
         so.FindProperty("handRoot").objectReferenceValue = handRoot;

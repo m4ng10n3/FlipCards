@@ -1,0 +1,86 @@
+[
+  {
+    "file": "Lamps\\hp_round_off.png",
+    "sourceCrop": [
+      327,
+      121,
+      928,
+      1129
+    ],
+    "size": [
+      601,
+      1008
+    ],
+    "alphaOnly": true
+  },
+  {
+    "file": "Lamps\\hp_round_on.png",
+    "sourceCrop": [
+      327,
+      121,
+      928,
+      1129
+    ],
+    "size": [
+      601,
+      1008
+    ],
+    "alphaOnly": true
+  },
+  {
+    "file": "Lamps\\atk_taper_off.png",
+    "sourceCrop": [
+      496,
+      78,
+      759,
+      1156
+    ],
+    "size": [
+      263,
+      1078
+    ],
+    "alphaOnly": true
+  },
+  {
+    "file": "Lamps\\atk_taper_on.png",
+    "sourceCrop": [
+      496,
+      78,
+      759,
+      1156
+    ],
+    "size": [
+      263,
+      1078
+    ],
+    "alphaOnly": true
+  },
+  {
+    "file": "Lamps\\def_discharge_off.png",
+    "sourceCrop": [
+      165,
+      150,
+      1090,
+      1126
+    ],
+    "size": [
+      925,
+      976
+    ],
+    "alphaOnly": true
+  },
+  {
+    "file": "Lamps\\def_discharge_on.png",
+    "sourceCrop": [
+      165,
+      150,
+      1090,
+      1126
+    ],
+    "size": [
+      925,
+      976
+    ],
+    "alphaOnly": true
+  }
+]

@@ -1,0 +1,5 @@
+{
+  "tool": "built-in image_gen",
+  "date": "2026-09-10",
+  "prompt": "Edit target: the supplied red mushroom button sprite. Remove the cream rectangular label plaque and its entire rectangular border on the front of the brass base. Replace that area with continuous curved gold/brass engraved cylindrical metal matching the neighboring base, with NO plaque, NO signage, NO text. Preserve EXACTLY the outer silhouette, position, perspective, scale, red dome, black ink engraved linework and canvas framing. Output a game sprite on a genuinely transparent alpha background, not a painted checkerboard. Do not add objects."
+}

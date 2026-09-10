@@ -1,0 +1,7 @@
+{
+  "tool": "built-in image_gen",
+  "asset": "cabinet_clean.png",
+  "date": "2026-09-10",
+  "prompt": "Use case: precise-object-edit. Asset: production Unity UI cabinet sprite. Image 1 is the edit target, existing illustrated cabinet. Image 2 is composition/style reference only. Edit image 1: remove the long blank cream name plaque across the top and the three small cream plaques above the lower instruments. Fill those areas with continuous dark teal enameled metal with restrained gold engraving consistent with reference image 2. Preserve EXACT cabinet silhouette, dimensions/aspect ratio 2:1, brass crown feet and three equal windows, all aperture positions and lower dark instrument shelves, bold engraved ink style. Keep the three central reel apertures completely transparent so moving runtime reels can be visible through them. The entire exterior background must also be real alpha transparency. No white background, no checkerboard painted into pixels. No reels, cards, lamps, controls, words, numbers or baked game data. Output one complete cabinet cutout only, generously high resolution. This is a foreground frame placed over live content.",
+  "alpha": "CabinetMasked.mat samples the existing cabinet_illustrated.png alpha; the generated RGB source remains unchanged."
+}

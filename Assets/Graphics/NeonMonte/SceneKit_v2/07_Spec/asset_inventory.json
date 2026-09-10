@@ -1,0 +1,224 @@
+[
+  {
+    "file": "02_Machine/cabinet_empty.png",
+    "size": [
+      1774,
+      887
+    ],
+    "mode": "RGBA",
+    "alpha": [
+      0,
+      255
+    ]
+  },
+  {
+    "file": "02_Machine/cabinet_illustrated.png",
+    "size": [
+      1774,
+      887
+    ],
+    "mode": "RGBA",
+    "alpha": [
+      0,
+      255
+    ]
+  },
+  {
+    "file": "02_Machine/crown.png",
+    "size": [
+      1774,
+      185
+    ],
+    "mode": "RGBA",
+    "alpha": [
+      0,
+      255
+    ]
+  },
+  {
+    "file": "02_Machine/left_cheek.png",
+    "size": [
+      166,
+      592
+    ],
+    "mode": "RGBA",
+    "alpha": [
+      0,
+      255
+    ]
+  },
+  {
+    "file": "02_Machine/plinth.png",
+    "size": [
+      1774,
+      110
+    ],
+    "mode": "RGBA",
+    "alpha": [
+      0,
+      255
+    ]
+  },
+  {
+    "file": "02_Machine/reel_bay.png",
+    "size": [
+      485,
+      592
+    ],
+    "mode": "RGBA",
+    "alpha": [
+      0,
+      255
+    ]
+  },
+  {
+    "file": "02_Machine/reel_drum_blank.png",
+    "size": [
+      1254,
+      1254
+    ],
+    "mode": "RGBA",
+    "alpha": [
+      0,
+      255
+    ]
+  },
+  {
+    "file": "02_Machine/right_cheek.png",
+    "size": [
+      169,
+      592
+    ],
+    "mode": "RGBA",
+    "alpha": [
+      0,
+      255
+    ]
+  },
+  {
+    "file": "03_Table/table_environment.png",
+    "size": [
+      1672,
+      941
+    ],
+    "mode": "RGB",
+    "alpha": null
+  },
+  {
+    "file": "03_Table/table_illustrated.png",
+    "size": [
+      1672,
+      941
+    ],
+    "mode": "RGB",
+    "alpha": null
+  },
+  {
+    "file": "04_Controls/lever_rest.png",
+    "size": [
+      724,
+      2172
+    ],
+    "mode": "RGBA",
+    "alpha": [
+      0,
+      255
+    ]
+  },
+  {
+    "file": "04_Controls/mushroom_idle.png",
+    "size": [
+      1254,
+      1254
+    ],
+    "mode": "RGBA",
+    "alpha": [
+      0,
+      255
+    ]
+  },
+  {
+    "file": "05_Lamps/atk_taper_off.png",
+    "size": [
+      263,
+      1078
+    ],
+    "mode": "RGBA",
+    "alpha": [
+      0,
+      255
+    ]
+  },
+  {
+    "file": "05_Lamps/atk_taper_on.png",
+    "size": [
+      263,
+      1078
+    ],
+    "mode": "RGBA",
+    "alpha": [
+      0,
+      255
+    ]
+  },
+  {
+    "file": "05_Lamps/def_discharge_off.png",
+    "size": [
+      925,
+      976
+    ],
+    "mode": "RGBA",
+    "alpha": [
+      0,
+      255
+    ]
+  },
+  {
+    "file": "05_Lamps/def_discharge_on.png",
+    "size": [
+      925,
+      976
+    ],
+    "mode": "RGBA",
+    "alpha": [
+      0,
+      255
+    ]
+  },
+  {
+    "file": "05_Lamps/hp_round_off.png",
+    "size": [
+      601,
+      1008
+    ],
+    "mode": "RGBA",
+    "alpha": [
+      0,
+      255
+    ]
+  },
+  {
+    "file": "05_Lamps/hp_round_on.png",
+    "size": [
+      601,
+      1008
+    ],
+    "mode": "RGBA",
+    "alpha": [
+      0,
+      255
+    ]
+  },
+  {
+    "file": "06_UI/legend_paper.png",
+    "size": [
+      1448,
+      913
+    ],
+    "mode": "RGBA",
+    "alpha": [
+      0,
+      255
+    ]
+  }
+]

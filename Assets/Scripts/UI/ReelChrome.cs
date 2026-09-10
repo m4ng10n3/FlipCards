@@ -119,6 +119,8 @@ public class ReelChrome : MonoBehaviour
     {
         _built = true;
 
+        if (UiSkin.Sprite("scene_cabinet") != null) return;
+
         Layer(underLayer, "Backing", UiSkin.ReelBacking, 0f, 0f, underLayer.rect.width, underLayer.rect.height, 1f);
 
         if (overLayer == null) return;
@@ -206,9 +208,18 @@ public class ReelChrome : MonoBehaviour
         {
             col.instruments = UiBuild.Rect("CabinetInstruments" + index, overLayer);
             UiBuild.Band(col.instruments, 0f, 0f, cellWidth, underLayer.rect.height);
-            var instruments = col.instruments.gameObject.AddComponent<ReelInstruments>();
-            instruments.lane = index;
-            instruments.laneRoot = laneReferenceRoot;
+            if (UiSkin.Sprite("scene_cabinet") != null)
+            {
+                var instruments = col.instruments.gameObject.AddComponent<MedallionInstruments>();
+                instruments.lane = index;
+                instruments.laneRoot = laneReferenceRoot;
+            }
+            else
+            {
+                var instruments = col.instruments.gameObject.AddComponent<ReelInstruments>();
+                instruments.lane = index;
+                instruments.laneRoot = laneReferenceRoot;
+            }
         }
         return col;
     }

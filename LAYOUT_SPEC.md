@@ -1,3 +1,5 @@
+> **Layout attivo dal 10 settembre 2026:** la composizione a medaglione sostituisce le bande e le coordinate del layout storico sotto. Fonte di montaggio: `Assets/Editor/MedallionSceneBuilder.cs`; misure e interazioni in `Assets/Graphics/NeonMonte/SceneKit_v2/08_Integration/README.md`. Restano validi i vincoli di gioco: tre corsie allineate, input delle coroutine, pronostico condiviso con la risoluzione, prefab 224x336 e 352x288.
+
 # FlipCards — descrizione del gioco e specifica di layout
 
 Documento di riferimento per costruire il layout di gioco. Tutto quello che segue è

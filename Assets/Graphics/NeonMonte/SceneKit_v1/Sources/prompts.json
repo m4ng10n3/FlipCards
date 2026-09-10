@@ -1,0 +1,73 @@
+[
+  {
+    "key": "tablecloth",
+    "file": "Table/tablecloth.png",
+    "refs": [
+      "C:/Users/vulpi/OneDrive/Documenti/UnityProj/FlipCards/Assets/Graphics/NeonMonte/Cards/_Final/FINAL_PREVIEW.png",
+      "C:/Users/vulpi/OneDrive/Documenti/UnityProj/FlipCards/Assets/Graphics/NeonMonte/Runtime/Board/board.png"
+    ],
+    "prompt": "Use case: stylized-concept. Generate a production game background texture, wide 16:9 landscape. References: first image establishes the finalized vintage ivory/red/black printed card aesthetic; second is existing dark board for palette only. A magnificent but restrained deep petrol-green woven gambling TABLECLOTH filling the entire image, viewed from above, faint linen fibers and subtle physical soft folds ONLY at the far edges, generous completely uninterrupted flat dark-green center for readable playing cards and machine. Thin worn brass-gold double stitched perimeter with tiny restrained tattoo-star details at corners. Soft upper-left warm illumination. Handmade screenprint / distressed vintage illustration, not photorealistic, not pixel art, no bloom. No UI, no cards, no machine, no slots, no writing, no icons in center, no perspective convergence, no checkerboard. Full bleed opaque fabric. Landscape 1920x1080 composition.",
+    "source": "C:\\Users\\vulpi\\.codex\\generated_images\\01a08815-94e9-7120-afca-299c2bf0e45d\\exec-e465dbbb-2e08-403a-8195-eab7bb01adf5.png"
+  },
+  {
+    "key": "cabinet",
+    "file": "Machine/cabinet.png",
+    "refs": [
+      "C:/Users/vulpi/OneDrive/Documenti/UnityProj/FlipCards/Assets/Graphics/NeonMonte/Runtime/Board/reel_housing.png",
+      "C:/Users/vulpi/OneDrive/Documenti/UnityProj/FlipCards/Assets/Graphics/NeonMonte/Cards/_Final/FINAL_PREVIEW.png"
+    ],
+    "prompt": "Use case: stylized-concept. Generate ONE isolated production sprite of a wide low antique mechanical slot-machine cabinet, landscape 3:1 silhouette on genuinely transparent RGBA background. Reference 1 is old housing to evolve, reference 2 is FINAL cards whose crisp ivory/ink vintage tattoo line language should inform this new cabinet. Front view with very slight view of top and right thickness, front apertures remain straight rectangular and identical size, no perspective skew across three lanes. Petrol green enamel, restrained thin aged brass trim, deep black recesses, warm ivory inlays, elegant fine pinstriping, small corner stars. THREE equal large empty rectangular reel windows side by side, very narrow dividing posts. Windows consume 78 percent width and 65 percent height. Truly transparent INSIDE all 3 windows so separate live reel artwork is visible behind. Compact header rail and bottom plinth, a blank narrow inset plaque above for runtime boss status. Reserve small round mechanical axle mount on right edge for separately animated lever. Do NOT include lever, handle, button, reels, characters, symbols, letters, numbers, text, lamps with stats, surrounding table, background rectangle or cast shadow backdrop. Restrained wear matching cards, crisp silhouette and believable beveled thickness. All body visible with transparent padding around edges. Deliver alpha, not painted checkerboard.",
+    "source": "C:\\Users\\vulpi\\.codex\\generated_images\\01a08815-94e9-7120-afca-299c2bf0e45d\\exec-3cb6a12e-f0e9-4d27-a744-5df9b1cd96c2.png"
+  },
+  {
+    "key": "reel",
+    "file": "Reels/reel_paper.png",
+    "refs": [
+      "C:/Users/vulpi/OneDrive/Documenti/UnityProj/FlipCards/Assets/Graphics/NeonMonte/Cards/_Final/FINAL_PREVIEW.png"
+    ],
+    "prompt": "Use case: stylized-concept. Production sprite for ONE blank mechanical slot-machine reel face. Square 1024x1024 full bleed opaque pale ivory aged paper, very restrained fiber grain. The paper wraps over a vertical scrolling CYLINDRICAL drum whose rotation axle is horizontal: bright flat broad central 65%, smoothly dimmed top and bottom curved-away edges. Entire square contains paper, no frame, no ornament, no glyphs, no logos, no text, no statistics, no characters, no divisions. Visual style matches the ivory paper in reference vintage playing cards. This is a neutral surface onto which existing game artwork and dynamic stats are composed. Top and bottom edges dark warm grey shadow, center warm readable ivory. Clean continuous shading not folded paper.",
+    "source": "C:\\Users\\vulpi\\.codex\\generated_images\\01a08815-94e9-7120-afca-299c2bf0e45d\\exec-bdddfb90-9487-448f-a0e0-78740ad8eac9.png"
+  },
+  {
+    "key": "button",
+    "file": "Controls/attack_mushroom_idle.png",
+    "refs": [
+      "C:/Users/vulpi/OneDrive/Documenti/UnityProj/FlipCards/Assets/Graphics/NeonMonte/Cards/_Final/FINAL_PREVIEW.png"
+    ],
+    "prompt": "Use case: stylized-concept. One isolated large RED MUSHROOM PUSHBUTTON game sprite on genuinely transparent RGBA background, square canvas. A squat mechanical arcade emergency mushroom button, bright saturated vermilion red bakelite rounded broad cap, dark narrow red stem, heavy aged brass circular escutcheon and petrol-green enamel lower base. Camera from front and above 25 degrees, cap top visible as an ellipse, circular round silhouette. Warm highlight upper left, restrained hand-painted screenprint grain and crisp fine black outline matching reference vintage cards. Center object, identical 15 percent transparent margin each side. The button is in raised unpressed state. No text, labels, letters, warning symbol, arrows, hand, wires, scene, ground plane, cast shadow on background, checkerboard. Real transparency. Restrained charming physical depth, not photorealistic or pixelated.",
+    "source": "C:\\Users\\vulpi\\.codex\\generated_images\\01a08815-94e9-7120-afca-299c2bf0e45d\\exec-f12b2134-73b2-4b66-b0ba-c1a88233e027.png"
+  },
+  {
+    "key": "grip",
+    "file": "Controls/lever_grip.png",
+    "refs": [
+      "C:/Users/vulpi/OneDrive/Documenti/UnityProj/FlipCards/Assets/Graphics/NeonMonte/Cards/_Final/FINAL_PREVIEW.png"
+    ],
+    "prompt": "Use case: stylized-concept. ONE isolated spherical ivory bakelite slot-machine lever grip, production game sprite with genuine transparent RGBA background, square canvas. A smooth nearly circular ivory/cream ball with a subtle fine dark equatorial seam and tiny aged brass socket at the bottom, no rod. Round contour, neutral front view. Warm bright upper-left highlight, muted petrol reflected shade bottom right, very restrained vintage grain matching reference printed cards. Occupies central 70 percent of square with transparent padding. No text, symbols, numbers, surrounding assembly, environment, ground shadow, checkerboard. The object will be billboarded on a moving 3D lever; do not give it directional perspective or an elongated shape.",
+    "source": "C:\\Users\\vulpi\\.codex\\generated_images\\01a08815-94e9-7120-afca-299c2bf0e45d\\exec-38e287e2-e26b-4012-bf34-db3a4be912d4.png"
+  },
+  {
+    "key": "pivot",
+    "file": "Controls/lever_pivot.png",
+    "refs": [
+      "C:/Users/vulpi/OneDrive/Documenti/UnityProj/FlipCards/Assets/Graphics/NeonMonte/Runtime/Board/reel_housing.png"
+    ],
+    "prompt": "Use case: stylized-concept. ONE isolated slot-machine lever AXLE MOUNT only on genuinely transparent RGBA, square canvas. Worn brass mechanical hub, round brass face seen as a vertical ellipse because mounted on the RIGHT side of a cabinet, axle projects horizontally slightly towards the viewer. Broad petrol-green enamel mounting flange behind, two tiny brass screws, concentric metal rings and black center bearing. Frontal game view showing slight right side of cabinet. No lever, rod or grip, no surrounding cabinet, no words or numbers, no background plate rectangle. Crisp hand illustrated vintage enamel/brass, restrained wear and thin tattoo-like outline from reference. All contours contained central 70 percent square, true alpha."
+  },
+  {
+    "key": "shaft",
+    "file": "Controls/lever_shaft.png",
+    "refs": [
+      "C:/Users/vulpi/OneDrive/Documenti/UnityProj/FlipCards/Assets/Graphics/NeonMonte/Runtime/Board/reel_housing.png"
+    ],
+    "prompt": "Use case: stylized-concept. Isolated straight vertical mechanical lever rod, production game sprite on true transparent RGBA background. Narrow aged polished brass cylindrical shaft, straight from near top to near bottom, rounded end caps, warm bright stripe left and dark petrol reflected shade right to describe cylinder volume. Only a rod, NO handle ball, NO mount or flange, NO extra pieces. Canvas portrait 1:3 ratio; rod occupies central 18 percent width and 88 percent height. Minimal restrained vintage illustrative grain coordinated with reference cabinet. No text, no ground shadow, no background, no checkerboard. This sprite is to stretch between an immobile axle and projected handle position."
+  },
+  {
+    "key": "panel",
+    "file": "UI/ivory_panel.png",
+    "refs": [
+      "C:/Users/vulpi/OneDrive/Documenti/UnityProj/FlipCards/Assets/Graphics/NeonMonte/Cards/_Final/FINAL_PREVIEW.png"
+    ],
+    "prompt": "Use case: stylized-concept. One blank rectangular vintage printed ivory paper panel for a game inspector and rules overlay, isolated on genuine transparent RGBA background. Landscape 3:2 canvas. Shape is a simple subtly rounded rectangular ivory card occupying 94 percent width and height. Fine black double hairline border, tiny tasteful vermilion star at each corner, restrained worn paper grain matching exact reference card faces. Center is EMPTY uninterrupted light ivory, nearly flat, enormous readable area. Border within outer 3 percent, no ornate swirls intruding inward. No text, no numbers, no symbols except four small corner stars, no fake handwriting, no graphic stat rails, no drops or spears, no background, no cast shadow. Will be nine sliced; keep straight edges simple."
+  }
+]

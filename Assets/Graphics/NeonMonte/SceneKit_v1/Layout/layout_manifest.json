@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "canvas": [1920, 1080],
+  "coordinates": "top-left, x right, y down, canvas pixels",
+  "status": "asset layout prototype; not yet applied to Unity builder",
+  "rail": [28, 32, 252, 1012],
+  "deck": [66, 212, 176, 264],
+  "inspector": [28, 566, 252, 304],
+  "machine": [300, 66, 1430, 476.666667],
+  "cabinetSource": [2172, 724],
+  "aperturesSource": [[176, 188, 573, 330], [792, 188, 573, 330], [1407, 188, 569, 330]],
+  "laneCenters": [604.5, 1010.06, 1413.65],
+  "cardSize": [224, 336],
+  "cardTop": 580,
+  "axisTop": 540,
+  "handActivation": [352, 924, 1300, 156],
+  "handSpacing": 132,
+  "maxHand": 8,
+  "attack": [1710, 686, 182, 192],
+  "leverHit": [1730, 126, 166, 410],
+  "leverPivot": [1766, 392],
+  "legend": {"trigger": [1700, 30, 180, 46], "panel": [458, 150, 1004, 780], "scrimAlpha": 0.76, "reflow": false, "modal": true},
+  "lampTypes": {
+    "hp": {"shape": "round globe", "technology": "tungsten incandescent", "tint": "red"},
+    "atk": {"shape": "tapered torpedo", "technology": "long carbon filament", "tint": "amber"},
+    "def": {"shape": "squat cylinder", "technology": "cold cathode gas discharge", "tint": "cyan"}
+  },
+  "lampCapacity": 7,
+  "overflow": "show exact numeric total when value exceeds 7; never clamp displayed value silently",
+  "layerOrder": ["cloth", "reelPaper", "reelArtwork", "cabinet", "statsAndPattern", "axis", "cards", "lever", "hand", "modalScrim", "legend"]
+}

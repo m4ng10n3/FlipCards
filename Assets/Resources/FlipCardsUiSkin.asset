@@ -404,17 +404,17 @@ MonoBehaviour:
   - key: card_neutral
     sprite: {fileID: 21300000, guid: df417a8dca1ea1a4ca2c6ca3ea23efab, type: 3}
   - key: lamp_round_off
-    sprite: {fileID: 21300000, guid: ef50f873895a6564390ff32b042246e4, type: 2}
+    sprite: {fileID: 21300000, guid: 2e9b8a458407ddd479218f2659b4a928, type: 3}
   - key: lamp_spear_off
-    sprite: {fileID: 21300000, guid: fd87d3a92b40f554b8027d62eb5f0cde, type: 2}
+    sprite: {fileID: 21300000, guid: 5a490dfefe733c547bace294abc80524, type: 3}
   - key: lamp_shield_off
-    sprite: {fileID: 21300000, guid: 071245b5f41417243bb946adb5f8c9fa, type: 2}
+    sprite: {fileID: 21300000, guid: 0594f29fe5f700e47a1407e7cdad6a95, type: 3}
   - key: lamp_round_on
-    sprite: {fileID: 21300000, guid: 61d7ffb3889359044a1112a2999c5c7a, type: 2}
+    sprite: {fileID: 21300000, guid: 12c489c8fd7b9c74e9d640d034827003, type: 3}
   - key: lamp_spear_on
-    sprite: {fileID: 21300000, guid: b12abf1503ad69b439f97d93fe535989, type: 2}
+    sprite: {fileID: 21300000, guid: caf6c9a0c3113f143a3ad734f19370d1, type: 3}
   - key: lamp_shield_on
-    sprite: {fileID: 21300000, guid: 7fe2f394d67abdd4b872c27e3b581007, type: 2}
+    sprite: {fileID: 21300000, guid: 796e0334bfb601a4b8e7878990294332, type: 3}
   - key: slot_name_A
     sprite: {fileID: 21300000, guid: 1472d102c366e8843b63c4f9fa468d49, type: 2}
   - key: slot_name_B
@@ -527,4 +527,26 @@ MonoBehaviour:
     sprite: {fileID: 21300000, guid: 75630922d4151904fb581db7a5a4f48a, type: 3}
   - key: glyph_thorn
     sprite: {fileID: 21300000, guid: 8ddd18a4974215d4e865e24e18504511, type: 3}
+  - key: scene_cabinet
+    sprite: {fileID: 21300000, guid: 5fd16ce8049b92a4f9c9dbd5baf40e5c, type: 3}
+  - key: scene_table
+    sprite: {fileID: 21300000, guid: 268e2791789c2a946a8518913423f483, type: 3}
+  - key: scene_lever
+    sprite: {fileID: 21300000, guid: bc7b896ef62274b43abc99a006e9b982, type: 3}
+  - key: scene_attack
+    sprite: {fileID: 21300000, guid: 8f58fcdaf0b90e944a827bb2db0d4768, type: 3}
+  - key: scene_attack_cap
+    sprite: {fileID: 21300000, guid: bd6c2e40319c8c1409d24de322b21dbe, type: 2}
+  - key: scene_attack_base
+    sprite: {fileID: 21300000, guid: 790a0ab57ac77c042ac4e2af917deec5, type: 2}
+  - key: scene_paper
+    sprite: {fileID: 21300000, guid: 86033da69169f054381f56e590886788, type: 3}
+  - key: scene_reel
+    sprite: {fileID: 21300000, guid: b37b61a6eacf3a24b8d07e16ac5e24ff, type: 3}
+  - key: scene_lever_pivot
+    sprite: {fileID: 21300000, guid: f5c2e950d16c23d44b95ece20e4ce66e, type: 3}
+  - key: scene_lever_shaft
+    sprite: {fileID: 21300000, guid: cd8fcc5cde976594e92c456cd4050dbb, type: 3}
+  - key: scene_lever_grip
+    sprite: {fileID: 21300000, guid: e7b9b22ee7bfeb54e938d2bc40f576e6, type: 3}
   neonMonte: 1

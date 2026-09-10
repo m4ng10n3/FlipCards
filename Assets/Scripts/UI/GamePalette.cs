@@ -48,6 +48,9 @@ public static class GamePalette
 
     public static Color SideColor(Side side) => side == Side.Fronte ? Fronte : Retro;
 
+    /// <summary>Le stesse due facce sull'avorio del libretto: ambra bruciata e ottanio.</summary>
+    public static Color InkSide(Side side) => side == Side.Fronte ? Hex(0x9A6410) : Hex(0x1E6E7A);
+
     public static string FactionName(Faction faction) => faction switch
     {
         Faction.A => "Braci",
@@ -62,6 +65,25 @@ public static class GamePalette
         Faction.B => Hex(0x69C5BC),
         _         => Hex(0xB5CF82),
     };
+
+    /// <summary>
+    /// Le stesse fazioni sulle superfici di carta. Il libretto e la pergamena
+    /// sono avorio: i valori del kit, scelti per il fondo nero, lì non reggono
+    /// il contrasto. Cambia la luminosita', non la tinta — la fazione resta
+    /// riconoscibile dallo stesso colore.
+    /// </summary>
+    public static Color InkFaction(Faction f) => f switch
+    {
+        Faction.A => Hex(0x9C3324),
+        Faction.B => Hex(0x1E6E7A),
+        _         => Hex(0x4A6B22),
+    };
+
+    /// Testo su carta: nero d'inchiostro, corpo, note, oro spento.
+    public static readonly Color InkStrong = Hex(0x1A2326);
+    public static readonly Color InkBody   = Hex(0x2E3A3C);
+    public static readonly Color InkMuted  = Hex(0x6E7A74);
+    public static readonly Color InkGold   = Hex(0x8A6A22);
 
     public static Color ClassColor(CardClass c) => c switch
     {

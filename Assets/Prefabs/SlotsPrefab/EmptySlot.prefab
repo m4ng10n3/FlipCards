@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 6134123941179847740}
   - component: {fileID: 8380466680754058379}
   - component: {fileID: 5309553852287039356}
+  - component: {fileID: 3149334880105614296}
   m_Layer: 5
   m_Name: EmptySlot
   m_TagString: Untagged
@@ -154,3 +155,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c47c479b467386a44bdb25fe65de3b39, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SlotOverlay
+--- !u!114 &3149334880105614296
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4860462570295797339}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9247701128f678e43a9444a3ab2d7f55, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ReelPrintedAttack

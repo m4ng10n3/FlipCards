@@ -1,0 +1,1339 @@
+fileFormatVersion: 2
+guid: 251c4d74409c0d247a5b57814668f007
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -1530865682508267851
+    second: lamp_round_on_generated_0
+  - first:
+      213: -4554740937823756280
+    second: lamp_round_on_generated_1
+  - first:
+      213: -6117598559477793184
+    second: lamp_round_on_generated_2
+  - first:
+      213: 4891521907892736163
+    second: lamp_round_on_generated_3
+  - first:
+      213: 443627993948236456
+    second: lamp_round_on_generated_4
+  - first:
+      213: 6100839991135082043
+    second: lamp_round_on_generated_5
+  - first:
+      213: -7853469783823193301
+    second: lamp_round_on_generated_6
+  - first:
+      213: 4893498120810129168
+    second: lamp_round_on_generated_7
+  - first:
+      213: 253773968093315746
+    second: lamp_round_on_generated_8
+  - first:
+      213: 3139053364274274911
+    second: lamp_round_on_generated_9
+  - first:
+      213: 1426247262749469454
+    second: lamp_round_on_generated_10
+  - first:
+      213: 7364346479797557361
+    second: lamp_round_on_generated_11
+  - first:
+      213: -2696270926213002951
+    second: lamp_round_on_generated_12
+  - first:
+      213: -193026843648602523
+    second: lamp_round_on_generated_13
+  - first:
+      213: 7889737650790819358
+    second: lamp_round_on_generated_14
+  - first:
+      213: -4529640255728894776
+    second: lamp_round_on_generated_15
+  - first:
+      213: 8465556606106232180
+    second: lamp_round_on_generated_16
+  - first:
+      213: 2505369330462919026
+    second: lamp_round_on_generated_17
+  - first:
+      213: 1491211054029384925
+    second: lamp_round_on_generated_18
+  - first:
+      213: -3660923550542356024
+    second: lamp_round_on_generated_19
+  - first:
+      213: -1627558962499964234
+    second: lamp_round_on_generated_20
+  - first:
+      213: -7527820145628750479
+    second: lamp_round_on_generated_21
+  - first:
+      213: 6849806523094963179
+    second: lamp_round_on_generated_22
+  - first:
+      213: 5795423300455646057
+    second: lamp_round_on_generated_23
+  - first:
+      213: -6107654014755281070
+    second: lamp_round_on_generated_24
+  - first:
+      213: -8525827698187768589
+    second: lamp_round_on_generated_25
+  - first:
+      213: 398085276499537146
+    second: lamp_round_on_generated_26
+  - first:
+      213: 2844229441149999097
+    second: lamp_round_on_generated_27
+  - first:
+      213: -6438533445316500157
+    second: lamp_round_on_generated_28
+  - first:
+      213: -7656550060991908377
+    second: lamp_round_on_generated_29
+  - first:
+      213: -3942100558202842063
+    second: lamp_round_on_generated_30
+  - first:
+      213: -2933168085514261447
+    second: lamp_round_on_generated_31
+  - first:
+      213: 622206316076850160
+    second: lamp_round_on_generated_32
+  - first:
+      213: -7070089934144159210
+    second: lamp_round_on_generated_33
+  - first:
+      213: -2732119050510647860
+    second: lamp_round_on_generated_34
+  - first:
+      213: 1873471805590866280
+    second: lamp_round_on_generated_35
+  - first:
+      213: 4042961090778743750
+    second: lamp_round_on_generated_36
+  - first:
+      213: -580219060312309170
+    second: lamp_round_on_generated_37
+  - first:
+      213: -1892908878563785241
+    second: lamp_round_on_generated_38
+  - first:
+      213: 5586844038921583497
+    second: lamp_round_on_generated_39
+  - first:
+      213: -5689736797996879797
+    second: lamp_round_on_generated_40
+  - first:
+      213: 5409448995300390956
+    second: lamp_round_on_generated_41
+  - first:
+      213: -3187093089735126778
+    second: lamp_round_on_generated_42
+  - first:
+      213: -1286420632270060039
+    second: lamp_round_on_generated_43
+  - first:
+      213: 7636233773635386303
+    second: lamp_round_on_generated_44
+  - first:
+      213: 3178866676730774341
+    second: lamp_round_on_generated_45
+  - first:
+      213: 8328097129103109525
+    second: lamp_round_on_generated_46
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: lamp_round_on_generated_0
+      rect:
+        serializedVersion: 2
+        x: 10
+        y: 0
+        width: 1213
+        height: 1232
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5be324bc5c541cae0800000000000000
+      internalID: -1530865682508267851
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_1
+      rect:
+        serializedVersion: 2
+        x: 603
+        y: 1221
+        width: 7
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 800e515cf3f4ac0c0800000000000000
+      internalID: -4554740937823756280
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_2
+      rect:
+        serializedVersion: 2
+        x: 1077
+        y: 1146
+        width: 66
+        height: 88
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 06e72e7c58ce91ba0800000000000000
+      internalID: -6117598559477793184
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_3
+      rect:
+        serializedVersion: 2
+        x: 812
+        y: 1208
+        width: 7
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3a0dcf2424d22e340800000000000000
+      internalID: 4891521907892736163
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_4
+      rect:
+        serializedVersion: 2
+        x: 1029
+        y: 369
+        width: 214
+        height: 846
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8aa24bf5f45182600800000000000000
+      internalID: 443627993948236456
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_5
+      rect:
+        serializedVersion: 2
+        x: 667
+        y: 1198
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b369a17f5a98aa450800000000000000
+      internalID: 6100839991135082043
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_6
+      rect:
+        serializedVersion: 2
+        x: 894
+        y: 1167
+        width: 7
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b2b64f057ded20390800000000000000
+      internalID: -7853469783823193301
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_7
+      rect:
+        serializedVersion: 2
+        x: 1035
+        y: 1154
+        width: 27
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 017edef2d9239e340800000000000000
+      internalID: 4893498120810129168
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_8
+      rect:
+        serializedVersion: 2
+        x: 995
+        y: 1124
+        width: 21
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2a281755416958300800000000000000
+      internalID: 253773968093315746
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_9
+      rect:
+        serializedVersion: 2
+        x: 1021
+        y: 1132
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f5220944768209b20800000000000000
+      internalID: 3139053364274274911
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_10
+      rect:
+        serializedVersion: 2
+        x: 1028
+        y: 1140
+        width: 6
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e0b2e02345c0bc310800000000000000
+      internalID: 1426247262749469454
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_11
+      rect:
+        serializedVersion: 2
+        x: 916
+        y: 1096
+        width: 8
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1785b3bfa1a633660800000000000000
+      internalID: 7364346479797557361
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_12
+      rect:
+        serializedVersion: 2
+        x: 137
+        y: 947
+        width: 7
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9394cd8c0ebe49ad0800000000000000
+      internalID: -2696270926213002951
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_13
+      rect:
+        serializedVersion: 2
+        x: 1099
+        y: 964
+        width: 19
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 56ec530cb1b325df0800000000000000
+      internalID: -193026843648602523
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_14
+      rect:
+        serializedVersion: 2
+        x: 110
+        y: 911
+        width: 10
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e16696e779afd7d60800000000000000
+      internalID: 7889737650790819358
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_15
+      rect:
+        serializedVersion: 2
+        x: 137
+        y: 906
+        width: 20
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8cc38fcbf2c7321c0800000000000000
+      internalID: -4529640255728894776
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_16
+      rect:
+        serializedVersion: 2
+        x: 110
+        y: 889
+        width: 10
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4756cec71e2bb7570800000000000000
+      internalID: 8465556606106232180
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_17
+      rect:
+        serializedVersion: 2
+        x: 1131
+        y: 883
+        width: 10
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 279866dc12cd4c220800000000000000
+      internalID: 2505369330462919026
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_18
+      rect:
+        serializedVersion: 2
+        x: 1067
+        y: 875
+        width: 15
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ddcae888d88d1b410800000000000000
+      internalID: 1491211054029384925
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_19
+      rect:
+        serializedVersion: 2
+        x: 119
+        y: 787
+        width: 25
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8c1af0c5d69c13dc0800000000000000
+      internalID: -3660923550542356024
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_20
+      rect:
+        serializedVersion: 2
+        x: 1206
+        y: 755
+        width: 13
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6b2bf2d2fbfb969e0800000000000000
+      internalID: -1627558962499964234
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_21
+      rect:
+        serializedVersion: 2
+        x: 1165
+        y: 626
+        width: 18
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 17dd4ce267fc78790800000000000000
+      internalID: -7527820145628750479
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_22
+      rect:
+        serializedVersion: 2
+        x: 329
+        y: 612
+        width: 8
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: be39a3dadb66f0f50800000000000000
+      internalID: 6849806523094963179
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_23
+      rect:
+        serializedVersion: 2
+        x: 1027
+        y: 578
+        width: 18
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9634eaa49ca7d6050800000000000000
+      internalID: 5795423300455646057
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_24
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 537
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 257e58788014d3ba0800000000000000
+      internalID: -6107654014755281070
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_25
+      rect:
+        serializedVersion: 2
+        x: 989
+        y: 483
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3fce45951ec2ea980800000000000000
+      internalID: -8525827698187768589
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_26
+      rect:
+        serializedVersion: 2
+        x: 938
+        y: 453
+        width: 10
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: afc61182378468500800000000000000
+      internalID: 398085276499537146
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_27
+      rect:
+        serializedVersion: 2
+        x: 945
+        y: 454
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9f7147b7b9bb87720800000000000000
+      internalID: 2844229441149999097
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_28
+      rect:
+        serializedVersion: 2
+        x: 1043
+        y: 357
+        width: 13
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 345207db1fbb5a6a0800000000000000
+      internalID: -6438533445316500157
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_29
+      rect:
+        serializedVersion: 2
+        x: 963
+        y: 305
+        width: 15
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7e5f49129487eb590800000000000000
+      internalID: -7656550060991908377
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_30
+      rect:
+        serializedVersion: 2
+        x: 1059
+        y: 339
+        width: 7
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 134537fad68da49c0800000000000000
+      internalID: -3942100558202842063
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_31
+      rect:
+        serializedVersion: 2
+        x: 1232
+        y: 322
+        width: 13
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 93ce864ba2b4b47d0800000000000000
+      internalID: -2933168085514261447
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_32
+      rect:
+        serializedVersion: 2
+        x: 954
+        y: 319
+        width: 14
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0fbd3ce095582a800800000000000000
+      internalID: 622206316076850160
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_33
+      rect:
+        serializedVersion: 2
+        x: 1107
+        y: 200
+        width: 129
+        height: 126
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 612c541f9aef1ed90800000000000000
+      internalID: -7070089934144159210
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_34
+      rect:
+        serializedVersion: 2
+        x: 1012
+        y: 290
+        width: 8
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ccd3c3ee230951ad0800000000000000
+      internalID: -2732119050510647860
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_35
+      rect:
+        serializedVersion: 2
+        x: 112
+        y: 274
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 86904fc5ea8eff910800000000000000
+      internalID: 1873471805590866280
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_36
+      rect:
+        serializedVersion: 2
+        x: 930
+        y: 216
+        width: 10
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6c3c79801bb7b1830800000000000000
+      internalID: 4042961090778743750
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_37
+      rect:
+        serializedVersion: 2
+        x: 354
+        y: 130
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e428c2ab6d5a2f7f0800000000000000
+      internalID: -580219060312309170
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_38
+      rect:
+        serializedVersion: 2
+        x: 866
+        y: 101
+        width: 9
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7e5c50d67690bb5e0800000000000000
+      internalID: -1892908878563785241
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_39
+      rect:
+        serializedVersion: 2
+        x: 874
+        y: 101
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 98bfd639d05788d40800000000000000
+      internalID: 5586844038921583497
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_40
+      rect:
+        serializedVersion: 2
+        x: 354
+        y: 89
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b407de9178ef901b0800000000000000
+      internalID: -5689736797996879797
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_41
+      rect:
+        serializedVersion: 2
+        x: 946
+        y: 87
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c2839736339321b40800000000000000
+      internalID: 5409448995300390956
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_42
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 71
+        width: 10
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6015c3888bb25c3d0800000000000000
+      internalID: -3187093089735126778
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_43
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 69
+        width: 10
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9f54fcd2047b52ee0800000000000000
+      internalID: -1286420632270060039
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_44
+      rect:
+        serializedVersion: 2
+        x: 870
+        y: 66
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fbbb06b982a59f960800000000000000
+      internalID: 7636233773635386303
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_45
+      rect:
+        serializedVersion: 2
+        x: 898
+        y: 53
+        width: 17
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5434dde666a9d1c20800000000000000
+      internalID: 3178866676730774341
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lamp_round_on_generated_46
+      rect:
+        serializedVersion: 2
+        x: 922
+        y: 39
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 59d242bf638539370800000000000000
+      internalID: 8328097129103109525
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      lamp_round_on_generated_0: -1530865682508267851
+      lamp_round_on_generated_1: -4554740937823756280
+      lamp_round_on_generated_10: 1426247262749469454
+      lamp_round_on_generated_11: 7364346479797557361
+      lamp_round_on_generated_12: -2696270926213002951
+      lamp_round_on_generated_13: -193026843648602523
+      lamp_round_on_generated_14: 7889737650790819358
+      lamp_round_on_generated_15: -4529640255728894776
+      lamp_round_on_generated_16: 8465556606106232180
+      lamp_round_on_generated_17: 2505369330462919026
+      lamp_round_on_generated_18: 1491211054029384925
+      lamp_round_on_generated_19: -3660923550542356024
+      lamp_round_on_generated_2: -6117598559477793184
+      lamp_round_on_generated_20: -1627558962499964234
+      lamp_round_on_generated_21: -7527820145628750479
+      lamp_round_on_generated_22: 6849806523094963179
+      lamp_round_on_generated_23: 5795423300455646057
+      lamp_round_on_generated_24: -6107654014755281070
+      lamp_round_on_generated_25: -8525827698187768589
+      lamp_round_on_generated_26: 398085276499537146
+      lamp_round_on_generated_27: 2844229441149999097
+      lamp_round_on_generated_28: -6438533445316500157
+      lamp_round_on_generated_29: -7656550060991908377
+      lamp_round_on_generated_3: 4891521907892736163
+      lamp_round_on_generated_30: -3942100558202842063
+      lamp_round_on_generated_31: -2933168085514261447
+      lamp_round_on_generated_32: 622206316076850160
+      lamp_round_on_generated_33: -7070089934144159210
+      lamp_round_on_generated_34: -2732119050510647860
+      lamp_round_on_generated_35: 1873471805590866280
+      lamp_round_on_generated_36: 4042961090778743750
+      lamp_round_on_generated_37: -580219060312309170
+      lamp_round_on_generated_38: -1892908878563785241
+      lamp_round_on_generated_39: 5586844038921583497
+      lamp_round_on_generated_4: 443627993948236456
+      lamp_round_on_generated_40: -5689736797996879797
+      lamp_round_on_generated_41: 5409448995300390956
+      lamp_round_on_generated_42: -3187093089735126778
+      lamp_round_on_generated_43: -1286420632270060039
+      lamp_round_on_generated_44: 7636233773635386303
+      lamp_round_on_generated_45: 3178866676730774341
+      lamp_round_on_generated_46: 8328097129103109525
+      lamp_round_on_generated_5: 6100839991135082043
+      lamp_round_on_generated_6: -7853469783823193301
+      lamp_round_on_generated_7: 4893498120810129168
+      lamp_round_on_generated_8: 253773968093315746
+      lamp_round_on_generated_9: 3139053364274274911
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

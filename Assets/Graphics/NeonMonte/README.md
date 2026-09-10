@@ -1,3 +1,7 @@
+# Scena attiva: medaglione, 10 settembre 2026
+
+Il layout in uso segue `ArtReferences/2026-09-10_original_medallion_full.png`. Vedi [montaggio e verifica](SceneKit_v2/08_Integration/README.md). `SceneKit_v2` fornisce tavolo, cassa, controlli e lampadine; `Cards/_Final` resta il set delle carte. Dettaglio e Legenda si aprono in overlay semitrasparenti.
+
 # Neon Monte ? grafica in uso
 
 **Set attivo: Cards/_Final, consegna del 9 settembre 2026.**

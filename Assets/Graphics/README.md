@@ -1,5 +1,7 @@
 # Grafica attiva di FlipCards
 
+La scena attiva segue il riferimento **Medallion** del 10 settembre 2026. Asset montati, varianti senza targhette e prompt: [integrazione SceneKit_v2](NeonMonte/SceneKit_v2/08_Integration/README.md). Il layout viene costruito da `MedallionSceneBuilder`, tramite il comando di ricostruzione esistente.
+
 La direzione grafica in uso è **Neon Monte**.
 
 - [Carte finali e organizzazione](NeonMonte/README.md): `NeonMonte/Cards/_Final` è il set montato nei 10 prefab; `NeonMonte/Runtime` raccoglie le risorse condivise.

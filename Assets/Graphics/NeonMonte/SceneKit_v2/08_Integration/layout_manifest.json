@@ -1,0 +1,44 @@
+{
+  "canvas": [
+    1920,
+    1080
+  ],
+  "reference": "../../ArtReferences/2026-09-10_original_medallion_full.png",
+  "machine": [
+    300,
+    48,
+    1330,
+    665
+  ],
+  "laneCenters": [
+    610,
+    968,
+    1326
+  ],
+  "enemyTop": 265,
+  "enemyScale": [
+    0.82,
+    0.82
+  ],
+  "playerTop": 760,
+  "playerScale": [
+    1.18,
+    0.66
+  ],
+  "axisTop": 716,
+  "handActivation": [
+    355,
+    994,
+    1210,
+    86
+  ],
+  "overlay": [
+    195,
+    95,
+    1530,
+    875
+  ],
+  "modalCanvasOrder": 100,
+  "endCanvasOrder": 120,
+  "runtime_geometry_source": "Assets/Editor/MedallionSceneBuilder.cs"
+}

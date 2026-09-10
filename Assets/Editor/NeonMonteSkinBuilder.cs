@@ -110,6 +110,7 @@ public static class NeonMonteSkinBuilder
         for (int i = 0; i < 3; i++) entries["glyph_" + glyphs[i]] = FinalArt("Front/Symbols/faction_" + families[i] + "_mask");
         entries["glyph_sword"] = FinalArt("Back/Symbols/attack_spade_mask");
         entries["glyph_shield"] = FinalArt("Back/Symbols/defense_club_B_mask");
+        MedallionSceneSkin.Prepare(entries);
         skin.entries.Clear();
         foreach (var pair in entries)
             if (pair.Value != null) skin.entries.Add(new UiSkin.Entry { key = pair.Key, sprite = pair.Value });

@@ -15,7 +15,7 @@ public class SlotLamp : MaskableGraphic
     public void SetState(bool lit, Color accent)
     {
         if (_lit == lit && _accent == accent) return;
-        _lit = lit; _accent = accent; SetVerticesDirty();
+        _lit = lit; _accent = accent; SetVerticesDirty(); SetMaterialDirty();
     }
     protected override void OnPopulateMesh(VertexHelper vh)
     {

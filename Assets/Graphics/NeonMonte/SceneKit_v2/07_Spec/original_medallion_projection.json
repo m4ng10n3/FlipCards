@@ -1,0 +1,44 @@
+{
+  "source": "C:\\Users\\vulpi\\OneDrive\\Documenti\\UnityProj\\FlipCards\\Assets\\Graphics\\NeonMonte\\Cards\\_Final\\Back\\Template\\back_artwork_overlay.png",
+  "source_sha256": "9125469e72eb6cd81a7aeee1641b7136ecbb177fc9fc98945405a697237a7bd6",
+  "crop": [
+    242,
+    434,
+    782,
+    1245
+  ],
+  "crop_size": [
+    540,
+    811
+  ],
+  "target_quad": [
+    [
+      300,
+      425
+    ],
+    [
+      1372,
+      425
+    ],
+    [
+      2060,
+      900
+    ],
+    [
+      -388,
+      900
+    ]
+  ],
+  "inverse_homography": [
+    -3.3928571428571295,
+    -4.914285714285697,
+    3106.42857142856,
+    -1.3452022667302868e-15,
+    -26.26095238095228,
+    11160.90476190472,
+    -1.6647049908543131e-18,
+    -0.01820105820105813
+  ],
+  "geometry": "One homography for ALL original pixels. No redrawn eyes, loops or diamond. Same decal in both scenes; independent foreground mask.",
+  "material": "Global ivory-to-gold tint; original alpha and dark ink preserved."
+}
