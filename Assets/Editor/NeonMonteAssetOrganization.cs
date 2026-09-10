@@ -7,13 +7,15 @@ public static class NeonMonteAssetOrganization
 {
     const string Root = NeonMonteSkinBuilder.Root;
     public const string Final = Root + "/Cards/_Final";
+    /// <summary>Studies and superseded Neon Monte assets, outside the active style.</summary>
+    public const string Studies = NeonMonteSkinBuilder.Archive + "/NeonMonte_Studi";
 
     public static string ArtPath(string name)
     {
         string folder = name.StartsWith("portrait_") ? "Portraits" : name.StartsWith("symbol_") || name.StartsWith("slot_") ? "Slots" :
             name.StartsWith("glyph_") ? "Glyphs" : name == "card_neutral" ? "Cards" :
             name.StartsWith("card_") || name == "back_seal" || name == "stat_ink_fill" || name == "base_front_unfinished" || name == "indie-concept-study" ? null : "Board";
-        return Root + (folder == null ? "/_Archive/PreviousCards/" : "/Runtime/" + folder + "/") + name + ".png";
+        return folder == null ? Studies + "/PreviousCards/" + name + ".png" : Root + "/Runtime/" + folder + "/" + name + ".png";
     }
 
     static void Folder(string path)
@@ -36,12 +38,12 @@ public static class NeonMonteAssetOrganization
     {
         Move(Root + "/Cards_Final", Final);
         foreach (string name in new[] { "Front_French_v2", "Back_French_v2", "SharedCardAssets" })
-            Move(Root + "/" + name, Root + "/Cards/_Sources/" + name);
+            Move(Root + "/" + name, Studies + "/Cards_Sources/" + name);
         Move(Root + "/Chrome", Root + "/Runtime/Chrome");
         Move(Root + "/Fonts", Root + "/Runtime/Fonts");
         foreach (string path in Directory.GetFiles(Root, "*.png")) Move(path.Replace('\\', '/'), ArtPath(Path.GetFileNameWithoutExtension(path)));
         foreach (string path in Directory.GetFiles(Root, "*.mat")) Move(path.Replace('\\', '/'), Root + "/Runtime/Materials/" + Path.GetFileName(path));
         foreach (string path in Directory.GetFiles(Root, "*.md"))
-            if (Path.GetFileName(path) != "README.md") Move(path.Replace('\\', '/'), Root + "/_Archive/Notes/" + Path.GetFileName(path));
+            if (Path.GetFileName(path) != "README.md") Move(path.Replace('\\', '/'), Studies + "/Notes/" + Path.GetFileName(path));
     }
 }

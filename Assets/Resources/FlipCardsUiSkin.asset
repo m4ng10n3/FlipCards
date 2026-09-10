@@ -401,20 +401,6 @@ MonoBehaviour:
     sprite: {fileID: 21300000, guid: 7128996026836704d81af9b2f77baf48, type: 3}
   - key: glyph_broken
     sprite: {fileID: 21300000, guid: e6b5d15344eeeab47b0d1c9c92354293, type: 3}
-  - key: card_neutral
-    sprite: {fileID: 21300000, guid: df417a8dca1ea1a4ca2c6ca3ea23efab, type: 3}
-  - key: lamp_round_off
-    sprite: {fileID: 21300000, guid: 2e9b8a458407ddd479218f2659b4a928, type: 3}
-  - key: lamp_spear_off
-    sprite: {fileID: 21300000, guid: 5a490dfefe733c547bace294abc80524, type: 3}
-  - key: lamp_shield_off
-    sprite: {fileID: 21300000, guid: 0594f29fe5f700e47a1407e7cdad6a95, type: 3}
-  - key: lamp_round_on
-    sprite: {fileID: 21300000, guid: 12c489c8fd7b9c74e9d640d034827003, type: 3}
-  - key: lamp_spear_on
-    sprite: {fileID: 21300000, guid: caf6c9a0c3113f143a3ad734f19370d1, type: 3}
-  - key: lamp_shield_on
-    sprite: {fileID: 21300000, guid: 796e0334bfb601a4b8e7878990294332, type: 3}
   - key: slot_name_A
     sprite: {fileID: 21300000, guid: 1472d102c366e8843b63c4f9fa468d49, type: 2}
   - key: slot_name_B
@@ -423,6 +409,8 @@ MonoBehaviour:
     sprite: {fileID: 21300000, guid: 934458dd03722714d9b3d977f0406675, type: 2}
   - key: slot_paper
     sprite: {fileID: 21300000, guid: c19c4a93a731c4c4d99566441d2a8b49, type: 2}
+  - key: card_neutral
+    sprite: {fileID: 21300000, guid: df417a8dca1ea1a4ca2c6ca3ea23efab, type: 3}
   - key: final_front_charge_full
     sprite: {fileID: 21300000, guid: 4b22cb24e1bc5504c9e6dd2ccc38fe99, type: 3}
   - key: final_front_charge_ring
@@ -543,10 +531,26 @@ MonoBehaviour:
     sprite: {fileID: 21300000, guid: 86033da69169f054381f56e590886788, type: 3}
   - key: scene_reel
     sprite: {fileID: 21300000, guid: b37b61a6eacf3a24b8d07e16ac5e24ff, type: 3}
-  - key: scene_lever_pivot
-    sprite: {fileID: 21300000, guid: f5c2e950d16c23d44b95ece20e4ce66e, type: 3}
+  - key: scene_reel_face
+    sprite: {fileID: 21300000, guid: 8bf27cf6a3d19a8419351455108b4f9f, type: 3}
+  - key: scene_lever_hub
+    sprite: {fileID: 21300000, guid: 74eb8f9512e2e74449a360d490b1cb43, type: 3}
+  - key: scene_lever_socket
+    sprite: {fileID: 21300000, guid: bd70f3981eb768c43b2bd65efa6542d5, type: 3}
   - key: scene_lever_shaft
-    sprite: {fileID: 21300000, guid: cd8fcc5cde976594e92c456cd4050dbb, type: 3}
-  - key: scene_lever_grip
-    sprite: {fileID: 21300000, guid: e7b9b22ee7bfeb54e938d2bc40f576e6, type: 3}
+    sprite: {fileID: 21300000, guid: d626029f235b96f4cb49afed8e7dbfb0, type: 3}
+  - key: scene_lever_knob
+    sprite: {fileID: 21300000, guid: 17a1cde361ea41249b7ddae13e85fc8f, type: 3}
+  - key: lamp_round_on
+    sprite: {fileID: 21300000, guid: 12c489c8fd7b9c74e9d640d034827003, type: 3}
+  - key: lamp_spear_on
+    sprite: {fileID: 21300000, guid: caf6c9a0c3113f143a3ad734f19370d1, type: 3}
+  - key: lamp_shield_on
+    sprite: {fileID: 21300000, guid: 796e0334bfb601a4b8e7878990294332, type: 3}
+  - key: lamp_round_off
+    sprite: {fileID: 21300000, guid: 2e9b8a458407ddd479218f2659b4a928, type: 3}
+  - key: lamp_spear_off
+    sprite: {fileID: 21300000, guid: 5a490dfefe733c547bace294abc80524, type: 3}
+  - key: lamp_shield_off
+    sprite: {fileID: 21300000, guid: 0594f29fe5f700e47a1407e7cdad6a95, type: 3}
   neonMonte: 1

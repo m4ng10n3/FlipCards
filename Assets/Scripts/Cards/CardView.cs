@@ -730,11 +730,17 @@ public class CardView : MonoBehaviour
             // a (1,1) -> dir ~ (0.707, 0.707)
             // tiltVec ~ (-0.707, +0.707) * manualTiltAmount
             // => asse effettivo lungo (-1, +1)
-            Vector2 tiltVec = new Vector2(-dir.y, dir.x) * manualTiltAmount * dist;
+            // Sul tavolo la carta e' gia' inclinata verso una camera prospettica:
+            // l'inclinazione piena la schiaccerebbe o allungherebbe di un terzo.
+            // Un accenno basta a dire che la si sta indicando.
+            const float boardShare = 0.35f;
+            bool onBoard = _playerBoardContainer != null && _rt.parent.IsChildOf(_playerBoardContainer);
+            float amount = onBoard ? manualTiltAmount * boardShare : manualTiltAmount;
+            Vector2 tiltVec = new Vector2(-dir.y, dir.x) * amount * dist;
 
             // Limiti corretti per sicurezza
-            tiltX = Mathf.Clamp(tiltVec.x, -manualTiltAmount, manualTiltAmount);
-            tiltY = Mathf.Clamp(tiltVec.y, -manualTiltAmount, manualTiltAmount);
+            tiltX = Mathf.Clamp(tiltVec.x, -amount, amount);
+            tiltY = Mathf.Clamp(tiltVec.y, -amount, amount);
 
             /*
             Debug.Log($"dir {dir} dist {dist} => tiltX {tiltX} tiltY {tiltY}");
@@ -771,17 +777,19 @@ public class CardView : MonoBehaviour
 
         var baseRotation = anchorRotation;
         if (inHand) baseRotation *= _targetHandRotation;
-        else if (inBoard) baseRotation *= _targetBoardRotation * TablePerspective();
+        else if (inBoard) baseRotation *= _targetBoardRotation;
 
         float sine = Mathf.Sin(Time.time + savedIndex);
         float cosine = Mathf.Cos(Time.time + savedIndex);
 
-        float tiltX = 0f;
-        float tiltY = 0f;
+        // L'oscillazione e' delle carte in mano. In campo la carta e' appoggiata
+        // al panno, e il panno e' un piano inclinato vero visto da una camera
+        // prospettica: su un piano a 60 gradi pochi gradi di X cambiano lo
+        // scorcio di un buon 15%, e la carta respirerebbe in altezza.
+        float wobble = inBoard && !inHand ? 0f : autoTiltAmount;
+        float tiltX = sine * wobble;
+        float tiltY = cosine * wobble;
         float tiltZ = 0f;
-
-        tiltX = sine * autoTiltAmount;
-        tiltY = cosine * autoTiltAmount;
 
         Vector3 currentLocal = (Quaternion.Inverse(baseRotation) * _rt.rotation).eulerAngles;
 
@@ -791,14 +799,6 @@ public class CardView : MonoBehaviour
 
         var targetRot = baseRotation * Quaternion.Euler(lerpX, lerpY, lerpZ);
         _rt.rotation = Quaternion.Lerp(_rt.rotation, targetRot, handFollowRotationSpeed * Time.deltaTime);
-    }
-
-    private Quaternion TablePerspective()
-    {
-        if (UiSkin.Active == null || !UiSkin.Active.neonMonte) return Quaternion.identity;
-        int lane = _playerBoardContainer != null ? _playerBoardContainer.GetSiblingIndex() : savedIndex;
-        float spread = Mathf.Clamp(lane - 1, -1, 1);
-        return Quaternion.Euler(18f, -spread * 6f, -spread * 5f);
     }
 
     private void FollowContainer()
@@ -869,8 +869,11 @@ public class CardView : MonoBehaviour
         
         if (_rt != null)
         {
-            _playerBoardContainer.rotation = Quaternion.identity;
-            
+            // Locale, non mondiale: le corsie stanno su un piano inclinato, e una
+            // rotazione mondiale azzerata raddrizzerebbe il container contro lo
+            // schermo, col bersaglio di raycast fuori dalla carta disegnata.
+            _playerBoardContainer.localRotation = Quaternion.identity;
+
             var crt = GetComponent<RectTransform>().rect.size;
             _playerBoardContainer.sizeDelta = crt;
             _playerBoardContainer.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, crt.x);

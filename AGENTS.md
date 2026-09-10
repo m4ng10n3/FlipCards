@@ -281,10 +281,11 @@ Chi non è un `Button` (il mazzo) non passa da `UpdateHUD` e guarda `CanAct`.
 - `HandTray.cs` — la mano sale in blocco quando il puntatore entra nell'area.
   Il componente sta sull'**area di attivazione**, e la mano è un suo figlio: se
   fossero fratelli, passare da una carta all'altra genererebbe un `PointerExit`.
-- `DeckView.cs` — mazzo cliccabile: pila di prefab carta veri, di dorso, spessore
+- `DeckView.cs` — mazzo cliccabile, posato sul tavolo a sinistra. In cima c'e'
+  il prefab vero della prossima carta, di dorso; sotto, tagli di carta impilati
+  lungo la **normale del tavolo** (z locale di `stackRoot`), in numero
   proporzionale al residuo. Le copie sono decorative (`CardDefinition` e
-  `CardView` disabilitati) e il clic risale fino al box. **Sta nel rail
-  sinistro**, non più nella colonna destra: è un oggetto del giocatore.
+  `CardView` disabilitati) e il clic lo prende il box piatto in spazio schermo.
 - `LaneAxisView.cs` — asse delle corsie: pronostico per corsia e connettori di combo.
 - `InspectorPanel.cs` + `AbilityCatalog.cs` — ispettore e testi delle abilità.
 - `CardOverlay.cs` / `SlotOverlay.cs` — chrome costruito a runtime sopra i prefab.
@@ -297,9 +298,20 @@ Chi non è un `Button` (il mazzo) non passa da `UpdateHUD` e guarda `CanAct`.
   bande e ricabla `GameManager` e `HandManager`. È idempotente. **Non modificare
   il layout a mano nella scena**: al prossimo rebuild si perde. Si tocca il builder.
 
-**Kit grafico** (`Assets/Graphics/FlipCards_ArcadeHorrorUI/ArcadeHorrorUI/`)
+**Grafica** (`Assets/Graphics/`, riorganizzata il 10 settembre 2026) — due
+cartelle sole, mappa in `Assets/Graphics/README.md`:
+- `1_NeonMonte_Attivo/` — lo stile in uso: solo cio' che il gioco monta, i
+  riferimenti correnti, la spec e `SceneKit_v2/08_Integration/Tools/`, gli script
+  Python che rigenerano la faccia del rullo (`build_reel_face.py`) e i pezzi
+  della leva (`build_lever_parts.py`). Costante: `NeonMonteSkinBuilder.Root`.
+- `2_Archivio/` — prototipi, studi, sorgenti, riferimenti superati. Costante:
+  `NeonMonteSkinBuilder.Archive`. **Eccezione**: il vecchio kit qui sotto sta in
+  archivio ma e' ancora letto dal builder (86 voci della skin).
+
+**Kit grafico** (`Assets/Graphics/2_Archivio/FlipCards_ArcadeHorrorUI/ArcadeHorrorUI/`)
 - `flipcards_ui_manifest.json` → `layouts.board` è la **fonte delle misure** del
-  layout: i numeri del builder sono quelli ×2 (kit 960×540 → canvas 1920×1080).
+  layout storico a bande: i numeri del builder erano quelli ×2 (kit 960×540 →
+  canvas 1920×1080). Il layout attivo a medaglione non li usa piu'.
 - `2x/board/board_bg.png` è un fondo con già disegnati i pozzetti di ogni zona.
   Il builder lo carica come Backdrop se lo trova; se le bande del builder e i
   pozzetti del fondo divergono, si vede subito perché i contenuti finiscono
@@ -524,6 +536,39 @@ più vicina alla camera: in Overlay la z era ignorata, passando a Camera l'ombra
 copriva la carta. Ora `CardView.UpdateShadow` usa `+Vector3.forward` e il prefab
 parte da z = +1. Se compaiono rettangoli neri sulle corsie, è questo.
 
+**Il tavolo e' un piano inclinato vero, non uno schiacciamento.** Dal 10
+settembre la Main Camera e' prospettica (FOV 17, la imposta
+`MedallionSceneBuilder`) e `PlayerLanes`, la pila del mazzo e il libretto sono
+ruotati di 60° attorno all'asse orizzontale, **ciascuno attorno al proprio
+centro** (`LayFlat`, `OnTable`). E' l'unico modo di avere carte a trapezio che
+convergono verso lo stesso punto di fuga, come nel riferimento. Prima la zona era
+scalata 1.18×0.66 e `CardView.TablePerspective` aggiungeva una rotazione finta per
+corsia: la scala non uniforme sotto una rotazione fa uno shear, ed e' il motivo
+per cui carte e mazzo sembravano storti. Quattro regole:
+- **mai scala non uniforme** su cio' che sta sul tavolo: si inclina, non si schiaccia;
+- ruotare **attorno al centro**: il centro resta a profondita' zero, quindi la sua
+  x a schermo e' quella del layout (l'asse delle corsie la legge con
+  `InverseTransformPoint` e resta allineato) e l'ordinamento per distanza dei
+  sub-canvas resta quello di prima;
+- i container delle carte in campo si azzerano con `localRotation`, non con
+  `rotation`: una rotazione mondiale nulla raddrizza il container contro lo
+  schermo e porta il bersaglio di raycast fuori dalla carta disegnata;
+- in campo niente oscillazione idle e tilt di hover al 35%: su un piano a 60°
+  pochi gradi di X cambiano lo scorcio di un buon 15%.
+Verificato col raycast dell'EventSystem: il centro proiettato di ogni carta
+colpisce la carta, 25 px sopra il suo bordo alto non colpisce niente.
+
+**Spostare asset: da filesystem col `.meta`, non da `Unity_RunCommand`.** Un
+comando con `AssetDatabase.MoveAsset` o `DeleteAsset` viene rifiutato dal bridge
+("User interactions are not supported for MCP tool calls") **prima** di eseguire,
+quindi non sposta niente. Si sposta con `mv` il file e il suo `.meta` insieme, poi
+`AssetDatabase.Refresh()` da comando: il GUID viaggia nel `.meta` e prefab, scena e
+skin restano agganciati.
+
+**Subito dopo una modifica agli script, `Unity_RunCommand` puo' rispondere
+`Could not find type ...RunCommandMacroEvaluatorEntryPoint`.** E' il domain reload
+in corso, come `Unity not detected`: si aspetta e si riprova.
+
 **Il pivot di `handRoot` deve stare al centro.** `HandManager.UpdateCardsPosition`
 posiziona i container con `localPosition` simmetrica intorno allo zero, e lo zero
 locale è il pivot del parent. Con pivot in alto a sinistra la mano finisce fuori
@@ -675,8 +720,10 @@ Oltre ai vincoli di LAYOUT_SPEC §7:
   serve, il prossimo rebuild le riscrive.
 - **Le due celle hanno misure diverse**: 224×336 la carta, 352×288 la casella
   nemica. `EmptySpot` ed `EmptySlot` seguono ciascuno la propria, o le corsie
-  saltano a ogni morte. Il passo di corsia invece è lo stesso (396) per i due
+  saltano a ogni morte. Il passo di corsia invece è lo stesso (357,5) per i due
   lati: rullo, asse dei pronostici e corsie devono stare sui medesimi tre centri.
+  Le scale no: la casella sta a 0,856 per riempire la finestra della cassa, la
+  carta a 1,34 sul piano del tavolo. Sempre uniformi.
 - **Chi blocca l'input lo sblocca.** Le tre catene asincrone tengono
   `inputLocked = true` e lo rilasciano in fondo alla propria coroutine.
   Anticipare `awaitingEndTurn` o `SetButtonsInteractable(true)` permette di
@@ -684,8 +731,10 @@ Oltre ai vincoli di LAYOUT_SPEC §7:
 - `GameManager.hpText`, `apText` ed `EnemyHptxt` sono **null di proposito**: la HUD
   la scrive `HudController`. Assegnarli farebbe lampeggiare i testi fra due
   formati diversi.
-- Le corsie devono restare centrate a **x 508 / 904 / 1300** con tre corsie: passo
-  396, celle da 224 con gap 172 sul lato giocatore e celle da 352 con gap 44 sul
-  rullo. Verificabile proiettando il centro delle corsie nello spazio del Canvas.
+- Le corsie devono restare centrate sulle finestre della cassa, **x 607 / 964,5 /
+  1322** con passo 357,5 (misurate sull'alpha di `cabinet_illustrated`): rullo,
+  asse dei pronostici e carte stanno sugli stessi tre centri. Le carte sono sul
+  piano inclinato ma ruotate attorno al centro, quindi il centro proiettato
+  coincide. Verificabile con `Camera.WorldToScreenPoint` sul centro delle corsie.
 - `CardOverlay` e `SlotOverlay` costruiscono i figli **a runtime**, non nel
   prefab. Non salvarli nell'asset.

@@ -17,12 +17,18 @@ using UnityEngine.UI;
 /// dorso della prossima carta e' davvero il suo. Le copie sono decorative — i
 /// componenti di input vengono spenti — e sono poche, perche' ogni prefab si
 /// porta dietro un Canvas annidato e un CardDefinition.
+///
+/// <b>La pila sta sul piano del tavolo.</b> <see cref="stackRoot"/> vive dentro
+/// un rect ruotato come il panno (lo monta il builder) e lo spessore cresce lungo
+/// la sua z locale, cioe' la normale del tavolo verso la camera. Prima i tagli di
+/// carta erano scalati nel piano della carta ruotata: lo spessore usciva in
+/// diagonale e la pila sembrava un libro storto.
 /// </summary>
 [RequireComponent(typeof(RectTransform))]
 public class DeckView : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
     [Header("Riferimenti")]
-    [Tooltip("Rect in cui viene impilata la pila. La scala delle carte si ricava dalla sua altezza.")]
+    [Tooltip("Rect in cui viene impilata la pila. Deve stare sul piano del tavolo: la sua z locale e' lo spessore.")]
     public RectTransform stackRoot;
     [Tooltip("Riga di stato dentro la carta in cima: costo, mazzo vuoto, mano piena.")]
     public TMP_Text hintText;
@@ -32,18 +38,18 @@ public class DeckView : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
     public Image pulseImage;
 
     [Header("Pila")]
-    [Tooltip("Quante carte si vedono al massimo nella pila, a mazzo pieno.")]
-    [Min(1)] public int maxLayers = 3;
-    [Tooltip("Scarto fra una carta e la successiva della pila, in pixel. La y va verso il basso: la pila si appoggia al tavolo.")]
-    public Vector2 layerOffset = new Vector2(-2f, -3f);
-    [Tooltip("Margine verticale fra la carta in cima e il bordo del rect della pila.")]
-    public float verticalPadding = 12f;
+    [Tooltip("Quante carte vere stanno in cima alla pila, a mazzo pieno. Sotto ci sono solo tagli di carta.")]
+    [Min(1)] public int maxLayers = 1;
+    [Tooltip("Scala delle carte della pila rispetto al prefab.")]
+    public float cardScale = 1f;
 
     [Header("Spessore")]
-    [Tooltip("Bordi di carta disegnati sotto la pila. Sono il grosso dello spessore: costano un'Image l'uno invece di un prefab con Canvas annidato.")]
+    [Tooltip("Tagli di carta sotto la carta in cima. Sono il grosso dello spessore: costano un'Image l'uno invece di un prefab con Canvas annidato.")]
     [Min(0)] public int maxEdges = 16;
-    [Tooltip("Scarto fra un bordo e il successivo.")]
-    public Vector2 edgeOffset = new Vector2(-1.7f, -2.7f);
+    [Tooltip("Spessore di un taglio, lungo la normale del tavolo.")]
+    public float edgeThickness = 2.2f;
+    [Tooltip("Scarto di un taglio nel piano della pila, nello spazio di stackRoot. Il mazzo sta a sinistra e lo si guarda dal centro del tavolo: i tagli alti scivolano verso sinistra e lo spessore si vede sul fianco destro, come nel riferimento.")]
+    public Vector2 edgeShift = Vector2.zero;
     public Color edgePaper = new Color(.90f, .85f, .74f, 1f);
     public Color edgeLine = new Color(.28f, .19f, .11f, .85f);
 
@@ -192,56 +198,65 @@ public class DeckView : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
 
         _topPrefab = next[0];
 
-        // Lo spessore vero sta nei bordi, non nelle carte: sul riferimento si
-        // vede una faccia sola e sotto una ventina di tagli di carta. Le carte
-        // vere servono perche' il dorso in cima sia davvero quello che uscira'.
         int edges = maxEdges <= 0 ? 0 : Mathf.Clamp(Mathf.CeilToInt(count / (float)start * maxEdges), 1, maxEdges);
         var cardRect = (RectTransform)next[0].transform;
-        float scale = CardScale(cardRect);
-        var edgeSize = new Vector2(cardRect.rect.width * scale, cardRect.rect.height * scale);
-        var deepest = layerOffset * (next.Count - 1);
-        for (int k = edges; k >= 1; k--)
-            _layers.Add(BuildEdge(edgeSize, deepest + edgeOffset * k, (next.Count + k) * 2f));
+        var size = cardRect.rect.size * cardScale;
 
-        // Si costruisce dal fondo: l'ordine di disegno fra sub-canvas annidati lo
-        // decide la z (ogni carta ha un Canvas sul figlio Visual), non la
-        // gerarchia. La carta in cima sta a z 0, quelle dietro a z crescente —
-        // stessa convenzione dell'ombra della carta.
+        // Dal fondo verso la cima, un taglio sopra l'altro lungo la normale. Fra
+        // i tagli (Image del canvas radice) decide la gerarchia; la carta vera
+        // ha un Canvas annidato e sta piu' vicina alla camera di tutti, quindi
+        // disegna sopra anche con l'ordinamento per distanza.
+        int slice = 0;
+        for (int k = 0; k < edges; k++)
+            _layers.Add(BuildEdge(size, slice++));
         for (int i = next.Count - 1; i >= 0; i--)
-            _layers.Add(BuildLayer(next[i], i, isTop: i == 0));
+            _layers.Add(BuildLayer(next[i], i, slice++));
     }
 
-    /// <summary>Un taglio di carta: foglio chiaro con la riga scura del bordo inferiore.</summary>
-    GameObject BuildEdge(Vector2 size, Vector2 offset, float z)
+    Vector3 Lift(int slice) => new Vector3(edgeShift.x * slice, edgeShift.y * slice, -slice * edgeThickness);
+
+    /// <summary>
+    /// Un taglio di carta: foglio chiaro filettato sui quattro lati. Si vedono
+    /// solo i filetti dei lati rivolti alla camera — gli altri li copre il taglio
+    /// di sopra — quindi non serve sapere come e' girata la pila.
+    /// </summary>
+    GameObject BuildEdge(Vector2 size, int slice)
     {
         var go = new GameObject("DeckEdge", typeof(RectTransform), typeof(Image));
         var rt = (RectTransform)go.transform;
         rt.SetParent(stackRoot, false);
         rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0.5f, 0.5f);
         rt.sizeDelta = size;
-        rt.anchoredPosition = offset;
-        rt.localPosition = new Vector3(rt.localPosition.x, rt.localPosition.y, z);
+        rt.anchoredPosition = Vector2.zero;
+        rt.localPosition = Lift(slice);
 
         var paper = go.GetComponent<Image>();
         paper.color = edgePaper;
         paper.raycastTarget = false;
 
-        var line = new GameObject("Line", typeof(RectTransform), typeof(Image));
-        var lrt = (RectTransform)line.transform;
-        lrt.SetParent(rt, false);
-        lrt.anchorMin = new Vector2(0f, 0f);
-        lrt.anchorMax = new Vector2(1f, 0f);
-        lrt.pivot = new Vector2(0.5f, 0f);
-        lrt.sizeDelta = new Vector2(0f, 1.4f);
-        lrt.anchoredPosition = Vector2.zero;
-        var lineImage = line.GetComponent<Image>();
-        lineImage.color = edgeLine;
-        lineImage.raycastTarget = false;
-
+        Line(rt, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0f, 1.4f));
+        Line(rt, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0f, 1.4f));
+        Line(rt, new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(1.4f, 0f));
+        Line(rt, new Vector2(1f, 0f), new Vector2(1f, 1f), new Vector2(1.4f, 0f));
         return go;
     }
 
-    GameObject BuildLayer(GameObject prefab, int index, bool isTop)
+    void Line(RectTransform parent, Vector2 anchorMin, Vector2 anchorMax, Vector2 size)
+    {
+        var line = new GameObject("Line", typeof(RectTransform), typeof(Image));
+        var lrt = (RectTransform)line.transform;
+        lrt.SetParent(parent, false);
+        lrt.anchorMin = anchorMin;
+        lrt.anchorMax = anchorMax;
+        lrt.pivot = (anchorMin + anchorMax) * 0.5f;
+        lrt.sizeDelta = size;
+        lrt.anchoredPosition = Vector2.zero;
+        var image = line.GetComponent<Image>();
+        image.color = edgeLine;
+        image.raycastTarget = false;
+    }
+
+    GameObject BuildLayer(GameObject prefab, int index, int slice)
     {
         var go = Instantiate(prefab, stackRoot);
         go.name = $"DeckLayer_{index}";
@@ -262,32 +277,14 @@ public class DeckView : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
         }
 
         var rt = (RectTransform)go.transform;
-        float scale = CardScale(rt);
-
         rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
         rt.pivot = new Vector2(0.5f, 0.5f);
         rt.localRotation = Quaternion.identity;
-        rt.localScale = Vector3.one * scale;
-        rt.anchoredPosition = layerOffset * index;
-        rt.localPosition = new Vector3(rt.localPosition.x, rt.localPosition.y, index * 2f);
+        rt.localScale = Vector3.one * cardScale;
+        rt.anchoredPosition = Vector2.zero;
+        rt.localPosition = Lift(slice);
 
         return go;
-    }
-
-    float CardScale(RectTransform card)
-    {
-        if (stackRoot == null) return 1f;
-
-        float h = card.rect.height, w = card.rect.width;
-        if (h <= 1f || w <= 1f) return 1f;
-
-        // Lo spessore occupa spazio quanto le carte: senza contarlo, la pila a
-        // mazzo pieno sborda dal rect.
-        float spreadY = Mathf.Abs(layerOffset.y) * (maxLayers - 1) + Mathf.Abs(edgeOffset.y) * maxEdges;
-        float spreadX = Mathf.Abs(layerOffset.x) * (maxLayers - 1) + Mathf.Abs(edgeOffset.x) * maxEdges;
-        float availableH = stackRoot.rect.height - verticalPadding * 2f - spreadY;
-        float availableW = stackRoot.rect.width - spreadX;
-        return Mathf.Max(0.05f, Mathf.Min(availableH / h, availableW / w));
     }
 
     void ClearLayers()

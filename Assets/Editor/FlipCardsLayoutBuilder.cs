@@ -102,7 +102,7 @@ public static class FlipCardsLayoutBuilder
 
     // Fondo e overlay CRT del kit. Assenti (kit non importato) si degrada a
     // tinte piatte: il layout resta quello, cambia solo la pelle.
-    const string KitRoot = "Assets/Graphics/FlipCards_ArcadeHorrorUI/ArcadeHorrorUI/2x";
+    const string KitRoot = NeonMonteSkinBuilder.Kit;
 
     static Sprite _boardBg;
     static bool HasBackdrop => _boardBg != null;
@@ -440,7 +440,9 @@ public static class FlipCardsLayoutBuilder
             var bg = root.GetComponent<Image>();
             if (bg != null)
             {
-                bg.sprite = NeonMonteSkinBuilder.SlotPaper ?? NeonMonteSkinBuilder.Art("slot_face");
+                // La faccia del rullo: carta curva col filetto. Il vecchio foglio
+                // piatto con la cornice verde resta solo come ripiego.
+                bg.sprite = MedallionSceneSkin.ReelFace ?? NeonMonteSkinBuilder.SlotPaper ?? NeonMonteSkinBuilder.Art("slot_face");
                 bg.type = Image.Type.Simple;
                 bg.color = bg.sprite != null ? Color.white : GamePalette.Paper;
             }
@@ -467,7 +469,8 @@ public static class FlipCardsLayoutBuilder
             Place(cell, "Def", SlotOverlay.ChipTextX(2), SlotOverlay.ChipRowY(2),
                                SlotOverlay.ChipTextW, SlotOverlay.ChipH);
 
-            StyleText(cell, "Name", 19, TextAnchor.MiddleCenter, GamePalette.Ink);
+            // Il nome sta in basso a sinistra, sotto la colonna del seme.
+            StyleText(cell, "Name", 20, TextAnchor.MiddleLeft, GamePalette.Ink);
             StyleText(cell, "HP", 20, TextAnchor.MiddleCenter, GamePalette.PlayerHp);
             StyleText(cell, "Def", 20, TextAnchor.MiddleCenter, GamePalette.Retro);
 

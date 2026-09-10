@@ -22,7 +22,7 @@ using UnityEngine.UI;
 /// para e basta. E' l'"hold" della slot machine.</item>
 /// </list>
 ///
-/// I pip al centro del bordo inferiore sono il **programma**: cosa fara' nei giri successivi, con
+/// I pip in basso a destra sono il **programma**: cosa fara' nei giri successivi, con
 /// il giro in corso marcato. E' l'informazione piu' importante del tavolo — senza,
 /// decidere se coprire una corsia adesso o al turno dopo e' un tiro di dado.
 ///
@@ -36,17 +36,27 @@ public class SlotOverlay : MonoBehaviour,
 {
     // ── Anatomia della casella del rullo ──────────────────────────────────────
     //
-    // Coordinate banda in scala 2x: i numeri di `layouts.reel_cell` moltiplicati
-    // per 2, cioe' la casella 176x144 del kit portata a 352x288. La casella e'
-    // orizzontale — e' un rullo, non una fila di carte — e la forma e' cio' che
-    // lo dice prima di qualunque etichetta.
+    // Coordinate banda della cella 352x288. La faccia del rullo e'
+    // SceneKit_v2/02_Machine/reel_face_ink.png, tela 704x576 = questa cella x2:
+    // il filetto interno sta a 21 unita' dai lati e a 19 da sopra e sotto, e
+    // tutto quello che si stampa sulla carta ci sta dentro. L'impaginazione e'
+    // quella del riferimento: seme in alto a sinistra e nome in basso sulla
+    // stessa colonna, simbolo al centro, tacche d'attacco in colonna a destra,
+    // numero della lastra in alto a destra.
 
     public const float CellW = 352f, CellH = 288f;
 
-    public const float NameX = 100f, NameY = 13f, NameW = 172f, NameH = 28f;
-    public const float FactionX = 18f, FactionY = 14f, FactionSize = 18f;
+    public const float NameX = 30f, NameY = 242f, NameW = 196f, NameH = 26f;
+    // Il seme e' lo sprite delle carte finali: cella 256 con margine, quindi il
+    // rect e' piu' grande dell'inchiostro, che resta dentro il filetto.
+    public const float FactionX = 20f, FactionY = 17f, FactionSize = 62f;
 
-    public const float ArtX = 68f, ArtY = 38f, ArtSize = 216f;
+    public const float ArtX = 76f, ArtY = 34f, ArtSize = 200f;
+
+    // Tacche d'attacco: tre sedi in colonna, centrate sull'altezza del simbolo.
+    public const int NotchSeats = 3;
+    public const float NotchX = 286f, NotchSize = 42f, NotchPitch = 46f;
+    public static float NotchY(int seat) => ArtY + ArtSize * 0.5f + (seat - 1) * NotchPitch - NotchSize * 0.5f;
 
     // Angoli: ATK in basso a sinistra, HP in alto a destra, DEF in basso a destra. Icona
     // a sinistra, quindi il numero parte dopo di lei.
@@ -57,14 +67,13 @@ public class SlotOverlay : MonoBehaviour,
     public static float ChipTextX(int index) => ChipX(index) + ChipTextInset;
     public const float ChipTextW = ChipW - ChipTextInset - 16f;
 
-    // Pip del programma, in coda alla striscia del nome.
-    const float PipY = 245f, PipSize = 12f, PipPitch = 20f;
-    const float PipMarkSize = 18f;
+    // Pip del programma, in basso a destra: a sinistra c'e' il nome.
+    const float PipY = 250f, PipSize = 12f, PipPitch = 18f, PipRight = CellW - 30f;
 
-    // Il numero della lastra, nella striscia libera a sinistra del simbolo, e
-    // sotto di lui il marchio della risonanza.
-    const float PoolX = 304f, PoolY = 21f, PoolW = 44f, PoolH = 22f;
-    const float ResonanceX = 14f, ResonanceY = 44f, ResonanceSize = 26f;
+    // Il numero della lastra in alto a destra, sopra le tacche; il marchio della
+    // risonanza sotto il seme, nella colonna di sinistra.
+    const float PoolX = 262f, PoolY = 24f, PoolW = 64f, PoolH = 22f;
+    const float ResonanceX = 33f, ResonanceY = 86f, ResonanceSize = 36f;
 
     SlotView _view;
     RectTransform _rt;
@@ -275,7 +284,7 @@ public class SlotOverlay : MonoBehaviour,
         Chip("DefChipBg", 2, UiSkin.MicroDef, GamePalette.Retro);
 
         _pipRoot = UiBuild.Rect("Program", _rt);
-        UiBuild.Band(_pipRoot, 0f, 0f, CellW, NameH + 16f);
+        UiBuild.Band(_pipRoot, 0f, 0f, CellW, CellH);
 
         BuildPoolNumber();
         BuildResonanceMark();
@@ -283,7 +292,7 @@ public class SlotOverlay : MonoBehaviour,
         if (_berserker != null)
         {
             var furyRt = UiBuild.Rect("FuryChip", _rt);
-            UiBuild.Band(furyRt, 276f, 72f, 62f, 20f);
+            UiBuild.Band(furyRt, PoolX, PoolY + PoolH + 4f, PoolW, 20f);
             _furyChip = UiBuild.Fill(furyRt, GamePalette.WithAlpha(GamePalette.Danger, 0.45f));
             _furyLabel = UiBuild.Text("Label", furyRt, "FURIA", 12f, GamePalette.TextPrimary,
                                       TextAlignmentOptions.Center, FontStyles.Bold);
@@ -311,8 +320,8 @@ public class SlotOverlay : MonoBehaviour,
     /// rende sensato colpire senza uccidere resta invisibile. E' anche il numero
     /// che l'ispettore usa per dire quante lastre restano.
     ///
-    /// La striscia a sinistra del simbolo (x 0..ArtX) e' l'unico spazio libero
-    /// della cella: il nome sta in cima, i tre numeri in fondo, i pip a destra.
+    /// Sta in alto a destra, sopra la colonna delle tacche: la colonna di
+    /// sinistra e' del seme e del nome.
     /// </summary>
     void BuildPoolNumber()
     {
@@ -320,7 +329,7 @@ public class SlotOverlay : MonoBehaviour,
         if (number <= 0) return;
 
         _poolLabel = UiBuild.Text("PoolNumber", _rt, $"#{number}", 18f, GamePalette.Ink,
-                                  TextAlignmentOptions.Left, FontStyles.Bold);
+                                  TextAlignmentOptions.Right, FontStyles.Bold);
         UiBuild.Band(_poolLabel.rectTransform, PoolX, PoolY, PoolW, PoolH);
     }
 
@@ -369,15 +378,29 @@ public class SlotOverlay : MonoBehaviour,
         rt.SetSiblingIndex(1);   // sopra il simbolo, sotto tutto il resto
     }
 
+    /// <summary>
+    /// Il seme della casella, in alto a sinistra. E' lo stesso sprite delle carte
+    /// finali, negli stessi colori: la risonanza e' "stesso seme fra carta e
+    /// casella", e si riconosce a colpo d'occhio solo se il seme e' identico.
+    /// </summary>
     void BuildFactionTag(SlotDefinition.Spec def)
     {
         if (UiSkin.Active != null && UiSkin.Active.neonMonte && UiSkin.Sprite("final_front_front_clean") == null) return;
         var rt = UiBuild.Rect("FactionTag", _rt);
         UiBuild.Band(rt, FactionX, FactionY, FactionSize, FactionSize);
-        if (UiSkin.Sprite("final_front_front_clean") != null)
-            UiBuild.Band(rt, 62f, 7f, 36f, 36f);
+
+        var suit = UiSkin.Sprite("final_front_faction_" + Family(def.faction));
+        if (suit != null)
+        {
+            var image = UiBuild.Fill(rt, Color.white);
+            image.sprite = suit;
+            image.preserveAspect = true;
+            return;
+        }
         GlyphSprites.Stamp(rt, def.faction);
     }
+
+    static string Family(Faction faction) => faction == Faction.A ? "sun" : faction == Faction.B ? "moon" : "saturn";
 
     RectTransform Chip(string name, int index, string key, Color accent)
     {
@@ -450,10 +473,10 @@ public class SlotOverlay : MonoBehaviour,
 
             for (int i = 0; i < count; i++)
             {
-                float x = (CellW - count * PipPitch) * 0.5f + i * PipPitch + (PipPitch - PipSize) * 0.5f;
+                float x = PipRight - (count - i) * PipPitch + (PipPitch - PipSize) * 0.5f;
 
                 var markRt = UiBuild.Rect($"Mark{i}", _pipRoot);
-                UiBuild.Band(markRt, x, PipY + PipSize + 5f, PipSize, 2f);
+                UiBuild.Band(markRt, x, PipY + PipSize + 4f, PipSize, 2f);
                 var mark = UiBuild.Fill(markRt, GamePalette.Ink);
                 mark.enabled = false;
                 _pipMarks.Add(mark);

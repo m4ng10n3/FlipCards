@@ -1,0 +1,76 @@
+{
+  "canvas": [
+    1920,
+    1080
+  ],
+  "reference": "../../ArtReferences/2026-09-10_original_medallion_full.png",
+  "runtime_geometry_source": "Assets/Editor/MedallionSceneBuilder.cs",
+  "note": "Fotografia delle costanti del builder al 10 settembre 2026. La fonte e' il builder: se divergono, vale il builder.",
+  "camera": {
+    "projection": "perspective",
+    "verticalFov": 17
+  },
+  "machine": [
+    300,
+    48,
+    1330,
+    665
+  ],
+  "reelWindows": {
+    "x": [
+      [460, 754],
+      [811, 1117],
+      [1175, 1470]
+    ],
+    "y": [263, 501],
+    "source": "alpha di 02_Machine/cabinet_illustrated.png"
+  },
+  "laneCenters": [
+    607,
+    964.5,
+    1322
+  ],
+  "lanePitch": 357.5,
+  "enemyTop": 259,
+  "enemyScale": 0.856,
+  "table": {
+    "tiltDegrees": 60,
+    "rotateAround": "centro di ogni oggetto"
+  },
+  "playerRowCenterY": 868,
+  "playerScale": 1.34,
+  "axisTop": 694,
+  "axisHeight": 40,
+  "deck": {
+    "center": [178, 800],
+    "spinDegrees": -10,
+    "cardScale": 0.98,
+    "edgeThickness": 2.6,
+    "edges": 18
+  },
+  "booklet": [
+    58,
+    520,
+    230,
+    120
+  ],
+  "status": [
+    36,
+    28,
+    336,
+    212
+  ],
+  "lever": {
+    "pivot": [1612, 460],
+    "scale": 0.19,
+    "cabinetRightCheekX": 1582
+  },
+  "handActivation": [
+    355,
+    994,
+    1210,
+    86
+  ],
+  "modalCanvasOrder": 100,
+  "endCanvasOrder": 120
+}

@@ -22,9 +22,12 @@ public sealed class MedallionInstruments : MonoBehaviour
     // Oltre le sedi disponibili compare il totale numerico, come prima.
     void Start()
     {
-        _hp = Bank("Health", 18, 140, 252, 62, 7, "round", out _hpOverflow);
-        _atk = Bank("Attack", 12, 478, 72, 84, 3, "spear", out _atkOverflow);
-        _guard = Bank("Guard", 98, 518, 182, 44, 5, "shield", out _guardOverflow);
+        // Quote dal centro della colonna: la colonna e' larga quanto la faccia
+        // del rullo, e quella segue la finestra della cassa, non una costante.
+        float c = ((RectTransform)transform).rect.width * .5f;
+        _hp = Bank("Health", c - 126, 140, 252, 62, 7, "round", out _hpOverflow);
+        _atk = Bank("Attack", c - 132, 478, 72, 84, 3, "spear", out _atkOverflow);
+        _guard = Bank("Guard", c - 46, 518, 182, 44, 5, "shield", out _guardOverflow);
     }
 
     Image[] Bank(string name, float x, float y, float width, float height, int capacity, string shape, out TMP_Text overflow)

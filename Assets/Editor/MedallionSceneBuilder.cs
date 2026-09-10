@@ -8,9 +8,37 @@ public static class MedallionSceneBuilder
 {
     const float W = 1920, H = 1080;
     const float MachineX = 300, MachineY = 48, MachineW = 1330, MachineH = 665;
-    const float LaneCenter = 610, LanePitch = 358, EnemyScale = .82f;
-    const float CardScaleX = 1.18f, CardScaleY = .66f;
+
+    // Centri delle finestre dei rulli, misurati sull'alpha di cabinet_illustrated:
+    // 460-754, 811-1117, 1175-1470 per y 263-501. Le corsie del giocatore stanno
+    // sugli stessi centri.
+    const float LaneCenter = 607, LanePitch = 357.5f;
+
+    // La faccia del rullo riempie la finestra da 294x238 e passa di pochi pixel
+    // sotto gli anelli d'ottone: scala uniforme, cosi il simbolo non si stira.
+    const float EnemyScale = .856f, EnemyTop = 259;
+
+    // Il panno e' un piano inclinato visto da una camera prospettica: carte,
+    // mazzo e libretto ci stanno sopra, ruotati di TableTilt attorno al proprio
+    // centro. Il centro resta dove lo mette il layout — e i centri delle corsie
+    // restano quelli dei rulli — mentre i bordi convergono verso un punto di
+    // fuga comune. Il FOV stretto tiene la prospettiva debole come sulle carte
+    // del riferimento (lato lontano ~0.9 del vicino); il medaglione dipinto sul
+    // panno scorcia molto di piu', ma e' pittura.
+    const float TableTilt = 60f, CameraFov = 17f;
+    const float CardScale = 1.34f, PlayerRowCenterY = 868f;
+
+    // Il mazzo sta tutto dentro lo schermo e un po' piu' piccolo delle carte in
+    // campo; lo spessore lo si vede sul fianco rivolto al centro del tavolo.
+    const float DeckCenterX = 178, DeckCenterY = 800, DeckSpin = -10f, DeckCardScale = .98f, DeckEdgeShift = .8f;
+
+    // Perno della leva: il fianco sinistro del tamburo tocca la guancia destra
+    // della cassa, che all'altezza del perno sta a x 1582.
+    const float LeverPivotX = 1612, LeverPivotY = 460, LeverScale = .19f;
+
     static readonly Color Gold = new Color(.80f,.62f,.30f);
+    // Inchiostro rosso del boss: lo stesso delle lastre ferite in SlotOverlay.
+    static readonly Color BossInk = new Color(.55f,.14f,.10f);
 
     static RectTransform Rect(string name, Transform parent, float x, float y, float w, float h)
         => UiBuild.Band(UiBuild.Rect(name, parent), x, y, w, h);
@@ -57,7 +85,14 @@ public static class MedallionSceneBuilder
         var gm=Object.FindAnyObjectByType<GameManager>();var hand=Object.FindAnyObjectByType<HandManager>();
         if(gm==null || hand==null) throw new System.InvalidOperationException("GameManager/HandManager missing.");
         var go=GameObject.Find("Canvas") ?? new GameObject("Canvas",typeof(Canvas));
-        var canvas=go.GetComponent<Canvas>();canvas.renderMode=RenderMode.ScreenSpaceCamera;canvas.worldCamera=Camera.main;
+
+        // Prospettiva per il piano del tavolo. Cio' che sta sul piano del canvas
+        // si vede identico a prima: la differenza la fanno solo i rect inclinati.
+        var camera=Camera.main;
+        camera.orthographic=false;camera.fieldOfView=CameraFov;
+        EditorUtility.SetDirty(camera);
+
+        var canvas=go.GetComponent<Canvas>();canvas.renderMode=RenderMode.ScreenSpaceCamera;canvas.worldCamera=camera;
         canvas.planeDistance=100;canvas.sortingOrder=0;canvas.referencePixelsPerUnit=1;
         var scaler=go.GetComponent<CanvasScaler>() ?? go.AddComponent<CanvasScaler>();
         scaler.uiScaleMode=CanvasScaler.ScaleMode.ScaleWithScreenSize;scaler.referenceResolution=new Vector2(W,H);
@@ -70,27 +105,28 @@ public static class MedallionSceneBuilder
         var overlay=go.AddComponent<TableOverlayController>();
         Art("StarryVelvetTable",root,"scene_table",0,0,W,H);
         var under=Rect("MachineUnder",root,MachineX,MachineY,MachineW,MachineH);
-        var enemy=Board(root,"EnemyLanes","AIBoardRoot",LaneCenter,265,SlotOverlay.CellW,SlotOverlay.CellH,EnemyScale,EnemyScale);
+        var enemy=Board(root,"EnemyLanes","AIBoardRoot",LaneCenter,EnemyTop,SlotOverlay.CellW,SlotOverlay.CellH,EnemyScale,0f);
         var cabinet=Art("Cabinet",root,"scene_cabinet",MachineX,MachineY,MachineW,MachineH);
         cabinet.material=MedallionSceneSkin.CabinetMaterial();
         var over=Rect("MachineOver",root,MachineX,MachineY,MachineW,MachineH);
         var chrome=under.gameObject.AddComponent<ReelChrome>();chrome.underLayer=over;chrome.overLayer=over;
-        chrome.laneReferenceRoot=enemy;chrome.cellTop=217;chrome.cellWidth=SlotOverlay.CellW*EnemyScale;chrome.cellHeight=SlotOverlay.CellH*EnemyScale;chrome.sliverHeight=0;chrome.highlightBleed=0;
+        chrome.laneReferenceRoot=enemy;chrome.cellTop=EnemyTop-MachineY;chrome.cellWidth=SlotOverlay.CellW*EnemyScale;chrome.cellHeight=SlotOverlay.CellH*EnemyScale;chrome.sliverHeight=0;chrome.highlightBleed=0;
 
-        var player=Board(root,"PlayerLanes","PlayerBoardRoot",LaneCenter,760,CardOverlay.CardW,CardOverlay.CardH,CardScaleX,CardScaleY);
-        var axis=Rect("LaneAxis",root,0,716,W,42).gameObject.AddComponent<LaneAxisView>();axis.laneReferenceRoot=player;axis.columnWidth=285;
+        var player=Board(root,"PlayerLanes","PlayerBoardRoot",LaneCenter,PlayerRowCenterY-CardOverlay.CardH*CardScale*.5f,
+                         CardOverlay.CardW,CardOverlay.CardH,CardScale,TableTilt);
+        // Il pronostico sta fra i piedi della cassa e il bordo lontano delle
+        // carte (y ~745): piu' in basso le sue due righe coprono la cornice.
+        var axis=Rect("LaneAxis",root,0,694,W,40).gameObject.AddComponent<LaneAxisView>();axis.laneReferenceRoot=player;axis.columnWidth=285;
         var (handRoot,spawn)=Hand(root,hud);
         Deck(root,hud);
         Status(root,hud);
         var attack=MushroomControl(root,1620,700,245);
-        // Il perno va appoggiato al fianco destro della cassa (che finisce a
-        // 1630): staccato si vedeva la leva galleggiare nel cielo.
-        var lever=LeverControl(root,1636,444);
+        var lever=LeverControl(root,LeverPivotX,LeverPivotY);
         hud.endTurnLabel=null;
         // Due oggetti sul tavolo, non due scritte. Il libretto sta oltre il
         // mazzo — piu' lontano dal giocatore — perche' e' roba da consultare,
         // non da giocare; la pergamena resta in alto a destra dov'era.
-        Bind(BookletTag(root,66,508,208,132),overlay.OpenDetail);
+        Bind(BookletTag(root,58,520,230,120),overlay.OpenDetail);
         Bind(ScrollTag(root,1646,24,222,88),overlay.OpenLegend);
         var log=Overlay(root,overlay);
         FlipCardsLayoutBuilder.BuildEndPanel(root,hud);
@@ -101,16 +137,45 @@ public static class MedallionSceneBuilder
         EditorUtility.SetDirty(go);EditorUtility.SetDirty(gm);EditorUtility.SetDirty(hand);
     }
 
-    static RectTransform Board(Transform parent,string zoneName,string name,float firstCenter,float y,float cellW,float cellH,float sx,float sy)
+    static RectTransform Board(Transform parent,string zoneName,string name,float firstCenter,float y,float cellW,float cellH,float scale,float tilt)
     {
-        float pitch=LanePitch/sx, width=cellW+2*pitch;
-        var zone=Rect(zoneName,parent,firstCenter-cellW*sx*.5f,y,width*sx,cellH*sy);
-        var board=Rect(name,zone,0,0,width,cellH);board.localScale=new Vector3(sx,sy,1);
+        float pitch=LanePitch/scale, width=cellW+2*pitch;
+        var zone=Rect(zoneName,parent,firstCenter-cellW*scale*.5f,y,width*scale,cellH*scale);
+        if(tilt!=0f)LayFlat(zone,tilt);
+        var board=Rect(name,zone,0,0,width,cellH);board.localScale=new Vector3(scale,scale,1);
         var layout=board.gameObject.AddComponent<HorizontalLayoutGroup>();layout.spacing=pitch-cellW;
         layout.childAlignment=TextAnchor.MiddleCenter;layout.childControlHeight=false;layout.childControlWidth=false;
         layout.childForceExpandHeight=false;layout.childForceExpandWidth=false;
         return board;
     }
+
+    /// <summary>
+    /// Posa sul tavolo un rect gia' impaginato: pivot al centro senza spostarlo,
+    /// poi rotazione attorno all'asse orizzontale. Il centro resta dov'era sullo
+    /// schermo, quindi i centri delle corsie restano quelli dei rulli.
+    /// </summary>
+    static void LayFlat(RectTransform rt,float degrees)
+    {
+        var size=rt.sizeDelta;
+        rt.pivot=new Vector2(.5f,.5f);
+        rt.anchoredPosition+=new Vector2(size.x*.5f,-size.y*.5f);
+        rt.localRotation=Quaternion.Euler(degrees,0f,0f);
+    }
+
+    /// <summary>
+    /// Un oggetto posato sul tavolo e girato sul panno: rect centrato nel parent,
+    /// inclinato come il tavolo, e dentro un secondo rect ruotato nel piano. Due
+    /// transform perche' la rotazione nel piano va applicata prima
+    /// dell'inclinazione: con lo schiacciamento al posto dell'inclinazione, come
+    /// prima, il risultato era uno shear e la carta sembrava storta.
+    /// </summary>
+    static RectTransform OnTable(RectTransform parent,string name,float w,float h,float spin)
+    {
+        var plane=UiBuild.Rect(name,parent);UiBuild.Centered(plane,w,h);plane.localRotation=Quaternion.Euler(TableTilt,0f,0f);
+        var turned=UiBuild.Rect("Turned",plane);UiBuild.Centered(turned,w,h);turned.localRotation=Quaternion.Euler(0f,0f,spin);
+        return turned;
+    }
+
     static (Transform,Transform) Hand(RectTransform root,HudController hud)
     {
         var zone=Rect("HandZone",root,355,994,1210,86);zone.pivot=Vector2.zero;zone.anchorMin=zone.anchorMax=Vector2.zero;zone.anchoredPosition=new Vector2(355,0);
@@ -123,15 +188,16 @@ public static class MedallionSceneBuilder
     }
     static void Deck(RectTransform root,HudController hud)
     {
-        // Schiacciamento e rotazione su DUE transform. Sullo stesso, la scala non
-        // uniforme viene applicata prima della rotazione e il risultato e' uno
-        // shear: la carta si inclina invece di appoggiarsi al tavolo. Fuori lo
-        // schiacciamento (nello spazio dello schermo), dentro la rotazione.
-        var deck=Rect("Deck",root,46,652,252,356);deck.localScale=new Vector3(1f,.66f,1f);
+        // L'area di clic resta piatta, in spazio schermo. La pila sta sul piano
+        // del tavolo come le carte, girata sul panno: lo spessore cresce lungo la
+        // normale del tavolo e cade dritto verso chi guarda.
+        var deck=Rect("Deck",root,DeckCenterX-130,DeckCenterY-115,260,230);
         UiBuild.Fill(deck,Color.clear,true);var view=deck.gameObject.AddComponent<DeckView>();
-        var tilt=UiBuild.Rect("Tilt",deck);UiBuild.Stretch(tilt);tilt.localRotation=Quaternion.Euler(0,0,-11f);
-        view.stackRoot=UiBuild.Rect("Stack",tilt);UiBuild.Stretch(view.stackRoot);
-        hud.deckText=Text("DeckCount",root,"0",250,880,60,30,19,GamePalette.Paper);
+        view.stackRoot=UiBuild.Rect("Stack",OnTable(deck,"Plane",260,230,DeckSpin));UiBuild.Stretch(view.stackRoot);
+        view.cardScale=DeckCardScale;view.maxLayers=1;view.maxEdges=18;view.edgeThickness=2.6f;
+        // Verso sinistra sul panno, riportato nello spazio della pila girata.
+        view.edgeShift=Quaternion.Euler(0f,0f,-DeckSpin)*new Vector3(-DeckEdgeShift,0f,0f);
+        hud.deckText=Text("DeckCount",root,"0",DeckCenterX+126,DeckCenterY+70,60,30,19,GamePalette.Paper);
         view.hintText=null;
     }
     static void Status(RectTransform root,HudController hud)
@@ -139,38 +205,39 @@ public static class MedallionSceneBuilder
         // Il riquadro d'avorio del kit: le proporzioni sono le sue (1448x913),
         // altrimenti la doppia cornice stampata si deforma. Su carta chiara il
         // testo va in inchiostro, non in Paper, o non si legge.
-        var plaque=Rect("PlayerStatus",root,36,28,300,189);
+        var plaque=Rect("PlayerStatus",root,36,28,336,212);
         var sheet=UiBuild.Fill(plaque,Color.white);
         sheet.sprite=UiSkin.Sprite("scene_paper");
         sheet.raycastTarget=false;
 
-        Text("LifeLabel",plaque,"VITA",28,24,110,32,23,GamePalette.Ink);
-        hud.playerHpText=Value("LifeValue",plaque,"20 / 20",140,24);
-        Text("ApLabel",plaque,"AP",28,68,110,32,23,GamePalette.Ink);
-        hud.apText=Value("ApValue",plaque,"3 / 3",140,68);
-        UiBuild.Fill(Rect("Rule",plaque,28,112,246,2),new Color(GamePalette.Ink.r,GamePalette.Ink.g,GamePalette.Ink.b,.55f));
-        hud.turnText=Text("Turn",plaque,"TURNO 1 / 12",28,126,246,32,22,GamePalette.Ink);
+        // La vita del boss sta sopra la nostra, nello stesso riquadro: sono le
+        // due vite che decidono la partita, e si confrontano con un'occhiata.
+        Text("BossLabel",plaque,"BOSS",30,22,120,32,23,BossInk);
+        hud.bossHpText=Value("BossValue",plaque,"24 / 24",172,22);hud.bossHpText.color=BossInk;
+        Text("LifeLabel",plaque,"VITA",30,60,120,32,23,GamePalette.Ink);
+        hud.playerHpText=Value("LifeValue",plaque,"20 / 20",172,60);
+        Text("ApLabel",plaque,"AP",30,98,120,32,23,GamePalette.Ink);
+        hud.apText=Value("ApValue",plaque,"3 / 3",172,98);
+        UiBuild.Fill(Rect("Rule",plaque,30,140,276,2),new Color(GamePalette.Ink.r,GamePalette.Ink.g,GamePalette.Ink.b,.55f));
+        hud.turnText=Text("Turn",plaque,"TURNO 1 / 12",30,152,276,32,22,GamePalette.Ink);
         hud.phaseText=Text("Phase",root,"FASE AZIONI",690,14,600,28,17,GamePalette.Paper);hud.phaseText.alignment=TextAlignmentOptions.Center;
-        Text("BossLabel",root,"BOSS",866,140,70,25,16,GamePalette.Paper);
-        hud.bossHpText=Text("BossHealth",root,"24/24",939,140,150,25,18,GamePalette.Paper);
     }
     /// <summary>
-    /// Il libretto chiuso appoggiato al tavolo: copertina d'avorio, dorso
-    /// scuro a sinistra, linguette che sporgono a destra. Stessa prospettiva
-    /// del mazzo — schiacciamento fuori, rotazione dentro.
+    /// Il libretto chiuso posato sul tavolo: copertina d'avorio, dorso scuro a
+    /// sinistra, linguette che sporgono a destra. Sullo stesso piano del mazzo.
     /// </summary>
     static Button BookletTag(RectTransform root,float x,float y,float w,float h)
     {
+        const float PW=208,PH=170;
         var rt=Rect("DetailButton",root,x,y,w,h);
-        rt.localScale=new Vector3(1f,.74f,1f);
         var hit=UiBuild.Fill(rt,Color.clear,true);
-        var tilt=UiBuild.Rect("Tilt",rt);UiBuild.Stretch(tilt);tilt.localRotation=Quaternion.Euler(0,0,-7f);
+        var page=OnTable(rt,"Plane",PW,PH,-7f);
 
-        var cover=Art("Cover",tilt,"scene_paper",0,0,w,h);cover.raycastTarget=false;
-        UiBuild.Fill(Rect("Spine",tilt,0,0,16,h),new Color(.16f,.12f,.07f,.92f)).raycastTarget=false;
+        var cover=Art("Cover",page,"scene_paper",0,0,PW,PH);cover.raycastTarget=false;
+        UiBuild.Fill(Rect("Spine",page,0,0,16,PH),new Color(.16f,.12f,.07f,.92f)).raycastTarget=false;
         for(int i=0;i<3;i++)
-            UiBuild.Fill(Rect("Tab"+i,tilt,w-6,18+i*30,20,22),TabInk(i)).raycastTarget=false;
-        var label=Text("Label",tilt,"DETTAGLIO",30,h*.5f-18,w-58,34,22,GamePalette.InkStrong);
+            UiBuild.Fill(Rect("Tab"+i,page,PW-6,26+i*40,20,30),TabInk(i)).raycastTarget=false;
+        var label=Text("Label",page,"DETTAGLIO",30,PH*.5f-22,PW-58,44,28,GamePalette.InkStrong);
         label.alignment=TextAlignmentOptions.Center;label.raycastTarget=false;
 
         var button=rt.gameObject.AddComponent<Button>();button.targetGraphic=hit;
@@ -192,16 +259,16 @@ public static class MedallionSceneBuilder
     }
 
     /// <summary>
-    /// Rullo d'ottone: e' l'asta della leva coricata. Il tondino occupa il 14%
-    /// della tela dello sprite, quindi la tela va larga quanto serve perche' il
-    /// brass venga dello spessore voluto.
+    /// Rullo d'ottone: e' l'asta della leva coricata. Il tondino non riempie
+    /// tutta la tela dello sprite, quindi la tela va larga quanto serve perche'
+    /// l'ottone venga dello spessore voluto.
     /// </summary>
     static void Roller(RectTransform parent,string name,float x,float y,float w,float thickness)
     {
         var slot=Rect(name,parent,x,y,w,thickness);
         var bar=UiBuild.Rect("Bar",slot);
         bar.anchorMin=bar.anchorMax=bar.pivot=new Vector2(.5f,.5f);
-        bar.sizeDelta=new Vector2(thickness/0.144f,w);
+        bar.sizeDelta=new Vector2(thickness/MedallionSceneSkin.LeverShaftFill,w);
         bar.anchoredPosition=Vector2.zero;
         bar.localRotation=Quaternion.Euler(0,0,90f);
         var image=UiBuild.Fill(bar,Color.white);
@@ -230,28 +297,40 @@ public static class MedallionSceneBuilder
     }
 
     /// <summary>
-    /// Leva in tre pezzi attorno a un perno fermo. L'area di presa copre tutta
-    /// la corsa della manopola, non solo la posizione di riposo: a meta' tirata
-    /// il puntatore resta dentro il bottone e il clic non si perde.
+    /// Leva in tre pezzi dello stesso disegno a inchiostro della cassa, attorno
+    /// all'asse del tamburo. L'area di presa copre tutta la corsa della manopola,
+    /// non solo la posizione di riposo: a meta' tirata il puntatore resta dentro
+    /// il bottone e il clic non si perde.
     /// </summary>
     static Button LeverControl(RectTransform root,float pivotX,float pivotY)
     {
-        const float halfW=150f, above=300f, below=170f;
+        const float halfW=110f, above=290f, below=230f;
         var rt=Rect("BtnEndTurn",root,pivotX-halfW,pivotY-above,halfW*2f,above+below);
         UiBuild.Fill(rt,Color.clear,true);
         var button=rt.gameObject.AddComponent<Button>();
         var hinge=new Vector2(halfW,-above);
+        float k=LeverScale;
 
-        // Ordine di creazione = ordine di disegno: l'asta esce da dietro il
-        // perno, la manopola sta davanti a entrambi.
-        var shaft=LeverPart(rt,"Shaft","scene_lever_shaft",hinge,new Vector2(110f,212f),new Vector2(.5f,0f));
-        var pivot=LeverPart(rt,"Pivot","scene_lever_pivot",hinge,new Vector2(118f,118f),new Vector2(.5f,.5f));
-        var grip =LeverPart(rt,"Grip", "scene_lever_grip", hinge,new Vector2(96f,96f),  new Vector2(.5f,.5f));
-        button.targetGraphic=grip.GetComponent<Image>();
+        // Ordine di creazione = ordine di disegno a riposo: la bocca scura della
+        // fessura, poi l'asta che ne esce da dietro il tamburo, il tamburo, la
+        // manopola davanti. Quando la tirata porta l'asta verso la camera,
+        // MedallionLever scambia asta e tamburo; la bocca resta sempre in fondo.
+        LeverPart(rt,"Socket","scene_lever_socket",hinge,MedallionSceneSkin.LeverHubSize*k,MedallionSceneSkin.LeverHubPivot);
+        var shaft=LeverPart(rt,"Shaft","scene_lever_shaft",hinge,
+                            new Vector2(MedallionSceneSkin.LeverShaftSize.x*k,MedallionSceneSkin.LeverAttach*k),new Vector2(.5f,0f));
+        var hub=LeverPart(rt,"Hub","scene_lever_hub",hinge,MedallionSceneSkin.LeverHubSize*k,MedallionSceneSkin.LeverHubPivot);
+        var knob=LeverPart(rt,"Knob","scene_lever_knob",hinge,MedallionSceneSkin.LeverKnobSize*k,MedallionSceneSkin.LeverKnobPivot);
+        button.targetGraphic=knob.GetComponent<Image>();
         var colors=button.colors;colors.disabledColor=new Color(.55f,.55f,.55f,1);button.colors=colors;
 
         var rig=rt.gameObject.AddComponent<MedallionLever>();
-        rig.pivot=pivot;rig.shaft=shaft;rig.grip=grip;rig.hinge=hinge;
+        rig.hub=hub;rig.shaft=shaft;rig.knob=knob;rig.hinge=hinge;
+        // A riposo la proiezione accorcia l'asta di cos(pitch): la lunghezza
+        // fisica e' quella che, proiettata, ridà il disegno.
+        rig.length=MedallionSceneSkin.LeverAttach*k/Mathf.Cos(rig.cameraPitch*Mathf.Deg2Rad);
+        rig.shaftWidth=MedallionSceneSkin.LeverShaftSize.x*k;
+        rig.knobSize=MedallionSceneSkin.LeverKnobSize*k;
+        rig.screenLean=MedallionSceneSkin.LeverLean;
         rig.ApplyRest();
         Bind(button,rig.Pull);
         return button;
@@ -390,7 +469,7 @@ public static class MedallionSceneBuilder
         element.minHeight=element.preferredHeight=thickness;
         var bar=UiBuild.Rect("Bar",slot);
         bar.anchorMin=bar.anchorMax=bar.pivot=new Vector2(.5f,.5f);
-        bar.sizeDelta=new Vector2(thickness/0.144f,span);
+        bar.sizeDelta=new Vector2(thickness/MedallionSceneSkin.LeverShaftFill,span);
         bar.anchoredPosition=Vector2.zero;bar.localRotation=Quaternion.Euler(0,0,90f);
         var image=UiBuild.Fill(bar,Color.white);
         image.sprite=UiSkin.Sprite("scene_lever_shaft");image.raycastTarget=false;

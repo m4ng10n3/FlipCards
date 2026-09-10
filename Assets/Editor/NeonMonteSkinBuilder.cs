@@ -7,8 +7,13 @@ using TMPro;
 /// <summary>Pixel-art templates and restrained UI chrome matching the original monster illustrations.</summary>
 public static class NeonMonteSkinBuilder
 {
-    public const string Root = "Assets/Graphics/NeonMonte";
-    const string Kit = "Assets/Graphics/FlipCards_ArcadeHorrorUI/ArcadeHorrorUI/2x";
+    /// <summary>The selected art style: only what the game mounts, plus its references and spec.</summary>
+    public const string Root = "Assets/Graphics/1_NeonMonte_Attivo";
+    /// <summary>Old assets and studies. Nothing here is mounted, except the kit below.</summary>
+    public const string Archive = "Assets/Graphics/2_Archivio";
+    // The old kit is still the base of the skin: keys Neon Monte does not redraw
+    // keep pointing at its sprites. Archived, but read on every rebuild.
+    public const string Kit = Archive + "/FlipCards_ArcadeHorrorUI/ArcadeHorrorUI/2x";
 
     public static Sprite Art(string name) => AssetDatabase.LoadAssetAtPath<Sprite>(NeonMonteAssetOrganization.ArtPath(name));
 

@@ -5,17 +5,28 @@ using UnityEngine;
 /// <summary>Explicit production assets for the approved 2026-09-10 composition.</summary>
 public static class MedallionSceneSkin
 {
-    public const string Root = "Assets/Graphics/NeonMonte/SceneKit_v2/";
-
-    // I comandi fisici stanno ancora nello studio v1: la leva e' l'unico pezzo
-    // consegnato in parti separate (perno, asta, manopola), che e' quel che
-    // serve per animare la tirata invece di ruotare un'immagine sola.
-    public const string RootV1 = "Assets/Graphics/NeonMonte/SceneKit_v1/";
+    public const string Root = NeonMonteSkinBuilder.Root + "/SceneKit_v2/";
 
     /// <summary>Riga di taglio fra cappello e basamento del fungo, in pixel dall'alto.</summary>
     public const int MushroomCut = 600;
 
+    // La leva in tre pezzi tagliati da 04_Controls/lever_rest.png. Misure in
+    // pixel della tela, stampate da 08_Integration/Tools/build_lever_parts.py:
+    // se si rigenera il taglio vanno ricopiate qui.
+    public const float LeverLean = 10.767f;                                        // gradi, la cima pende a destra
+    public const float LeverAttach = 1113.1f;                                      // dal perno al colletto
+    public static readonly Vector2 LeverHubSize = new Vector2(470f, 670f);
+    public static readonly Vector2 LeverHubPivot = new Vector2(.4273f, .5201f);    // asse del tamburo
+    public static readonly Vector2 LeverShaftSize = new Vector2(162f, 684f);
+    /// <summary>Quota della tela occupata dal tondino: per uno spessore voluto la tela va larga spessore / fill.</summary>
+    public const float LeverShaftFill = .9093f;
+    public static readonly Vector2 LeverKnobSize = new Vector2(463f, 497f);
+    public static readonly Vector2 LeverKnobPivot = new Vector2(.5008f, .0121f);   // colletto
+
     public static Sprite Load(string relative) => Load(Root, relative);
+
+    /// <summary>Faccia del rullo: carta, curvatura e filetto. Da 08_Integration/Tools/build_reel_face.py.</summary>
+    public static Sprite ReelFace => Load("02_Machine/reel_face_ink");
 
     /// <summary>
     /// Ritaglio persistente da una texture gia' importata. Serve un asset vero,
@@ -24,7 +35,7 @@ public static class MedallionSceneSkin
     /// </summary>
     static Sprite Slice(string name, Texture2D texture, Rect rect)
     {
-        const string folder = "Assets/Graphics/NeonMonte/Runtime/Chrome/";
+        const string folder = NeonMonteSkinBuilder.Root + "/Runtime/Chrome/";
         string path = folder + name + ".asset";
         var sprite = Sprite.Create(texture, rect, new Vector2(.5f, .5f), 1f, 0, SpriteMeshType.FullRect);
         sprite.name = name;
@@ -77,12 +88,16 @@ public static class MedallionSceneSkin
             new Rect(0, 0, mushroom.width, mushroom.height - MushroomCut));
         entries["scene_paper"] = Load("06_UI/legend_paper");
         entries["scene_reel"] = Load("02_Machine/reel_drum_blank");
+        entries["scene_reel_face"] = ReelFace;
 
-        // Leva in tre pezzi: il perno non si muove, l'asta ruota, la manopola
-        // insegue la proiezione. Vedi SceneKit_v1/Layout/animation_spec.md.
-        entries["scene_lever_pivot"] = Load(RootV1, "Controls/lever_pivot");
-        entries["scene_lever_shaft"] = Load(RootV1, "Controls/lever_shaft");
-        entries["scene_lever_grip"] = Load(RootV1, "Controls/lever_grip");
+        // Leva in tre pezzi dallo stesso disegno a inchiostro della cassa:
+        // tamburo fermo, asta che ruota, manopola che si avvicina. I pezzi
+        // realistici dello studio v1 erano un altro stile, e il loro perno a
+        // disco non poteva appoggiarsi al fianco della cassa.
+        entries["scene_lever_hub"] = Load("04_Controls/lever_ink_hub");
+        entries["scene_lever_socket"] = Load("04_Controls/lever_ink_socket");
+        entries["scene_lever_shaft"] = Load("04_Controls/lever_ink_shaft");
+        entries["scene_lever_knob"] = Load("04_Controls/lever_ink_knob");
 
         foreach (var state in new[] { "on", "off" })
         {
