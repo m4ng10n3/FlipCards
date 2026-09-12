@@ -148,6 +148,33 @@ def local_capabilities():
         return {}
 
 
+def workflow_results():
+    try:
+        data = json.loads((ROOT / 'benchmarks/workflow.json').read_text(encoding='utf-8'))
+        return data if time.time() - data['when'] < 7 * 86400 else {}
+    except (OSError, ValueError, KeyError):
+        return {}
+
+
+def worker_config():
+    config = dict(SETTINGS['worker'])
+    try:
+        live = json.loads((ROOT / 'runtime/worker-profile.json').read_text(encoding='utf-8-sig'))
+        config['context'] = min(config['context'], int(live['context']))
+        config['profile'] = live['profile']
+    except (OSError, ValueError, KeyError):
+        pass
+    return config
+
+
+def workflow_score(model):
+    result = workflow_results().get('models', {}).get(model, {})
+    if time.time() - result.get('when', 0) >= 7 * 86400:
+        return 0
+    weights = {'ownership': 1, 'failed-verification': 3, 'cycle-and-acceptance': 2}
+    return sum(weights.get(r['case'], 0) for r in result.get('cases', []) if r['passed']) / 6
+
+
 def ranked_groups():
     bench = benchmarks().get('models', {})
     groups = {}
@@ -157,14 +184,42 @@ def ranked_groups():
                     and bench.get(m, {}).get(group, {}).get('passed', 0) >= 2
                     and time.time() - bench[m][group].get('when', 0) < 7*86400
                     and bench[m][group].get('score', 0) >= .8]
-        groups[group] = sorted(measured, key=lambda m: (-bench[m][group]['score'], bench[m][group]['median_ms']))
+        # Every automatic group can use tools, including "fast". A failed
+        # tool-calling benchmark must not sneak back in through that group.
+        measured = [m for m in measured if workflow_score(m) >= 4/6]
+        groups[group] = sorted(measured, key=lambda m: (-workflow_score(m), -bench[m][group]['score'], bench[m][group]['median_ms']))
     return groups
+
+
+def harness_states():
+    rows=[]
+    for path in sorted((ROOT/'runtime/harness').glob('*.json'), key=lambda p:p.stat().st_mtime, reverse=True)[:8]:
+        try:
+            state=json.loads(path.read_text(encoding='utf-8'))
+            rows.append({'session':path.stem[:8], 'phase':state['phase'], 'stop':state.get('stop'), 'calls':len(state.get('records',[])), 'criteria':state.get('criteria',[])})
+        except (OSError,ValueError,KeyError):
+            pass
+    return rows
+
+
+def worker_status():
+    result=worker_config()
+    conn=HTTPConnection('127.0.0.1',8081,timeout=1)
+    try:
+        conn.request('GET','/health');response=conn.getresponse();result['ready']=response.status==200;response.read()
+    except (OSError,HTTPException):
+        result['ready']=False
+    finally:
+        conn.close()
+    return result
 
 
 def upstream(model, payload, local=False, worker=False):
     body = dict(payload)
     config = SETTINGS['worker'] if worker else SETTINGS['local']
     body['model'] = config['model'] if local else model
+    if local:
+        body['messages'] = policy.local_messages(payload['messages'])
     endpoint = config['url'] if local else 'https://api.kilo.ai/api/openrouter/v1'
     url = urlsplit(endpoint)
     klass = HTTPSConnection if url.scheme == 'https' else HTTPConnection
@@ -229,7 +284,7 @@ class Handler(BaseHTTPRequestHandler):
             self.wfile.write(body)
             self.close_connection = True
         elif path in ('/health', '/v1/health'):
-            self._json(200, {'status': 'ok', 'version': 3, 'pid': os.getpid(), 'active': len(_active)})
+            self._json(200, {'status': 'ok', 'version': 4, 'harness_required': '4', 'pid': os.getpid(), 'active': len(_active)})
         elif path in ('/models', '/v1/models'):
             self._json(200, {'object': 'list', 'data': [{'id': k, 'object': 'model', 'owned_by': 'flipcards-auto'} for k in ENTRIES]})
         elif path == '/api/state':
@@ -241,7 +296,7 @@ class Handler(BaseHTTPRequestHandler):
                     'groups': {g: {'models': ms, 'note': 'ordinati per successo, poi latenza'} for g, ms in ranked_groups().items()},
                     'catalogo': {'modelli_gratuiti': len(_catalog['free']), 'con_vista': sum(bool(m['image']) for m in _catalog['free'].values()), 'errore': _catalog['error']},
                     'last': [{'quando': time.strftime('%H:%M:%S', time.localtime(r[0])), 'modello': r[1], 'immagini': r[2], 'stato': r[3], 'ms': r[4], 'token': r[5], 'gruppo': r[6], 'motivo': r[7]} for r in reversed(list(_requests)[-15:])],
-                    'errori': list(_errors), 'active': list(_active.values()), 'benchmarks': benchmarks(), 'classifier': SETTINGS['classifier'], 'local_capabilities': local_capabilities()})
+                    'errori': list(_errors), 'active': list(_active.values()), 'benchmarks': benchmarks(), 'workflow': workflow_results(), 'harness': harness_states(), 'worker': worker_status(), 'harness_required': '4', 'classifier': SETTINGS['classifier'], 'local_capabilities': local_capabilities()})
         else:
             self.error(404, 'Percorso non trovato')
 
@@ -271,6 +326,8 @@ class Handler(BaseHTTPRequestHandler):
                     raise ValueError(field + ' deve essere positivo')
         except (ValueError, TypeError) as exc:
             return self.error(400, str(exc))
+        if payload.get('tools') and SETTINGS.get('require_harness', True) and (self.headers.get('X-FlipCards-Harness') != '4' or not self.headers.get('X-FlipCards-Session')):
+            return self.error(400, 'Harness Kilo v4 non caricato. Nel pannello Auto premi Ricarica Kilo, poi riprendi il task. Nessuna richiesta inviata ai modelli.')
         payload = policy.role_payload(payload, self.headers.get('X-FlipCards-Agent'))
         key = policy.session_key(payload, self.headers.get('X-FlipCards-Session'))
         mutex = _session_locks[int(key[:8], 16) % len(_session_locks)]
@@ -286,7 +343,7 @@ class Handler(BaseHTTPRequestHandler):
     def route(self, payload, requested, key):
         local = requested in ('locale', 'rapido', 'coordinatore')
         worker = requested in ('rapido', 'coordinatore')
-        local_config = SETTINGS['worker'] if worker else SETTINGS['local']
+        local_config = worker_config() if worker else SETTINGS['local']
         stream = bool(payload.get('stream'))
         payload = dict(payload)
         if not payload.get('max_tokens') and not payload.get('max_completion_tokens'):
@@ -294,7 +351,7 @@ class Handler(BaseHTTPRequestHandler):
         images = bool(policy.image_count(payload))
         if local:
             if images or policy.input_tokens(payload) + int(payload.get('max_completion_tokens') or payload.get('max_tokens')) > local_config['context']:
-                return self.error(400, 'Il modello locale non supporta questa immagine o contesto; nessun invio online')
+                return self.error(400, 'Profilo locale %s: input stimato %s + output %s, contesto %s, immagini %s. Riduci il sotto-task o usa Auto; nessun invio online automatico.' % (local_config.get('profile', requested), policy.input_tokens(payload), payload.get('max_completion_tokens') or payload.get('max_tokens'), local_config['context'], images))
             group, why, chain = 'local', 'solo locale esplicito', [local_config['model']]
         else:
             catalog = refresh_catalog()
@@ -313,7 +370,7 @@ class Handler(BaseHTTPRequestHandler):
                     group, why = advised
             if images:
                 group = 'vision'
-            elif policy.needs_code(payload) and not forced:
+            elif policy.needs_code(payload):
                 group, why = 'code', why + '; operazione che richiede codice'
             groups = ranked_groups()
             if images and policy.needs_code(payload):
@@ -324,7 +381,7 @@ class Handler(BaseHTTPRequestHandler):
                 sticky_model = None
             chain = policy.candidates(group, payload, catalog, groups, _cooldown, sticky_model, bool(forced), list(_requests))
             if not chain:
-                return self.error(503, 'Nessun modello qualificato disponibile per contesto, strumenti, immagini e cooldown. Consulta il cruscotto o rilancia i benchmark.')
+                return self.error(400, 'Nessun modello qualificato disponibile per contesto, strumenti, immagini e cooldown. Consulta il cruscotto o rilancia i benchmark. Stop: nessuna ripetizione automatica.')
         log('%s %s -> %s (%s)' % (key[:8], group, chain[0], why))
         headers_sent = False
         deadline = time.monotonic() + SETTINGS['request_timeout_seconds']
@@ -333,7 +390,7 @@ class Handler(BaseHTTPRequestHandler):
             if time.monotonic() >= deadline:
                 break
             if not local and not reserve_attempt():
-                return self.error(429, 'Budget orario locale esaurito; non misura la quota residua del gateway')
+                return self.error(400, 'Budget orario locale esaurito; non misura la quota residua del gateway. Riprendi quando il budget torna disponibile.')
             started = time.time()
             status, tokens, conn = 502, None, None
             with _lock:
@@ -403,7 +460,10 @@ class Handler(BaseHTTPRequestHandler):
                     persist()
                 self.close_connection = True
         if not headers_sent:
-            self.error(503, 'Provider gratuiti temporaneamente indisponibili: ' + last_error)
+            # Retries have already been exhausted here. Returning another 503
+            # makes native Kilo retry the whole chain indefinitely (also when
+            # the local server is stopped). Report a terminal, actionable error.
+            self.error(400, 'Tentativi esauriti, richiesta fermata: ' + last_error + '. Verifica i server dal pannello Auto prima di riprendere.')
 
 
 def main():
@@ -414,7 +474,7 @@ def main():
     refresh_catalog()
     server = ThreadingHTTPServer(('127.0.0.1', PORT), Handler)
     server.daemon_threads = True
-    log('Auto v3 pronto: http://127.0.0.1:%d/' % PORT)
+    log('Auto v4 pronto: http://127.0.0.1:%d/' % PORT)
     try:
         server.serve_forever()
     except KeyboardInterrupt:

@@ -9,7 +9,7 @@ async function main() {
   const context = {document:{getElementById:id=>elements[id] ||= {}},fetch:async()=>({ok:true,json:async()=>state}),setInterval:()=>{},Date,Math,console}
   vm.runInNewContext(code, context)
   await new Promise(resolve=>setImmediate(resolve))
-  assert(elements.groups.innerHTML.includes('nex-agi'))
+  assert(elements.groups.innerHTML.includes('stepfun'))
   assert(elements.bench.innerHTML.includes('reasoning'))
   assert(elements.quota.textContent.includes('/'))
   assert(!elements.error.innerHTML.includes('non raggiungibile'))

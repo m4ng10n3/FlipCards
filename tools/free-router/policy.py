@@ -18,10 +18,12 @@ def session_key(payload, session_id=None):
 
 
 def role_payload(payload, agent):
-    if agent != 'coordinatore':
+    if agent not in ('coordinatore', 'rapido'):
         return payload
     result = dict(payload)
-    allowed = {'task', 'todowrite', 'todoread', 'question'}
+    allowed = {'task', 'todowrite', 'todoread', 'question', 'harness_checkpoint'}
+    if agent == 'rapido':
+        allowed = {'read', 'grep', 'glob'}
     result['tools'] = [t for t in payload.get('tools', []) if t.get('function', {}).get('name') in allowed]
     return result
 
@@ -33,6 +35,19 @@ def image_count(payload):
         if isinstance(content, list):
             count += sum(1 for p in content if isinstance(p, dict) and p.get("type") in ("image_url", "image", "input_image"))
     return count
+
+
+def local_messages(messages):
+    """llama.cpp's Qwen template accepts one system message, at the beginning.
+
+    Kilo plugins may emit several system blocks. Preserve their order/authority
+    in one block; user, assistant, reasoning and tool messages remain untouched.
+    """
+    instructions = [m['content'] for m in messages if m.get('role') in ('system', 'developer')]
+    if any(not isinstance(text, str) for text in instructions):
+        raise ValueError('Istruzioni locali non testuali non supportate')
+    rest = [m for m in messages if m.get('role') not in ('system', 'developer')]
+    return ([{'role': 'system', 'content': '\n\n'.join(instructions)}] if instructions else []) + rest
 
 
 def input_tokens(payload):
@@ -73,12 +88,17 @@ def classify(payload):
 
 def needs_code(payload):
     """Capability floor: a local classification cannot downgrade an explicit edit."""
+    for message in payload.get('messages', []):
+        for call in message.get('tool_calls', []):
+            name = call.get('function', {}).get('name', '')
+            if name in ('edit', 'write', 'apply_patch', 'bash') or name.endswith('Unity_RunCommand'):
+                return True
     text = task_text(payload).lower()
     if 'unity_runcommand' in text or 'commandscript' in text:
         return True  # Even read-only editor commands require correct C# generation.
     text = re.sub(r"\b(?:non|senza|do not|don't|without)\b[^,.;\n]{0,160}", '', text)
-    edit = re.search(r'\b(corregg\w*|modific\w*|implement\w*|aggiung\w*|rimuov\w*|sostituisc\w*|scrivi|fix|change|add|remove|replace|refactor\w*|write)\b', text)
-    code = re.search(r'\b(codice|code|metod\w*|function\w*|funzion\w*|listener|script\w*|builder|test\w*|class\w*)\b|\.(cs|py|js|ts)\b', text)
+    edit = re.search(r'\b(cambi\w*|corregg\w*|modific\w*|implement\w*|aggiung\w*|rimuov\w*|sostituisc\w*|scrivi|fix|change|add|remove|replace|refactor\w*|write)\b', text)
+    code = re.search(r'\b(template|slot|prefab|scena|layout|lamp\w*|simbol\w*|codice|code|metod\w*|function\w*|funzion\w*|listener|script\w*|builder|test\w*|class\w*)\b|\.(cs|py|js|ts)\b', text)
     return bool(edit and code)
 
 

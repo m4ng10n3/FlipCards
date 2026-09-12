@@ -17,24 +17,38 @@ $totalContext = 65536
 # K/V dimension 256, q8_0 = 34/32 bytes. Remaining runtime overhead measured ~1.37 GB.
 $kvGB = $totalContext * 6 * 2 * (256 + 256) * 34 / 32 / 1GB
 $requiredGB = (Get-Item -LiteralPath $modelPath).Length / 1GB + $kvGB + 1.5
-$marginGB = 1.5
+$marginGB = 1.0
+$parallelSlots = 2
+$deviceName = 'Vulkan0'
+$profileName = 'dual-32k'
+if ($memory.FreeVirtualMemory / 1MB -lt $requiredGB + $marginGB -or $memory.FreePhysicalMemory / 1MB -lt $requiredGB) {
+    # Shared graphics memory competes with Unity. Small CPU context keeps the
+    # classifier/extractor available when two full GPU slots cannot fit.
+    $totalContext = 2048
+    $parallelSlots = 1
+    $deviceName = 'none'
+    $profileName = 'extract-cpu-2k'
+    $kvGB = $totalContext * 6 * 2 * (256 + 256) * 34 / 32 / 1GB
+    $requiredGB = (Get-Item -LiteralPath $modelPath).Length / 1GB + $kvGB + 0.65
+}
 Write-Host ('Memoria stimata {0:N2} GB + margine {1:N1} GB, commit libero {2:N2} GB.' -f $requiredGB,$marginGB,($memory.FreeVirtualMemory/1MB))
 if ($memory.FreeVirtualMemory / 1MB -lt $requiredGB + $marginGB -or $memory.FreePhysicalMemory / 1MB -lt $requiredGB) {
-    throw 'Memoria insufficiente per due contesti locali: il worker lascia margine a Unity.'
+    throw 'Memoria insufficiente anche per il profilo compatto. Auto online resta disponibile; nessuna attesa infinita del locale.'
 }
 $serverPath = (Get-Command llama-server -ErrorAction Stop).Source
 $arguments = @('--model', ('"' + $modelPath + '"'), '--alias', 'qwen3.5-2b',
-    '--device', 'Vulkan0', '--ctx-size', '65536', '--parallel', '2',
+    '--device', $deviceName, '--ctx-size', $totalContext, '--parallel', $parallelSlots,
     '--cache-type-k', 'q8_0', '--cache-type-v', 'q8_0', '--flash-attn', 'on',
     '--cache-ram', '0', '--ctx-checkpoints', '4', '--reasoning', 'off', '--jinja',
-    '--threads', '4', '--threads-batch', '4', '--fit', 'on', '--fit-target', '1024',
+    '--batch-size', '128', '--ubatch-size', '128', '--threads', '4', '--threads-batch', '4', '--fit', 'on', '--fit-target', '1024',
     '--host', '127.0.0.1', '--port', $Port, '--api-key-file', ('"' + $keyPath + '"'),
     '--no-webui', '--temp', '0.2', '--top-p', '0.8', '--top-k', '20', '--min-p', '0')
 $proc = Start-Process -FilePath $serverPath -ArgumentList $arguments -WindowStyle Hidden -PassThru `
     -RedirectStandardOutput (Join-Path $runtimePath 'worker.stdout.log') `
     -RedirectStandardError (Join-Path $runtimePath 'worker.stderr.log')
+@{ profile=$profileName; context=($totalContext / $parallelSlots); slots=$parallelSlots; pid=$proc.Id } | ConvertTo-Json | Set-Content -Encoding UTF8 (Join-Path $runtimePath 'worker-profile.json')
 $proc.Id | Set-Content (Join-Path $runtimePath 'worker.pid')
-Write-Host "Qwen 2B PID $($proc.Id): un caricamento pesi, due slot fino a 32768 token. Worker limitato a 16k, coordinatore a 32k."
+Write-Host "Qwen 2B PID $($proc.Id): profilo $profileName, $parallelSlots slot, contesto totale $totalContext."
 $ready = $false
 try {
     while (-not $proc.HasExited) {

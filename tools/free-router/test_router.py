@@ -109,6 +109,24 @@ class PolicyTests(unittest.TestCase):
         self.assertEqual(len(payload['tools']),4)
         self.assertIs(policy.role_payload(payload,'specialista'),payload)
 
+    def test_slot_request_requires_code_even_without_word_code(self):
+        self.assertTrue(policy.needs_code({'messages':[{'role':'user','content':'cambia il template delle slot nemiche, non voglio le tacche di attacco ma la sequenza di stati'}]}))
+
+    def test_tool_history_preserves_code_capability_after_capture(self):
+        p={'messages':[{'role':'user','content':'Sistema questo'}, {'role':'assistant','tool_calls':[{'function':{'name':'edit','arguments':'{}'}}]}, {'role':'user','content':[{'type':'image_url','image_url':{'url':'data:image/png;base64,AA'}}]}]}
+        self.assertTrue(policy.needs_code(p))
+
+    def test_local_worker_has_only_extraction_tools(self):
+        p={'tools':[{'function':{'name':n}} for n in ['read','grep','glob','bash','task','chart']]}
+        self.assertEqual([t['function']['name'] for t in policy.role_payload(p,'rapido')['tools']],['read','grep','glob'])
+
+    def test_local_template_merges_system_preserves_tool_chain(self):
+        messages=[{'role':'system','content':'base'},{'role':'user','content':'task'}, {'role':'system','content':'harness'}, {'role':'assistant','tool_calls':[{'id':'1'}]}, {'role':'tool','tool_call_id':'1','content':'value'}]
+        result=policy.local_messages(messages)
+        self.assertEqual(result[0],{'role':'system','content':'base\n\nharness'})
+        self.assertEqual(result[1:],[messages[1],messages[3],messages[4]])
+        self.assertEqual(len(messages),5)
+
 
 class HTTPTests(unittest.TestCase):
     def setUp(self):
@@ -139,7 +157,7 @@ class HTTPTests(unittest.TestCase):
     def request(self,model='auto'):
         conn=HTTPConnection('127.0.0.1',self.server.server_port,timeout=3)
         body={'model':model,'stream':True,'messages':[{'role':'user','content':'Unity test'}],'max_tokens':100}
-        conn.request('POST','/v1/chat/completions',json.dumps(body),{'Content-Type':'application/json','Authorization':'Bearer test','X-FlipCards-Session':'test-session'})
+        conn.request('POST','/v1/chat/completions',json.dumps(body),{'Content-Type':'application/json','Authorization':'Bearer test','X-FlipCards-Session':'test-session','X-FlipCards-Harness':'4'})
         resp=conn.getresponse();data=resp.read();conn.close();return resp.status,data
     def test_retry_before_any_output(self):
         self.responses=[Response([event({'role':'assistant'}),b'data: {"error":{"message":"busy"}}\n\n']),Response([event({'content':'ok'})+event(finish='stop')])]
@@ -160,14 +178,20 @@ class HTTPTests(unittest.TestCase):
         self.assertGreater(router._cooldown['a:free'],time.time()+290)
     def test_unknown_model_rejected(self):
         self.assertEqual(self.request('typo')[0],400);self.assertEqual(self.calls,[])
+    def test_missing_harness_rejected_before_upstream(self):
+        conn=HTTPConnection('127.0.0.1',self.server.server_port,timeout=3)
+        body={'model':'auto','messages':[{'role':'user','content':'test'}],'tools':[{'type':'function','function':{'name':'read'}}]}
+        conn.request('POST','/v1/chat/completions',json.dumps(body),{'Content-Type':'application/json','Authorization':'Bearer test'})
+        response=conn.getresponse();data=response.read();conn.close()
+        self.assertEqual(response.status,400);self.assertIn(b'Harness',data);self.assertEqual(self.calls,[])
     def test_local_failure_never_uses_cloud_or_cloud_budget(self):
         self.responses=[Response([OSError('worker offline')])]
-        self.assertEqual(self.request('rapido')[0],503)
+        self.assertEqual(self.request('rapido')[0],400)
         self.assertEqual([c[0] for c in self.calls],['qwen3.5-2b'])
         self.assertEqual(budget.used(),0)
     def test_hourly_budget_enforced(self):
         for _ in range(router.SETTINGS['hourly_request_budget']): budget.reserve(router.SETTINGS['hourly_request_budget'],'test')
-        self.assertEqual(self.request()[0],429);self.assertEqual(self.calls,[])
+        self.assertEqual(self.request()[0],400);self.assertEqual(self.calls,[])
 
 
 if __name__=='__main__': unittest.main()

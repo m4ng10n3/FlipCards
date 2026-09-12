@@ -120,12 +120,13 @@
     {
       "label": "Auto: benchmark online",
       "type": "process",
-      "command": "python",
+      "command": "powershell.exe",
       "args": [
-        "-B",
-        "${workspaceFolder}\\tools\\free-router\\benchmark.py",
-        "--models",
-        "all"
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}\\tools\\free-router\\Benchmark-All.ps1"
       ],
       "problemMatcher": [],
       "presentation": {

@@ -1,0 +1,60 @@
+{
+  "when": "2026-09-12T20:07:22.776411+00:00",
+  "revision": 4,
+  "router_unit_tests": {
+    "passed": 32,
+    "scope": "routing, streaming, quotas, local template, missing harness, terminal failures"
+  },
+  "native_kilo": {
+    "passed": true,
+    "model": "deterministic local fixture + real Qwen3.5-2B local_extract",
+    "steps": 8,
+    "checks": [
+      "unplanned edit blocked",
+      "plan stored",
+      "native read/edit/read",
+      "completion evidence validated",
+      "real local extractor preserved number and boolean"
+    ]
+  },
+  "local_kilo_read": {
+    "passed": true,
+    "expected": 731,
+    "actual": 731
+  },
+  "unity": {
+    "passed_samples": 36,
+    "console_errors": 0,
+    "camera_image": "runtime/slot-capture.jpg",
+    "visual_inspected": true,
+    "limitation": "manual component update samples; not a timed playtest; Editor was at frame 1"
+  },
+  "online": {
+    "scope": "synthetic benchmarks only; no full autonomous project edit retested"
+  },
+  "worker": {
+    "url": "http://127.0.0.1:8081/v1",
+    "model": "qwen3.5-2b",
+    "context": 32768,
+    "output": 2048,
+    "image": false,
+    "profile": "dual-32k",
+    "ready": true
+  },
+  "routing": {
+    "fast": [
+      "stepfun/step-3.7-flash:free"
+    ],
+    "code": [
+      "nvidia/nemotron-3-super-120b-a12b:free",
+      "stepfun/step-3.7-flash:free"
+    ],
+    "vision": [
+      "stepfun/step-3.7-flash:free"
+    ],
+    "reasoning": [
+      "nvidia/nemotron-3-super-120b-a12b:free"
+    ]
+  },
+  "activation": "Existing VS Code backend must load v4 using Ricarica Kilo; missing harness header is rejected."
+}

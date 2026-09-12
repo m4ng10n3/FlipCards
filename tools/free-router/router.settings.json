@@ -24,5 +24,6 @@
     "context": 32768,
     "output": 2048,
     "image": false
-  }
+  },
+  "require_harness": true
 }

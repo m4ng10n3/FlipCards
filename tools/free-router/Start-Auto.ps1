@@ -9,7 +9,7 @@ if (-not $ready) {
     $runtimePath=Join-Path $PSScriptRoot 'runtime'
     $proc=Start-Process powershell.exe -ArgumentList @('-NoProfile','-ExecutionPolicy','Bypass','-File',('"'+$scriptPath+'"')) -WindowStyle Hidden -PassThru `
         -RedirectStandardOutput (Join-Path $runtimePath 'worker-monitor.stdout.log') -RedirectStandardError (Join-Path $runtimePath 'worker-monitor.stderr.log')
-    Write-Host "Sorveglianza locale PID $($proc.Id). Due contesti, un solo modello 2B."
+    Write-Host "Sorveglianza locale PID $($proc.Id). Contesti adattati alla memoria disponibile."
     $deadline=(Get-Date).AddSeconds(40)
     while ((Get-Date) -lt $deadline) {
         try { if ((Invoke-RestMethod 'http://127.0.0.1:8081/health' -TimeoutSec 2).status -eq 'ok') { $ready=$true; break } } catch {}

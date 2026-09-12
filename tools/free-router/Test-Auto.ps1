@@ -10,6 +10,9 @@ try { $state=Invoke-RestMethod 'http://127.0.0.1:8099/api/state' -TimeoutSec 3 }
 if ($state) {
     Write-Host "Budget osservato: $($state.used_last_hour)/$($state.hourly_limit)"
     Write-Host "Routing locale: $($state.local_capabilities.routing_accuracy)"
+    Write-Host "Harness richiesto: v$($state.harness_required)"
+    Write-Host "Worker: ready=$($state.worker.ready), profilo=$($state.worker.profile), contesto=$($state.worker.context)"
+    $state.harness | Format-Table session,phase,calls,stop
 }
 $kiloPath=Get-ChildItem (Join-Path $env:USERPROFILE '.vscode/extensions/kilocode.kilo-code-*/bin/kilo.exe') | Sort-Object LastWriteTime -Descending | Select-Object -First 1
 if ($kiloPath) { & $kiloPath.FullName mcp list }

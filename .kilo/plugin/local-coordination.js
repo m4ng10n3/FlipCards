@@ -11,7 +11,7 @@ export default {
       if (lastUser?.info?.agent !== 'coordinatore') return
       // Permission deny on the parent propagates to children in Kilo. Enforce the
       // coordinator role here, without removing the specialist's native permissions.
-      if (!['task', 'todowrite', 'todoread', 'question'].includes(input.tool)) {
+      if (!['task', 'todowrite', 'todoread', 'question', 'harness_checkpoint'].includes(input.tool)) {
         throw new Error('Il coordinatore deve delegare questa operazione a rapido o specialista.')
       }
       if (input.tool !== 'task') return

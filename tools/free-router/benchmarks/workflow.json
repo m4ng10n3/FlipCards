@@ -1,0 +1,156 @@
+{
+  "suite": "slot-workflow-v1",
+  "models": {
+    "stepfun/step-3.7-flash:free": {
+      "when": 1789242416.54481,
+      "passed": false,
+      "cases": [
+        {
+          "model": "stepfun/step-3.7-flash:free",
+          "group": "workflow",
+          "case": "ownership",
+          "passed": true,
+          "ms": 35565,
+          "error": null,
+          "when": 1789242353.943016,
+          "answer": {
+            "attackOwner": "CabinetGauge",
+            "sequenceLength": "PatternLength",
+            "currentStep": "PatternStep",
+            "fixedLength": 1
+          },
+          "output_budget": 8192
+        },
+        {
+          "model": "stepfun/step-3.7-flash:free",
+          "group": "workflow",
+          "case": "failed-verification",
+          "passed": true,
+          "ms": 4490,
+          "error": null,
+          "when": 1789242389.5080214,
+          "answer": {
+            "complete": false,
+            "next": "repair_compile",
+            "verified": false
+          },
+          "output_budget": 8192
+        },
+        {
+          "model": "stepfun/step-3.7-flash:free",
+          "group": "workflow",
+          "case": "cycle-and-acceptance",
+          "passed": false,
+          "ms": 22547,
+          "error": null,
+          "when": 1789242393.9982133,
+          "answer": {
+            "complete": true,
+            "repeatCapture": true,
+            "missing": [
+              "pattern_edges",
+              "dynamic_attack"
+            ]
+          },
+          "output_budget": 8192
+        }
+      ]
+    },
+    "nvidia/nemotron-3-super-120b-a12b:free": {
+      "when": 1789242503.0598557,
+      "passed": false,
+      "cases": [
+        {
+          "model": "nvidia/nemotron-3-super-120b-a12b:free",
+          "group": "workflow",
+          "case": "ownership",
+          "passed": false,
+          "ms": 60618,
+          "error": null,
+          "when": 1789242416.5463564,
+          "answer": {
+            "attackOwner": "EnemyProgram",
+            "sequenceLength": "PatternLength",
+            "currentStep": "PatternStep",
+            "fixedLength": 1
+          },
+          "output_budget": 8192
+        },
+        {
+          "model": "nvidia/nemotron-3-super-120b-a12b:free",
+          "group": "workflow",
+          "case": "failed-verification",
+          "passed": true,
+          "ms": 7261,
+          "error": null,
+          "when": 1789242477.1642952,
+          "answer": {
+            "complete": false,
+            "next": "repair_compile",
+            "verified": false
+          },
+          "output_budget": 8192
+        },
+        {
+          "model": "nvidia/nemotron-3-super-120b-a12b:free",
+          "group": "workflow",
+          "case": "cycle-and-acceptance",
+          "passed": true,
+          "ms": 18634,
+          "error": null,
+          "when": 1789242484.4254522,
+          "answer": {
+            "complete": false,
+            "repeatCapture": false,
+            "missing": [
+              "pattern_edges",
+              "dynamic_attack"
+            ]
+          },
+          "output_budget": 8192
+        }
+      ]
+    },
+    "nex-agi/nex-n2.5-pro:free": {
+      "when": 1789242517.3912947,
+      "passed": false,
+      "cases": [
+        {
+          "model": "nex-agi/nex-n2.5-pro:free",
+          "group": "workflow",
+          "case": "ownership",
+          "passed": false,
+          "ms": 6882,
+          "error": "ValueError: Tool calls=0 finish=['stop', 'stop'] text={\"attackOwner\":\"CabinetGauge\",\"sequenceLength\":\"PatternLength\",\"currentStep\":\"",
+          "when": 1789242503.0608635,
+          "answer": null,
+          "output_budget": 8192
+        },
+        {
+          "model": "nex-agi/nex-n2.5-pro:free",
+          "group": "workflow",
+          "case": "failed-verification",
+          "passed": false,
+          "ms": 2645,
+          "error": "ValueError: Tool calls=0 finish=['stop', 'stop'] text={\"complete\":false,\"next\":\"repair_compile\",\"verified\":false}",
+          "when": 1789242509.942543,
+          "answer": null,
+          "output_budget": 8192
+        },
+        {
+          "model": "nex-agi/nex-n2.5-pro:free",
+          "group": "workflow",
+          "case": "cycle-and-acceptance",
+          "passed": false,
+          "ms": 4804,
+          "error": "ValueError: Tool calls=0 finish=['stop', 'stop'] text={\"complete\":false,\"repeatCapture\":true,\"missing\":[\"pattern_edges\",\"dynamic_att",
+          "when": 1789242512.587749,
+          "answer": null,
+          "output_budget": 8192
+        }
+      ]
+    }
+  },
+  "when": 1789242517.3912947,
+  "scope": "Operational regression probes from the failed slot task; no scene mutation.\n\nThis evaluates evidence interpretation and ownership, not complete coding ability.\nKeep separate from arithmetic/vision scores; failures cannot be hidden by averaging.\n"
+}

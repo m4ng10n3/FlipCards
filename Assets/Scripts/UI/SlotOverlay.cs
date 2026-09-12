@@ -462,6 +462,12 @@ public class SlotOverlay : MonoBehaviour,
     /// </summary>
     void RefreshProgram(SlotInstance inst)
     {
+        // Cabinet skin owns the complete vertical program; avoid a duplicate.
+        if (UiSkin.Sprite("scene_cabinet") != null && GetComponent<ReelPrintedAttack>() != null)
+        {
+            _pipRoot.gameObject.SetActive(false);
+            return;
+        }
         int count = PipCount(inst);
 
         if (_pips.Count != count)

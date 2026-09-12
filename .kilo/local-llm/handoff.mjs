@@ -5,7 +5,7 @@ export function previousTaskID(messages, target) {
       const state = part.state
       if (part.tool !== 'task' || state?.status !== 'completed' || state.input?.subagent_type !== target) continue
       const id = String(state.output || '').match(/<task id="(ses_[A-Za-z0-9]+)"/)
-      if (id) return id[1]
+      if (id && /state="(?:error|interrupted|running)"/.test(String(state.output || ''))) return id[1]
     }
   }
 }

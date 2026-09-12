@@ -1,5 +1,11 @@
 # FlipCards Auto gratuito
 
+**Revisione attiva v4:** leggere [HARNESS.md](HARNESS.md) per protocollo obbligatorio,
+limiti reali dei benchmark, profili di memoria e verifiche del caso delle slot.
+La precedente integrazione di sola lettura descritta qui sotto non qualificava
+un agente per modifiche Unity complete. Ora il router richiede gli hook v4.
+
+
 L'interfaccia di lavoro resta **Kilo in VS Code**. Il pannello aggiunto si apre da
 **Ctrl+Shift+P → FlipCards Auto: apri pannello**, oppure dalla voce **Auto locale**
 nella barra di stato. Contiene avvio/arresto, apertura/ricarica di Kilo, benchmark e diagnostica.
@@ -22,7 +28,7 @@ di forzare `vista`, `codice`, `cervello`, `rapido` o `locale`.
 
 Macchina misurata: **ROG Ally X, 23,2 GB RAM utilizzabile, grafica AMD integrata**.
 Il modello aggiunto è **Qwen3.5 2B Q4_K_M**, 1.280.835.840 byte sul disco.
-Il server usa un caricamento dei pesi e **due slot fino a 32.768 token**, con KV q8,
+Quando la memoria lo consente il server usa un caricamento dei pesi e **due slot fino a 32.768 token**, con KV q8,
 ragionamento disabilitato e quattro thread CPU. Durante il collaudo il processo
 occupava circa **2,92 GB di memoria privata** (il valore varia col contesto).
 Kilo limita il worker a **16k** e il coordinatore a **32k**: il secondo deve poter

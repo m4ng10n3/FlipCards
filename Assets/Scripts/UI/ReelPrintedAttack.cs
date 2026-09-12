@@ -1,41 +1,65 @@
-using TMPro;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Tacche d'attacco stampate sulla faccia del rullo, in colonna a destra del
-/// simbolo come nel riferimento. La vita non sta qui: e' delle lampade della cassa.
+/// Programma stampato a destra del rullo, dall'alto in basso: spada ambra
+/// (carica), scudo ciano (trattenuta). Il cursore indica il passo corrente.
+/// Il valore di attacco appartiene alle lampade della cassa. Il nome della
+/// classe conserva i collegamenti dei prefab esistenti.
 /// </summary>
 public sealed class ReelPrintedAttack : MonoBehaviour
 {
     SlotView _view;
-    readonly Image[] _marks = new Image[SlotOverlay.NotchSeats];
-    TMP_Text _overflow;
-    int _last = -1;
-
-    void Start()
-    {
-        _view = GetComponent<SlotView>();
-        for (int i = 0; i < _marks.Length; i++)
-        {
-            var rt = UiBuild.Rect("PrintedAttack" + i, transform);
-            UiBuild.Band(rt, SlotOverlay.NotchX, SlotOverlay.NotchY(i), SlotOverlay.NotchSize, SlotOverlay.NotchSize);
-            _marks[i] = UiBuild.Fill(rt, Color.white);
-            _marks[i].preserveAspect = true;
-        }
-        _overflow = UiBuild.Text("PrintedAttackTotal", transform, "", 15, GamePalette.Ink, TextAlignmentOptions.Center);
-        UiBuild.Band(_overflow.rectTransform, SlotOverlay.NotchX, SlotOverlay.NotchY(_marks.Length), SlotOverlay.NotchSize, 22);
-    }
+    RectTransform _root;
+    readonly List<Image> _symbols = new();
+    readonly List<Image> _cursors = new();
 
     void LateUpdate()
     {
-        if (_view == null || _view.instance == null) return;
-        int value = Mathf.Max(0, _view.instance.def.atkDamage + _view.instance.tempAtkBonus);
-        if (value == _last) return;
-        _last = value;
-        // Si riempiono dal basso, come le lance sulle carte.
-        for (int i = 0; i < _marks.Length; i++)
-            _marks[i].sprite = UiSkin.Sprite("final_front_attack_" + (_marks.Length - 1 - i < value ? "full" : "empty"));
-        _overflow.text = value > _marks.Length ? value.ToString() : "";
+        if (_view == null) _view = GetComponent<SlotView>();
+        var inst = _view != null ? _view.instance : null;
+        if (inst == null) return;
+        int count = Mathf.Max(1, inst.PatternLength);
+        if (_root == null)
+        {
+            _root = UiBuild.Rect("PrintedProgram", transform);
+            UiBuild.Stretch(_root);
+        }
+        if (_symbols.Count != count) Build(count);
+        for (int i = 0; i < count; i++)
+        {
+            var side = inst.PatternSideAt(i);
+            _symbols[i].sprite = side == Side.Fronte ? GlyphSprites.Sword : GlyphSprites.Shield;
+            _symbols[i].color = GamePalette.SideColor(side);
+            _cursors[i].enabled = i == inst.PatternStep;
+        }
+    }
+
+    void Build(int count)
+    {
+        UiBuild.ClearChildren(_root);
+        _symbols.Clear();
+        _cursors.Clear();
+        // Fit the full program in the old column; no repeated or truncated states.
+        float height = SlotOverlay.NotchPitch * SlotOverlay.NotchSeats;
+        float pitch = Mathf.Min(SlotOverlay.NotchPitch, height / count);
+        float size = Mathf.Max(1f, Mathf.Min(SlotOverlay.NotchSize, pitch - 2f));
+        float top = SlotOverlay.ArtY + SlotOverlay.ArtSize * .5f - pitch * count * .5f;
+        for (int i = 0; i < count; i++)
+        {
+            var rt = UiBuild.Rect("State" + i, _root);
+            UiBuild.Band(rt, SlotOverlay.NotchX + (SlotOverlay.NotchSize - size) * .5f,
+                top + i * pitch, size, size);
+            var symbol = UiBuild.Fill(rt, Color.white);
+            symbol.preserveAspect = true;
+            symbol.raycastTarget = false;
+            _symbols.Add(symbol);
+            var cursor = UiBuild.Rect("Current" + i, _root);
+            UiBuild.Band(cursor, SlotOverlay.NotchX - 5f, top + i * pitch + size * .25f, 3f, size * .5f);
+            var mark = UiBuild.Fill(cursor, GamePalette.Ink);
+            mark.raycastTarget = false;
+            _cursors.Add(mark);
+        }
     }
 }
