@@ -1,0 +1,44 @@
+{
+  "when": 1789240564.5470273,
+  "local_coordinator_delegation": true,
+  "original_constraints_preserved": true,
+  "mcp_disabled_for_this_probe": true,
+  "expected": "6000.4.4f1",
+  "observed": "<task id=\"ses_f69046f41ffeVZ64SJolZ9Uk8e\" state=\"completed\">\n<task_result>\nUnity 6000.4.4f1 (360f97ecca93)\n</task_result>\n</task>",
+  "worker_prompt": "File: C:\\Users\\vulpi\\OneDrive\\Documenti\\UnityProj\\FlipCards\\ProjectSettings\\ProjectVersion.txt\n\nRiproduci solo la versione di Unity contenuta in questo file. Non modificare nessun file.\n\nRICHIESTE ORIGINALI DA CONSERVARE (precedono il riassunto del coordinatore):\n\"Leggi ProjectSettings/ProjectVersion.txt e riporta la versione di Unity. Delega la lettura a rapido. Non modificare file.\"",
+  "mcp_status": "connected",
+  "mcp_checked_at": 1789239847.9722574,
+  "coordinator_to_specialist_to_unity": true,
+  "observed_unity_version": "6000.4.4f1",
+  "observed_scene": "SampleScene",
+  "observed_main_camera": 69480,
+  "mcp_probes": [
+    {
+      "tool": "unity-mcp_Unity_RunCommand",
+      "status": "completed",
+      "input": {
+        "Code": "using UnityEngine;\n\ninternal class CommandScript : IRunCommand\n{\n    public void Execute(ExecutionResult result)\n    {\n        result.Log(\"Application.unityVersion=\" + Application.unityVersion);\n    }\n}",
+        "Title": "Leggi versione Unity"
+      },
+      "output": "{\n  \"success\": true,\n  \"message\": \"Command executed successfully.\",\n  \"data\": {\n    \"isCompilationSuccessful\": true,\n    \"isExecutionSuccessful\": true,\n    \"executionId\": 1,\n    \"compilationLogs\": \"\",\n    \"executionLogs\": \"[Log] Application.unityVersion=6000.4.4f1\",\n    \"localFixedCode\": \"using UnityEngine;\\r\\n\\r\\nnamespace Unity.AI.Assistant.Agent.Dynamic.Extension.Editor\\r\\n{\\r\\n    internal class CommandScript : IRunCommand\\r\\n    {\\r\\n        public void Execute(ExecutionResult result)\\r\\n        {\\r\\n            result.Log(\\\"Application.unityVersion=\\\" + Application.unityVersion);\\r\\n        }\\r\\n    }\\r\\n}\",\n    \"result\": \"Command executed successfully.\"\n  }\n}"
+    },
+    {
+      "tool": "unity-mcp_Unity_RunCommand",
+      "status": "completed",
+      "input": {
+        "Code": "using UnityEngine.SceneManagement;\n\ninternal class CommandScript : IRunCommand\n{\n    public void Execute(ExecutionResult result)\n    {\n        Scene activeScene = SceneManager.GetActiveScene();\n        result.Log(\"ActiveScene.name=\" + activeScene.name);\n    }\n}",
+        "Title": "Leggi scena attiva"
+      },
+      "output": "{\n  \"success\": true,\n  \"message\": \"Command executed successfully.\",\n  \"data\": {\n    \"isCompilationSuccessful\": true,\n    \"isExecutionSuccessful\": true,\n    \"executionId\": 1,\n    \"compilationLogs\": \"\",\n    \"executionLogs\": \"[Log] ActiveScene.name=SampleScene\",\n    \"localFixedCode\": \"using UnityEngine.SceneManagement;\\r\\n\\r\\nnamespace Unity.AI.Assistant.Agent.Dynamic.Extension.Editor\\r\\n{\\r\\n    internal class CommandScript : IRunCommand\\r\\n    {\\r\\n        public void Execute(ExecutionResult result)\\r\\n        {\\r\\n            Scene activeScene = SceneManager.GetActiveScene();\\r\\n            result.Log(\\\"ActiveScene.name=\\\" + activeScene.name);\\r\\n        }\\r\\n    }\\r\\n}\",\n    \"result\": \"Command executed successfully.\"\n  }\n}"
+    },
+    {
+      "tool": "unity-mcp_Unity_RunCommand",
+      "status": "completed",
+      "input": {
+        "Code": "using UnityEngine;\n\ninternal class CommandScript : IRunCommand\n{\n    public void Execute(ExecutionResult result)\n    {\n        Camera mainCamera = Camera.main;\n        if (mainCamera == null)\n        {\n            result.Log(\"MainCamera.instanceID=NOT_FOUND\");\n        }\n        else\n        {\n            result.Log(\"MainCamera.instanceID=\" + mainCamera.gameObject.GetInstanceID());\n        }\n    }\n}",
+        "Title": "Leggi Instance ID Main Camera"
+      },
+      "output": "{\n  \"success\": true,\n  \"message\": \"Command executed successfully.\",\n  \"data\": {\n    \"isCompilationSuccessful\": true,\n    \"isExecutionSuccessful\": true,\n    \"executionId\": 1,\n    \"compilationLogs\": \"\",\n    \"executionLogs\": \"[Log] MainCamera.instanceID=69480\",\n    \"localFixedCode\": \"using UnityEngine;\\r\\n\\r\\nnamespace Unity.AI.Assistant.Agent.Dynamic.Extension.Editor\\r\\n{\\r\\n    internal class CommandScript : IRunCommand\\r\\n    {\\r\\n        public void Execute(ExecutionResult result)\\r\\n        {\\r\\n            Camera mainCamera = Camera.main;\\r\\n            if (mainCamera == null)\\r\\n            {\\r\\n                result.Log(\\\"MainCamera.instanceID=NOT_FOUND\\\");\\r\\n            }\\r\\n            else\\r\\n            {\\r\\n                result.Log(\\\"MainCamera.instanceID=\\\" + mainCamera.gameObject.GetInstanceID());\\r\\n            }\\r\\n        }\\r\\n    }\\r\\n}\",\n    \"result\": \"Command executed successfully.\"\n  }\n}"
+    }
+  ]
+}

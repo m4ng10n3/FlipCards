@@ -1,0 +1,13 @@
+{
+  "name": "flipcards-auto",
+  "displayName": "FlipCards Auto locale",
+  "description": "Pannello locale per router, benchmark e agenti Kilo di FlipCards.",
+  "version": "0.1.1",
+  "publisher": "flipcards-local",
+  "engines": {"vscode": "^1.90.0"},
+  "main": "./extension.js",
+  "activationEvents": ["onStartupFinished"],
+  "contributes": {
+    "commands": [{"command": "flipcardsAuto.open", "title": "FlipCards Auto: apri pannello"}]
+  }
+}

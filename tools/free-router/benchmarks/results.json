@@ -1,0 +1,590 @@
+{
+  "suite": "flipcards-v1",
+  "when": 1789239587.0395029,
+  "models": {
+    "inclusionai/ling-3.0-flash-vl:free": {
+      "fast": {
+        "passed": 1,
+        "total": 2,
+        "score": 0.5,
+        "median_ms": 1736.0,
+        "when": 1789238525.847531
+      },
+      "vision": {
+        "passed": 1,
+        "total": 2,
+        "score": 0.5,
+        "median_ms": 1465.0,
+        "when": 1789238524.4524765
+      }
+    },
+    "nex-agi/nex-n2.5-pro:free": {
+      "reasoning": {
+        "passed": 0,
+        "total": 2,
+        "score": 0.0,
+        "median_ms": 3058.0,
+        "when": 1789239258.2434614
+      },
+      "code": {
+        "passed": 1,
+        "total": 2,
+        "score": 0.5,
+        "median_ms": 11250.5,
+        "when": 1789239254.951885
+      },
+      "vision": {
+        "passed": 2,
+        "total": 2,
+        "score": 1.0,
+        "median_ms": 2308.5,
+        "when": 1789238533.8072999
+      },
+      "fast": {
+        "passed": 2,
+        "total": 2,
+        "score": 1.0,
+        "median_ms": 2547.0,
+        "when": 1789238527.431246
+      }
+    },
+    "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free": {
+      "vision": {
+        "passed": 2,
+        "total": 2,
+        "score": 1.0,
+        "median_ms": 7615.5,
+        "when": 1789238544.4264505
+      },
+      "fast": {
+        "passed": 1,
+        "total": 2,
+        "score": 0.5,
+        "median_ms": 4037.0,
+        "when": 1789238539.7473004
+      }
+    },
+    "nvidia/nemotron-3-super-120b-a12b:free": {
+      "code": {
+        "passed": 2,
+        "total": 2,
+        "score": 1.0,
+        "median_ms": 7728.0,
+        "when": 1789238767.9338777
+      },
+      "fast": {
+        "passed": 2,
+        "total": 2,
+        "score": 1.0,
+        "median_ms": 10777.5,
+        "when": 1789238556.2630143
+      },
+      "reasoning": {
+        "passed": 2,
+        "total": 2,
+        "score": 1.0,
+        "median_ms": 9751.0,
+        "when": 1789238548.0042367
+      }
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free": {
+      "fast": {
+        "passed": 1,
+        "total": 2,
+        "score": 0.5,
+        "median_ms": 35704.0,
+        "when": 1789238611.466195
+      },
+      "reasoning": {
+        "passed": 2,
+        "total": 2,
+        "score": 1.0,
+        "median_ms": 42453.0,
+        "when": 1789238567.507573
+      }
+    },
+    "poolside/laguna-s-2.1:free": {
+      "fast": {
+        "passed": 0,
+        "total": 2,
+        "score": 0.0,
+        "median_ms": 540.5,
+        "when": 1789238654.471324
+      },
+      "code": {
+        "passed": 0,
+        "total": 2,
+        "score": 0.0,
+        "median_ms": 6332.0,
+        "when": 1789238647.6615515
+      }
+    },
+    "stepfun/step-3.7-flash:free": {
+      "code": {
+        "passed": 2,
+        "total": 2,
+        "score": 1.0,
+        "median_ms": 10544.5,
+        "when": 1789239264.3598306
+      },
+      "vision": {
+        "passed": 2,
+        "total": 2,
+        "score": 1.0,
+        "median_ms": 6026.5,
+        "when": 1789238668.931588
+      },
+      "fast": {
+        "passed": 2,
+        "total": 2,
+        "score": 1.0,
+        "median_ms": 3015.5,
+        "when": 1789238655.552618
+      }
+    },
+    "qwen3.5-2b": {
+      "reasoning": {
+        "passed": 0,
+        "total": 2,
+        "score": 0.0,
+        "median_ms": 1557.5,
+        "when": 1789239011.619851
+      },
+      "code": {
+        "passed": 0,
+        "total": 2,
+        "score": 0.0,
+        "median_ms": 1472.0,
+        "when": 1789239008.6758034
+      },
+      "fast": {
+        "passed": 2,
+        "total": 2,
+        "score": 1.0,
+        "median_ms": 1767.0,
+        "when": 1789239005.1415582
+      }
+    }
+  },
+  "cases": [
+    {
+      "model": "inclusionai/ling-3.0-flash-vl:free",
+      "group": "vision",
+      "case": "lanes-True",
+      "passed": false,
+      "ms": 1394,
+      "error": "JSONDecodeError: Expecting ',' delimiter: line 1 column 44 (char 43)",
+      "when": 1789238524.4524765
+    },
+    {
+      "model": "inclusionai/ling-3.0-flash-vl:free",
+      "group": "vision",
+      "case": "lanes-False",
+      "passed": true,
+      "ms": 1536,
+      "error": null,
+      "when": 1789238524.4524765
+    },
+    {
+      "model": "inclusionai/ling-3.0-flash-vl:free",
+      "group": "fast",
+      "case": "tool-result",
+      "passed": true,
+      "ms": 1443,
+      "error": null,
+      "when": 1789238525.9883807
+    },
+    {
+      "model": "inclusionai/ling-3.0-flash-vl:free",
+      "group": "fast",
+      "case": "extract",
+      "passed": false,
+      "ms": 2029,
+      "error": "ValueError: Tool call mancante o stream incompleto",
+      "when": 1789238525.847531
+    },
+    {
+      "model": "nex-agi/nex-n2.5-pro:free",
+      "group": "fast",
+      "case": "extract",
+      "passed": true,
+      "ms": 1865,
+      "error": null,
+      "when": 1789238527.431246
+    },
+    {
+      "model": "nex-agi/nex-n2.5-pro:free",
+      "group": "fast",
+      "case": "tool-result",
+      "passed": true,
+      "ms": 3229,
+      "error": null,
+      "when": 1789238527.8764195
+    },
+    {
+      "model": "nex-agi/nex-n2.5-pro:free",
+      "group": "vision",
+      "case": "lanes-False",
+      "passed": true,
+      "ms": 2431,
+      "error": null,
+      "when": 1789238533.8072999
+    },
+    {
+      "model": "nex-agi/nex-n2.5-pro:free",
+      "group": "vision",
+      "case": "lanes-True",
+      "passed": true,
+      "ms": 2186,
+      "error": null,
+      "when": 1789238534.6432889
+    },
+    {
+      "model": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+      "group": "fast",
+      "case": "tool-result",
+      "passed": false,
+      "ms": 3212,
+      "error": "ValueError: Tool call mancante o stream incompleto",
+      "when": 1789238541.2142527
+    },
+    {
+      "model": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+      "group": "fast",
+      "case": "extract",
+      "passed": true,
+      "ms": 4862,
+      "error": null,
+      "when": 1789238539.7473004
+    },
+    {
+      "model": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+      "group": "vision",
+      "case": "lanes-False",
+      "passed": true,
+      "ms": 3578,
+      "error": null,
+      "when": 1789238544.4264505
+    },
+    {
+      "model": "nvidia/nemotron-3-super-120b-a12b:free",
+      "group": "reasoning",
+      "case": "armor",
+      "passed": true,
+      "ms": 5645,
+      "error": null,
+      "when": 1789238548.0042367
+    },
+    {
+      "model": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+      "group": "vision",
+      "case": "lanes-True",
+      "passed": true,
+      "ms": 11653,
+      "error": null,
+      "when": 1789238544.609696
+    },
+    {
+      "model": "nvidia/nemotron-3-super-120b-a12b:free",
+      "group": "fast",
+      "case": "extract",
+      "passed": true,
+      "ms": 9519,
+      "error": null,
+      "when": 1789238556.2630143
+    },
+    {
+      "model": "nvidia/nemotron-3-super-120b-a12b:free",
+      "group": "reasoning",
+      "case": "async",
+      "passed": true,
+      "ms": 13857,
+      "error": null,
+      "when": 1789238553.6495726
+    },
+    {
+      "model": "nvidia/nemotron-3-super-120b-a12b:free",
+      "group": "fast",
+      "case": "tool-result",
+      "passed": true,
+      "ms": 12036,
+      "error": null,
+      "when": 1789238565.7824657
+    },
+    {
+      "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+      "group": "reasoning",
+      "case": "armor",
+      "passed": true,
+      "ms": 43959,
+      "error": null,
+      "when": 1789238567.507573
+    },
+    {
+      "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+      "group": "reasoning",
+      "case": "async",
+      "passed": true,
+      "ms": 40947,
+      "error": null,
+      "when": 1789238577.8186333
+    },
+    {
+      "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+      "group": "fast",
+      "case": "extract",
+      "passed": true,
+      "ms": 36195,
+      "error": null,
+      "when": 1789238611.466195
+    },
+    {
+      "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+      "group": "fast",
+      "case": "tool-result",
+      "passed": false,
+      "ms": 35213,
+      "error": "UpstreamError: errore del provider nello stream",
+      "when": 1789238618.7666888
+    },
+    {
+      "model": "poolside/laguna-s-2.1:free",
+      "group": "code",
+      "case": "heal",
+      "passed": false,
+      "ms": 492,
+      "error": "RuntimeError: HTTP 429",
+      "when": 1789238653.9795287
+    },
+    {
+      "model": "poolside/laguna-s-2.1:free",
+      "group": "fast",
+      "case": "extract",
+      "passed": false,
+      "ms": 588,
+      "error": "RuntimeError: HTTP 429",
+      "when": 1789238654.471324
+    },
+    {
+      "model": "poolside/laguna-s-2.1:free",
+      "group": "fast",
+      "case": "tool-result",
+      "passed": false,
+      "ms": 493,
+      "error": "RuntimeError: HTTP 429",
+      "when": 1789238655.0593235
+    },
+    {
+      "model": "stepfun/step-3.7-flash:free",
+      "group": "fast",
+      "case": "extract",
+      "passed": true,
+      "ms": 3504,
+      "error": null,
+      "when": 1789238655.552618
+    },
+    {
+      "model": "poolside/laguna-s-2.1:free",
+      "group": "code",
+      "case": "overflow",
+      "passed": false,
+      "ms": 12172,
+      "error": null,
+      "when": 1789238647.6615515
+    },
+    {
+      "model": "stepfun/step-3.7-flash:free",
+      "group": "fast",
+      "case": "tool-result",
+      "passed": true,
+      "ms": 2527,
+      "error": null,
+      "when": 1789238659.0566432
+    },
+    {
+      "model": "stepfun/step-3.7-flash:free",
+      "group": "vision",
+      "case": "lanes-False",
+      "passed": true,
+      "ms": 4822,
+      "error": null,
+      "when": 1789238668.931588
+    },
+    {
+      "model": "stepfun/step-3.7-flash:free",
+      "group": "vision",
+      "case": "lanes-True",
+      "passed": true,
+      "ms": 7231,
+      "error": null,
+      "when": 1789238673.753241
+    },
+    {
+      "model": "nvidia/nemotron-3-super-120b-a12b:free",
+      "group": "code",
+      "case": "heal",
+      "passed": true,
+      "ms": 6320,
+      "error": null,
+      "when": 1789238767.9343874,
+      "answer": {
+        "expression": "min(health + max(amount, 0), maximum)"
+      }
+    },
+    {
+      "model": "nvidia/nemotron-3-super-120b-a12b:free",
+      "group": "code",
+      "case": "overflow",
+      "passed": true,
+      "ms": 9136,
+      "error": null,
+      "when": 1789238767.9338777,
+      "answer": {
+        "expression": "max(0, incoming - block - health)"
+      }
+    },
+    {
+      "model": "qwen3.5-2b",
+      "group": "fast",
+      "case": "extract",
+      "passed": true,
+      "ms": 2039,
+      "error": null,
+      "when": 1789239005.1415582,
+      "answer": {
+        "path": "Assets/Scripts/Managers/GameManager.cs",
+        "value": true
+      }
+    },
+    {
+      "model": "qwen3.5-2b",
+      "group": "fast",
+      "case": "tool-result",
+      "passed": true,
+      "ms": 1495,
+      "error": null,
+      "when": 1789239007.1808398,
+      "answer": {
+        "status": "compiled",
+        "errorCount": 0
+      }
+    },
+    {
+      "model": "qwen3.5-2b",
+      "group": "code",
+      "case": "overflow",
+      "passed": false,
+      "ms": 1417,
+      "error": null,
+      "when": 1789239008.6758034,
+      "answer": {
+        "expression": "incoming - block - health"
+      }
+    },
+    {
+      "model": "qwen3.5-2b",
+      "group": "code",
+      "case": "heal",
+      "passed": false,
+      "ms": 1527,
+      "error": null,
+      "when": 1789239010.0924697,
+      "answer": {
+        "expression": "max(0, min(amount, maximum))"
+      }
+    },
+    {
+      "model": "qwen3.5-2b",
+      "group": "reasoning",
+      "case": "armor",
+      "passed": false,
+      "ms": 1583,
+      "error": null,
+      "when": 1789239011.619851,
+      "answer": {
+        "A": 12,
+        "B": 12
+      }
+    },
+    {
+      "model": "qwen3.5-2b",
+      "group": "reasoning",
+      "case": "async",
+      "passed": false,
+      "ms": 1532,
+      "error": null,
+      "when": 1789239013.2029896,
+      "answer": {
+        "readySignal": true,
+        "bug": "race"
+      }
+    },
+    {
+      "model": "nex-agi/nex-n2.5-pro:free",
+      "group": "code",
+      "case": "overflow",
+      "passed": false,
+      "ms": 3291,
+      "error": "ValueError: Tool calls=0 finish=['stop', 'stop'] text={\"result\":{\"expression\":\"max(0, incoming - block - health)\"}}",
+      "when": 1789239254.951885,
+      "answer": null
+    },
+    {
+      "model": "nex-agi/nex-n2.5-pro:free",
+      "group": "reasoning",
+      "case": "armor",
+      "passed": false,
+      "ms": 3158,
+      "error": "ValueError: Tool calls=0 finish=['stop', 'stop'] text={\"A\":5,\"B\":2}",
+      "when": 1789239258.2434614,
+      "answer": null
+    },
+    {
+      "model": "nex-agi/nex-n2.5-pro:free",
+      "group": "reasoning",
+      "case": "async",
+      "passed": false,
+      "ms": 2958,
+      "error": "ValueError: Tool calls=0 finish=['stop', 'stop'] text={\"readySignal\":\"CanAct\",\"bug\":\"race\"}",
+      "when": 1789239261.4017692,
+      "answer": null
+    },
+    {
+      "model": "nex-agi/nex-n2.5-pro:free",
+      "group": "code",
+      "case": "heal",
+      "passed": true,
+      "ms": 19210,
+      "error": null,
+      "when": 1789239254.951885,
+      "answer": {
+        "expression": "min(maximum, health + max(amount, 0))"
+      }
+    },
+    {
+      "model": "stepfun/step-3.7-flash:free",
+      "group": "code",
+      "case": "overflow",
+      "passed": true,
+      "ms": 11184,
+      "error": null,
+      "when": 1789239264.3598306,
+      "answer": {
+        "expression": "max(0, incoming - block - health)"
+      }
+    },
+    {
+      "model": "stepfun/step-3.7-flash:free",
+      "group": "code",
+      "case": "heal",
+      "passed": true,
+      "ms": 9905,
+      "error": null,
+      "when": 1789239274.1625152,
+      "answer": {
+        "expression": "min(maximum, max(health, health + amount))"
+      }
+    }
+  ],
+  "scope": "Small deterministic probes: tool calling/continuation, arithmetic code, Unity rules, synthetic vision. Not a full-game benchmark."
+}

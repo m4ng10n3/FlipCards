@@ -9,6 +9,7 @@ import { fileURLToPath } from "node:url"
 
 const LOCAL_PROVIDERS = new Set(["llamacpp"])
 const DIGEST_PATH = fileURLToPath(new URL("../local-llm/AGENTS.local.md", import.meta.url))
+const WORKER_DIGEST_PATH = fileURLToPath(new URL("../local-llm/AGENTS.worker.md", import.meta.url))
 // Kilo intesta ogni file di istruzioni con "Instructions from: <percorso>\n<contenuto>".
 const AGENTS_HEADER = /Instructions from: ([^\n]*[\\/]AGENTS\.md)\n/g
 
@@ -20,7 +21,7 @@ function readText(path) {
   }
 }
 
-function replaceAgentsBlocks(text, digest) {
+function replaceAgentsBlocks(text, digest, digestPath = DIGEST_PATH) {
   let result = text
   for (const header of text.matchAll(AGENTS_HEADER)) {
     const content = readText(header[1])
@@ -34,7 +35,7 @@ function replaceAgentsBlocks(text, digest) {
       console.warn(`[local-llm-context] AGENTS.md non riconosciuto nel prompt (${header[1]}): lasciato intatto`)
       continue
     }
-    result = result.replace(block, () => `Instructions from: ${DIGEST_PATH}\n${digest}`)
+    result = result.replace(block, () => `Instructions from: ${digestPath}\n${digest}`)
   }
   return result
 }
@@ -44,11 +45,13 @@ export default {
   server: async () => ({
     "experimental.chat.system.transform": async (input, output) => {
       const providerID = input.model?.providerID ?? input.model?.provider?.id
-      if (!LOCAL_PROVIDERS.has(providerID)) return
-      const digest = readText(DIGEST_PATH)
+      const modelID = input.model?.id ?? input.model?.modelID
+      if (!LOCAL_PROVIDERS.has(providerID) && !(providerID === "router" && ["rapido", "locale", "coordinatore"].includes(modelID))) return
+      const digestPath = providerID === "router" && ["rapido", "coordinatore"].includes(modelID) ? WORKER_DIGEST_PATH : DIGEST_PATH
+      const digest = readText(digestPath)
       if (digest === undefined) return
       for (let i = 0; i < output.system.length; i++) {
-        output.system[i] = replaceAgentsBlocks(output.system[i], digest)
+        output.system[i] = replaceAgentsBlocks(output.system[i], digest, digestPath)
       }
     },
   }),

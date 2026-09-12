@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FlipCards Auto</title>
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;padding:24px;background:#111720;color:#e4eaf4;font:14px/1.5 system-ui}h1{font-size:23px;margin:0}h2{font-size:16px;margin:28px 0 10px}.muted{color:#9baabd}.cards{display:flex;flex-wrap:wrap;gap:12px;margin-top:20px}.card{border:1px solid #314054;border-radius:10px;padding:16px;flex:1;min-width:180px;background:#192230}.big{font-size:27px;color:#9ed4ff}table{border-collapse:collapse;width:100%}th,td{text-align:left;padding:10px 6px;border-bottom:1px solid #29374b;vertical-align:top}th{color:#9baabd;font-weight:500}.ok{color:#8de3a7}.no{color:#ffae97}.scroll{overflow:auto}code{color:#ace0ff}button{background:#274766;color:white;border:0;border-radius:5px;padding:7px 12px;cursor:pointer}small{color:#9baabd}.pill{display:inline-block;background:#254436;color:#abebba;border-radius:12px;padding:2px 9px}.error{padding:12px;border-left:3px solid #ffb197;background:#33241e;margin:12px 0}
+</style></head><body>
+<h1>FlipCards Auto <span class="pill">ibrido gratuito</span></h1>
+<div class="muted">Kilo conserva il task. Il modello locale classifica; i benchmark qualificano gli specialisti. Nessun cambio di modello durante una risposta.</div>
+<div class="cards"><div class="card"><div class="muted">Budget locale / ora</div><div class="big" id="quota">—</div><small>Richieste osservate, non quota residua del gateway</small></div><div class="card"><div class="muted">Classificatore</div><div class="big">Qwen 2B</div><small id="local">Benchmark da eseguire</small></div><div class="card"><div class="muted">Ora in esecuzione</div><div id="active">Nessuna richiesta</div></div></div>
+<div id="error"></div>
+<h2>Agenti nella chat Kilo</h2><p><code>auto</code> è il predefinito: completa il lavoro, può delegare estrazioni a <code>rapido</code> locale. <code>coordinatore</code> è il coordinatore locale sperimentale: usa gli specialisti con task separati. <code>locale</code> usa il 9B solo sul PC e richiede il suo server.</p>
+<p class="muted">Il 2B condivide un caricamento dei pesi tra due slot fino a 32k (worker 16k, coordinatore 32k). Non è qualificato automaticamente per modifiche complesse. Kilo mantiene richieste di approvazione e verifiche MCP native.</p>
+<h2>Scelte disponibili, nell'ordine effettivo</h2><div class="scroll"><table><thead><tr><th>Task</th><th>Modelli qualificati</th></tr></thead><tbody id="groups"></tbody></table></div>
+<h2>Benchmark misurati <button id="refresh">Aggiorna</button></h2><small>Prove piccole e deterministiche: strumenti e continuazione, codice aritmetico, regole Unity, immagini sintetiche. Non sono una garanzia su task lunghi. Le misure scadono dopo 7 giorni.</small>
+<div class="scroll"><table><thead><tr><th>Modello</th><th>Categoria</th><th>Prove superate</th><th>Mediana</th></tr></thead><tbody id="bench"></tbody></table></div>
+<h2>Ultime decisioni</h2><div class="scroll"><table><thead><tr><th>Ora</th><th>Modello / motivo</th><th>Esito</th><th>Tempo</th><th>Token</th></tr></thead><tbody id="last"></tbody></table></div>
+<p class="muted" id="updated"></p>
+<script>
+const $=id=>document.getElementById(id);const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function tick(){try{const r=await fetch('/api/state');if(!r.ok)throw Error('HTTP '+r.status);const s=await r.json();$('quota').textContent=s.used_last_hour+' / '+s.hourly_limit;
+$('active').innerHTML=s.active.length?s.active.map(a=>'<b>'+esc(a.model)+'</b><br><small>'+esc(a.group)+' · '+Math.round(Date.now()/1000-a.since)+' s</small>').join('<br>'):'Nessuna richiesta';
+$('local').textContent=s.local_capabilities?'Routing: '+Math.round(s.local_capabilities.routing_accuracy*100)+'% sulle prove locali':'Benchmark locale da eseguire';
+$('groups').innerHTML=Object.entries(s.groups).map(([g,v])=>'<tr><td>'+esc(g)+'</td><td>'+(v.models.length?v.models.map(m=>esc(m)+(s.cooling[m]?' <span class="no">pausa '+s.cooling[m]+' s</span>':'')).join('<br>'):'<span class="no">Nessun candidato qualificato</span>')+'</td></tr>').join('');
+$('bench').innerHTML=Object.entries(s.benchmarks.models||{}).flatMap(([m,groups])=>Object.entries(groups).map(([g,v])=>'<tr><td>'+esc(m)+'</td><td>'+esc(g)+'</td><td class="'+(v.score>=.8?'ok':'no')+'">'+v.passed+' / '+v.total+'</td><td>'+(v.median_ms/1000).toFixed(1)+' s</td></tr>')).join('');
+$('last').innerHTML=s.last.map(r=>'<tr><td>'+esc(r.quando)+'</td><td>'+esc(r.modello)+'<br><small>'+esc(r.motivo)+'</small></td><td class="'+(r.stato===200?'ok':'no')+'">'+r.stato+'</td><td>'+(r.ms/1000).toFixed(1)+' s</td><td>'+esc(r.token??'—')+'</td></tr>').join('');
+const errors=[s.catalogo.errore,...s.errori].filter(Boolean);$('error').innerHTML=errors.length?'<div class="error">'+errors.slice(-3).map(esc).join('<br>')+'</div>':'';
+$('updated').textContent='Aggiornato alle '+new Date().toLocaleTimeString();}catch(e){$('error').innerHTML='<div class="error">Router non raggiungibile. Avvia Auto dal pannello o dal task VS Code.</div>';}}
+$('refresh').onclick=tick;tick();setInterval(tick,5000);
+</script></body></html>

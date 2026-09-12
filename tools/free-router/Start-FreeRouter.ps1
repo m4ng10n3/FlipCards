@@ -1,67 +1,43 @@
-<#
-.SYNOPSIS
-    Avvia l'instradatore locale dei modelli gratuiti di Kilo.
-
-.DESCRIPTION
-    Espone a Kilo un provider OpenAI-compatibile su http://127.0.0.1:<Port>/v1, cosi' le
-    sue voci (auto, vista, cervello, codice) compaiono nel selettore dei modelli di
-    VS Code. L'instradatore sceglie il modello gratuito a monte in base alla richiesta e
-    ricade su un altro se il fornitore risponde 429.
-
-    Il cruscotto su http://127.0.0.1:<Port>/ mostra regole, richieste usate nell'ultima
-    ora (tetto 200 per IP) e modello che ha servito ogni richiesta. Per vederlo in un tab
-    di VS Code: Ctrl+Shift+P, "Simple Browser: Show", e incolla l'indirizzo.
-
-    Non serve alcuna credenziale: i modelli :free del gateway Kilo rispondono senza
-    autenticazione. L'instradatore pretende invece la API key locale
-    (%USERPROFILE%\.llama-local\api-key.txt) da chi lo chiama, cioe' da Kilo.
-
-.EXAMPLE
-    .\Start-FreeRouter.ps1
-
-.EXAMPLE
-    .\Start-FreeRouter.ps1 -Port 8099 -OpenDashboard
-#>
-[CmdletBinding()]
-param(
-    [int]$Port = 8099,
-
-    # Apre il cruscotto nel browser di sistema (in VS Code usa invece "Simple Browser: Show").
-    [switch]$OpenDashboard
-)
-
+﻿[CmdletBinding()]
+param([int]$Port = 8099, [switch]$Restart, [switch]$Foreground)
 $ErrorActionPreference = 'Stop'
-$ProgressPreference = 'SilentlyContinue'
-
-function Write-Step([string]$Text) { Write-Host "[router] $Text" -ForegroundColor Cyan }
-function Stop-WithError([string]$Text) { Write-Host "[router] $Text" -ForegroundColor Red; exit 1 }
-
-$python = Get-Command python -ErrorAction SilentlyContinue
-if (-not $python) { $python = Get-Command py -ErrorAction SilentlyContinue }
-if (-not $python) { Stop-WithError 'Python non trovato nel PATH: serve Python 3.' }
-
-$script = Join-Path $PSScriptRoot 'router.py'
-if (-not (Test-Path $script)) { Stop-WithError "router.py non trovato in $PSScriptRoot." }
-
-$listener = Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1
-if ($listener) {
-    $owner = Get-Process -Id $listener.OwningProcess -ErrorAction SilentlyContinue
-    if ($owner -and $owner.ProcessName -match 'python') {
-        Write-Step "l'instradatore e' gia' in esecuzione (PID $($owner.Id)): http://127.0.0.1:$Port/"
-        exit 0
-    }
-    Stop-WithError "La porta $Port e' occupata dal processo $($listener.OwningProcess)."
+$runtimePath = Join-Path $PSScriptRoot 'runtime'
+New-Item -ItemType Directory -Force $runtimePath | Out-Null
+$health = $null
+try { $health = Invoke-RestMethod "http://127.0.0.1:$Port/health" -TimeoutSec 2 } catch {}
+if ($health) {
+    if (-not $Restart) { Write-Host "Router gia attivo: http://127.0.0.1:$Port/"; exit 0 }
+    if ($health.active -gt 0) { throw 'Richiesta in corso: attendi prima di riavviare.' }
+    $listener = Get-NetTCPConnection -LocalPort $Port -State Listen | Select-Object -First 1
+    $owner = Get-CimInstance Win32_Process -Filter "ProcessId=$($listener.OwningProcess)"
+    $scriptPath = Join-Path $PSScriptRoot 'router.py'
+    if ($owner.Name -ne 'python.exe' -or $owner.CommandLine -notlike "*$scriptPath*") { throw 'La porta appartiene a un altro programma.' }
+    if (Get-NetTCPConnection -LocalPort $Port -State Established -ErrorAction SilentlyContinue) { throw 'Ci sono client collegati: riprova a chat ferma.' }
+    Stop-Process -Id $owner.ProcessId
 }
-
-$keyFile = Join-Path $env:USERPROFILE '.llama-local\api-key.txt'
-if (-not (Test-Path $keyFile)) {
-    Write-Step "Nessuna API key locale in $keyFile : l'instradatore accettera' richieste senza autenticazione."
+$keyFile = Join-Path $env:USERPROFILE '.llama-local/api-key.txt'
+if (-not (Test-Path -LiteralPath $keyFile)) {
+    New-Item -ItemType Directory -Force (Split-Path $keyFile) | Out-Null
+    $bytes = New-Object byte[] 32
+    $rng = [Security.Cryptography.RandomNumberGenerator]::Create()
+    $rng.GetBytes($bytes); $rng.Dispose()
+    [IO.File]::WriteAllText($keyFile, 'sk-local-' + (-join ($bytes | ForEach-Object { $_.ToString('x2') })))
 }
-
-Write-Step "Cruscotto: http://127.0.0.1:$Port/  (in VS Code: Ctrl+Shift+P, Simple Browser: Show)"
-Write-Step "Endpoint per Kilo: http://127.0.0.1:$Port/v1  -  Ctrl+C per fermare."
-if ($OpenDashboard) { Start-Process "http://127.0.0.1:$Port/" }
-
-$env:ROUTER_PORT = $Port
-& $python.Source -u $script
-Write-Step "instradatore terminato (codice $LASTEXITCODE)."
+$pythonPath = (Get-Command python -ErrorAction Stop).Source
+$scriptPath = Join-Path $PSScriptRoot 'router.py'
+$env:ROUTER_PORT = [string]$Port
+if ($Foreground) { & $pythonPath -B -u $scriptPath; exit $LASTEXITCODE }
+$proc = Start-Process -FilePath $pythonPath -ArgumentList @('-B','-u',('"'+$scriptPath+'"')) -WindowStyle Hidden -PassThru `
+    -RedirectStandardOutput (Join-Path $runtimePath 'router.stdout.log') -RedirectStandardError (Join-Path $runtimePath 'router.stderr.log')
+$proc.Id | Set-Content (Join-Path $runtimePath 'router.pid')
+Write-Host "Auto avviato (PID $($proc.Id)): http://127.0.0.1:$Port/"
+$deadline = (Get-Date).AddSeconds(40)
+while ((Get-Date) -lt $deadline) {
+    if ($proc.HasExited) { throw "Router terminato: vedi runtime/router.stderr.log" }
+    try {
+        $ready = Invoke-RestMethod "http://127.0.0.1:$Port/health" -TimeoutSec 2
+        if ($ready.status -eq 'ok') { Write-Host 'Endpoint pronto.'; exit 0 }
+    } catch {}
+    Start-Sleep -Milliseconds 500
+}
+throw 'Router non pronto entro 40 secondi.'

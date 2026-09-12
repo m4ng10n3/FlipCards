@@ -98,3 +98,9 @@ InitTestScene*.unity*
 # Auto-generated scenes by play mode tests
 /[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
 Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset
+
+# Local Auto runtime (keys stay outside the repository)
+/tools/free-router/runtime/
+/tools/free-router/**/__pycache__/
+/tools/free-router/router.v2.backup.txt
+/tools/vscode-auto/*.vsix

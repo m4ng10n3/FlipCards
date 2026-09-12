@@ -41,14 +41,12 @@ La guida del progetto che trovi più sotto è una versione compatta di AGENTS.md
 - Leggi a pezzi: `read` con offset e limit, al massimo ~250 righe per volta.
   `GameManager.cs`, `CardView.cs` e `FlipCardsLayoutBuilder.cs` superano le 1000 righe.
 - Non rileggere un file già letto in questa sessione se non è cambiato.
-- `Library/`, `Temp/`, `Logs/`, `obj/` e `UserSettings/` li genera Unity: non aprirli.
+- `Library/`, `Temp/`, `obj/` e `UserSettings/` li genera Unity: non aprirli.
 
 # Come modifichi
 
 - Usa `edit` con sostituzioni piccole e univoche; `write` solo per file nuovi e brevi.
-- Con `edit` **aggiungi** righe senza cancellare quelle che c'erano: il testo da cercare
-  deve ricomparire identico nel testo nuovo. Non scrivere nel codice frasi prese dalla
-  richiesta dell'utente: nel file va solo codice o commenti sensati.
+- Usa sostituzioni mirate: correggi o rimuovi il codice difettoso necessario al task, preservando modifiche non pertinenti.
 - Chi sposta o rinomina un asset sposta anche il suo `.meta`.
 
 # Unity via MCP

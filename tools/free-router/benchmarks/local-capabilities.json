@@ -1,0 +1,135 @@
+{
+  "when": 1789238866.787552,
+  "model": "qwen3.5-2b",
+  "routing_accuracy": 0.9333333333333333,
+  "routing_passed": true,
+  "cases": [
+    {
+      "task": "Elenca i campi serializzati presenti nel file indicato",
+      "expected": "fast",
+      "actual": "fast",
+      "ms": 1287,
+      "passed": true
+    },
+    {
+      "task": "Leggi il numero massimo di carte dalla configurazione",
+      "expected": "fast",
+      "actual": "fast",
+      "ms": 1057,
+      "passed": true
+    },
+    {
+      "task": "Estrai solo i percorsi dei file da questo log",
+      "expected": "fast",
+      "actual": "fast",
+      "ms": 958,
+      "passed": true
+    },
+    {
+      "task": "Posiziona il mazzo nella scena Unity e cattura la Main Camera",
+      "expected": "fast",
+      "actual": "fast",
+      "ms": 1020,
+      "passed": true
+    },
+    {
+      "task": "Verifica visivamente se i tre prefab sono allineati",
+      "expected": "fast",
+      "actual": "fast",
+      "ms": 1018,
+      "passed": true
+    },
+    {
+      "task": "Aggiungi un metodo che calcoli il danno oltre la corazza",
+      "expected": "code",
+      "actual": "code",
+      "ms": 1014,
+      "passed": true
+    },
+    {
+      "task": "Scrivi test per un attacco che pareggia la vita dello slot",
+      "expected": "code",
+      "actual": "code",
+      "ms": 1037,
+      "passed": true
+    },
+    {
+      "task": "Sostituisci il nome della variabile in queste tre righe C#",
+      "expected": "code",
+      "actual": "code",
+      "ms": 934,
+      "passed": true
+    },
+    {
+      "task": "Implementa la gestione di Retry-After nel proxy HTTP",
+      "expected": "code",
+      "actual": "code",
+      "ms": 1035,
+      "passed": true
+    },
+    {
+      "task": "Rimuovi un listener duplicato nel metodo OnEnable",
+      "expected": "code",
+      "actual": "fast",
+      "ms": 1036,
+      "passed": false
+    },
+    {
+      "task": "Per quale causa il turno parte due volte durante il rullo?",
+      "expected": "reasoning",
+      "actual": "reasoning",
+      "ms": 1052,
+      "passed": true
+    },
+    {
+      "task": "Confronta due strategie di sincronizzazione delle coroutine",
+      "expected": "reasoning",
+      "actual": "reasoning",
+      "ms": 1048,
+      "passed": true
+    },
+    {
+      "task": "Progetta una struttura per separare regole e presentazione",
+      "expected": "reasoning",
+      "actual": "reasoning",
+      "ms": 1042,
+      "passed": true
+    },
+    {
+      "task": "Indaga una perdita di memoria che compare dopo dodici partite",
+      "expected": "reasoning",
+      "actual": "reasoning",
+      "ms": 1042,
+      "passed": true
+    },
+    {
+      "task": "Spiega perche il pronostico diverge dalla risoluzione",
+      "expected": "reasoning",
+      "actual": "reasoning",
+      "ms": 1062,
+      "passed": true
+    }
+  ],
+  "coordination": [
+    {
+      "passed": false,
+      "ms": 3351,
+      "arguments": {
+        "subagent_type": "rapido",
+        "description": "Leggere il file GameManager.cs per trovare il limite dei 12 turni.",
+        "prompt": "Leggere il file GameManager.cs e trova il limite dei 12 turni. Non modificare file."
+      }
+    },
+    {
+      "passed": true,
+      "ms": 3282,
+      "arguments": {
+        "subagent_type": "specialista",
+        "prompt": "Correggi il controllo dei 12 turni in Assets/Scripts/Managers/GameManager.cs. Verifica in Unity.",
+        "description": "Correggi il controllo dei 12 turni in Assets/Scripts/Managers/GameManager.cs e verifica in Unity."
+      }
+    }
+  ],
+  "coordination_passed": false,
+  "scope": "Held-out routing + two delegation probes. Coordinator remains experimental until an end-to-end Unity task passes."
+}
