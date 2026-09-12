@@ -1,0 +1,43 @@
+{
+  "$schema": "https://app.kilo.ai/config.json",
+
+  "model": "llamacpp/qwen3.5-9b",
+  "default_agent": "locale",
+
+  "provider": {
+    "llamacpp": {
+      "models": {
+        "qwen3.5-9b": {
+          "name": "Qwen3.5 9B locale",
+          "tool_call": true,
+          "temperature": true,
+          "limit": {
+            "context": 32768,
+            "output": 4096
+          }
+        }
+      }
+    }
+  },
+
+  "mcp": {
+    "unity-mcp": {
+      "type": "local",
+      "command": [
+        "C:/Users/vulpi/.unity/relay/relay_win.exe",
+        "--mcp",
+        "--project-path",
+        "C:/Users/vulpi/OneDrive/Documenti/UnityProj/FlipCards"
+      ],
+      "timeout": 60000
+    }
+  },
+
+  "compaction": {
+    "auto": true,
+    "threshold_percent": 70,
+    "prune": true,
+    "tail_turns": 2,
+    "preserve_recent_tokens": 4000
+  }
+}

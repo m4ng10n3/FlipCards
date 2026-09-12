@@ -733,7 +733,14 @@ Oltre ai vincoli di LAYOUT_SPEC §7:
   formati diversi.
 - Le corsie devono restare centrate sulle finestre della cassa, **x 607 / 964,5 /
   1322** con passo 357,5 (misurate sull'alpha di `cabinet_illustrated`): rullo,
-  asse dei pronostici e carte stanno sugli stessi tre centri. Le carte sono sul
+  asse dei pronostici e carte stanno sugli stessi tre centri.
+  **Sono coordinate del Canvas nella risoluzione di riferimento 1920×1080, non pixel
+  di schermo.** Il `CanvasScaler` le moltiplica per il fattore della risoluzione vera:
+  a 2560×1440 il fattore è 1,333 e i centri a schermo diventano 809,33 / 1286 /
+  1762,67. Si verificano leggendo l'`anchoredPosition` delle corsie di `LaneAxisView`;
+  `WorldToScreenPoint` sui figli di `playerBoardRoot` dà valori diversi e vicini fra
+  loro (il tavolo è inclinato e scalato 0,04), e **non** significa che l'invariante
+  sia rotta. Le carte sono sul
   piano inclinato ma ruotate attorno al centro, quindi il centro proiettato
   coincide. Verificabile con `Camera.WorldToScreenPoint` sul centro delle corsie.
 - `CardOverlay` e `SlotOverlay` costruiscono i figli **a runtime**, non nel
