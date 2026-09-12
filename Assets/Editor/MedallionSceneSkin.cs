@@ -72,6 +72,9 @@ public static class MedallionSceneSkin
     public static void Prepare(Dictionary<string, Sprite> entries)
     {
         entries["scene_cabinet"] = Load("08_Integration/cabinet_clean");
+        var integrated = Resources.Load<CabinetArtDefinition>("ActiveCabinetArt");
+        if (integrated != null)
+            entries["scene_cabinet"] = Load("", AssetDatabase.GetAssetPath(integrated.illustration).Replace(".png", ""));
         entries["scene_table"] = Load("03_Table/table_original_medallion_empty");
         entries["scene_lever"] = Load("04_Controls/lever_rest");
         entries["scene_attack"] = Load("08_Integration/mushroom_clean");
@@ -105,10 +108,46 @@ public static class MedallionSceneSkin
             entries["lamp_spear_" + state] = Load("05_Lamps/atk_taper_" + state);
             entries["lamp_shield_" + state] = Load("05_Lamps/def_discharge_" + state);
         }
+
+        var atlas = Load("09_Instruments_v3/lamps_atlas");
+        // vita OFF (112,44,384,440), ON (112,532,384,440)
+        entries["lamp_v3_round_off"] = Slice("lamp_v3_round_off", atlas.texture, new Rect(112, 540, 384, 440));
+        entries["lamp_v3_round_on"]  = Slice("lamp_v3_round_on",  atlas.texture, new Rect(112, 52,  384, 440));
+        // attacco OFF (638,44,260,440), ON (638,532,260,440)
+        entries["lamp_v3_spear_off"] = Slice("lamp_v3_spear_off", atlas.texture, new Rect(638, 540, 260, 440));
+        entries["lamp_v3_spear_on"]  = Slice("lamp_v3_spear_on",  atlas.texture, new Rect(638, 52,  260, 440));
+        // difesa OFF (1046,74,380,410), ON (1046,562,380,410)
+        entries["lamp_v3_shield_off"] = Slice("lamp_v3_shield_off", atlas.texture, new Rect(1046, 540, 380, 410));
+        entries["lamp_v3_shield_on"]  = Slice("lamp_v3_shield_on",  atlas.texture, new Rect(1046, 52,  380, 410));
     }
 
     public static Material CabinetMaterial()
     {
+        var integrated = Resources.Load<CabinetArtDefinition>("ActiveCabinetArt");
+        if (integrated != null)
+        {
+            const string integratedPath = CabinetArtInstaller.BundleRoot + "IntegratedCabinet.mat";
+            var mat = AssetDatabase.LoadAssetAtPath<Material>(integratedPath);
+            var shader = Shader.Find("FlipCards/Integrated Cabinet Lamps");
+            if(shader == null) throw new System.InvalidOperationException("Integrated cabinet shader missing");
+            if(mat == null) { mat = new Material(shader); AssetDatabase.CreateAsset(mat, integratedPath); }
+            mat.shader = shader;
+            mat.SetTexture("_MaskTex", integrated.silhouette);
+            mat.SetVector("_SourceSize", integrated.sourceSize);
+            var positions = new Vector4[9]; var sizes = new Vector4[9]; var states = new Vector4[9];
+            for(int i=0;i<9;i++) {
+                var bank=integrated.banks[i];
+                positions[i]=new Vector4(bank.first.x,bank.first.y,bank.step.x,bank.step.y);
+                sizes[i]=new Vector4(bank.glassRadius.x,bank.glassRadius.y,bank.stat,0);
+                states[i]=new Vector4(0,-1,0,0);
+            }
+            var windows=new Vector4[3];
+            for(int i=0;i<3;i++){var r=integrated.windowRegions[i];windows[i]=new Vector4(r.x,r.y,r.width,r.height);}
+            mat.SetVectorArray("_GlassPositions",positions);mat.SetVectorArray("_GlassSizes",sizes);
+            mat.SetVectorArray("_BankStates",states);mat.SetVectorArray("_WindowRegions",windows);
+            EditorUtility.SetDirty(mat);
+            return mat;
+        }
         // ImageGen preserved the shape but delivered RGB. Reuse the authored alpha
         // texture in a UI material: no resampling or modification of either source.
         const string path = Root + "08_Integration/CabinetMasked.mat";

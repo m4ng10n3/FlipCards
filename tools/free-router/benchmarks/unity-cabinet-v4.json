@@ -1,0 +1,33 @@
+{
+  "when": 1789248003.0972393,
+  "task": "Monta i nuovi asset integrati della slot",
+  "model": "qwen3.5-2b",
+  "profile": "coordinator-cpu-16k",
+  "native_kilo": true,
+  "local_mount_passed": true,
+  "tool_calls": 4,
+  "model_requests": 5,
+  "total_tokens": 19008,
+  "compactions": 0,
+  "supervisor_refinements_after_kilo": [
+    "MeasuredRect deserialization",
+    "dark reel wells",
+    "white aperture key threshold"
+  ],
+  "final_bundle_digest": "9c7ba25783eef17e7159ee70fb8b59fc1f8f7bbc659cf8d6071d5d2d502fcb5b",
+  "final_unity_tests": {
+    "success": true,
+    "lamps": 63,
+    "valueSamples": 63,
+    "pixelSamples": 63,
+    "resonanceSamples": 6,
+    "rectangleSamples": 12,
+    "apertureSamples": 3,
+    "cameraId": 69480,
+    "frame": 1,
+    "limitation": "Deterministic samples and actual GPU rendering; timed reel animation is not certified by this test."
+  },
+  "online_handoff_tested": false,
+  "online_block": "Automatic approval review requires payload-specific authorization for api.kilo.ai",
+  "timed_animation_tested": false
+}

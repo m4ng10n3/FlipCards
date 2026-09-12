@@ -1,0 +1,55 @@
+{
+  "suite": "unity-lamps-v3-real-task",
+  "when": 1789245821.916656,
+  "session": "ses_f68af9402ffeFxmJ5qZo7b37Tb",
+  "model": "nvidia/nemotron-3-super-120b-a12b:free",
+  "router": "router/auto",
+  "passed": false,
+  "autonomous_completion": false,
+  "supervisor_completed_layout": true,
+  "tool_calls": 23,
+  "tool_counts": {
+    "glob": 4,
+    "read": 4,
+    "harness_checkpoint": 1,
+    "edit": 3,
+    "unity-mcp_Unity_RunCommand": 6,
+    "unity-mcp_Unity_GetConsoleLogs": 2,
+    "bash": 3
+  },
+  "finish_reasons": {
+    "tool-calls": 23,
+    "length": 1
+  },
+  "tokens_reported_by_kilo": {
+    "input": 772202,
+    "output": 10542,
+    "reasoning": 17244,
+    "total": 1171700
+  },
+  "interventions": [
+    "resume same session after output length limit without edits",
+    "stop ineffective log/wait sequence",
+    "repair lamp anchoring, raycast targets, initial sprites, sockets and overflow position",
+    "supervisor rebuild, runtime samples and Main Camera review"
+  ],
+  "verification": {
+    "lamps": 63,
+    "stat_assertions": 1803,
+    "resonance_samples": 6,
+    "second_rebuild_lamps": 63,
+    "console_errors_returned": 0,
+    "main_camera_id": 69480,
+    "timed_playtest_passed": false,
+    "timed_playtest_limitation": "Unity background frameCount stayed at 1; LateUpdate sampled directly"
+  },
+  "evidence": {
+    "kilo_trace": "runtime/kilo-lamps-v3.jsonl",
+    "kilo_original_diff": "runtime/kilo-lamps-before-review.patch",
+    "stat_test": "runtime/review-lamps-result.json",
+    "resonance_test": "runtime/resonance-lamps-result.json",
+    "idempotence": "runtime/lamps-count-result.json",
+    "screenshot": "reports/slot-lamps-v3.png"
+  },
+  "routing_effect": "This evaluation is recorded separately; synthetic workflow ranking is unchanged. Do not interpret existing benchmark eligibility as autonomous Unity qualification."
+}

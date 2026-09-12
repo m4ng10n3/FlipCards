@@ -17,10 +17,20 @@ $totalContext = 65536
 # K/V dimension 256, q8_0 = 34/32 bytes. Remaining runtime overhead measured ~1.37 GB.
 $kvGB = $totalContext * 6 * 2 * (256 + 256) * 34 / 32 / 1GB
 $requiredGB = (Get-Item -LiteralPath $modelPath).Length / 1GB + $kvGB + 1.5
-$marginGB = 1.0
+$marginGB = 2.0
 $parallelSlots = 2
 $deviceName = 'Vulkan0'
 $profileName = 'dual-32k'
+if ($memory.FreeVirtualMemory / 1MB -lt 8) {
+    # Measured Unity rebuilds + native Kilo consume transient commit. Keep a
+    # single CPU coordinator resident instead of competing for shared GPU RAM.
+    $totalContext = 16384
+    $parallelSlots = 1
+    $deviceName = 'none'
+    $profileName = 'coordinator-cpu-16k'
+    $kvGB = $totalContext * 6 * 2 * (256 + 256) * 34 / 32 / 1GB
+    $requiredGB = (Get-Item -LiteralPath $modelPath).Length / 1GB + $kvGB + 0.65
+}
 if ($memory.FreeVirtualMemory / 1MB -lt $requiredGB + $marginGB -or $memory.FreePhysicalMemory / 1MB -lt $requiredGB) {
     # Shared graphics memory competes with Unity. Small CPU context keeps the
     # classifier/extractor available when two full GPU slots cannot fit.
@@ -39,7 +49,7 @@ $serverPath = (Get-Command llama-server -ErrorAction Stop).Source
 $arguments = @('--model', ('"' + $modelPath + '"'), '--alias', 'qwen3.5-2b',
     '--device', $deviceName, '--ctx-size', $totalContext, '--parallel', $parallelSlots,
     '--cache-type-k', 'q8_0', '--cache-type-v', 'q8_0', '--flash-attn', 'on',
-    '--cache-ram', '0', '--ctx-checkpoints', '4', '--reasoning', 'off', '--jinja',
+    '--cache-ram', '0', '--ctx-checkpoints', '1', '--reasoning', 'off', '--jinja',
     '--batch-size', '128', '--ubatch-size', '128', '--threads', '4', '--threads-batch', '4', '--fit', 'on', '--fit-target', '1024',
     '--host', '127.0.0.1', '--port', $Port, '--api-key-file', ('"' + $keyPath + '"'),
     '--no-webui', '--temp', '0.2', '--top-p', '0.8', '--top-k', '20', '--min-p', '0')

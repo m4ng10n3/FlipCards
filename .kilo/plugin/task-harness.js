@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync, mkdirSync, renameSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { homedir } from 'node:os'
 import { tool } from '@kilocode/plugin/tool'
-import { REVISION, fresh, sync, before, checkpoint, summary, digest } from '../local-llm/harness.mjs'
+import { REVISION, fresh, sync, before, checkpoint, summary, digest, finishArtWorkflow } from '../local-llm/harness.mjs'
 
 const root = fileURLToPath(new URL('../../tools/free-router/runtime/harness/', import.meta.url))
 const states = new Map()
@@ -27,6 +27,7 @@ export default {
       const agent = messages.findLast(m => m.info?.role === 'user')?.info?.agent
       if (!managed.has(agent)) return null
       const state = sync(states.get(id), messages)
+      finishArtWorkflow(state)
       save(id, state)
       return state
     }
@@ -88,7 +89,17 @@ export default {
       },
       'tool.execute.after': async (input, output) => {
         if (input.tool === 'harness_checkpoint') return
-        if (!await stateFor(input.sessionID)) return
+        const state = await stateFor(input.sessionID)
+        if (!state) return
+        if (input.tool === 'unity_art_bundle' && input.args?.action === 'inspect' && state.phase === 'inspect') {
+          const data=JSON.parse(output.output)
+          if(data.success && data.contract?.length===3) {
+            checkpoint(state,{phase:'plan',criteria:data.contract,note:'Contratto del bundle preparato, registrato dal harness locale.'})
+            save(input.sessionID,state)
+            data.contractRegistered=true;data.next='Contratto registrato dal harness. Ora chiama unity_art_bundle action=install.'
+            output.output=JSON.stringify(data)
+          }
+        }
         // This marker links acceptance checks to the actual Kilo tool record.
         output.output += '\n[HARNESS evidence=' + input.callID + ']'
       },

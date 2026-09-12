@@ -105,9 +105,21 @@ public static class MedallionSceneBuilder
         var overlay=go.AddComponent<TableOverlayController>();
         Art("StarryVelvetTable",root,"scene_table",0,0,W,H);
         var under=Rect("MachineUnder",root,MachineX,MachineY,MachineW,MachineH);
+        var integratedArt=Resources.Load<CabinetArtDefinition>("ActiveCabinetArt");
+        if(integratedArt!=null) {
+            // Dark mechanical wells remain behind the reel faces during entry
+            // and around their rounded edges; the aperture never exposes the table.
+            for(int i=0;i<integratedArt.windowRegions.Length;i++) {
+                var r=integratedArt.windowRegions[i];
+                UiBuild.Fill(Rect("ReelWell"+i,under,r.x/integratedArt.sourceSize.x*MachineW,
+                    r.y/integratedArt.sourceSize.y*MachineH,r.width/integratedArt.sourceSize.x*MachineW,
+                    r.height/integratedArt.sourceSize.y*MachineH),new Color(.018f,.024f,.023f));
+            }
+        }
         var enemy=Board(root,"EnemyLanes","AIBoardRoot",LaneCenter,EnemyTop,SlotOverlay.CellW,SlotOverlay.CellH,EnemyScale,0f);
         var cabinet=Art("Cabinet",root,"scene_cabinet",MachineX,MachineY,MachineW,MachineH);
         cabinet.material=MedallionSceneSkin.CabinetMaterial();
+        if(integratedArt!=null)cabinet.gameObject.AddComponent<CabinetLampController>().definition=integratedArt;
         var over=Rect("MachineOver",root,MachineX,MachineY,MachineW,MachineH);
         var chrome=under.gameObject.AddComponent<ReelChrome>();chrome.underLayer=over;chrome.overLayer=over;
         chrome.laneReferenceRoot=enemy;chrome.cellTop=EnemyTop-MachineY;chrome.cellWidth=SlotOverlay.CellW*EnemyScale;chrome.cellHeight=SlotOverlay.CellH*EnemyScale;chrome.sliverHeight=0;chrome.highlightBleed=0;

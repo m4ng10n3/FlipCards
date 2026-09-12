@@ -5,6 +5,36 @@ limiti reali dei benchmark, profili di memoria e verifiche del caso delle slot.
 La precedente integrazione di sola lettura descritta qui sotto non qualificava
 un agente per modifiche Unity complete. Ora il router richiede gli hook v4.
 
+## Cassa integrata e condivisione online (12 settembre)
+
+Prompt in Kilo, agente **auto**, modello **router/auto**:
+**Monta i nuovi asset integrati della slot**.
+Il nuovo strumento `unity_art_bundle` possiede il manifest delle misure e chiama
+il builder via MCP Unity. Qwen 2B coordina quattro operazioni locali:
+inspect, install, verify, capture. Auto passa poi la cattura a un modello gratuito
+con vista qualificato dai benchmark. Il montaggio locale è stato eseguito realmente
+da Kilo; la prova del passaggio online è ancora in attesa dell'approvazione specifica
+richiesta dalla revisione automatica dell'ambiente. Vedi il rapporto v4.
+
+**Codice, asset, struttura e screenshot del progetto sono condivisibili online.**
+Il gateway è `https://api.kilo.ai/api/openrouter/v1/chat/completions`;
+la selezione resta limitata ai modelli `:free` qualificati e al budget configurato.
+`privacy.py` controlla l'uscita e ferma credenziali riconoscibili, chiavi private,
+token, password assegnate e contenuti marcati riservati. I normali percorsi e
+contenuti di progetto non causano un blocco. Nessun contenuto viene cancellato
+silenziosamente dalla cronologia e i messaggi d'errore non riportano il segreto.
+I profili esplicitamente locali non hanno fallback online.
+
+Il filtro non può riconoscere ogni informazione personale o un segreto dentro
+un'immagine. Tali contenuti devono restare fuori dal contesto online: usare il
+profilo locale o marcare il testo con un blocco XML `private`. La procedura grafica
+allega esclusivamente la Main Camera del gioco, non il desktop o l'editor.
+
+Con Unity e Kilo aperti il monitor seleziona **CPU, 16k, una sola istanza** quando
+il commit libero è sotto 8 GB. Due contesti GPU da 32k restano possibili solo con
+margine sufficiente. La prova di montaggio riuscita ha usato CPU 16k; il tentativo
+precedente a due contesti GPU è stato fermato dal monitor per memoria insufficiente.
+
 
 L'interfaccia di lavoro resta **Kilo in VS Code**. Il pannello aggiunto si apre da
 **Ctrl+Shift+P → FlipCards Auto: apri pannello**, oppure dalla voce **Auto locale**

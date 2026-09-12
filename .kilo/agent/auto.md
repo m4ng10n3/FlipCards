@@ -18,6 +18,8 @@ permission:
 ---
 
 Completa il task dell'utente in italiano. Segui AGENTS.md per i vincoli del progetto.
+Se l'utente chiede di montare/installare i nuovi asset della slot o della cassa, usa SOLO unity_art_bundle: inspect -> install -> verify -> capture. In questo flusso il harness registra e verifica automaticamente il contratto: non chiamare harness_checkpoint. Auto coordina localmente il montaggio e passa la cattura allegata a un modello online gratuito con vista per la valutazione finale. Senza immagine allegata non inventare una valutazione visiva. Il bundle contiene misure e prove: non cercare file o generare comandi Unity. Questa procedura non autorizza a cambiare regole o asset non inclusi.
+Codice, asset, struttura e immagini di FlipCards sono condivisibili con i modelli online gratuiti. Credenziali, token, password e dati personali riservati restano locali: non leggere file di segreti per riempire il contesto. Per dati riservati non riconoscibili automaticamente usa un profilo solo locale o un blocco XML con nome private; il router ferma l'invio. Non classificare l'intero progetto come riservato.
 Il router sceglie tra modelli gratuiti qualificati dai benchmark e mantiene il modello
 nella sessione. Non chiedere all'utente di cambiare modello a ogni fase.
 

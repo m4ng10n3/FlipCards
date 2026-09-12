@@ -11,42 +11,59 @@ public sealed class MedallionInstruments : MonoBehaviour
     TMP_Text _hpOverflow, _atkOverflow, _guardOverflow;
     SlotBatchManager _batch;
 
-    // Le sedi sono dimensionate sui valori che le caselle hanno davvero, non a
-    // sette per statistica come nella specifica del kit:
-    //   vita     3..5  -> 7 sedi (la fila rossa del riferimento, con margine)
-    //   attacco  1..3  -> 3 sedi: con cinque, due restavano sempre spente e la
-    //                    fila ambra non diceva piu' niente
-    //   guardia  0..5  -> 5 sedi, e sono quelle che si allargano: il tubo a
-    //                    scarica e' l'asset piu' ricco del kit e a 22px
-    //                    schiacciati non si leggeva.
-    // Oltre le sedi disponibili compare il totale numerico, come prima.
     void Start()
     {
+        // The integrated artwork is driven once on the cabinet material itself.
+        if (Resources.Load<CabinetArtDefinition>("ActiveCabinetArt") != null) { enabled = false; return; }
         // Quote dal centro della colonna: la colonna e' larga quanto la faccia
         // del rullo, e quella segue la finestra della cassa, non una costante.
         float c = ((RectTransform)transform).rect.width * .5f;
-        _hp = Bank("Health", c - 126, 140, 252, 62, 7, "round", out _hpOverflow);
-        _atk = Bank("Attack", c - 132, 478, 72, 84, 3, "spear", out _atkOverflow);
-        _guard = Bank("Guard", c - 46, 518, 182, 44, 5, "shield", out _guardOverflow);
+        _hp = BankHealth(c - 126, 140, 252, 62, 7, out _hpOverflow);
+        _atk = BankAttack(c - 178, 207, 26, 245, 7, out _atkOverflow);
+        _guard = BankGuard(c - 126, 482, 252, 68, 7, out _guardOverflow);
     }
 
-    Image[] Bank(string name, float x, float y, float width, float height, int capacity, string shape, out TMP_Text overflow)
+    Image[] BankHealth(float x, float y, float width, float height, int capacity, out TMP_Text overflow)
     {
-        var root = UiBuild.Rect(name, transform);
+        return Bank("Health", "round", transform, x, y, width, height, capacity, 36, 62, 32, 40, false, out overflow);
+    }
+
+    Image[] BankAttack(float x, float y, float width, float height, int capacity, out TMP_Text overflow)
+    {
+        return Bank("Attack", "spear", transform, x, y, width, height, capacity, 26, 35, 22, 32, true, out overflow);
+    }
+
+    Image[] BankGuard(float x, float y, float width, float height, int capacity, out TMP_Text overflow)
+    {
+        return Bank("Guard", "shield", transform, x, y, width, height, capacity, 36, 68, 32, 44, false, out overflow);
+    }
+
+    Image[] Bank(string name, string shape, Transform parent, float x, float y, float width, float height, int capacity, int cellWidth, int cellHeight, int imageWidth, int imageHeight, bool vertical, out TMP_Text overflow)
+    {
+        var root = UiBuild.Rect(name, parent);
         UiBuild.Band(root, x, y, width, height);
+        // Dark sockets separate the indicators from the illustrated reel.
+        UiBuild.Fill(root, new Color32(111, 83, 36, 255));
+        var recess = UiBuild.Rect("Recess", root);
+        UiBuild.Band(recess, 1, 1, width - 2, height - 2);
+        UiBuild.Fill(recess, new Color32(5, 13, 14, 255));
+
         var images = new Image[capacity];
         for (int i = 0; i < capacity; i++)
         {
             var rt = UiBuild.Rect("Lamp" + i, root);
-            UiBuild.Band(rt, i * width / capacity, 0, width / capacity - 3, height);
+            float left = vertical ? (cellWidth - imageWidth) * .5f : i * cellWidth + (cellWidth - imageWidth) * .5f;
+            float top = vertical ? i * cellHeight + (cellHeight - imageHeight) * .5f : 3;
+            UiBuild.Band(rt, left, top, imageWidth, imageHeight);
             images[i] = UiBuild.Fill(rt, Color.white);
-            images[i].sprite = UiSkin.Sprite("lamp_" + shape + "_off");
-            // Il tubo a scarica e' quasi quadrato: senza preserveAspect veniva
-            // stirato in una scheggia verticale e le griglie sparivano.
+            images[i].sprite = UiSkin.Sprite("lamp_v3_" + shape + "_off");
             images[i].preserveAspect = true;
         }
+
         overflow = UiBuild.Text(name + "Total", root, "", 17, GamePalette.Paper, TextAlignmentOptions.Right);
-        UiBuild.Band(overflow.rectTransform, width - 35, height - 8, 35, 22);
+        // Totals stay clear of both the lamps and the reel window.
+        UiBuild.Band(overflow.rectTransform, vertical ? -6 : width - 38,
+            vertical ? height + 2 : height - 18, 38, 18);
         return images;
     }
 
@@ -77,7 +94,7 @@ public sealed class MedallionInstruments : MonoBehaviour
         for (int i = 0; i < bank.Length; i++)
         {
             bool lit = rolling ? (chase + i) % bank.Length < 2 : i < value;
-            bank[i].sprite = UiSkin.Sprite("lamp_" + shape + (lit ? "_on" : "_off"));
+            bank[i].sprite = UiSkin.Sprite("lamp_v3_" + shape + (lit ? "_on" : "_off"));
         }
         overflow.text = !rolling && value > bank.Length ? value.ToString() : "";
     }

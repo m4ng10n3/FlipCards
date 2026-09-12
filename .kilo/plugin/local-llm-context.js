@@ -21,7 +21,7 @@ function readText(path) {
   }
 }
 
-function replaceAgentsBlocks(text, digest, digestPath = DIGEST_PATH) {
+export function replaceAgentsBlocks(text, digest, digestPath = DIGEST_PATH) {
   let result = text
   for (const header of text.matchAll(AGENTS_HEADER)) {
     const content = readText(header[1])

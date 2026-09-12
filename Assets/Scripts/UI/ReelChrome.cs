@@ -59,6 +59,7 @@ public class ReelChrome : MonoBehaviour
     readonly List<Column> _columns = new List<Column>();
     SlotBatchManager _batch;
     bool _built;
+    bool _integratedCabinet;
     int _lastArmedMask = -1;
     bool _lastRolling;
     int _lastPayoutSerial = -1;
@@ -107,7 +108,7 @@ public class ReelChrome : MonoBehaviour
         for (int i = 0; i < _columns.Count; i++)
         {
             if (_columns[i].highlight != null)
-                _columns[i].highlight.enabled = (armedMask & (1 << i)) != 0;
+                _columns[i].highlight.enabled = !_integratedCabinet && (armedMask & (1 << i)) != 0;
             if (_columns[i].blur != null)
                 _columns[i].blur.enabled = rolling;
         }
@@ -118,6 +119,7 @@ public class ReelChrome : MonoBehaviour
     void Build()
     {
         _built = true;
+        _integratedCabinet = Resources.Load<CabinetArtDefinition>("ActiveCabinetArt") != null;
 
         if (UiSkin.Sprite("scene_cabinet") != null) return;
 

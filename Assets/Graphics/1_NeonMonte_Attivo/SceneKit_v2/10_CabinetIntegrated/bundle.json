@@ -1,0 +1,229 @@
+{
+  "id": "cabinet-integrated-v4",
+  "cabinet": "Assets/Graphics/1_NeonMonte_Attivo/SceneKit_v2/10_CabinetIntegrated/cabinet.png",
+  "mask": "Assets/Graphics/1_NeonMonte_Attivo/SceneKit_v2/02_Machine/cabinet_illustrated.png",
+  "sourceSize": {
+    "x": 1774,
+    "y": 887
+  },
+  "banks": [
+    {
+      "lane": 0,
+      "stat": 0,
+      "first": {
+        "x": 224,
+        "y": 190
+      },
+      "step": {
+        "x": 61,
+        "y": 0
+      },
+      "glassRadius": {
+        "x": 24,
+        "y": 24
+      },
+      "totalRect": {
+        "x": 379,
+        "y": 229,
+        "width": 60,
+        "height": 24
+      }
+    },
+    {
+      "lane": 0,
+      "stat": 1,
+      "first": {
+        "x": 193.5,
+        "y": 305
+      },
+      "step": {
+        "x": 0,
+        "y": 47.5
+      },
+      "glassRadius": {
+        "x": 11.5,
+        "y": 20
+      },
+      "totalRect": {
+        "x": 180.5,
+        "y": 610,
+        "width": 28,
+        "height": 20
+      }
+    },
+    {
+      "lane": 0,
+      "stat": 2,
+      "first": {
+        "x": 221,
+        "y": 691
+      },
+      "step": {
+        "x": 61.3,
+        "y": 0
+      },
+      "glassRadius": {
+        "x": 22,
+        "y": 34
+      },
+      "totalRect": {
+        "x": 376,
+        "y": 741,
+        "width": 60,
+        "height": 24
+      }
+    },
+    {
+      "lane": 1,
+      "stat": 0,
+      "first": {
+        "x": 703,
+        "y": 190
+      },
+      "step": {
+        "x": 61.4,
+        "y": 0
+      },
+      "glassRadius": {
+        "x": 24,
+        "y": 24
+      },
+      "totalRect": {
+        "x": 858,
+        "y": 229,
+        "width": 60,
+        "height": 24
+      }
+    },
+    {
+      "lane": 1,
+      "stat": 1,
+      "first": {
+        "x": 673,
+        "y": 305
+      },
+      "step": {
+        "x": 0,
+        "y": 47.5
+      },
+      "glassRadius": {
+        "x": 11.5,
+        "y": 20
+      },
+      "totalRect": {
+        "x": 660,
+        "y": 610,
+        "width": 28,
+        "height": 20
+      }
+    },
+    {
+      "lane": 1,
+      "stat": 2,
+      "first": {
+        "x": 701,
+        "y": 691
+      },
+      "step": {
+        "x": 61.3,
+        "y": 0
+      },
+      "glassRadius": {
+        "x": 22,
+        "y": 34
+      },
+      "totalRect": {
+        "x": 856,
+        "y": 741,
+        "width": 60,
+        "height": 24
+      }
+    },
+    {
+      "lane": 2,
+      "stat": 0,
+      "first": {
+        "x": 1184,
+        "y": 190
+      },
+      "step": {
+        "x": 61.4,
+        "y": 0
+      },
+      "glassRadius": {
+        "x": 24,
+        "y": 24
+      },
+      "totalRect": {
+        "x": 1339,
+        "y": 229,
+        "width": 60,
+        "height": 24
+      }
+    },
+    {
+      "lane": 2,
+      "stat": 1,
+      "first": {
+        "x": 1152,
+        "y": 305
+      },
+      "step": {
+        "x": 0,
+        "y": 47.5
+      },
+      "glassRadius": {
+        "x": 11.5,
+        "y": 20
+      },
+      "totalRect": {
+        "x": 1139,
+        "y": 610,
+        "width": 28,
+        "height": 20
+      }
+    },
+    {
+      "lane": 2,
+      "stat": 2,
+      "first": {
+        "x": 1183,
+        "y": 691
+      },
+      "step": {
+        "x": 61.5,
+        "y": 0
+      },
+      "glassRadius": {
+        "x": 22,
+        "y": 34
+      },
+      "totalRect": {
+        "x": 1338,
+        "y": 741,
+        "width": 60,
+        "height": 24
+      }
+    }
+  ],
+  "windowRegions": [
+    {
+      "x": 208,
+      "y": 268,
+      "width": 410,
+      "height": 350
+    },
+    {
+      "x": 680,
+      "y": 268,
+      "width": 425,
+      "height": 350
+    },
+    {
+      "x": 1165,
+      "y": 268,
+      "width": 410,
+      "height": 350
+    }
+  ]
+}

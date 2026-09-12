@@ -15,6 +15,7 @@ from urllib.parse import urlsplit
 import policy
 import streaming
 import budget
+import privacy
 
 ROOT = Path(__file__).resolve().parent
 PORT = int(os.environ.get('ROUTER_PORT', '8099'))
@@ -215,6 +216,8 @@ def worker_status():
 
 
 def upstream(model, payload, local=False, worker=False):
+    if not local:
+        privacy.check(payload, [KEY_FILE])
     body = dict(payload)
     config = SETTINGS['worker'] if worker else SETTINGS['local']
     body['model'] = config['model'] if local else model
@@ -329,6 +332,8 @@ class Handler(BaseHTTPRequestHandler):
         if payload.get('tools') and SETTINGS.get('require_harness', True) and (self.headers.get('X-FlipCards-Harness') != '4' or not self.headers.get('X-FlipCards-Session')):
             return self.error(400, 'Harness Kilo v4 non caricato. Nel pannello Auto premi Ricarica Kilo, poi riprendi il task. Nessuna richiesta inviata ai modelli.')
         payload = policy.role_payload(payload, self.headers.get('X-FlipCards-Agent'))
+        if requested == 'auto' and policy.art_bundle_task(payload) and not any(t.get('function', {}).get('name') == 'unity_art_bundle' for t in payload.get('tools', [])):
+            return self.error(400, 'Il montaggio richiede il nuovo strumento locale unity_art_bundle. Premi Ricarica Kilo nel pannello Auto locale, poi ripeti il prompt. Nessuna richiesta inviata al modello.')
         key = policy.session_key(payload, self.headers.get('X-FlipCards-Session'))
         mutex = _session_locks[int(key[:8], 16) % len(_session_locks)]
         if not mutex.acquire(timeout=1):
@@ -341,19 +346,27 @@ class Handler(BaseHTTPRequestHandler):
             mutex.release()
 
     def route(self, payload, requested, key):
-        local = requested in ('locale', 'rapido', 'coordinatore')
-        worker = requested in ('rapido', 'coordinatore')
+        bundle_local = requested == 'auto' and policy.art_bundle_task(payload) and not policy.image_count(payload)
+        local = requested in ('locale', 'rapido', 'coordinatore') or bundle_local
+        worker = requested in ('rapido', 'coordinatore') or bundle_local
         local_config = worker_config() if worker else SETTINGS['local']
         stream = bool(payload.get('stream'))
         payload = dict(payload)
+        if bundle_local:
+            requested_output = payload.pop('max_completion_tokens', None) or payload.get('max_tokens') or local_config['output']
+            payload['max_tokens'] = min(requested_output, local_config['output'])
         if not payload.get('max_tokens') and not payload.get('max_completion_tokens'):
             payload['max_tokens'] = local_config['output'] if local else 8192
         images = bool(policy.image_count(payload))
         if local:
             if images or policy.input_tokens(payload) + int(payload.get('max_completion_tokens') or payload.get('max_tokens')) > local_config['context']:
                 return self.error(400, 'Profilo locale %s: input stimato %s + output %s, contesto %s, immagini %s. Riduci il sotto-task o usa Auto; nessun invio online automatico.' % (local_config.get('profile', requested), policy.input_tokens(payload), payload.get('max_completion_tokens') or payload.get('max_tokens'), local_config['context'], images))
-            group, why, chain = 'local', 'solo locale esplicito', [local_config['model']]
+            group, why, chain = 'local', ('montaggio bundle: coordinamento locale senza fallback online' if bundle_local else 'solo locale esplicito'), [local_config['model']]
         else:
+            try:
+                privacy.check(payload, [KEY_FILE])
+            except privacy.PrivatePayload as exc:
+                return self.error(400, str(exc))
             catalog = refresh_catalog()
             pinned = _sticky.get(key, {})
             if time.time() - pinned.get('when', 0) > SETTINGS['session_ttl_seconds']:

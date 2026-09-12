@@ -1,0 +1,51 @@
+{
+  "destination": "https://api.kilo.ai/api/openrouter/v1/chat/completions",
+  "purpose": "Free vision review after local Kilo/Unity assembly",
+  "eligible_vision_models_at_preparation": [
+    "stepfun/step-3.7-flash:free"
+  ],
+  "user_prompt": "Monta i nuovi asset integrati della slot",
+  "project_context": [
+    "Native Kilo operating instructions",
+    "Compact ART-WORKFLOW instructions",
+    "Four unity_art_bundle calls and results: paths, bundle digest, lamp counts, installation result, measured tests",
+    "Game Main Camera JPEG attachment"
+  ],
+  "workflow_instructions": "Montaggio bundle grafico preparato FlipCards. Il prompt breve dell'utente autorizza il montaggio e la verifica, non la riscrittura di gioco o strumenti.\nUsa SOLO unity_art_bundle con queste quattro azioni, una per volta: inspect, install, verify, capture. Il harness registra il piano da inspect e chiude il contratto automatico SOLO dopo verify e capture riusciti sullo stesso bundle. Non chiamare harness_checkpoint: e' gestito automaticamente. Dopo capture non chiamare altri strumenti: rispondi con installazione, controlli e limiti. Con Auto il coordinamento testuale e' locale; la cattura allegata passa a un modello online gratuito con vista per valutare integrazione della cassa, ingombri, sette luci per banco e difetti visibili. Se la cattura non e' allegata non dichiarare di averla vista. Se qualcosa fallisce fermati con il motivo concreto, non inventare correzioni o ripetere attese. Massimo otto chiamate operative; nessun bash, ricerca file o generazione C# necessaria.\nLa procedura locale possiede quote e percorsi nel manifest; conserva regole di combattimento, carte, rulli, scene e stato temporaneo dei test. Usa il builder ufficiale, uscita Play separata, Main Camera esplicita, controlli di shader e pixel reali. Non si modificano scene a mano o PackageCache. La verifica campiona valori, bonus, morte, Retro, risonanza e accensione grafica; non certifica l'animazione temporizzata del reel. Riporta questa limitazione. Codice, asset e immagini del progetto sono autorizzati online; credenziali, chiavi, password e informazioni personali riservate restano locali. Non leggere file di segreti per inserirli nel contesto.\n",
+  "verification": {
+    "success": true,
+    "action": "verify",
+    "bundleDigest": "9c7ba25783eef17e7159ee70fb8b59fc1f8f7bbc659cf8d6071d5d2d502fcb5b",
+    "bundle": "cabinet-integrated-v4",
+    "tests": {
+      "success": true,
+      "lamps": 63,
+      "valueSamples": 63,
+      "pixelSamples": 63,
+      "resonanceSamples": 6,
+      "rectangleSamples": 12,
+      "apertureSamples": 3,
+      "cameraId": 69480,
+      "frame": 1,
+      "limitation": "Deterministic samples and actual GPU rendering; timed reel animation is not certified by this test."
+    },
+    "console": {
+      "logs": [],
+      "totalCount": 0,
+      "errorCount": 0,
+      "warningCount": 0
+    },
+    "next": "capture; inspect the returned image before completion"
+  },
+  "image": {
+    "file": "cabinet-integrated-v4.jpg",
+    "sha256": "e5c8e48801ec19d15f22857173a6d9680574688c967e3fa75361681f827f989b",
+    "bytes": 1045724
+  },
+  "excluded": [
+    "Desktop or editor screenshot",
+    "Credential files",
+    "Full project archive"
+  ],
+  "status": "Prepared locally; not sent. Payload-specific authorization requested by automatic approval review."
+}

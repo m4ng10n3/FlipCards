@@ -18,6 +18,10 @@ def session_key(payload, session_id=None):
 
 
 def role_payload(payload, agent):
+    if agent == 'auto' and art_bundle_task(payload):
+        result = dict(payload)
+        result['tools'] = [t for t in payload.get('tools', []) if t.get('function', {}).get('name') == 'unity_art_bundle']
+        return result
     if agent not in ('coordinatore', 'rapido'):
         return payload
     result = dict(payload)
@@ -26,6 +30,15 @@ def role_payload(payload, agent):
         allowed = {'read', 'grep', 'glob'}
     result['tools'] = [t for t in payload.get('tools', []) if t.get('function', {}).get('name') in allowed]
     return result
+
+
+def art_bundle_task(payload):
+    users = [m for m in payload.get('messages', []) if m.get('role') == 'user']
+    if not users:
+        return False
+    content = users[-1].get('content', '')
+    text = content if isinstance(content, str) else ' '.join(p.get('text', '') for p in content if isinstance(p, dict))
+    return len(text) < 400 and bool(re.search(r'\b(monta\w*|installa\w*)\b', text, re.I)) and 'asset' in text.lower() and bool(re.search(r'slot|cassa', text, re.I))
 
 
 def image_count(payload):

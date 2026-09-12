@@ -516,7 +516,7 @@ MonoBehaviour:
   - key: glyph_thorn
     sprite: {fileID: 21300000, guid: 8ddd18a4974215d4e865e24e18504511, type: 3}
   - key: scene_cabinet
-    sprite: {fileID: 21300000, guid: 5fd16ce8049b92a4f9c9dbd5baf40e5c, type: 3}
+    sprite: {fileID: 21300000, guid: acae4d4d2dacf054dba3a578465eb8fb, type: 3}
   - key: scene_table
     sprite: {fileID: 21300000, guid: 268e2791789c2a946a8518913423f483, type: 3}
   - key: scene_lever
@@ -553,4 +553,16 @@ MonoBehaviour:
     sprite: {fileID: 21300000, guid: 5a490dfefe733c547bace294abc80524, type: 3}
   - key: lamp_shield_off
     sprite: {fileID: 21300000, guid: 0594f29fe5f700e47a1407e7cdad6a95, type: 3}
+  - key: lamp_v3_round_off
+    sprite: {fileID: 21300000, guid: 61149895876df7f4daaa334fe1e7e936, type: 2}
+  - key: lamp_v3_round_on
+    sprite: {fileID: 21300000, guid: f154f3f48aa1b184bbee655031332750, type: 2}
+  - key: lamp_v3_spear_off
+    sprite: {fileID: 21300000, guid: 6ff01434d170a1f4a87f5fd61b1cf3a1, type: 2}
+  - key: lamp_v3_spear_on
+    sprite: {fileID: 21300000, guid: 35731f0ec71b6d348874812dd8adb3e3, type: 2}
+  - key: lamp_v3_shield_off
+    sprite: {fileID: 21300000, guid: c21c34fe272c1fb47993a2275e4ce6bf, type: 2}
+  - key: lamp_v3_shield_on
+    sprite: {fileID: 21300000, guid: 43f42a7ff8c5de04f8e169ccaa9c585a, type: 2}
   neonMonte: 1
