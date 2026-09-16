@@ -1,32 +1,9 @@
 using System.Collections.Generic;
-using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-/// <summary>
-/// Asse delle corsie: fra il fronte nemico e quello del giocatore dice, corsia
-/// per corsia, cosa succede se si attacca adesso, e nei varchi fra una corsia e
-/// l'altra disegna le insegne, cioe' i bonus che una carta coperta passa alla
-/// vicina della sua fazione.
-///
-/// E' la traduzione a schermo di LaneResolver e SynergyResolver, e usa gli
-/// stessi metodi che poi risolvono il colpo: quello che si legge qui e' quello
-/// che succede. In particolare la guardia mostrata e' quella **efficace**
-/// (<see cref="SynergyResolver.EffectiveSlotBlock"/>), quindi in una corsia in
-/// risonanza si legge zero — che e' il punto della risonanza.
-///
-/// Le tre cose che il giocatore decide guardando questa banda:
-///  - dove puo' <b>sfondare</b>, cioe' fare piu' danno della vita che resta alla
-///    casella, perche' l'eccedenza la paga il boss;
-///  - dove sta per <b>passare</b> un colpo, cioe' dove la sua carta non ha
-///    abbastanza vita e il resto arriva ai suoi HP;
-///  - dove conviene spostare un'insegna, perche' i varchi dicono a chi sta
-///    dando il suo numero e a chi lo darebbe.
-///
-/// Le colonne si allineano leggendo la posizione reale delle corsie, quindi
-/// seguono lo swap e funzionano con qualunque numero di corsie.
-/// </summary>
+/// <summary>Lane resonance and adjacent banners. Damage forecasts live on the cabinet lights and boss HUD.</summary>
 public class LaneAxisView : MonoBehaviour
 {
     [Header("Riferimenti")]
@@ -38,15 +15,8 @@ public class LaneAxisView : MonoBehaviour
     class Column
     {
         public RectTransform root;
-        public TextMeshProUGUI main;
-        public TextMeshProUGUI counter;
-        public Image rule;
-        public Image readout;    // freccia del kit: chi colpisce, o parata
         public Image resonance;  // scudo spezzato: in questa corsia nessuno para
     }
-
-    /// <summary>Esito della corsia, nei tre indicatori che il kit disegna.</summary>
-    enum Readout { None, Up, Down, Block }
 
     /// <summary>Un'insegna accesa nel varco: da quale corsia, verso quale, con che simbolo.</summary>
     struct Banner
@@ -68,15 +38,12 @@ public class LaneAxisView : MonoBehaviour
     readonly List<Column> _columns = new List<Column>();
     readonly List<Connector> _connectors = new List<Connector>();
     readonly List<Banner> _banners = new List<Banner>(4);
-    readonly StringBuilder _sb = new StringBuilder(48);
 
     RectTransform _rt;
-    bool _skinnedReadout;
 
     void Awake()
     {
         _rt = (RectTransform)transform;
-        _skinnedReadout = UiSkin.Sprite(UiSkin.ReadoutUp) != null;
     }
 
     void LateUpdate()
@@ -93,7 +60,7 @@ public class LaneAxisView : MonoBehaviour
         for (int i = 0; i < lanes; i++)
         {
             float x = LocalCenterX(reference, i);
-            PlaceColumn(_columns[i], x);
+            _columns[i].root.anchoredPosition = new Vector2(x, 0f);
             RefreshColumn(gm, _columns[i], i);
 
             if (i >= lanes - 1) continue;
@@ -108,103 +75,8 @@ public class LaneAxisView : MonoBehaviour
     void RefreshColumn(GameManager gm, Column col, int lane)
     {
         var card = gm.GetPlayerCardAtLane(lane);
-        var slot = gm.GetEnemySlotAtLane(lane);
         bool resonant = SynergyResolver.Resonates(gm, lane);
 
-        string main, counter = string.Empty;
-        Color color;
-        Readout readout;
-
-        if (card != null && slot != null)
-        {
-            if (card.side == Side.Fronte)
-            {
-                int atk = card.ComputeAttackDamage() + (gm.CanAct ? SynergyResolver.AttackBonus(gm, lane) : 0);
-                int guard = SynergyResolver.EffectiveSlotBlock(gm, lane);
-                int net = Mathf.Max(0, atk - guard);
-                main = Compose(true, atk, guard, net);
-                color = net > 0 ? GamePalette.Good : GamePalette.Neutral;
-                readout = net > 0 ? Readout.Up : Readout.Block;
-
-                // Il traboccamento e' l'unica via al boss finche' la corazza
-                // tiene: senza questa riga il giocatore vede "3" e non sa se
-                // sta facendo qualcosa o riempiendo un secchio bucato.
-                if (net > slot.health) counter = $"SFONDA · boss −{net - slot.health}";
-                else if (net == slot.health) counter = "rompe la casella";
-                else if (net > 0) counter = $"le restano {slot.health - net}";
-
-                // La carta colpisce per prima; se la casella sopravvive ed e'
-                // carica, risponde. Ed e' li' che si vede se la corsia regge.
-                if (slot.side == Side.Fronte && net < slot.health)
-                {
-                    int back = Mathf.Max(0, slot.def.atkDamage + slot.tempAtkBonus
-                                          - SynergyResolver.EffectiveCardBlock(gm, lane));
-                    string risposta = back > card.health
-                        ? $"risposta {back} · PASSA −{back - card.health}"
-                        : $"risposta {back}";
-                    counter = string.IsNullOrEmpty(counter) ? risposta : counter + " / " + risposta;
-                }
-            }
-            else if (slot.side == Side.Fronte)
-            {
-                int atk = slot.def.atkDamage + slot.tempAtkBonus;
-                int guard = SynergyResolver.EffectiveCardBlock(gm, lane);
-                int net = Mathf.Max(0, atk - guard);
-                main = Compose(false, atk, guard, net);
-                color = net > 0 ? GamePalette.Danger : GamePalette.Neutral;
-                readout = net > 0 ? Readout.Down : Readout.Block;
-
-                // La copertura non e' infinita: quando la carta cede, il resto
-                // del colpo arriva addosso al giocatore.
-                if (net > card.health) counter = $"PASSA · tu −{net - card.health}";
-                else if (net >= card.health && net > 0) counter = "la carta cade";
-                else if (net > 0) counter = $"le restano {card.health - net}";
-            }
-            else
-            {
-                main = "—";
-                color = GamePalette.Neutral;
-                counter = "stallo · lei carica, tu carichi";
-                readout = Readout.Block;
-            }
-        }
-        else if (card != null)
-        {
-            if (card.side == Side.Fronte)
-            {
-                // Corsia senza casella: la corazza non copre e il colpo va tutto al boss.
-                int atk = card.ComputeAttackDamage() + (gm.CanAct ? SynergyResolver.AttackBonus(gm, lane) : 0);
-                main = $"{Arrow(true)}{atk} → BOSS";
-                color = GamePalette.Good;
-                counter = "corazza scoperta";
-                readout = Readout.Up;
-            }
-            else { main = "—"; color = GamePalette.Neutral; counter = "carica"; readout = Readout.None; }
-        }
-        else if (slot != null)
-        {
-            if (slot.side == Side.Fronte)
-            {
-                // Corsia vuota: il danno salta la board e arriva agli HP. E' una falla.
-                main = $"{Arrow(false)}{slot.def.atkDamage + slot.tempAtkBonus} → HP";
-                color = GamePalette.Danger;
-                counter = "corsia scoperta";
-                readout = Readout.Down;
-            }
-            else { main = "—"; color = GamePalette.Neutral; readout = Readout.None; }
-        }
-        else
-        {
-            main = "—";
-            color = GamePalette.Neutral;
-            readout = Readout.None;
-        }
-
-        if (col.main.text != main) col.main.text = main;
-        col.main.color = color;
-        if (col.counter.text != counter) col.counter.text = counter;
-        col.rule.color = GamePalette.WithAlpha(color, 0.45f);
-        ApplyReadout(col, readout, color);
         ApplyResonance(col, resonant, card);
     }
 
@@ -222,45 +94,6 @@ public class LaneAxisView : MonoBehaviour
         if (!col.resonance.enabled) return;
 
         col.resonance.color = GamePalette.FactionColor(card.def.faction);
-    }
-
-    /// <summary>
-    /// L'indicatore del kit al posto del glifo: sale se colpisci tu, scende se
-    /// colpiscono te, diventa lo scudo quando il colpo viene assorbito.
-    /// </summary>
-    void ApplyReadout(Column col, Readout readout, Color color)
-    {
-        if (col.readout == null) return;
-
-        if (readout == Readout.None)
-        {
-            col.readout.enabled = false;
-            return;
-        }
-
-        var sprite = UiSkin.Sprite(readout switch
-        {
-            Readout.Up => UiSkin.ReadoutUp,
-            Readout.Down => UiSkin.ReadoutDown,
-            _ => UiSkin.ReadoutBlock,
-        });
-
-        if (sprite == null) { col.readout.enabled = false; return; }
-
-        col.readout.enabled = true;
-        col.readout.sprite = sprite;
-        col.readout.color = color;
-    }
-
-    /// <summary>Freccia testuale: serve solo dove non c'e' lo sprite del kit.</summary>
-    string Arrow(bool up) => _skinnedReadout ? string.Empty : UiBuild.Arrow(up) + " ";
-
-    string Compose(bool up, int power, int mitigation, int net)
-    {
-        _sb.Clear();
-        _sb.Append(Arrow(up)).Append(power)
-           .Append(" − ").Append(mitigation).Append(" = ").Append(net);
-        return _sb.ToString();
     }
 
     // ── Insegne nei varchi ────────────────────────────────────────────────────
@@ -351,41 +184,14 @@ public class LaneAxisView : MonoBehaviour
         col.root.pivot = new Vector2(0.5f, 0.5f);
         col.root.sizeDelta = new Vector2(columnWidth, _rt.rect.height);
 
-        // Le quote seguono l'altezza reale della banda: l'asse si e' gia'
-        // accorciato una volta col layout e le costanti erano tarate su 64.
-        float half = _rt.rect.height * 0.5f;
-
-        var ruleRt = UiBuild.Rect("Rule", col.root);
-        UiBuild.Centered(ruleRt, columnWidth - 60f, 2f, 0f, half - 6f);
-        col.rule = UiBuild.Fill(ruleRt, GamePalette.Neutral);
-
-        col.main = UiBuild.Text("Main", col.root, "—", 24f, GamePalette.Neutral,
-                                TextAlignmentOptions.Center, FontStyles.Bold);
-        UiBuild.Centered(col.main.rectTransform, columnWidth, 28f, _skinnedReadout ? 16f : 0f, 2f);
-
-        if (_skinnedReadout)
-        {
-            var iconRt = UiBuild.Rect("Readout", col.root);
-            UiBuild.Centered(iconRt, 28f, 28f, -columnWidth * 0.5f + 40f, 2f);
-            col.readout = UiBuild.Fill(iconRt, GamePalette.Neutral);
-            col.readout.sprite = UiSkin.Sprite(UiSkin.ReadoutUp);
-            col.readout.type = Image.Type.Simple;
-            col.readout.enabled = false;
-        }
-
-        // Lo scudo spezzato in coda alla riga, dalla parte opposta alla freccia:
-        // e' un secondo indicatore e non deve leggersi come parte del numero.
+        // Lo scudo spezzato in coda alla riga: indica risonanza in questa corsia.
         var resRt = UiBuild.Rect("Resonance", col.root);
-        UiBuild.Centered(resRt, 26f, 26f, columnWidth * 0.5f - 34f, 2f);
+        UiBuild.Centered(resRt, 22f, 22f, 0f, 0f);
         col.resonance = UiBuild.Fill(resRt, GamePalette.Danger);
         col.resonance.sprite = GlyphSprites.BrokenShield;
         col.resonance.type = Image.Type.Simple;
         col.resonance.preserveAspect = true;
         col.resonance.enabled = false;
-
-        col.counter = UiBuild.Text("Counter", col.root, string.Empty, 14f, GamePalette.TextMuted,
-                                   TextAlignmentOptions.Center);
-        UiBuild.Centered(col.counter.rectTransform, columnWidth, 16f, 0f, -half + 8f);
 
         return col;
     }
@@ -427,12 +233,6 @@ public class LaneAxisView : MonoBehaviour
         }
 
         return con;
-    }
-
-    void PlaceColumn(Column col, float x)
-    {
-        var p = col.root.anchoredPosition;
-        if (!Mathf.Approximately(p.x, x)) col.root.anchoredPosition = new Vector2(x, 0f);
     }
 
     void PlaceConnector(Connector con, float x)

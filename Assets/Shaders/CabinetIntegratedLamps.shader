@@ -28,7 +28,7 @@ Shader "FlipCards/Integrated Cabinet Lamps"
             #include "UnityCG.cginc"
             sampler2D _MainTex, _MaskTex;
             fixed4 _Color;
-            float4 _SourceSize, _GlassPositions[9], _GlassSizes[9], _BankStates[9], _WindowRegions[3];
+            float4 _SourceSize, _GlassPositions[9], _GlassSizes[9], _BankStates[9], _WindowRegions[3], _DamagePreview[9];
             struct appdata { float4 vertex:POSITION; float4 color:COLOR; float2 uv:TEXCOORD0; };
             struct v2f { float4 vertex:SV_POSITION; fixed4 color:COLOR; float2 uv:TEXCOORD0; };
             v2f vert(appdata v) { v2f o; o.vertex=UnityObjectToClipPos(v.vertex); o.color=v.color*_Color; o.uv=v.uv; return o; }
@@ -59,6 +59,8 @@ Shader "FlipCards/Integrated Cabinet Lamps"
                     float distance=length(float2(q.x,max(0,abs(q.y)-capsule)/(1-capsule)));
                     float glass=1-smoothstep(.94,1.04,distance);
                     float lit=_BankStates[b].y>=0 ? (fmod(n+_BankStates[b].y,7)<2 ? 1:0) : (n<_BankStates[b].x ? 1:0);
+                    if(_BankStates[b].y<0 && n>=_DamagePreview[b].x && n<_DamagePreview[b].y)
+                        lit*=saturate(_DamagePreview[b].z);
                     c.rgb*=lerp(1,lerp(.09,1,lit),glass);
                 }
                 c.a*=alpha;

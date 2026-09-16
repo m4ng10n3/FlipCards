@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { fresh, sync, before, checkpoint, successful, finishArtWorkflow } from '../../.kilo/local-llm/harness.mjs'
+import { fresh, sync, before, checkpoint, successful, finishArtWorkflow, boundRead } from '../../.kilo/local-llm/harness.mjs'
 const user = id => ({info:{role:'user',id,agent:'auto'},parts:[{type:'text',text:'Cambia template slot e colori dinamici'}]})
 const call = (id,name,input,output,status='completed') => ({info:{role:'assistant'},parts:[{type:'tool',callID:id,tool:name,state:{status,input,output}}]})
 let s=sync(fresh(),[user('u1')])
@@ -53,3 +53,42 @@ assert.equal(finishArtWorkflow(automatic),true)
 assert.equal(automatic.phase,'complete')
 assert.equal(finishArtWorkflow(automatic),false)
 console.log('Automatic art completion requires all actual bundle evidence and is idempotent')
+
+const inspection = sync(fresh(), [user('inspect'), ...Array.from({length:4}, (_, i) =>
+ call('read'+i, 'read', {filePath:'Owner'+i+'.cs'}, 'source'))])
+assert.throws(() => before(inspection, 'read', {filePath:'Another.cs'}), /Quattro letture/)
+assert.throws(() => before(inspection, 'grep', {pattern:'anything'}), /Quattro letture/)
+before(inspection, 'local_extract', {excerpt:'already read'})
+before(inspection, 'harness_checkpoint', {phase:'plan'})
+checkpoint(inspection, {phase:'plan', criteria:['Runtime preview restores values'], note:'Owner identified; inspect APIs needed for implementation'})
+before(inspection, 'read', {filePath:'Another.cs', offset:100, limit:50})
+assert.equal(inspection.stop, '')
+console.log('Exploration guard passed: plan after four successful reads; targeted follow-up and local extraction remain available')
+assert.deepEqual(boundRead('read', {filePath:'Manager.cs', offset:1200}), {filePath:'Manager.cs', offset:1200, limit:240})
+assert.equal(boundRead('read', {filePath:'Manager.cs', limit:40}).limit, 40)
+assert.equal(boundRead('read', {filePath:'Manager.cs', limit:2000}).limit, 240)
+assert.equal(boundRead('read', {filePath:'AGENTS.md'}).limit, undefined)
+assert.equal(boundRead('edit', {filePath:'Manager.cs'}).limit, undefined)
+console.log('Native source reads bounded without discarding offsets or hiding remaining source')
+const extracted = sync(fresh(), [user('extract'), call('extract1', 'local_extract', {}, 'facts')])
+assert.throws(() => before(extracted, 'local_extract', {}), /gia tentata/)
+const reviewed = fresh()
+reviewed.turn='old'; reviewed.phase='blocked'; reviewed.criteria=['Original complete requirement']; reviewed.stop='old failure'
+sync(reviewed, [user('review')])
+assert.equal(reviewed.phase, 'implement')
+assert.deepEqual(reviewed.criteria, ['Original complete requirement'])
+assert.equal(reviewed.stop, '')
+before(reviewed, 'edit', {})
+const resumed = sync(fresh(), [user('prior'), call('contract', 'harness_checkpoint',
+ {phase:'plan',criteria:['Requirement survives review']}, 'planned'), user('correction')])
+assert.deepEqual(resumed.criteria, ['Requirement survives review'])
+console.log('Review turns preserve unfinished criteria while resetting retry counters')
+const sourceOnly=sync(fresh(),[user('source'),call('source-edit','edit',{filePath:'Assets/UI.cs'},'edited'),
+ call('source-read','read',{filePath:'Assets/UI.cs'},'looks good')])
+checkpoint(sourceOnly,{phase:'plan',criteria:['UI works'],note:'acceptance'})
+assert.throws(()=>checkpoint(sourceOnly,{phase:'complete',checks:[{criterion:0,evidence:['source-read'],observation:'static review'}]}),/Console/)
+console.log('Unity source edits cannot claim completion from a read-only review without editor evidence')
+sync(sourceOnly,[user('source'),call('p','harness_checkpoint',{phase:'plan',criteria:['UI works']},'plan'),
+ call('e','edit',{filePath:'Assets/UI.cs'},'edited'),user('review-source'),call('new-read','read',{},'static review')])
+assert.equal(sourceOnly.pendingUnity,true)
+assert.throws(()=>checkpoint(sourceOnly,{phase:'complete',checks:[{criterion:0,evidence:['new-read'],observation:'review'}]}),/Console/)

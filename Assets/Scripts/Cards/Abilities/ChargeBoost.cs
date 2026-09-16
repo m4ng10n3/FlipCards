@@ -20,7 +20,7 @@ public class ChargeBoost : AbilityBase
         if (ctx.source != Source || Source == null || !Source.alive) return;
         if (Source.side != Side.Fronte || Source.flipCharge < chargeThreshold) return;
 
-        int boost = bonusDamage + Mathf.Max(0, Source.flipCharge - chargeThreshold);
+        int boost = PreviewBonus(Source);
         Source.AddAtkBonus(boost, AbilityCatalog.Name(this));
         Source.PushHint($"Charge +{boost}");
 
@@ -45,4 +45,8 @@ public class ChargeBoost : AbilityBase
         EventBus.Unsubscribe(GameEventType.Custom, _h);
         _h = null;
     }
+
+    public int PreviewBonus(CardInstance card) => IsBound && card != null && card.alive &&
+        card.side == Side.Fronte && card.flipCharge >= chargeThreshold
+        ? bonusDamage + Mathf.Max(0, card.flipCharge - chargeThreshold) : 0;
 }

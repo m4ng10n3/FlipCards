@@ -21,17 +21,22 @@ public class VanguardStrike : AbilityBase
         var gm = GameManager.Instance;
         if (gm == null) return;
 
-        int lane = gm.GetLaneIndexFor(Source);
-        if (lane < 0) return;
+        int bonus = PreviewBonus(gm, Source);
+        if (bonus <= 0) return;
+        Source.AddAtkBonus(bonus, AbilityCatalog.Name(this));
+        Source.PushHint($"Vanguard +{bonus}");
+    }
+
+    public int PreviewBonus(GameManager gm, CardInstance card)
+    {
+        if (!IsBound || gm == null || card == null || !card.alive || card.side != Side.Fronte) return 0;
+        int lane = gm.GetLaneIndexFor(card);
+        if (lane < 0) return 0;
 
         int emptyNeighbors = 0;
         if (gm.GetPlayerCardAtLane(lane - 1) == null) emptyNeighbors++;
         if (gm.GetPlayerCardAtLane(lane + 1) == null) emptyNeighbors++;
-        if (emptyNeighbors <= 0) return;
-
-        int bonus = bonusDamage * emptyNeighbors;
-        Source.AddAtkBonus(bonus, AbilityCatalog.Name(this));
-        Source.PushHint($"Vanguard +{bonus}");
+        return bonusDamage * emptyNeighbors;
     }
 
     protected override void Unregister()

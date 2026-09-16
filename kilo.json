@@ -140,9 +140,14 @@
       "timeout": 60000
     }
   },
+  "agent": {
+    "compaction": {
+      "model": "router/codice"
+    }
+  },
   "compaction": {
     "auto": true,
-    "threshold_percent": 70,
+    "threshold_percent": 50,
     "prune": true,
     "tail_turns": 4,
     "preserve_recent_tokens": 6000

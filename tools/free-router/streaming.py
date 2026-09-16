@@ -7,6 +7,23 @@ class UpstreamError(Exception):
     pass
 
 
+def error_summary(error):
+    """Diagnose upstream failures without echoing a provider's prompt or secrets."""
+    if not isinstance(error, dict):
+        return 'errore del provider nello stream'
+    message = str(error.get('message', '')).lower()
+    code = error.get('code')
+    suffix = ' HTTP ' + str(code) if isinstance(code, int) and 100 <= code <= 599 else ''
+    categories = [
+        (('context', 'token limit', 'too many tokens', 'maximum tokens'), 'contesto troppo grande'),
+        (('rate limit', 'quota', 'too many requests'), 'limite richieste del provider'),
+        (('unavailable', 'overloaded', 'capacity', 'no endpoints'), 'provider indisponibile'),
+        (('timeout', 'timed out'), 'timeout del provider'),
+    ]
+    category = next((label for terms, label in categories if any(term in message for term in terms)), 'errore del provider')
+    return category + suffix + ' nello stream'
+
+
 def events(response, deadline):
     buffer = b""
     while True:
@@ -42,7 +59,7 @@ def events(response, deadline):
                     raise UpstreamError("evento SSE non oggetto")
                 if obj.get("error"):
                     # Do not treat quoted 'error' inside content or arguments as errors.
-                    raise UpstreamError("errore del provider nello stream")
+                    raise UpstreamError(error_summary(obj['error']))
                 yield frame + separator, obj
 
 

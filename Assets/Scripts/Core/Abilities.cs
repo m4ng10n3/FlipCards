@@ -13,6 +13,7 @@ public abstract class AbilityBase : MonoBehaviour, IAbility
     protected CardInstance Source;
     protected PlayerState Owner, Opponent;
     bool _bound;
+    public bool IsBound => _bound;
 
     public virtual void Bind(CardInstance source, PlayerState owner, PlayerState opponent)
     {

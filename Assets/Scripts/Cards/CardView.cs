@@ -308,7 +308,7 @@ public class CardView : MonoBehaviour
         int lane = manager.GetLaneIndexFor(instance);
         if (lane < 0) return total;
 
-        return total + SynergyResolver.AttackBonus(manager, lane);
+        return SynergyResolver.ForecastCardAttack(manager, lane);
     }
 
     public void FlipSide(bool immediate = false)

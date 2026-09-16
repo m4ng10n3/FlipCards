@@ -225,10 +225,12 @@ violarne una.
    restano al giocatore. Non ci sono altri numeri di bilanciamento da girare:
    se serve un'altra leva, va derivata da questa.
 
-Il pronostico dell'asse delle corsie (`LaneAxisView`) chiama **gli stessi metodi**
-che poi risolvono il colpo, per costruzione: quello che si legge prima di attaccare
-e' quello che succede. Se il pronostico e la risoluzione divergono, il bug e' che
-qualcuno ha aggiunto un bonus fuori da `SynergyResolver`.
+Il pronostico al clic (`DamagePreviewController`) passa da `SynergyResolver` e
+dalle formule pure `PreviewBonus` usate anche dalle abilità in combattimento.
+Non pubblica eventi né modifica HP, pool, cariche, AP o RNG. `CabinetLampController`
+e `HudController` leggono `DamagePreviewController.Active`, che valida lo stato
+prima di restituire la previsione. Le vecchie frecce numeriche dell'asse sono rimosse.
+Nuove abilità che cambiano un colpo devono avere una previsione pura condivisa.
 
 ## Le tre catene asincrone
 
@@ -286,7 +288,8 @@ Chi non è un `Button` (il mazzo) non passa da `UpdateHUD` e guarda `CanAct`.
   lungo la **normale del tavolo** (z locale di `stackRoot`), in numero
   proporzionale al residuo. Le copie sono decorative (`CardDefinition` e
   `CardView` disabilitati) e il clic lo prende il box piatto in spazio schermo.
-- `LaneAxisView.cs` — asse delle corsie: pronostico per corsia e connettori di combo.
+- `LaneAxisView.cs` — asse delle corsie: risonanza e connettori di combo, senza pronostici numerici.
+- `DamagePreviewController.cs` — anteprima di 2,8 s al clic in campo, validazione e ripristino; luci e HUD restano gli unici proprietari dei loro grafici.
 - `InspectorPanel.cs` + `AbilityCatalog.cs` — ispettore e testi delle abilità.
 - `CardOverlay.cs` / `SlotOverlay.cs` — chrome costruito a runtime sopra i prefab.
 - `LogPanel.cs` — autoscroll del log.

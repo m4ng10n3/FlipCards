@@ -1278,6 +1278,7 @@ public class GameManager : MonoBehaviour
 
         if (view.owner != player || view.instance == null) return;
         SelectionManager.Instance.SelectOwned(view);
+        DamagePreviewController.Show(view);
     }
 
     public void OnEmptySpotClicked(Transform emptySpot)

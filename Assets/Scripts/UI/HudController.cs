@@ -47,6 +47,9 @@ public class HudController : MonoBehaviour
     int _lastDeck = -1, _lastHand = -1;
     string _lastPhase;
     bool _endShown;
+    Color _normalBossColor = Color.white;
+    bool _bossColorCaptured, _bossPreviewShown;
+    static readonly Color PreviewYellow = new Color(.78f, .53f, .02f);
 
     void LateUpdate()
     {
@@ -114,12 +117,22 @@ public class HudController : MonoBehaviour
             if (playerHpText != null) playerHpText.text = $"{gm.player.hp}/{gm.player.maxHp}";
         }
 
-        if (gm.ai.hp != _lastBossHp)
+        if (!_bossColorCaptured && bossHpText != null)
         {
-            _lastBossHp = gm.ai.hp;
-            if (bossHpBar != null) bossHpBar.Set(gm.ai.hp, gm.ai.maxHp);
-            if (bossHpText != null) bossHpText.text = $"{gm.ai.hp}/{gm.ai.maxHp}";
+            _normalBossColor = bossHpText.color;
+            _bossColorCaptured = true;
         }
+        var preview = DamagePreviewController.Active;
+        bool showPreview = preview != null && preview.BossDamage > 0;
+        int displayed = showPreview ? preview.DisplayedBossHp : gm.ai.hp;
+        if (gm.ai.hp != _lastBossHp && bossHpBar != null) bossHpBar.Set(gm.ai.hp, gm.ai.maxHp);
+        if (gm.ai.hp != _lastBossHp || showPreview || _bossPreviewShown)
+        {
+            SetText(bossHpText, $"{displayed}/{gm.ai.maxHp}");
+            if (bossHpText != null) bossHpText.color = showPreview ? PreviewYellow : _normalBossColor;
+        }
+        _lastBossHp = gm.ai.hp;
+        _bossPreviewShown = showPreview;
 
         if (bossNameText != null && string.IsNullOrEmpty(bossNameText.text))
             bossNameText.text = gm.ai.name.ToUpperInvariant();

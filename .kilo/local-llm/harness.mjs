@@ -2,6 +2,13 @@ import { createHash } from 'node:crypto'
 
 export const REVISION = '4'
 export const digest = value => createHash('sha256').update(JSON.stringify(value)).digest('hex')
+export function boundRead(name, args = {}) {
+  // Bound the actual native read, not its result: omitted lines remain available
+  // through explicit offsets and Kilo reports the remaining file length.
+  if (name === 'read' && /\.(cs|shader|py|js|mjs|json)$/i.test(args.filePath || ''))
+    args.limit = Math.min(Number.isFinite(args.limit) && args.limit > 0 ? args.limit : 240, 240)
+  return args
+}
 export function fresh() {
   return { revision: REVISION, turn: '', phase: 'inspect', criteria: [], checks: [], records: [], stop: '', compactions: 0 }
 }
@@ -24,7 +31,19 @@ export function sync(state, messages) {
   const users = messages.filter(m => m.info?.role === 'user' && m.parts?.some(p => p.type === 'text' && !p.synthetic && !p.ignored))
   const last = users.at(-1)
   if (last && state.turn !== last.info.id) {
-    Object.assign(state, fresh(), { turn: last.info.id,
+    // A review/fix message resumes the same unfinished contract. Resetting it
+    // made the model remember its plan while the guard rejected every read.
+    const prior = messages.slice(0, messages.indexOf(last)).flatMap(m => m.parts || [])
+      .filter(p => p.type === 'tool' && p.tool === 'harness_checkpoint' && p.state?.status === 'completed')
+    const latestContract = prior.findLast(p => ['plan', 'complete'].includes(p.state.input?.phase))
+    const inherited = state.criteria.length && state.phase !== 'complete' ? state.criteria :
+      latestContract?.state.input.phase === 'plan' ? latestContract.state.input.criteria : []
+    const pendingUnity = Boolean(inherited?.length && (state.pendingUnity || state.records.some(r => r.unitySource) ||
+      messages.slice(0, messages.indexOf(last)).some(m => (m.parts || []).some(p => p.type === 'tool' &&
+        ['edit', 'write', 'apply_patch'].includes(p.tool) && p.state?.status === 'completed' &&
+        /\.(cs|shader|prefab|unity)(?:\b|$)/i.test(String(p.state.input?.filePath || p.state.input?.patchText || ''))))))
+    Object.assign(state, fresh(), { turn: last.info.id, pendingUnity,
+      criteria: inherited || [], phase: inherited?.length ? 'implement' : 'inspect',
       objective: users.map(m => m.parts.filter(p => p.type === 'text' && !p.synthetic && !p.ignored).map(p => p.text).join('\n')).join('\nAGGIORNAMENTO UTENTE:\n') })
   }
   const start = last ? messages.indexOf(last) : 0
@@ -39,6 +58,8 @@ export function sync(state, messages) {
       status: s.status, output: String(s.error || s.output || '').split('\n[HARNESS evidence=')[0].slice(0, 12000),
       // Retain flags, not complete generated code or images, in the compact ledger.
       mutation: isMutation(p.tool, s.input), camera: /Camera_Capture$/.test(p.tool) && Number(s.input?.cameraInstanceID) !== 0 && s.input?.cameraInstanceID != null,
+      unitySource: ['edit', 'write', 'apply_patch'].includes(p.tool) &&
+        /\.(cs|shader|prefab|unity)(?:\b|$)/i.test(String(s.input?.filePath || s.input?.patchText || s.input?.patch || '')),
       code: /RunCommand$/.test(p.tool) ? String(s.input?.Code || '') : '',
       exit: s.metadata?.exit ?? s.metadata?.exitCode,
       bundleAction: p.tool === 'unity_art_bundle' ? s.input?.action : undefined,
@@ -59,6 +80,11 @@ export function sync(state, messages) {
 }
 export function before(state, name, args) {
   if (state.stop && name !== 'harness_checkpoint') throw Error('HARNESS STOP: ' + state.stop)
+  if (name === 'local_extract' && state.records.some(r => r.name === 'local_extract'))
+    throw Error('Estrazione locale gia tentata in questo turno: usa i dati sorgente verificati e prosegui con implementazione o test. Non delegare riassunti ripetitivi.');
+  if (state.phase === 'inspect' && ['read', 'grep', 'glob'].includes(name) &&
+      state.records.filter(r => ['read', 'grep', 'glob'].includes(r.name) && successful(r)).length >= 4)
+    throw Error('Quattro letture esplorative completate: fissa ora ipotesi e criteri con harness_checkpoint phase=plan. Poi continua con letture mirate per implementare e verificare; non serve leggere tutto il progetto prima del piano.');
   if (state.artWorkflow && !['unity_art_bundle', 'harness_checkpoint'].includes(name)) throw Error('Montaggio bundle: usa unity_art_bundle inspect/install/verify/capture. Non servono shell o codice generato.')
   if (isMutation(name, args) && !state.criteria.length) throw Error('Prima di eseguire: harness_checkpoint phase=plan con criteri osservabili e piano mirato. Una lettura MCP richiede un piano breve, non un permesso aggiuntivo.')
   const lastChange = state.records.findLastIndex(r => r.mutation && successful(r))
@@ -85,7 +111,7 @@ export function checkpoint(state, args) {
         if (index <= mutation || state.records[index]?.name === 'harness_checkpoint' || !successful(state.records[index] || {})) throw Error('Prova assente, fallita o precedente all’ultima modifica: ' + id)
       }
     }
-    const unityEdit = mutation >= 0 && state.records.some(r => /Unity_RunCommand$/.test(r.name))
+    const unityEdit = state.pendingUnity || (mutation >= 0 && state.records.some(r => r.unitySource || /Unity_RunCommand$/.test(r.name)))
     const recent = state.records.slice(mutation + 1).filter(successful)
     if (state.artWorkflow) {
       const verified = recent.findLast(r => r.bundleAction === 'verify')

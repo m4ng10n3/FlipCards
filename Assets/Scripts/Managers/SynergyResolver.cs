@@ -34,6 +34,45 @@ using UnityEngine;
 /// </summary>
 public static class SynergyResolver
 {
+    /// <summary>Pure attack forecast, including the same ability formulas used by event handlers.</summary>
+    public static int ForecastCardAttack(GameManager gm, int lane)
+    {
+        var card = gm.GetPlayerCardAtLane(lane);
+        if (card == null || card.side != Side.Fronte) return 0;
+        if (!gm.CanAct) return Mathf.Max(0, card.ComputeAttackDamage());
+        // PrepareBattle clears the old attack ledger before rebuilding bonuses.
+        int total = card.def.frontDamage + card.flipCharge + AttackBonus(gm, lane);
+        var view = gm.GetPlayerCardViewAtLane(lane);
+        if (view == null) return Mathf.Max(0, total);
+        bool targeted = gm.GetEnemySlotAtLane(lane) != null;
+        foreach (var ability in view.GetComponents<AbilityBase>())
+        {
+            if (!ability.IsBound) continue;
+            if (ability is ClassSynergyBoost sameClass) total += sameClass.PreviewBonus(gm, card);
+            // DirectCardPressure does not publish PreCardAttack.
+            else if (targeted && ability is VanguardStrike vanguard) total += vanguard.PreviewBonus(gm, card);
+            else if (targeted && ability is ChargeBoost charge) total += charge.PreviewBonus(card);
+        }
+        return Mathf.Max(0, total);
+    }
+
+    /// <summary>Guard at the incoming hit, including active AttackDeclared armour.</summary>
+    public static int ForecastSlotBlock(GameManager gm, int lane)
+    {
+        var slot = gm.GetEnemySlotAtLane(lane);
+        if (slot == null || Resonates(gm, lane)) return 0;
+        int guard = (slot.side == Side.Fronte ? slot.def.blockFront : slot.def.blockRetro) + slot.tempBlockBonus;
+        var view = gm.GetEnemySlotViewAtLane(lane);
+        if (view != null && slot.side == Side.Fronte)
+            foreach (var ability in view.GetComponents<AbilityBase>())
+            {
+                if (!ability.IsBound) continue;
+                if (ability is SlotArmorFront armor) guard += armor.armorValue;
+                else if (ability is SlotStrikeOnAct strike && strike.signature == SlotStrikeOnAct.SlotSignature.ArmorFront) guard += strike.power;
+            }
+        return Mathf.Max(0, guard);
+    }
+
     // Lista di servizio per non allocare a ogni corsia risolta.
     static readonly List<Contribution> _scratch = new List<Contribution>(2);
 

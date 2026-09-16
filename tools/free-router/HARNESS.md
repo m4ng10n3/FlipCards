@@ -1,11 +1,36 @@
 # Auto v4: protocollo e verifica
 
+Valutazione sul task Unity reale dell'anteprima danno:
+[rapporto e limiti](reports/damage-preview.md). I blocchi dell'harness migliorano
+il processo, ma non sostituiscono revisione semantica e collaudo in Play.
+
 Usare **auto / router/auto** nella chat Kilo. Dopo questa modifica premere
 **Ricarica Kilo** nel pannello Auto. Gli hook vengono caricati all'avvio del backend;
 il router rifiuta richieste con strumenti prive di revisione v4 e ID di sessione.
 Una chat vecchia non procede silenziosamente senza protezioni.
 
 ## Ciclo operativo
+
+La prova dell'anteprima danno ha mostrato una lunga serie di letture integrali senza
+contratto. Ora dopo quattro letture/ricerche riuscite durante l'ispezione il quinto
+accesso richiede un checkpoint di piano. Il blocco non termina la sessione: fissati
+ipotesi e criteri, le letture mirate delle API restano disponibili. L'estrattore
+locale può elaborare gli estratti già raccolti anche prima del piano.
+Le letture native dei sorgenti sono limitate a 240 righe per chiamata, mantenendo
+offset e accesso alle righe successive. La compattazione scatta al 50% e usa
+`router/codice`: il 2B locale resta adatto a classificazione ed estrazioni brevi,
+non a riassumere una cronologia da 100.000 token. `small_model` rimane locale.
+Le revisioni nella stessa sessione conservano il contratto incompleto invece di
+azzerarlo mentre il modello ricorda ancora il piano precedente. Una sola estrazione
+locale è ammessa per turno; il suo prompt chiede risposte entro 80 parole e segnala
+esplicitamente output troncati. Un edit C#/shader richiede prove Unity anche se
+l'agente non ha ancora chiamato RunCommand. Queste guardie non certificano la
+correttezza semantica del codice: compilazione e collaudo restano indispensabili.
+
+La CLI non interattiva rifiuta automaticamente una scrittura con permesso `ask`.
+Per un incarico di modifica già autorizzato avviarla con un override limitato
+`agent.auto.permission.edit = allow`, mantenendo i divieti e l'harness attivi.
+Non confondere questo rifiuto interno con una decisione esplicita dell'utente.
 
 1. Individuare il componente realmente attivo e leggere le API dei dati.
 2. `harness_checkpoint(plan)`: fissare criteri osservabili e piano breve.

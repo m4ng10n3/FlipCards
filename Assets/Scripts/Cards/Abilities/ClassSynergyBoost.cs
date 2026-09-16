@@ -22,21 +22,22 @@ public class ClassSynergyBoost : AbilityBase
         var gm = GameManager.Instance;
         if (gm == null) return;
 
-        int lane = gm.GetLaneIndexFor(Source);
-        if (lane < 0) return;
-
-        bool adjacentSameClass =
-            MatchesClass(gm.GetPlayerCardAtLane(lane - 1)) ||
-            MatchesClass(gm.GetPlayerCardAtLane(lane + 1));
-
-        if (!adjacentSameClass) return;
-
-        Source.AddAtkBonus(bonusDamage, AbilityCatalog.Name(this));
-        Source.PushHint($"+{bonusDamage} class");
+        int bonus = PreviewBonus(gm, Source);
+        if (bonus == 0) return;
+        Source.AddAtkBonus(bonus, AbilityCatalog.Name(this));
+        Source.PushHint($"+{bonus} class");
     }
 
-    bool MatchesClass(CardInstance other)
+    public int PreviewBonus(GameManager gm, CardInstance card)
     {
-        return other != null && other.alive && other.def.cardClass == Source.def.cardClass;
+        if (!IsBound || gm == null || card == null || !card.alive || card.side != Side.Fronte) return 0;
+        int lane = gm.GetLaneIndexFor(card);
+        if (lane < 0) return 0;
+        return MatchesClass(gm.GetPlayerCardAtLane(lane - 1), card) || MatchesClass(gm.GetPlayerCardAtLane(lane + 1), card) ? bonusDamage : 0;
+    }
+
+    static bool MatchesClass(CardInstance other, CardInstance card)
+    {
+        return other != null && other.alive && other.def.cardClass == card.def.cardClass;
     }
 }

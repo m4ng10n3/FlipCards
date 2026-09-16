@@ -11,6 +11,15 @@ Ogni voce ha **Obiettivo**, **Perché**, **Dove**, **Fatto quando** e — dove s
 
 ## Stato attuale
 
+**Anteprima del danno al clic (16 settembre 2026, chiusa).** Tolte le frecce
+numeriche fra carte e rullo; carte ingrandite e avvicinate alla cassa. Il clic su
+una carta in campo mostra per 2,8 secondi le luci di guardia/vita coinvolte e gli
+HP previsti del boss in giallo, poi ripristina la presentazione. Bonus e armature
+reattive condividono le formule con il combattimento. Verificati in Unity 1.050
+controlli temporali/grafici, 10 confronti con la risoluzione reale e 12 controlli
+di annullamento. Delega Kilo e valutazione dell'harness documentate nel
+[rapporto](tools/free-router/reports/damage-preview.md).
+
 Il layout a bande della specifica è in piedi e ricostruibile da menu
 (**FlipCards → Ricostruisci layout di gioco**, `Assets/Editor/FlipCardsLayoutBuilder.cs`).
 

@@ -26,7 +26,7 @@ public static class MedallionSceneBuilder
     // del riferimento (lato lontano ~0.9 del vicino); il medaglione dipinto sul
     // panno scorcia molto di piu', ma e' pittura.
     const float TableTilt = 60f, CameraFov = 17f;
-    const float CardScale = 1.34f, PlayerRowCenterY = 868f;
+    const float CardScale = 1.38f, PlayerRowCenterY = 844f;
 
     // Il mazzo sta tutto dentro lo schermo e un po' piu' piccolo delle carte in
     // campo; lo spessore lo si vede sul fianco rivolto al centro del tavolo.
@@ -126,9 +126,8 @@ public static class MedallionSceneBuilder
 
         var player=Board(root,"PlayerLanes","PlayerBoardRoot",LaneCenter,PlayerRowCenterY-CardOverlay.CardH*CardScale*.5f,
                          CardOverlay.CardW,CardOverlay.CardH,CardScale,TableTilt);
-        // Il pronostico sta fra i piedi della cassa e il bordo lontano delle
-        // carte (y ~745): piu' in basso le sue due righe coprono la cornice.
-        var axis=Rect("LaneAxis",root,0,694,W,40).gameObject.AddComponent<LaneAxisView>();axis.laneReferenceRoot=player;axis.columnWidth=285;
+        // Only resonance and banners remain in this compact gap. Damage is previewed on the cabinet.
+        var axis=Rect("LaneAxis",root,0,704,W,20).gameObject.AddComponent<LaneAxisView>();axis.laneReferenceRoot=player;axis.columnWidth=285;
         var (handRoot,spawn)=Hand(root,hud);
         Deck(root,hud);
         Status(root,hud);

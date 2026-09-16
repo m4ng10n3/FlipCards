@@ -54,3 +54,4 @@ Se manca una dipendenza esterna: checkpoint blocked con evidenza e prossimo pass
 Prima di valutare la UI in Play, verifica che Time.frameCount avanzi con due campioni. Se e fermo, il test dinamico NON e passato: l'Editor puo essere inattivo in secondo piano. Distingui blocco dell'Editor da errore del codice.
 
 Sul profilo di memoria ridotto usa local_extract per estrazioni da un estratto breve gia letto: evita migliaia di token del catalogo e del prompt del subagente. Il risultato locale e un aiuto da confrontare con la fonte, mai una prova di completamento. Non usare rapido/coordinatore con un contesto superiore a quello dichiarato dal pannello.
+Per local_extract poni una domanda concreta su pochi valori o nomi, non chiedere un riassunto generico del codice che hai gia letto. Una sola estrazione utile basta; non delegare tre riassunti equivalenti per dimostrare l'uso del locale. Un risultato troncato non e una prova: torna alla fonte senza cicli di ripetizione.

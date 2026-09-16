@@ -13,6 +13,7 @@ public sealed class CabinetLampController : MonoBehaviour
     readonly Vector4[] _positions = new Vector4[9];
     readonly Vector4[] _sizes = new Vector4[9];
     readonly Vector4[] _windows = new Vector4[3];
+    readonly Vector4[] _damagePreview = new Vector4[9];
     readonly TMP_Text[] _totals = new TMP_Text[9];
     SlotBatchManager _batch;
     public Material LampMaterial => _material;
@@ -46,6 +47,7 @@ public sealed class CabinetLampController : MonoBehaviour
         _material.SetVectorArray("_GlassPositions", _positions);
         _material.SetVectorArray("_GlassSizes", _sizes);
         _material.SetVectorArray("_WindowRegions", _windows);
+        _material.SetVectorArray("_DamagePreview", _damagePreview);
         RefreshIndicators();
     }
 
@@ -57,6 +59,7 @@ public sealed class CabinetLampController : MonoBehaviour
         var gm = GameManager.Instance;
         if (_batch == null) _batch = FindAnyObjectByType<SlotBatchManager>();
         bool rolling = _batch != null && _batch.IsRolling;
+        var preview = rolling ? null : DamagePreviewController.Active;
         for (int i = 0; i < 9; i++)
         {
             var bank = definition.banks[i];
@@ -67,10 +70,47 @@ public sealed class CabinetLampController : MonoBehaviour
                     ? (slot.side == Side.Fronte ? slot.def.atkDamage + slot.tempAtkBonus : 0)
                     : (SynergyResolver.Resonates(gm, bank.lane) ? 0 : slot.ComputeSelfBlock());
             value = Mathf.Max(0, value);
+            if (preview != null && bank.lane == preview.Lane && bank.stat == 2) value = preview.Guard;
             _states[i] = new Vector4(value, rolling ? (Mathf.FloorToInt(Time.unscaledTime * 11) + bank.lane) % 7 : -1, 0, 0);
             _totals[i].text = !rolling && value > 7 ? value.ToString() : "";
+            _totals[i].color = GamePalette.Paper;
+
+            // Danno anteprima: range di vetri da blinkare
+            if (preview != null)
+            {
+                if (bank.stat == 0)
+                {
+                    int loss = preview.HealthLossAt(bank.lane);
+                    if (loss > 0)
+                    {
+                        int before = preview.HealthBeforeAt(bank.lane);
+                        _damagePreview[i] = new Vector4(before - loss, before, preview.Blink, 0f);
+                    }
+                    else _damagePreview[i] = new Vector4(0, 0, 0);
+                }
+                else if (bank.stat == 2 && bank.lane == preview.Lane && preview.GuardAbsorbed > 0)
+                {
+                    int guard = preview.Guard;
+                    int absorbed = preview.GuardAbsorbed;
+                    _damagePreview[i] = new Vector4(guard - absorbed, guard, preview.Blink, 0f);
+                }
+                else
+                {
+                    _damagePreview[i] = new Vector4(0, 0, 0);
+                }
+            }
+            else
+            {
+                _damagePreview[i] = new Vector4(0, 0, 0);
+            }
+            if (preview != null && value > 7 && _damagePreview[i].y > _damagePreview[i].x)
+            {
+                _totals[i].text = (preview.Blink < .6f ? Mathf.Max(0, Mathf.RoundToInt(_damagePreview[i].x)) : value).ToString();
+                _totals[i].color = new Color(1f, .82f, .15f);
+            }
         }
         _material.SetVectorArray("_BankStates", _states);
+        _material.SetVectorArray("_DamagePreview", _damagePreview);
     }
 
     void OnDestroy()
