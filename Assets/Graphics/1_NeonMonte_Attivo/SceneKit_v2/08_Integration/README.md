@@ -1,5 +1,12 @@
 # Scena attiva — Medallion
 
+**Aggiornamento 16 settembre 2026:** vite percentuali negli inserti LED di cassa
+e pulsante, nuovi asset di libretto e pergamena, rulli fissi con superficie
+rotante e cielo animato. Montaggio e sorgenti in
+[11_GraphicUpgrade](../11_GraphicUpgrade/README.md). Le descrizioni storiche
+qui sotto di targhetta HP, carta riutilizzata e rulli dentro il contenuto sono
+superate da questo aggiornamento.
+
 Il layout in uso è costruito da `Assets/Editor/MedallionSceneBuilder.cs`, richiamato
 dal menu **FlipCards → Ricostruisci layout di gioco**. Riferimento:
 `ArtReferences/2026-09-10_original_medallion_full.png`. Canvas 1920×1080, tre

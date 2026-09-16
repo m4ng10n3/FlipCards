@@ -515,6 +515,36 @@ MonoBehaviour:
     sprite: {fileID: 21300000, guid: 75630922d4151904fb581db7a5a4f48a, type: 3}
   - key: glyph_thorn
     sprite: {fileID: 21300000, guid: 8ddd18a4974215d4e865e24e18504511, type: 3}
+  - key: upgrade_book_closed
+    sprite: {fileID: 21300000, guid: 4b83690e2f4ee394abb79bdbca77a992, type: 3}
+  - key: upgrade_parchment
+    sprite: {fileID: 21300000, guid: aa0018667b02d5f4f85be85def2fef9a, type: 3}
+  - key: upgrade_roller
+    sprite: {fileID: 21300000, guid: 415733f6db7ce824797e7b1b814f3f7f, type: 2}
+  - key: led_boss_cheek
+    sprite: {fileID: 21300000, guid: 79614f84dda08454bbdbbe0a8a05f36c, type: 3}
+  - key: led_button_base
+    sprite: {fileID: 21300000, guid: b4547fbb9aa52474c907a7fd2b067860, type: 3}
+  - key: book_spread_left
+    sprite: {fileID: 21300000, guid: daa345b12f578aa49bc0d4e3da8ff870, type: 3}
+  - key: book_spread_right
+    sprite: {fileID: 21300000, guid: 19171db52e0192f439bf0804f30b7048, type: 3}
+  - key: book_leaf_left
+    sprite: {fileID: 21300000, guid: a02bb7bc1427e2243bf5bae75048a13e, type: 3}
+  - key: book_leaf_right
+    sprite: {fileID: 21300000, guid: 121ba145a95803c429efa3825a5c3fa8, type: 3}
+  - key: book_cover_front
+    sprite: {fileID: 21300000, guid: 144c13c05d3c17e4a9f6b42cbed18991, type: 3}
+  - key: bookmark_campo
+    sprite: {fileID: 21300000, guid: ea7dde385ad2dbd4285486203b66ea5c, type: 3}
+  - key: bookmark_mano
+    sprite: {fileID: 21300000, guid: e52277700c8b18e4eb5e5127bc55c8b6, type: 3}
+  - key: bookmark_rullo
+    sprite: {fileID: 21300000, guid: f2fdb6cc7412faa408e2628f7e30222d, type: 3}
+  - key: bookmark_registro
+    sprite: {fileID: 21300000, guid: 307be2abe3cf3ab45a9f4d5a031b3180, type: 3}
+  - key: table_shadow
+    sprite: {fileID: 21300000, guid: 4ae45f50917a2f347805aed540784656, type: 3}
   - key: scene_cabinet
     sprite: {fileID: 21300000, guid: acae4d4d2dacf054dba3a578465eb8fb, type: 3}
   - key: scene_table

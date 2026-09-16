@@ -45,6 +45,7 @@ public class HudController : MonoBehaviour
     int _lastTurn = -1, _lastAp = -1, _lastMaxAp = -1;
     int _lastPlayerHp = -1, _lastBossHp = -1;
     int _lastDeck = -1, _lastHand = -1;
+    Color? _deckInk;
     string _lastPhase;
     bool _endShown;
     Color _normalBossColor = Color.white;
@@ -220,16 +221,22 @@ public class HudController : MonoBehaviour
         var hand = gm.HandManager;
         if (hand == null) return;
 
-        if (hand.DeckCount != _lastDeck)
+        // La carta estratta resta sulla pila finche' i segni del retro non si sono
+        // materializzati: il numero scende quando si stacca, non al clic.
+        int onDeck = hand.DeckCount + hand.PendingDraws;
+        if (onDeck != _lastDeck)
         {
-            _lastDeck = hand.DeckCount;
+            _lastDeck = onDeck;
             if (deckText != null)
             {
+                // Il colore e' quello del builder (inchiostro sul gettone d'ottone);
+                // solo a mazzo vuoto diventa l'avviso.
+                if (_deckInk == null) _deckInk = deckText.color;
                 // Solo il numero: la parola "MAZZO" e' l'etichetta accanto alla
                 // pila, scritta una volta dal builder. Scriverla anche qui la
                 // stampava due volte sulla stessa riga.
                 deckText.text = _lastDeck.ToString();
-                deckText.color = _lastDeck > 0 ? GamePalette.TextPrimary : GamePalette.Danger;
+                deckText.color = _lastDeck > 0 ? _deckInk.Value : GamePalette.Danger;
             }
         }
 

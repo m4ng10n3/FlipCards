@@ -5,7 +5,7 @@
   ],
   "reference": "../../ArtReferences/2026-09-10_original_medallion_full.png",
   "runtime_geometry_source": "Assets/Editor/MedallionSceneBuilder.cs",
-  "note": "Fotografia delle costanti del builder al 10 settembre 2026. La fonte e' il builder: se divergono, vale il builder.",
+  "note": "Fotografia delle costanti del builder al 16 settembre 2026. La fonte e' il builder: se divergono, vale il builder.",
   "camera": {
     "projection": "perspective",
     "verticalFov": 17
@@ -37,16 +37,19 @@
     "tiltDegrees": 60,
     "rotateAround": "centro di ogni oggetto"
   },
-  "playerRowCenterY": 868,
-  "playerScale": 1.34,
-  "axisTop": 694,
-  "axisHeight": 40,
+  "playerRowCenterY": 844,
+  "playerScale": 1.38,
+  "axisTop": 704,
+  "axisHeight": 20,
   "deck": {
-    "center": [178, 800],
-    "spinDegrees": -10,
-    "cardScale": 0.98,
-    "edgeThickness": 2.6,
-    "edges": 18
+    "center": [211, 810],
+    "spinDegrees": 8,
+    "cardScale": 0.90,
+    "edgeThickness": 1.8,
+    "edgeShift": 0.35,
+    "edges": 18,
+    "drawTravelSeconds": 0.78,
+    "drawRevealSeconds": 0.22
   },
   "booklet": [
     58,

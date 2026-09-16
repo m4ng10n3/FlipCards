@@ -1,0 +1,64 @@
+{
+  "boss": {
+    "source": "SceneKit_v2/10_CabinetIntegrated/cabinet.png",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "overlayRect": [
+      94,
+      178,
+      86,
+      546
+    ],
+    "gridCorners": {
+      "topLeft": [
+        128.2,
+        209.2
+      ],
+      "topRight": [
+        149.3,
+        209.2
+      ],
+      "bottomLeft": [
+        114.7,
+        702.8
+      ],
+      "bottomRight": [
+        142.8,
+        702.8
+      ]
+    },
+    "columns": 3,
+    "rows": 62
+  },
+  "button": {
+    "source": "SceneKit_v2/08_Integration/mushroom_clean.png",
+    "sourceSize": [
+      1254,
+      1254
+    ],
+    "cutFromTop": 600,
+    "ellipse": {
+      "center": [
+        627.0,
+        880.0
+      ],
+      "radii": [
+        585.0,
+        231.0
+      ],
+      "cone": 0.1
+    },
+    "gridTheta": [
+      -1.0680341880341881,
+      1.0680341880341881
+    ],
+    "gridDy": [
+      -159.0,
+      -119.0
+    ],
+    "columns": 40,
+    "rows": 2
+  }
+}

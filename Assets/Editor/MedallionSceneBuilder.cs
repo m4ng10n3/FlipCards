@@ -30,15 +30,18 @@ public static class MedallionSceneBuilder
 
     // Il mazzo sta tutto dentro lo schermo e un po' piu' piccolo delle carte in
     // campo; lo spessore lo si vede sul fianco rivolto al centro del tavolo.
-    const float DeckCenterX = 178, DeckCenterY = 800, DeckSpin = -10f, DeckCardScale = .98f, DeckEdgeShift = .8f;
+    const float DeckCenterX = 224, DeckCenterY = 842, DeckSpin = 8f, DeckCardScale = .96f, DeckEdgeShift = .35f, DeckFullHeight = 36f;
+
+    // Il libretto chiuso sta oltre il mazzo, piu' lontano dal giocatore: e' roba
+    // da consultare. Grande abbastanza da leggerne l'etichetta, girato al
+    // contrario del mazzo perche' i due oggetti non sembrino allineati a righello.
+    const float BookletCenterX = 176, BookletCenterY = 626, BookletSpin = -11f;
 
     // Perno della leva: il fianco sinistro del tamburo tocca la guancia destra
     // della cassa, che all'altezza del perno sta a x 1582.
     const float LeverPivotX = 1612, LeverPivotY = 460, LeverScale = .19f;
 
     static readonly Color Gold = new Color(.80f,.62f,.30f);
-    // Inchiostro rosso del boss: lo stesso delle lastre ferite in SlotOverlay.
-    static readonly Color BossInk = new Color(.55f,.14f,.10f);
 
     static RectTransform Rect(string name, Transform parent, float x, float y, float w, float h)
         => UiBuild.Band(UiBuild.Rect(name, parent), x, y, w, h);
@@ -103,7 +106,7 @@ public static class MedallionSceneBuilder
         var hud=go.GetComponent<HudController>() ?? go.AddComponent<HudController>();
         var oldOverlay=go.GetComponent<TableOverlayController>();if(oldOverlay!=null)Object.DestroyImmediate(oldOverlay);
         var overlay=go.AddComponent<TableOverlayController>();
-        Art("StarryVelvetTable",root,"scene_table",0,0,W,H);
+        Art("StarryVelvetTable",root,"scene_table",0,0,W,H).material=MedallionSceneSkin.AnimatedSurface(false);
         var under=Rect("MachineUnder",root,MachineX,MachineY,MachineW,MachineH);
         var integratedArt=Resources.Load<CabinetArtDefinition>("ActiveCabinetArt");
         if(integratedArt!=null) {
@@ -120,6 +123,7 @@ public static class MedallionSceneBuilder
         var cabinet=Art("Cabinet",root,"scene_cabinet",MachineX,MachineY,MachineW,MachineH);
         cabinet.material=MedallionSceneSkin.CabinetMaterial();
         if(integratedArt!=null)cabinet.gameObject.AddComponent<CabinetLampController>().definition=integratedArt;
+        BuildBossHealth(cabinet.rectTransform);
         var over=Rect("MachineOver",root,MachineX,MachineY,MachineW,MachineH);
         var chrome=under.gameObject.AddComponent<ReelChrome>();chrome.underLayer=over;chrome.overLayer=over;
         chrome.laneReferenceRoot=enemy;chrome.cellTop=EnemyTop-MachineY;chrome.cellWidth=SlotOverlay.CellW*EnemyScale;chrome.cellHeight=SlotOverlay.CellH*EnemyScale;chrome.sliverHeight=0;chrome.highlightBleed=0;
@@ -137,7 +141,7 @@ public static class MedallionSceneBuilder
         // Due oggetti sul tavolo, non due scritte. Il libretto sta oltre il
         // mazzo — piu' lontano dal giocatore — perche' e' roba da consultare,
         // non da giocare; la pergamena resta in alto a destra dov'era.
-        Bind(BookletTag(root,58,520,230,120),overlay.OpenDetail);
+        Bind(BookletTag(root,BookletCenterX,BookletCenterY,BookletSpin),overlay.OpenDetail);
         Bind(ScrollTag(root,1646,24,222,88),overlay.OpenLegend);
         var log=Overlay(root,overlay);
         FlipCardsLayoutBuilder.BuildEndPanel(root,hud);
@@ -204,11 +208,19 @@ public static class MedallionSceneBuilder
         // normale del tavolo e cade dritto verso chi guarda.
         var deck=Rect("Deck",root,DeckCenterX-130,DeckCenterY-115,260,230);
         UiBuild.Fill(deck,Color.clear,true);var view=deck.gameObject.AddComponent<DeckView>();
-        view.stackRoot=UiBuild.Rect("Stack",OnTable(deck,"Plane",260,230,DeckSpin));UiBuild.Stretch(view.stackRoot);
-        view.cardScale=DeckCardScale;view.maxLayers=1;view.maxEdges=18;view.edgeThickness=2.6f;
+        var plane=OnTable(deck,"Plane",260,230,DeckSpin);
+        // L'ombra di contatto ancora la pila al panno: senza, il mazzo sembrava
+        // un adesivo rosso appoggiato sopra il disegno.
+        float cw=CardOverlay.CardW*DeckCardScale,ch=CardOverlay.CardH*DeckCardScale;
+        ContactShadow(plane,130-cw*.5f,115-ch*.5f,cw,ch,.72f);
+        view.stackRoot=UiBuild.Rect("Stack",plane);UiBuild.Stretch(view.stackRoot);
+        view.cardScale=DeckCardScale;view.maxLayers=1;view.maxEdges=40;
+        // Niente numero: quante carte restano lo dice l'altezza della pila, un
+        // taglio per carta. A mazzo pieno la pila e' alta DeckFullHeight.
+        view.fullDeckHeight=DeckFullHeight;
         // Verso sinistra sul panno, riportato nello spazio della pila girata.
         view.edgeShift=Quaternion.Euler(0f,0f,-DeckSpin)*new Vector3(-DeckEdgeShift,0f,0f);
-        hud.deckText=Text("DeckCount",root,"0",DeckCenterX+126,DeckCenterY+70,60,30,19,GamePalette.Paper);
+        hud.deckText=null;
         view.hintText=null;
     }
     static void Status(RectTransform root,HudController hud)
@@ -221,12 +233,10 @@ public static class MedallionSceneBuilder
         sheet.sprite=UiSkin.Sprite("scene_paper");
         sheet.raycastTarget=false;
 
-        // La vita del boss sta sopra la nostra, nello stesso riquadro: sono le
-        // due vite che decidono la partita, e si confrontano con un'occhiata.
-        Text("BossLabel",plaque,"BOSS",30,22,120,32,23,BossInk);
-        hud.bossHpText=Value("BossValue",plaque,"24 / 24",172,22);hud.bossHpText.color=BossInk;
-        Text("LifeLabel",plaque,"VITA",30,60,120,32,23,GamePalette.Ink);
-        hud.playerHpText=Value("LifeValue",plaque,"20 / 20",172,60);
+        // Le vite stanno sui display LED della cassa e del fungo, senza numeri:
+        // la targhetta tiene solo AP e turno.
+        Text("StatusHeading",plaque,"FLIPCARDS",30,30,276,42,28,GamePalette.InkStrong);
+        hud.bossHpText=null;hud.playerHpText=null;
         Text("ApLabel",plaque,"AP",30,98,120,32,23,GamePalette.Ink);
         hud.apText=Value("ApValue",plaque,"3 / 3",172,98);
         UiBuild.Fill(Rect("Rule",plaque,30,140,276,2),new Color(GamePalette.Ink.r,GamePalette.Ink.g,GamePalette.Ink.b,.55f));
@@ -237,22 +247,48 @@ public static class MedallionSceneBuilder
     /// Il libretto chiuso posato sul tavolo: copertina d'avorio, dorso scuro a
     /// sinistra, linguette che sporgono a destra. Sullo stesso piano del mazzo.
     /// </summary>
-    static Button BookletTag(RectTransform root,float x,float y,float w,float h)
+    static Button BookletTag(RectTransform root,float cx,float cy,float spin)
     {
-        const float PW=208,PH=170;
-        var rt=Rect("DetailButton",root,x,y,w,h);
+        // Proporzioni di book_closed.png (1388x1133). Il corpo del libro dentro la
+        // tela: x 20..1350, y 86..1070; l'etichetta d'avorio x 208..1187, y 433..708.
+        const float PW=270,PH=PW*1133f/1388f,Thickness=11f;
+        var rt=Rect("DetailButton",root,cx-PW*.62f,cy-PH*.42f,PW*1.24f,PH*.84f);
         var hit=UiBuild.Fill(rt,Color.clear,true);
-        var page=OnTable(rt,"Plane",PW,PH,-7f);
+        var page=OnTable(rt,"Plane",PW,PH,spin);
 
-        var cover=Art("Cover",page,"scene_paper",0,0,PW,PH);cover.raycastTarget=false;
-        UiBuild.Fill(Rect("Spine",page,0,0,16,PH),new Color(.16f,.12f,.07f,.92f)).raycastTarget=false;
-        for(int i=0;i<3;i++)
-            UiBuild.Fill(Rect("Tab"+i,page,PW-6,26+i*40,20,30),TabInk(i)).raycastTarget=false;
-        var label=Text("Label",page,"DETTAGLIO",30,PH*.5f-22,PW-58,44,28,GamePalette.InkStrong);
-        label.alignment=TextAlignmentOptions.Center;label.raycastTarget=false;
+        // Ombra di contatto sul panno, poi lo spessore: piatto di sotto e blocco
+        // delle pagine impilati lungo la normale del tavolo, come i tagli del mazzo.
+        float bx=PW*20f/1388f,by=PH*86f/1133f,bw=PW*1330f/1388f,bh=PH*984f/1133f;
+        ContactShadow(page,bx,by,bw,bh,.62f);
+        var block=UiBuild.Rect("Thickness",page);UiBuild.Stretch(block);
+        int slices=7;
+        for(int i=0;i<slices;i++)
+        {
+            bool board=i==0;
+            var slice=UiBuild.Fill(Rect(board?"BackBoard":"Pages"+i,block,bx+(board?0:3),by+(board?0:2),bw-(board?0:10),bh-(board?0:6)),
+                                   board?new Color(.07f,.17f,.17f):new Color(.86f,.81f,.68f));
+            slice.raycastTarget=false;
+            slice.rectTransform.localPosition+=new Vector3(0,0,-Thickness*i/slices);
+            if(!board)UiBuild.Fill(Rect("Edge",slice.rectTransform,0,bh-7.5f,bw-10,1.2f),new Color(.45f,.36f,.24f,.7f)).raycastTarget=false;
+        }
+        var cover=Art("Cover",page,"upgrade_book_closed",0,0,PW,PH);cover.raycastTarget=false;
+        cover.rectTransform.localPosition+=new Vector3(0,0,-Thickness);
+        var label=Text("Label",cover.rectTransform,"DETTAGLIO",PW*208f/1388f,PH*433f/1133f,PW*979f/1388f,PH*275f/1133f,21,GamePalette.InkStrong);
+        label.alignment=TextAlignmentOptions.Center;label.raycastTarget=false;label.characterSpacing=8;
 
         var button=rt.gameObject.AddComponent<Button>();button.targetGraphic=hit;
         return button;
+    }
+
+    /// <summary>
+    /// Ombra morbida sotto un oggetto posato sul panno. La luce viene da in alto
+    /// a sinistra come sui disegni, quindi l'ombra scivola in basso a destra.
+    /// </summary>
+    static void ContactShadow(RectTransform plane,float x,float y,float w,float h,float strength)
+    {
+        float grow=Mathf.Max(w,h)*.22f;
+        var shadow=Art("ContactShadow",plane,"table_shadow",x-grow+w*.03f,y-grow+h*.05f,w+grow*2,h+grow*2);
+        shadow.color=new Color(0f,0f,0f,strength);shadow.raycastTarget=false;
     }
 
     /// <summary>La pergamena arrotolata: foglio d'avorio stretto fra due rulli d'ottone.</summary>
@@ -260,7 +296,9 @@ public static class MedallionSceneBuilder
     {
         var rt=Rect("LegendButton",root,x,y,w,h);
         var hit=UiBuild.Fill(rt,Color.clear,true);
-        var sheet=Art("Sheet",rt,"scene_paper",14,18,w-28,h-36);sheet.raycastTarget=false;
+        // Il foglio sta sotto il corpo avorio dei rulli, non sotto i tappi.
+        float inset=w*RollerBodyStart+2f;
+        var sheet=Art("Sheet",rt,"upgrade_parchment",inset,18,w-2*inset,h-36);sheet.raycastTarget=false;
         Roller(rt,"RollerTop",0,4,w,18);
         Roller(rt,"RollerBottom",0,h-22,w,18);
         var label=Text("Label",rt,"LEGENDA",16,h*.5f-15,w-32,30,20,GamePalette.InkStrong);
@@ -270,25 +308,40 @@ public static class MedallionSceneBuilder
     }
 
     /// <summary>
-    /// Rullo d'ottone: e' l'asta della leva coricata. Il tondino non riempie
-    /// tutta la tela dello sprite, quindi la tela va larga quanto serve perche'
-    /// l'ottone venga dello spessore voluto.
+    /// Dedicated illustrated roller, also used by the closed parchment tag.
     /// </summary>
     static void Roller(RectTransform parent,string name,float x,float y,float w,float thickness)
     {
-        var slot=Rect(name,parent,x,y,w,thickness);
-        var bar=UiBuild.Rect("Bar",slot);
-        bar.anchorMin=bar.anchorMax=bar.pivot=new Vector2(.5f,.5f);
-        bar.sizeDelta=new Vector2(thickness/MedallionSceneSkin.LeverShaftFill,w);
-        bar.anchoredPosition=Vector2.zero;
-        bar.localRotation=Quaternion.Euler(0,0,90f);
-        var image=UiBuild.Fill(bar,Color.white);
-        image.sprite=UiSkin.Sprite("scene_lever_shaft");
+        var image=Art(name,parent,"upgrade_roller",x,y,w,thickness);
         image.raycastTarget=false;
     }
 
-    static Color TabInk(int index)
-        => index switch { 0=>new Color(.62f,.24f,.18f,.95f), 1=>new Color(.20f,.40f,.42f,.95f), _=>new Color(.55f,.44f,.16f,.95f) };
+    /// <summary>
+    /// Vita del boss: display a matrice nella striscia frontale della guancia
+    /// sinistra. Tre strati sugli stessi pixel della tela: la luce dei LED, la
+    /// guancia ridipinta con la griglia forata, il bagliore additivo. Niente
+    /// scritte: il valore e' quanti LED restano accesi.
+    /// </summary>
+    static void BuildBossHealth(RectTransform cabinet)
+    {
+        float sx=MachineW/1774f,sy=MachineH/887f;
+        var (ox,oy,ow,oh)=MedallionSceneSkin.BossLedRect;
+        var matrix=LedLayer("BossLed",cabinet,ox*sx,oy*sy,ow*sx,oh*sy,false);
+        MedallionSceneSkin.ConfigureBossLed(matrix,sx,sy);
+        Art("BossLedCheek",cabinet,"led_boss_cheek",ox*sx,oy*sy,ow*sx,oh*sy).raycastTarget=false;
+        var glow=LedLayer("BossLedGlow",cabinet,ox*sx,oy*sy,ow*sx,oh*sy,true);
+        MedallionSceneSkin.ConfigureBossLed(glow,sx,sy);glow.source=matrix;
+        var strip=matrix.gameObject.AddComponent<LedHealthStrip>();
+        strip.boss=true;strip.fill=LedHealthStrip.Fill.BottomUp;
+    }
+
+    static LedMatrix LedLayer(string name,RectTransform parent,float x,float y,float w,float h,bool glow)
+    {
+        var matrix=Rect(name,parent,x,y,w,h).gameObject.AddComponent<LedMatrix>();
+        matrix.material=MedallionSceneSkin.LedMaterial(glow);
+        matrix.raycastTarget=false;
+        return matrix;
+    }
 
     /// <summary>
     /// Il fungo in due pezzi tagliati dallo stesso disegno: solo il cappello si
@@ -300,7 +353,17 @@ public static class MedallionSceneBuilder
         var rt=Rect("BtnAttack",root,x,y,size,size);
         UiBuild.Fill(rt,Color.clear,true);
         var cap=Art("Cap",rt,"scene_attack_cap",0,0,size,capH);cap.raycastTarget=false;
-        var plinth=Art("Base",rt,"scene_attack_base",0,capH,size,baseH);plinth.raycastTarget=false;
+        // Vita del giocatore: un arco di LED sulla gonna del basamento, sotto il
+        // basamento forato e con il bagliore sopra. Si svuota dai capi al centro.
+        float k=size/1254f;
+        var led=LedLayer("PlayerLed",rt,0,capH,size,baseH,false);
+        MedallionSceneSkin.ConfigurePlayerLed(led,k);
+        var plinth=Art("Base",rt,"led_button_base",0,capH,size,baseH);plinth.raycastTarget=false;
+        var glow=LedLayer("PlayerLedGlow",rt,0,capH,size,baseH,true);
+        MedallionSceneSkin.ConfigurePlayerLed(glow,k);glow.source=led;
+        var strip=led.gameObject.AddComponent<LedHealthStrip>();
+        strip.fill=LedHealthStrip.Fill.FromCenter;
+        strip.lit=new Color(.20f,.95f,.84f);strip.ember=new Color(.012f,.05f,.048f);
         var button=rt.gameObject.AddComponent<Button>();button.targetGraphic=plinth;
         var colors=button.colors;colors.disabledColor=new Color(.55f,.55f,.55f,1);button.colors=colors;
         var feedback=rt.gameObject.AddComponent<TableControlFeedback>();feedback.cap=cap.rectTransform;
@@ -379,7 +442,9 @@ public static class MedallionSceneBuilder
     {
         var modal=Rect("ReadingOverlay",root,0,0,W,H);controller.modal=modal.gameObject;
         var canvas=modal.gameObject.AddComponent<Canvas>();canvas.overrideSorting=true;canvas.sortingOrder=100;
-        modal.gameObject.AddComponent<GraphicRaycaster>();
+        // I segnalibri sul lato sinistro sono girati di 180 gradi insieme al
+        // foglio: con il filtro di default il raycaster li salterebbe.
+        modal.gameObject.AddComponent<GraphicRaycaster>().ignoreReversedGraphics=false;
         // Lo scrim serve ancora a intercettare i clic e a staccare la lettura dal
         // tavolo, ma le pagine sopra sono opache: il velo non e' piu' la superficie.
         var scrim=UiBuild.Fill(Rect("Scrim",modal,0,0,W,H),new Color(0,.02f,.025f,.58f),true);
@@ -391,52 +456,159 @@ public static class MedallionSceneBuilder
         return log;
     }
 
-    /// <summary>Libretto aperto: due pagine, dorso cucito, linguette che sporgono.</summary>
+    // Tela dei disegni del libretto (12_TableProps/Tools/build_book.py): piega a
+    // 826 su 1651, facce delle pagine da x 92 a 1560 e da y 24 a 906 su 953.
+    const float BookSrcW=1651,BookSrcH=953,BookSrcGutter=826,BookSrcPageRight=1560,BookSrcFaceTop=24,BookSrcFaceBottom=906;
+    // Largo quanto basta a leggere due pagine senza coprire tutto il tavolo, con
+    // spazio ai lati per i segnalibri: prima era 1560 e usciva dallo schermo.
+    const float BookW=1240;
+    static readonly string[] BookSections={"CAMPO","MANO","RULLO","REGISTRO"};
+
+    /// <summary>
+    /// Libretto aperto: doppia pagina con la piega al centro (niente dorso: da
+    /// aperto non si vede), copertina che gira all'apertura, fogli che si
+    /// sfogliano cambiando sezione e segnalibri di pelle fra le pagine.
+    /// L'ordine dei figli e' l'ordine di disegno: pagine, segnalibri a riposo,
+    /// testo, poi lo strato dei fogli che girano.
+    /// </summary>
     static TMP_Text Booklet(RectTransform modal,TableOverlayController controller)
     {
-        const float PW=1560,PH=900,Page=762,Gap=36;
-        var panel=Rect("Booklet",modal,180,80,PW,PH);controller.detail=panel.gameObject;
-        Art("PageLeft",panel,"scene_paper",0,0,Page,PH).raycastTarget=false;
-        Art("PageRight",panel,"scene_paper",Page+Gap,0,Page,PH).raycastTarget=false;
-        // Il dorso in pelle. Opaco: fra le due pagine c'e' un vuoto di 36px e
-        // con un velo semitrasparente ci si vedeva attraverso il tavolo.
-        UiBuild.Fill(Rect("Spine",panel,Page-6,0,Gap+12,PH),new Color(.17f,.12f,.07f,1f)).raycastTarget=false;
-        for(int i=0;i<9;i++)
-            UiBuild.Fill(Rect("Stitch"+i,panel,Page+Gap*.5f-2,60+i*92,5,44),new Color(.16f,.12f,.07f,.85f)).raycastTarget=false;
+        // k: le posizioni del testo sono state misurate sul libro largo 1380.
+        float s=BookW/BookSrcW, PH=BookSrcH*s, gutter=BookSrcGutter*s, k=BookW/1380f;
+        var panel=Rect("Booklet",modal,(W-BookW)*.5f,(H-PH)*.5f,BookW,PH);controller.detail=panel.gameObject;
+        var view=panel.gameObject.AddComponent<BookletView>();
+        view.controller=controller;controller.booklet=view;
+        view.book=panel.gameObject.AddComponent<CanvasGroup>();
 
-        controller.heading=Text("Title",panel,"DETTAGLIO",46,26,620,48,32,GamePalette.InkStrong);
-        Bind(PaperButton("Close",panel,"CHIUDI  x",1300,26,214,48),controller.Close);
+        var left=Art("SpreadLeft",panel,"book_spread_left",0,0,gutter,PH);left.raycastTarget=false;
+        Art("SpreadRight",panel,"book_spread_right",gutter,0,BookW-gutter,PH).raycastTarget=false;
+        view.spreadLeft=left;
+        view.tabsUnder=Hinge("Bookmarks",panel,gutter,PH);
 
-        // Linguette sul taglio esterno, come gli indici di un manuale.
-        Bind(PaperTab(panel,"FieldTab","CAMPO",0),controller.ShowField);
-        Bind(PaperTab(panel,"HandTab","MANO",1),controller.ShowHand);
-        Bind(PaperTab(panel,"ReelTab","RULLO",2),controller.ShowReels);
-        Bind(PaperTab(panel,"LogTab","REGISTRO",3),controller.ShowLog);
-
-        controller.choices=Rect("Choices",panel,46,108,672,742);
-        controller.inspector=Inspector(Rect("Inspector",panel,Page+Gap+46,108,672,742));
-
-        var logBox=Rect("Log",panel,46,108,PW-92,742);controller.logPanel=logBox.gameObject;
-        var log=ScrollText(logBox,"CombatLog",0,0,PW-92,742,19);
+        var leftPage=Page("LeftPage",panel,BookW,PH);var rightPage=Page("RightPage",panel,BookW,PH);
+        view.leftContent=leftPage.GetComponent<CanvasGroup>();view.rightContent=rightPage.GetComponent<CanvasGroup>();
+        controller.heading=Text("Title",leftPage,"IL CAMPO",150*k,92*k,450*k,46,29,GamePalette.InkStrong);
+        UiBuild.Fill(Rect("TitleRule",leftPage,150*k,92*k+50,450*k,2),new Color(GamePalette.Ink.r,GamePalette.Ink.g,GamePalette.Ink.b,.45f)).raycastTarget=false;
+        controller.choices=Rect("Choices",leftPage,150*k,92*k+72,450*k,540*k);
+        controller.inspector=Inspector(Rect("Inspector",rightPage,gutter+56*k,92*k,500*k,610*k));
+        var logBox=Rect("Log",rightPage,gutter+56*k,92*k,500*k,610*k);controller.logPanel=logBox.gameObject;
+        var log=ScrollText(logBox,"CombatLog",0,0,500*k,610*k,18);
         log.GetComponentInParent<ScrollRect>().gameObject.AddComponent<LogPanel>();
         logBox.gameObject.SetActive(false);
+        Bind(InkButton("Close",rightPage,"CHIUDI",BookW-300*k,28*k,126,34),controller.Close);
+
+        // Fogli e copertina ruotano attorno alla piega: stanno in un rect a
+        // dimensione zero centrato sulla piega, e il foglio ne e' l'integrale.
+        view.flipLayer=Hinge("Turning",panel,gutter,PH);
+        float faceTop=BookSrcFaceTop*s,faceBottom=BookSrcFaceBottom*s;
+        float leafW=(BookSrcPageRight-BookSrcGutter)*s,leafH=faceBottom-faceTop,leafY=PH*.5f-(faceTop+faceBottom)*.5f;
+        view.pageWidth=leafW;
+        view.leaves=new BookLeaf[3];
+        for(int i=0;i<3;i++)view.leaves[i]=Leaf("Leaf"+i,view.flipLayer,leafW,leafH,leafY,"book_leaf_right","book_leaf_left");
+        view.cover=Leaf("Cover",view.flipLayer,BookW-gutter,PH,0,"book_cover_front","book_spread_left");
+
+        // Segnalibri: uno per sezione, sul taglio esterno. Il componente li mette
+        // a destra o a sinistra secondo la sezione aperta.
+        view.tabCarriers=new RectTransform[BookSections.Length];view.tabs=new BookmarkTab[BookSections.Length];
+        view.tabHeights=new float[BookSections.Length];
+        for(int i=0;i<BookSections.Length;i++)
+        {
+            view.tabHeights[i]=PH*.5f-(196+i*112)*k;
+            var (carrier,tab,button)=Bookmark(view.tabsUnder,i);
+            view.tabCarriers[i]=carrier;view.tabs[i]=tab;
+            UnityEditor.Events.UnityEventTools.AddIntPersistentListener(button.onClick,view.Select,i);
+        }
         return log;
     }
 
+    /// <summary>Rect a dimensione zero sulla piega: lo spazio del perno di fogli e segnalibri.</summary>
+    static RectTransform Hinge(string name,RectTransform panel,float gutter,float height)
+    {
+        var rt=Rect(name,panel,gutter,height*.5f,0,0);
+        rt.pivot=new Vector2(.5f,.5f);
+        return rt;
+    }
+
+    static RectTransform Page(string name,RectTransform panel,float w,float h)
+    {
+        var rt=Rect(name,panel,0,0,w,h);
+        var group=rt.gameObject.AddComponent<CanvasGroup>();group.blocksRaycasts=true;
+        return rt;
+    }
+
+    static BookLeaf Leaf(string name,RectTransform hinge,float w,float h,float centerY,string front,string back)
+    {
+        var rt=UiBuild.Rect(name,hinge);rt.anchorMin=rt.anchorMax=rt.pivot=new Vector2(.5f,.5f);rt.sizeDelta=Vector2.zero;
+        var leaf=rt.gameObject.AddComponent<BookLeaf>();
+        leaf.material=MedallionSceneSkin.BookLeafMaterial();
+        leaf.front=UiSkin.Sprite(front).texture;leaf.back=UiSkin.Sprite(back).texture;
+        leaf.size=new Vector2(w,h);leaf.centerY=centerY;leaf.raycastTarget=false;
+        rt.gameObject.SetActive(false);
+        return leaf;
+    }
+
     /// <summary>
-    /// La pergamena: i rulli stanno DENTRO il contenuto scorrevole. Da qui la
-    /// regola chiesta — se il testo supera la finestra si vede un rullo per
-    /// volta, se ci sta si vedono tutti e due.
+    /// Un segnalibro: portatore sul taglio della pagina, linguetta di pelle che
+    /// ne esce, scritta e bottone. La linguetta parte un poco dentro la pagina,
+    /// come se fosse infilata fra i fogli.
     /// </summary>
+    static (RectTransform,BookmarkTab,Button) Bookmark(RectTransform layer,int index)
+    {
+        const float TabW=196,TabH=84,Tuck=8;
+        var carrier=UiBuild.Rect("Bookmark_"+BookSections[index],layer);
+        carrier.anchorMin=carrier.anchorMax=carrier.pivot=new Vector2(.5f,.5f);carrier.sizeDelta=Vector2.zero;
+        var body=UiBuild.Rect("Tab",carrier);
+        body.anchorMin=body.anchorMax=new Vector2(.5f,.5f);body.pivot=new Vector2(0f,.5f);body.sizeDelta=new Vector2(TabW,TabH);
+        body.anchoredPosition=new Vector2(-Tuck,0f);
+        var image=UiBuild.Fill(body,Color.white,true);image.sprite=UiSkin.Sprite("bookmark_"+BookSections[index].ToLowerInvariant());
+        var button=body.gameObject.AddComponent<Button>();button.targetGraphic=image;
+        var colors=button.colors;colors.highlightedColor=new Color(1f,.96f,.88f);colors.pressedColor=new Color(.85f,.8f,.72f);button.colors=colors;
+        var label=UiBuild.Text("Label",body,BookSections[index],16,new Color(.95f,.89f,.74f));
+        label.font=UiBuild.Font;label.fontSize=16;label.alignment=TextAlignmentOptions.Center;label.raycastTarget=false;
+        label.characterSpacing=6;
+        var lrt=label.rectTransform;lrt.anchorMin=lrt.anchorMax=new Vector2(0f,.5f);lrt.pivot=new Vector2(.5f,.5f);
+        lrt.sizeDelta=new Vector2(118,30);lrt.anchoredPosition=new Vector2(84,0);
+        var tab=carrier.gameObject.AddComponent<BookmarkTab>();tab.body=body;tab.label=label;tab.tuck=Tuck;
+        return (carrier,tab,button);
+    }
+
+    /// <summary>Bottone d'inchiostro sulla pagina: niente riquadro, solo la parola sottolineata.</summary>
+    static Button InkButton(string name,Transform parent,string label,float x,float y,float w,float h)
+    {
+        var rt=Rect(name,parent,x,y,w,h);
+        var hit=UiBuild.Fill(rt,new Color(0,0,0,0),true);
+        var text=Text("Label",rt,label+"  ×",0,0,w,h-6,19,GamePalette.InkStrong);
+        text.alignment=TextAlignmentOptions.Center;text.raycastTarget=false;text.characterSpacing=4;
+        UiBuild.Fill(Rect("Rule",rt,10,h-5,w-20,1.5f),new Color(GamePalette.Ink.r,GamePalette.Ink.g,GamePalette.Ink.b,.5f)).raycastTarget=false;
+        var button=rt.gameObject.AddComponent<Button>();button.targetGraphic=text;
+        var colors=button.colors;colors.highlightedColor=new Color(.72f,.36f,.22f);button.colors=colors;
+        return button;
+    }
+
+    /// <summary>
+    /// Fixed rollers frame a masked paper viewport; only the text travels.
+    /// </summary>
+    // Il corpo avorio del rullo va dal 12,4% all'87,5% della texture (misurato
+    // sulla riga centrale di roller.png): fuori ci sono i tappi.
+    const float RollerBodyStart=.124f, RollerBodyEnd=.875f;
+
+    /// <summary>Quanto il rullo deve sporgere per lato, in frazione della larghezza del foglio.</summary>
+    static float RollerOverhang(float paperWidth,float bleed=10f)
+        => (RollerBodyStart+bleed/paperWidth)/(RollerBodyEnd-RollerBodyStart);
+
     static void Parchment(RectTransform modal,TableOverlayController controller)
     {
-        const float PW=1180,PH=880;
+        const float PW=1080,PH=880;
         var panel=Rect("Parchment",modal,(W-PW)*.5f,90,PW,PH);controller.legend=panel.gameObject;
 
         // Il viewport segue il pannello: e' la sua maschera che scopre il foglio
         // mentre il rotolo si apre. Se restasse di misura fissa, l'animazione
         // sposterebbe una finestra gia' piena invece di srotolare qualcosa.
-        var view=UiBuild.Rect("Viewport",panel);UiBuild.Stretch(view);
+        var paperCore=UiBuild.Fill(Rect("PaperCore",panel,20,36,PW-40,PH-72),new Color(.89f,.85f,.73f));
+        UiBuild.Stretch(paperCore.rectTransform,20,36,20,36);
+        var paperBackdrop=Art("Paper",panel,"upgrade_parchment",0,36,PW,PH-72);
+        UiBuild.Stretch(paperBackdrop.rectTransform,0,36,0,36);
+        var view=UiBuild.Rect("Viewport",panel);UiBuild.Stretch(view,48,92,48,76);
         UiBuild.Fill(view,Color.clear,true);
         view.gameObject.AddComponent<RectMask2D>();
         var scroll=panel.gameObject.AddComponent<ScrollRect>();
@@ -451,18 +623,27 @@ public static class MedallionSceneBuilder
         content.gameObject.AddComponent<ContentSizeFitter>().verticalFit=ContentSizeFitter.FitMode.PreferredSize;
         scroll.viewport=view;scroll.content=content;
 
-        Bar(content,"RollerTop",44,PW);
         var sheet=UiBuild.Rect("Sheet",content);
-        var paper=UiBuild.Fill(sheet,Color.white);paper.sprite=UiSkin.Sprite("scene_paper");paper.raycastTarget=false;
         var sheetLayout=sheet.gameObject.AddComponent<VerticalLayoutGroup>();
-        sheetLayout.padding=new RectOffset(70,70,44,54);sheetLayout.spacing=26;
+        sheetLayout.padding=new RectOffset(32,32,12,32);sheetLayout.spacing=26;
         sheetLayout.childControlWidth=true;sheetLayout.childControlHeight=true;
         sheetLayout.childForceExpandWidth=true;sheetLayout.childForceExpandHeight=false;
         sheet.gameObject.AddComponent<ContentSizeFitter>().verticalFit=ContentSizeFitter.FitMode.PreferredSize;
         Legend(sheet);
-        Bar(content,"RollerBottom",44,PW);
+        // I rulli sporgono dal pannello: il foglio deve stare tutto sotto il corpo
+        // avorio, e i tappi d'ottone restano fuori dal suo taglio. Le ancore oltre
+        // 0..1 tengono la proporzione anche mentre MedallionScroll apre il rotolo.
+        float overhang=RollerOverhang(PW);
+        var top=Art("RollerTop",panel,"upgrade_roller",0,0,PW,76);
+        top.rectTransform.anchorMin=new Vector2(-overhang,1);top.rectTransform.anchorMax=new Vector2(1+overhang,1);
+        top.rectTransform.pivot=new Vector2(.5f,1);top.rectTransform.anchoredPosition=Vector2.zero;top.rectTransform.sizeDelta=new Vector2(0,76);
+        var bottom=Art("RollerBottom",panel,"upgrade_roller",0,0,PW,76);
+        bottom.rectTransform.anchorMin=new Vector2(-overhang,0);bottom.rectTransform.anchorMax=new Vector2(1+overhang,0);
+        bottom.rectTransform.pivot=new Vector2(.5f,0);bottom.rectTransform.anchoredPosition=Vector2.zero;bottom.rectTransform.sizeDelta=new Vector2(0,76);
+        top.material=bottom.material=MedallionSceneSkin.AnimatedSurface(true);
+        var motion=panel.gameObject.AddComponent<ParchmentRollerMotion>();motion.scroll=scroll;motion.top=top;motion.bottom=bottom;
 
-        Bind(PaperButton("Close",panel,"CHIUDI  x",PW-232,18,206,46),controller.Close);
+        Bind(PaperButton("Close",panel,"CHIUDI  x",PW-250,78,190,38),controller.Close);
 
         var unroll=panel.gameObject.AddComponent<MedallionScroll>();
         unroll.openSize=new Vector2(PW,PH);
@@ -472,20 +653,6 @@ public static class MedallionSceneBuilder
         panel.gameObject.SetActive(false);
     }
 
-    /// <summary>Un rullo come voce del layout verticale: il tondino ruotato gli sta dentro.</summary>
-    static void Bar(RectTransform content,string name,float thickness,float span)
-    {
-        var slot=UiBuild.Rect(name,content);
-        var element=slot.gameObject.AddComponent<LayoutElement>();
-        element.minHeight=element.preferredHeight=thickness;
-        var bar=UiBuild.Rect("Bar",slot);
-        bar.anchorMin=bar.anchorMax=bar.pivot=new Vector2(.5f,.5f);
-        bar.sizeDelta=new Vector2(thickness/MedallionSceneSkin.LeverShaftFill,span);
-        bar.anchoredPosition=Vector2.zero;bar.localRotation=Quaternion.Euler(0,0,90f);
-        var image=UiBuild.Fill(bar,Color.white);
-        image.sprite=UiSkin.Sprite("scene_lever_shaft");image.raycastTarget=false;
-    }
-
     static Button PaperButton(string name,Transform parent,string label,float x,float y,float w,float h)
     {
         var rt=Rect(name,parent,x,y,w,h);
@@ -493,19 +660,6 @@ public static class MedallionSceneBuilder
         UiBuild.Fill(Rect("Rule",rt,0,h-2,w,2),new Color(.16f,.12f,.07f,.5f)).raycastTarget=false;
         var button=rt.gameObject.AddComponent<Button>();button.targetGraphic=background;
         var text=Text("Label",rt,label,6,4,w-12,h-8,21,GamePalette.InkStrong);
-        text.alignment=TextAlignmentOptions.Center;text.raycastTarget=false;
-        return button;
-    }
-
-    /// <summary>Linguetta d'indice sul taglio esterno del libretto.</summary>
-    static Button PaperTab(RectTransform panel,string name,string label,int index)
-    {
-        var rt=Rect(name,panel,1560,132+index*128,152,112);
-        var background=UiBuild.Fill(rt,Color.white,true);
-        background.sprite=UiSkin.Sprite("scene_paper");
-        UiBuild.Fill(Rect("Ink",rt,0,0,12,112),TabInk(index%3)).raycastTarget=false;
-        var button=rt.gameObject.AddComponent<Button>();button.targetGraphic=background;
-        var text=Text("Label",rt,label,18,40,124,32,19,GamePalette.InkStrong);
         text.alignment=TextAlignmentOptions.Center;text.raycastTarget=false;
         return button;
     }

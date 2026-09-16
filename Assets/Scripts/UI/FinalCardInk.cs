@@ -15,6 +15,9 @@ public sealed class FinalCardInk : MonoBehaviour
 
     Face _front, _back;
     int _health = int.MinValue, _power = int.MinValue, _charges = -1, _face = -1;
+
+    /// <summary>Radice dei segni del retro: la pesca la fa comparire sul dorso.</summary>
+    public RectTransform BackRoot => _back?.root;
     static Sprite Sprite(string face, string name) => UiSkin.Sprite("final_" + face + "_" + name);
 
     static Image Stamp(RectTransform parent, string name, Sprite sprite, Vector2 center, Vector2 size)

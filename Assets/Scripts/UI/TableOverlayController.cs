@@ -12,24 +12,63 @@ public sealed class TableOverlayController : MonoBehaviour
     public RectTransform choices;
     public InspectorPanel inspector;
     public TMP_Text heading;
+    [Tooltip("Il libretto animato: se c'e', apertura, chiusura e cambio di sezione passano da lui.")]
+    public BookletView booklet;
     public string CurrentCategory { get; private set; }
-    void Awake() { Instance = this; Close(); }
+    bool _closing;
+    static readonly string[] SectionTitles = { "IL CAMPO", "LA MANO", "IL RULLO", "IL REGISTRO" };
+    void Awake() { Instance = this; CloseNow(); }
     void OnDestroy() { if (Instance == this) Instance = null; }
     void Update()
     {
         if (IsOpen && Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame) Close();
-        if (IsOpen && GameManager.Instance != null && GameManager.Instance.MatchEnded) Close();
+        if (IsOpen && GameManager.Instance != null && GameManager.Instance.MatchEnded) CloseNow();
     }
+
+    /// <summary>Chiude il modale; il libretto aperto prima richiude la copertina.</summary>
     public void Close()
     {
+        if (_closing) return;
+        if (booklet != null && modal != null && modal.activeSelf && detail != null && detail.activeSelf)
+        {
+            _closing = true;
+            booklet.PlayClose(CloseNow);
+            return;
+        }
+        CloseNow();
+    }
+
+    public void CloseNow()
+    {
+        _closing = false;
         if (modal != null) modal.SetActive(false);
         if (inspector != null) inspector.Clear();
     }
+
     public void OpenDetail()
     {
+        _closing = false;
         modal.SetActive(true); detail.SetActive(true); legend.SetActive(false);
         heading.text = "DETTAGLIO";
-        inspector.Clear(); ShowCategory("Campo");
+        inspector.Clear();
+        if (booklet != null) booklet.PlayOpen(0);
+        else ShowCategory("Campo");
+    }
+
+    /// <summary>
+    /// Scrive una sezione del libretto senza animazione: 0 campo, 1 mano,
+    /// 2 rullo, 3 registro. La chiama BookletView nel momento giusto dello sfoglio.
+    /// </summary>
+    public void ApplySection(int section)
+    {
+        if (heading != null) heading.text = SectionTitles[Mathf.Clamp(section, 0, SectionTitles.Length - 1)];
+        switch (section)
+        {
+            case 0: ShowCategory("Campo"); break;
+            case 1: ShowCategory("Mano"); break;
+            case 2: ShowCategory("Rullo"); break;
+            default: ShowLog(); break;
+        }
     }
     /// <summary>La pergamena ha il suo titolo stampato: non tocca quello del libretto.</summary>
     public void OpenLegend()
@@ -70,7 +109,8 @@ public sealed class TableOverlayController : MonoBehaviour
         }
         if (index == 0)
         {
-            var empty = UiBuild.Text("Empty", choices, "Nessun elemento in questa zona.", 18, GamePalette.InkMuted);
+            var empty = UiBuild.Text("Empty", choices, "Nessun elemento in questa zona.", 19, GamePalette.InkMuted);
+            empty.font = UiBuild.Font; empty.fontSize = 19;
             UiBuild.Band(empty.rectTransform, 8, 16, 400, 60);
             empty.textWrappingMode = TextWrappingModes.Normal;
         }
@@ -80,7 +120,7 @@ public sealed class TableOverlayController : MonoBehaviour
     void AddChoice(string label, Object source, int index)
     {
         var rt = UiBuild.Rect("Inspect_" + index, choices);
-        UiBuild.Band(rt, 0, index * 64, 640, 54);
+        UiBuild.Band(rt, 0, index * 64, choices.rect.width, 54);
         var background = UiBuild.Fill(rt, new Color(.80f,.74f,.60f,.55f), true);
         var button = rt.gameObject.AddComponent<Button>(); button.targetGraphic = background;
         var text = UiBuild.Text("Label", rt, label, 21, GamePalette.InkStrong);

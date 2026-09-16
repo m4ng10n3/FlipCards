@@ -29,6 +29,87 @@ public class CardView : MonoBehaviour
     [Header("Hover Activation Thresholds")]
 
     private Sprite frontImage;
+    public bool IsDrawing { get; private set; }
+    public bool DrawBackVisible => IsDrawing && !_drawRevealed;
+    Vector3 _drawOrigin, _drawWorldScale, _drawRestScale;
+    Quaternion _drawOriginRotation;
+    float _drawElapsed, _drawTravel, _drawReveal;
+    bool _drawRevealed;
+    Sprite _drawFront;
+    Graphic[] _drawGraphics;
+    bool[] _drawEnabled;
+
+    /// <summary>
+    /// Solo presentazione del secondo tempo della pesca. La carta e' gia'
+    /// estratta e pagata (<see cref="HandManager.TryExtractTop"/>) e i segni del
+    /// suo retro si sono gia' materializzati sulla cima del mazzo
+    /// (<see cref="DeckView"/>): qui parte da quella posa con gli stessi segni
+    /// accesi, li tiene visibili per tutto il viaggio e si gira sul fronte solo
+    /// all'arrivo. I segni vengono da <see cref="CardOverlay.PresentDrawBack"/>,
+    /// cioe' sono quelli che la carta mostrera' coperta in campo.
+    /// </summary>
+    public void PlayDrawFrom(Vector3 position,Quaternion rotation,Vector3 worldScale,float travel,float reveal)
+    {
+        if(instance != null || _rt == null) return;
+        _drawOrigin=position;_drawOriginRotation=rotation;_drawWorldScale=worldScale;
+        _drawRestScale=_rt.localScale;_drawTravel=Mathf.Max(.1f,travel);_drawReveal=Mathf.Max(.1f,reveal);
+        _drawElapsed=0;_drawRevealed=false;IsDrawing=true;
+        var template=Template.GetComponent<Image>();_drawFront=template.sprite;
+
+        var overlay=GetComponent<CardOverlay>();
+        var backInk=overlay != null ? overlay.PresentDrawBack() : null;
+        _drawGraphics=GetComponentsInChildren<Graphic>(true);_drawEnabled=new bool[_drawGraphics.Length];
+        for(int i=0;i<_drawGraphics.Length;i++)
+        {
+            var g=_drawGraphics[i];
+            _drawEnabled[i]=g.enabled;
+            bool ink=backInk != null && g.transform.IsChildOf(backInk);
+            g.enabled=g==template || (ink && g.enabled);
+        }
+        // Lo stesso dorso della pila del mazzo (ShowDeckBack): la carta non cambia
+        // copertina nel momento in cui si stacca.
+        template.sprite=UiSkin.Sprite("card_neutral") ?? backImage;
+        _rt.position=position;_rt.rotation=rotation;
+        var parentScale=_rt.parent.lossyScale;
+        _rt.localScale=new Vector3(worldScale.x/parentScale.x,worldScale.y/parentScale.y,worldScale.z/parentScale.z);
+        _canvas.overrideSorting=true;_canvas.sortingOrder=30;
+    }
+
+    void RestoreDrawFace()
+    {
+        if(_drawRevealed) return;
+        _drawRevealed=true;
+        Template.GetComponent<Image>().sprite=_drawFront;
+        for(int i=0;i<_drawGraphics.Length;i++) if(_drawGraphics[i]!=null) _drawGraphics[i].enabled=_drawEnabled[i];
+    }
+
+    void StepDraw()
+    {
+        _drawElapsed+=Time.unscaledDeltaTime;
+        UpdateHandContainerTarget();
+        var parentScale=_rt.parent.lossyScale;
+        var initialScale=new Vector3(_drawWorldScale.x/parentScale.x,_drawWorldScale.y/parentScale.y,_drawWorldScale.z/parentScale.z);
+
+        // Il viaggio, sempre di dorso.
+        float travelTime=_drawElapsed;
+        float t=Mathf.Clamp01(travelTime/_drawTravel),e=t*t*(3-2*t);
+        var destination=_rt.parent.TransformPoint(_handCurveOffset);
+        var endRotation=GetAnchorRotation()*_targetHandRotation;
+        _rt.position=Vector3.Lerp(_drawOrigin,destination,e)+_rt.parent.up*(Mathf.Sin(t*Mathf.PI)*80f*_rt.parent.lossyScale.y);
+        _rt.rotation=Quaternion.Slerp(_drawOriginRotation,endRotation,e);
+        _rt.localScale=Vector3.Lerp(initialScale,_drawRestScale,e);
+        if(t<1) return;
+
+        // In mano: si gira sul fronte.
+        float flip=Mathf.Clamp01((travelTime-_drawTravel)/_drawReveal);
+        if(flip>=.5f) RestoreDrawFace();
+        float angle=flip<.5f ? flip*180f : (flip-1)*180f;
+        _rt.rotation=endRotation*Quaternion.Euler(0,angle,0);
+        if(flip<1) return;
+        IsDrawing=false;_drawGraphics=null;_drawEnabled=null;
+        _rt.localScale=_drawRestScale;_canvas.overrideSorting=false;
+        UpdateShadow();
+    }
 
     [Header("MoveInHand Parameters")]
     [SerializeField] private bool MoveInHandAnimations = true;
@@ -133,6 +214,8 @@ public class CardView : MonoBehaviour
     private bool _templateBaseColorRead;
 
     public RectTransform RectTransform => _rt;
+    /// <summary>L'Image del template: dorso o fronte stampato della carta.</summary>
+    public Image TemplateImage => Template != null ? Template.GetComponent<Image>() : null;
     public Canvas RootCanvas => _rootCanvas;
     public Canvas Canvas => _canvas;
     public bool IsDragging { get => _dragging; set {
@@ -571,6 +654,7 @@ public class CardView : MonoBehaviour
     private void Update()
     {
         if (_rt == null) return;
+        if (IsDrawing) return;
         _rt.localRotation *= Quaternion.Euler(0f, -_appliedFlipAngle, 0f);
         _appliedFlipAngle = 0f;
 
@@ -619,6 +703,7 @@ public class CardView : MonoBehaviour
 
     private void LateUpdate()
     {
+        if(IsDrawing) { StepDraw(); return; }
         // HandManager can move the container after this card's Update.
         // Resolve the picked card in world space after every parent has moved.
         if (_dragging && _dragTarget.HasValue && _rt != null)

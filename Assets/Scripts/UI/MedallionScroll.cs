@@ -6,9 +6,8 @@ using UnityEngine;
 /// e' gia' tutto montato dentro e la maschera del viewport lo scopre man mano,
 /// che e' esattamente come si comporta un rotolo.
 ///
-/// I due rulli d'ottone stanno DENTRO il contenuto scorrevole, non ai bordi
-/// della finestra: percio' quando il testo supera l'altezza se ne vede uno per
-/// volta, e quando ci sta si vedono tutti e due.
+/// I due rulli restano ai bordi del pannello e la superficie ruota con il
+/// movimento della carta (ParchmentRollerMotion), fuori dalla maschera del testo.
 /// </summary>
 public sealed class MedallionScroll : MonoBehaviour
 {

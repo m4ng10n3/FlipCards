@@ -151,7 +151,7 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
     {
         LogPointerEvent("BeginDrag", eventData);
         EnsureRuntimeRefs();
-        if (cardView == null || cardView.IsDragging || gm == null || !gm.CanAct) return;
+        if (cardView == null || cardView.IsDrawing || cardView.IsDragging || gm == null || !gm.CanAct) return;
         int cost = IsHandCard() ? gm.playCardCost : gm.swapCardCost;
         if (gm.player.actionPoints < cost) return;
         if (cardView.RectTransform == null) throw new System.InvalidOperationException("CardView missing RectTransform");
@@ -238,7 +238,7 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
         LogPointerEvent("PointerEnter", eventData);
 
         EnsureRuntimeRefs();
-        if (cardView == null) return;
+        if (cardView == null || cardView.IsDrawing) return;
         cardView.IsHovering = true;
         cardView.ApplyPointerEnter();
 
@@ -250,7 +250,7 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
     {
         LogPointerEvent("PointerExit", eventData);
         EnsureRuntimeRefs();
-        if (cardView == null) return;
+        if (cardView == null || cardView.IsDrawing) return;
         cardView.IsHovering = false;
         cardView.ResetHoverVisual();
         InspectorPanel.Instance?.HideFor(cardView.instance != null ? (object)cardView : this);
@@ -260,7 +260,7 @@ public class CardDefinition : MonoBehaviour, IPointerDownHandler, IPointerUpHand
     {
         LogPointerEvent("PointerClick", eventData);
         EnsureRuntimeRefs();
-        if (cardView == null) return;
+        if (cardView == null || cardView.IsDrawing) return;
         if (cardView.IsDragging || (eventData != null && eventData.dragging)) return;
         if (eventData != null && eventData.button != PointerEventData.InputButton.Left) return;
         if (gm == null || !gm.CanAct) return;

@@ -14,6 +14,11 @@ public class HandManager : MonoBehaviour
     [SerializeField] private Transform handRoot;
     [SerializeField] private Transform spawnPoint;
     [SerializeField] private float spawnScaleMultiplier = 1.5f;
+    [Header("Draw presentation")]
+    [Tooltip("Quanto la carta estratta resta sulla cima del mazzo mentre i segni del retro compaiono.")]
+    [Min(0f)] public float drawMaterializeSeconds = .38f;
+    [Min(.1f)] public float drawTravelSeconds = .78f;
+    [Min(.1f)] public float drawRevealSeconds = .22f;
     [Header("Runtime debug")]
     [SerializeField] private CardView selectedCard;
 
@@ -32,7 +37,7 @@ public class HandManager : MonoBehaviour
     public int MaxHandSize => maxHandSize;
     public int HandCount => handCards.Count;
     public int DeckCount => deckInitialized ? deck.Count : CountDeckFromBindings();
-    public bool HandIsFull => handCards.Count >= maxHandSize;
+    public bool HandIsFull => handCards.Count + _pendingDraws >= maxHandSize;
 
     /// <summary>
     /// Carte del giocatore uscite dal gioco: la pila degli scarti del tabellone.
@@ -174,6 +179,33 @@ public class HandManager : MonoBehaviour
     /// </summary>
     public bool DrawCard()
     {
+        if (!TryExtractTop(out var drawn)) return false;
+        var deckView = Object.FindAnyObjectByType<DeckView>();
+        Vector3 drawPosition=spawnPoint.position,drawScale=spawnPoint.lossyScale;
+        Quaternion drawRotation=spawnPoint.rotation;
+        if(deckView != null) deckView.GetDrawPose(out drawPosition,out drawRotation,out drawScale);
+        DeliverDrawn(drawn,drawPosition,drawRotation,drawScale);
+        return true;
+    }
+
+    /// <summary>
+    /// Pesche estratte e non ancora consegnate: la carta e' decisa e pagata, ma
+    /// sta ancora materializzandosi sulla cima del mazzo. Contano per la mano
+    /// piena, cosi' due clic ravvicinati non la sforano.
+    /// </summary>
+    int _pendingDraws;
+    public int PendingDraws => _pendingDraws;
+
+    /// <summary>
+    /// Primo tempo della pesca: l'estrazione. Valida, spende gli AP una volta
+    /// sola e toglie la carta dalla cima. Da qui il risultato e' deciso — e' la
+    /// stessa carta che la pila mostrava in cima, perche' il mazzo e' mescolato
+    /// una volta sola e si pesca sempre da <c>deck[0]</c>. Nessuna grafica: la
+    /// carta entra in mano con <see cref="DeliverDrawn"/>.
+    /// </summary>
+    public bool TryExtractTop(out GameObject drawn)
+    {
+        drawn = null;
         var gm = GameManager.Instance ?? throw new System.InvalidOperationException("GameManager missing");
 
         EnsureDeck();
@@ -184,20 +216,34 @@ public class HandManager : MonoBehaviour
             return false;
         }
 
-        if (handCards.Count >= maxHandSize)
+        if (handCards.Count + _pendingDraws >= maxHandSize)
         {
-            Logger.Info($"Pesca: mano piena ({handCards.Count}/{maxHandSize})");
+            Logger.Info($"Pesca: mano piena ({handCards.Count + _pendingDraws}/{maxHandSize})");
             return false;
         }
 
         if (!gm.TrySpendPlayerAP(gm.drawCardCost, "Draw"))
             return false;
 
-        GameObject cardPrefabToSpawn = deck[0];
+        drawn = deck[0];
         deck.RemoveAt(0);
+        _pendingDraws++;
+        Logger.Info($"Draw: {drawn.GetComponent<CardDefinition>()?.cardName ?? drawn.name}");
+        return true;
+    }
 
-        GameObject go = Instantiate(cardPrefabToSpawn, handRoot);
-        go.name = cardPrefabToSpawn.name;
+    /// <summary>
+    /// Secondo tempo: la carta estratta entra in mano partendo dalla posa della
+    /// cima del mazzo, di dorso e con i segni del retro gia' accesi, e si gira
+    /// solo all'arrivo.
+    /// </summary>
+    public CardView DeliverDrawn(GameObject drawn, Vector3 position, Quaternion rotation, Vector3 worldScale)
+    {
+        var gm = GameManager.Instance ?? throw new System.InvalidOperationException("GameManager missing");
+        _pendingDraws = Mathf.Max(0, _pendingDraws - 1);
+
+        GameObject go = Instantiate(drawn, handRoot);
+        go.name = drawn.name;
         go.SetActive(true);
         go.transform.localScale = Vector3.one * spawnScaleMultiplier;
 
@@ -208,9 +254,10 @@ public class HandManager : MonoBehaviour
         go.transform.rotation = spawnPoint.rotation;
 
         RegisterHandCard(cv);
-        Logger.Info($"Draw: {cv.GetComponentInParent<CardDefinition>()?.cardName ?? cv.gameObject.name}");
         UpdateCardsPosition();
-        return true;
+        handRoot.GetComponentInParent<HandTray>()?.PresentDraw(drawTravelSeconds+drawRevealSeconds+.6f);
+        cv.PlayDrawFrom(position,rotation,worldScale,drawTravelSeconds,drawRevealSeconds);
+        return cv;
     }
 
     private void RegisterHandCard(CardView cv)

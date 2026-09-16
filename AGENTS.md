@@ -284,10 +284,24 @@ Chi non è un `Button` (il mazzo) non passa da `UpdateHUD` e guarda `CanAct`.
   Il componente sta sull'**area di attivazione**, e la mano è un suo figlio: se
   fossero fratelli, passare da una carta all'altra genererebbe un `PointerExit`.
 - `DeckView.cs` — mazzo cliccabile, posato sul tavolo a sinistra. In cima c'e'
-  il prefab vero della prossima carta, di dorso; sotto, tagli di carta impilati
-  lungo la **normale del tavolo** (z locale di `stackRoot`), in numero
-  proporzionale al residuo. Le copie sono decorative (`CardDefinition` e
-  `CardView` disabilitati) e il clic lo prende il box piatto in spazio schermo.
+  il prefab vero della prossima carta, di dorso; sotto, **un taglio per carta**
+  impilato lungo la **normale del tavolo** (z locale di `stackRoot`): l'altezza
+  della pila e' il numero di carte rimaste, non c'e' nessun numero scritto. Le
+  copie sono decorative (`CardDefinition` e `CardView` disabilitati) e il clic
+  lo prende il box piatto in spazio schermo. La pesca e' in tre tempi:
+  `HandManager.TryExtractTop` (decide la carta e spende gli AP), materializzazione
+  dei segni del retro sulla carta in cima (`CardOverlay.PresentDrawBack`), poi
+  `HandManager.DeliverDrawn` che la fa partire verso la mano gia' di dorso.
+  `HandManager.PendingDraws` conta le estratte non ancora consegnate.
+- `LedMatrix.cs` + `LedMatrix.shader` — display a pixel indirizzabili (texture
+  di stato, un texel per LED), con mesh a quadrilatero o ad arco su cono che
+  ricalca i fori dipinti negli asset di `12_TableProps`. `LedHealthStrip.cs` ci
+  scrive le vite di boss e giocatore: **niente numeri o percentuali**.
+- `BookletView.cs`, `BookLeaf.cs` + `BookLeaf.shader`, `BookmarkTab.cs` — il
+  libretto del dettaglio: copertina che gira all'apertura, fogli che si
+  sfogliano cambiando sezione, segnalibri che seguono il bordo del foglio e
+  stanno a sinistra per le sezioni gia' passate. Le sezioni le scrive
+  `TableOverlayController.ApplySection(int)`.
 - `LaneAxisView.cs` — asse delle corsie: risonanza e connettori di combo, senza pronostici numerici.
 - `DamagePreviewController.cs` — anteprima di 2,8 s al clic in campo, validazione e ripristino; luci e HUD restano gli unici proprietari dei loro grafici.
 - `InspectorPanel.cs` + `AbilityCatalog.cs` — ispettore e testi delle abilità.
@@ -567,6 +581,20 @@ comando con `AssetDatabase.MoveAsset` o `DeleteAsset` viene rifiutato dal bridge
 quindi non sposta niente. Si sposta con `mv` il file e il suo `.meta` insieme, poi
 `AssetDatabase.Refresh()` da comando: il GUID viaggia nel `.meta` e prefab, scena e
 skin restano agganciati.
+
+**Modificare uno script con il Play Mode acceso lo ricompila dentro la partita.**
+Unity ricarica il dominio e `GameManager.Instance` torna null mentre
+`isPlaying` resta true: il comando successivo fallisce con una
+NullReferenceException che sembra un bug del gioco. Si esce dal Play Mode prima
+di toccare i `.cs`, poi si rientra.
+
+**Niente `??` su `GetComponent` nel codice di gioco.** Nell'editor un componente
+assente e' un finto null che l'operatore `??` non riconosce: si usa
+`TryGetComponent`.
+
+**I segnalibri a sinistra del libretto sono girati di 180 gradi.** Il
+`GraphicRaycaster` del modale ha `ignoreReversedGraphics = false`, altrimenti
+non si potrebbero cliccare. Lo imposta il builder.
 
 **Subito dopo una modifica agli script, `Unity_RunCommand` puo' rispondere
 `Could not find type ...RunCommandMacroEvaluatorEntryPoint`.** E' il domain reload

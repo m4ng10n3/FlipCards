@@ -46,8 +46,10 @@ public class DeckView : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
     [Header("Spessore")]
     [Tooltip("Tagli di carta sotto la carta in cima. Sono il grosso dello spessore: costano un'Image l'uno invece di un prefab con Canvas annidato.")]
     [Min(0)] public int maxEdges = 16;
-    [Tooltip("Spessore di un taglio, lungo la normale del tavolo.")]
+    [Tooltip("Spessore di un taglio, lungo la normale del tavolo. Ignorato se fullDeckHeight e' impostato.")]
     public float edgeThickness = 2.2f;
+    [Tooltip("Altezza della pila a mazzo pieno, lungo la normale del tavolo. Ogni carta ne vale una parte uguale.")]
+    public float fullDeckHeight = 0f;
     [Tooltip("Scarto di un taglio nel piano della pila, nello spazio di stackRoot. Il mazzo sta a sinistra e lo si guarda dal centro del tavolo: i tagli alti scivolano verso sinistra e lo spessore si vede sul fianco destro, come nel riferimento.")]
     public Vector2 edgeShift = Vector2.zero;
     public Color edgePaper = new Color(.90f, .85f, .74f, 1f);
@@ -69,7 +71,9 @@ public class DeckView : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
         if (hand == null) return;
 
         int count = hand.DeckCount;
-        if (count != _lastCount)
+        // Durante l'estrazione la pila resta quella di prima: la cima e' la carta
+        // che si sta materializzando, e ricostruirla la farebbe sparire.
+        if (count != _lastCount && _extraction == null)
         {
             _lastCount = count;
             RebuildStack(hand, count);
@@ -118,6 +122,10 @@ public class DeckView : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
         var hand = gm != null ? gm.HandManager : null;
         if (gm == null || hand == null) return;
 
+        // Una carta alla volta si materializza sulla cima: finche' non si stacca,
+        // la pila e' la sua e un secondo clic non ha una cima da dare.
+        if (_extraction != null) return;
+
         if (!gm.CanAct)
         {
             Logger.Info("Pesca: non in questa fase");
@@ -125,8 +133,112 @@ public class DeckView : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
             return;
         }
 
-        if (hand.DrawCard()) Accept();
-        else Refuse();
+        if (!hand.TryExtractTop(out var drawn)) { Refuse(); return; }
+        _extracted = drawn; _extractHand = hand;
+        _extraction = StartCoroutine(MaterializeAndRelease(hand, drawn));
+    }
+
+    GameObject _extracted;
+    HandManager _extractHand;
+
+    /// <summary>La carta estratta e' gia' pagata: se il mazzo si spegne a meta', va consegnata lo stesso.</summary>
+    void OnDisable()
+    {
+        if (_extraction == null) return;
+        _extraction = null;
+        // Uscendo dal gioco la scena si sta smontando: niente da consegnare.
+        if (_extracted != null && _extractHand != null && gameObject.scene.isLoaded && _extractHand.isActiveAndEnabled)
+        {
+            GetDrawPose(out var position, out var rotation, out var worldScale);
+            _extractHand.DeliverDrawn(_extracted, position, rotation, worldScale);
+        }
+        _extracted = null; _extractHand = null;
+    }
+
+    [Header("Pesca")]
+    [Tooltip("Sollevamento della carta estratta dalla pila, lungo la normale del tavolo, mentre i segni compaiono.")]
+    public float extractLift = 7f;
+
+    static readonly Color InkFlash = new Color(1f, .86f, .52f, 1f);
+    Coroutine _extraction;
+
+    /// <summary>
+    /// La pesca in tre tempi, nell'ordine in cui si decide:
+    /// <list type="number">
+    /// <item>l'estrazione e' gia' avvenuta (<see cref="HandManager.TryExtractTop"/>):
+    /// la carta e' decisa, gli AP spesi;</item>
+    /// <item>sulla carta vera in cima alla pila — che e' proprio quella estratta —
+    /// si materializzano i segni del suo retro: fazioni, gocce di vita, difesa,
+    /// insegna. La pila resta ferma e non si ricostruisce;</item>
+    /// <item>solo allora la carta si stacca: la pila scende di uno e la carta
+    /// parte verso la mano da quella posa, con gli stessi segni accesi.</item>
+    /// </list>
+    /// </summary>
+    System.Collections.IEnumerator MaterializeAndRelease(HandManager hand, GameObject drawn)
+    {
+        var top = TopLayerFor(hand, drawn);
+        var view = top != null ? top.GetComponentInChildren<CardView>(true) : null;
+        var overlay = view != null ? view.GetComponent<CardOverlay>() : null;
+        var ink = overlay != null ? overlay.PresentDrawBack() : null;
+        var template = view != null ? view.TemplateImage : null;
+        CanvasGroup group = null;
+        if (ink != null)
+        {
+            if (!ink.TryGetComponent(out group)) group = ink.gameObject.AddComponent<CanvasGroup>();
+            group.alpha = 0f; group.blocksRaycasts = false; group.interactable = false;
+        }
+        var baseColor = template != null ? template.color : Color.white;
+        var rest = top != null ? top.transform.localPosition : Vector3.zero;
+
+        float seconds = Mathf.Max(0.05f, hand.drawMaterializeSeconds);
+        for (float t = 0f; t < seconds; t += Time.unscaledDeltaTime)
+        {
+            float m = Mathf.Clamp01(t / seconds);
+            // Un lampo d'oro sul dorso, poi l'inchiostro sale e si assesta come un timbro.
+            if (template != null) template.color = Color.Lerp(baseColor, InkFlash, Mathf.Sin(m * Mathf.PI) * .55f);
+            if (group != null)
+            {
+                group.alpha = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(m * 1.4f));
+                ink.localScale = Vector3.one * Mathf.Lerp(1.07f, 1f, Mathf.SmoothStep(0f, 1f, m));
+            }
+            // La carta si stacca appena dalla pila: e' lei quella che partira'.
+            if (top != null) top.transform.localPosition = rest + new Vector3(0f, 0f, -extractLift * Mathf.SmoothStep(0f, 1f, m));
+            yield return null;
+        }
+        if (template != null) template.color = baseColor;
+        if (group != null) { group.alpha = 1f; ink.localScale = Vector3.one; }
+
+        // Posa di partenza: quella della carta sollevata, poi la pila scende di uno.
+        GetDrawPose(out var position, out var rotation, out var worldScale);
+        _extraction = null; _extracted = null; _extractHand = null;
+        _lastCount = hand.DeckCount;
+        RebuildStack(hand, _lastCount);
+        hand.DeliverDrawn(drawn, position, rotation, worldScale);
+        Accept();
+    }
+
+    /// <summary>
+    /// La carta in cima alla pila, che deve essere quella estratta. Se la pila
+    /// non la mostra (non ancora costruita, o mazzo cambiato da fuori) la si
+    /// rimette in cima prima di materializzare: i segni devono comparire sulla
+    /// carta giusta, mai sulla successiva.
+    /// </summary>
+    GameObject TopLayerFor(HandManager hand, GameObject drawn)
+    {
+        if (stackRoot == null) return null;
+        if (_topPrefab != drawn || _layers.Count == 0)
+        {
+            ClearLayers();
+            int edges = EdgesFor(hand, hand.DeckCount + 1);
+            var size = ((RectTransform)drawn.transform).rect.size * cardScale;
+            int slice = 0;
+            for (int k = 0; k < edges; k++) _layers.Add(BuildEdge(size, slice++));
+            _layers.Add(BuildLayer(drawn, 0, slice));
+            _topPrefab = drawn;
+        }
+        for (int i = _layers.Count - 1; i >= 0; i--)
+            if (_layers[i] != null && _layers[i].GetComponentInChildren<CardView>(true) != null) return _layers[i];
+        return null;
     }
 
     /// <summary>Il mazzo si ispeziona come le carte: la prossima e' un'informazione, non una sorpresa.</summary>
@@ -183,8 +295,8 @@ public class DeckView : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
         ClearLayers();
         if (stackRoot == null) return;
 
-        // Lo spessore e' proporzionale al residuo: e' l'unica lettura a colpo
-        // d'occhio di quanto mazzo resta.
+        // Lo spessore e' proporzionale al residuo: e' l'unica lettura di quanto
+        // mazzo resta, niente numeri. Un taglio per carta sotto quella in cima.
         int start = Mathf.Max(1, hand.DeckStartCount);
         int layers = count <= 0 ? 0 : Mathf.Clamp(Mathf.CeilToInt(count / (float)start * maxLayers), 1, maxLayers);
         if (layers == 0)
@@ -198,7 +310,7 @@ public class DeckView : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
 
         _topPrefab = next[0];
 
-        int edges = maxEdges <= 0 ? 0 : Mathf.Clamp(Mathf.CeilToInt(count / (float)start * maxEdges), 1, maxEdges);
+        int edges = EdgesFor(hand, count);
         var cardRect = (RectTransform)next[0].transform;
         var size = cardRect.rect.size * cardScale;
 
@@ -213,7 +325,49 @@ public class DeckView : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
             _layers.Add(BuildLayer(next[i], i, slice++));
     }
 
-    Vector3 Lift(int slice) => new Vector3(edgeShift.x * slice, edgeShift.y * slice, -slice * edgeThickness);
+    /// <summary>
+    /// Tagli sotto la carta in cima: una per ogni altra carta rimasta, finche'
+    /// stanno sotto <see cref="maxEdges"/>. Oltre, lo spessore resta
+    /// proporzionale ridistribuendo i tagli.
+    /// </summary>
+    int EdgesFor(HandManager hand, int count)
+    {
+        if (maxEdges <= 0 || count <= 1) return 0;
+        int start = Mathf.Max(1, hand.DeckStartCount);
+        if (start - 1 <= maxEdges) return count - 1;
+        return Mathf.Clamp(Mathf.RoundToInt((count - 1) / (float)(start - 1) * maxEdges), 1, maxEdges);
+    }
+
+    /// <summary>
+    /// Spessore di un taglio: con <see cref="fullDeckHeight"/> impostato, il mazzo
+    /// pieno e' alto sempre quello e ogni carta pesca ne toglie la sua parte.
+    /// </summary>
+    float SliceThickness
+    {
+        get
+        {
+            var hand = GameManager.Instance != null ? GameManager.Instance.HandManager : null;
+            if (fullDeckHeight <= 0f || hand == null) return edgeThickness;
+            int start = Mathf.Max(2, hand.DeckStartCount);
+            return fullDeckHeight / Mathf.Min(start - 1, Mathf.Max(1, maxEdges));
+        }
+    }
+
+    Vector3 Lift(int slice) => new Vector3(edgeShift.x * slice, edgeShift.y * slice, -slice * SliceThickness);
+
+    public void GetDrawPose(out Vector3 position,out Quaternion rotation,out Vector3 worldScale)
+    {
+        for(int i=_layers.Count-1;i>=0;i--)
+        {
+            var view=_layers[i] != null ? _layers[i].GetComponentInChildren<CardView>(true) : null;
+            if(view == null) continue;
+            var visual=view.RectTransform;
+            position=visual.position;rotation=visual.rotation;worldScale=visual.lossyScale;
+            return;
+        }
+        var source=stackRoot != null ? stackRoot : (RectTransform)transform;
+        position=source.position;rotation=source.rotation;worldScale=source.lossyScale*cardScale;
+    }
 
     /// <summary>
     /// Un taglio di carta: foglio chiaro filettato sui quattro lati. Si vedono

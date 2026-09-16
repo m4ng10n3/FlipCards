@@ -11,6 +11,15 @@ Ogni voce ha **Obiettivo**, **Perché**, **Dove**, **Fatto quando** e — dove s
 
 ## Stato attuale
 
+**Oggetti di scena e pesca (16 settembre 2026, sera).** Cielo rotante attorno a
+un polo sotto il tavolo con parallasse di stelle; vite su display LED a pixel
+dipinti nella guancia della cassa e sulla gonna del fungo, senza numeri; libretto
+con piega al posto del dorso, apertura della copertina, sfoglio e segnalibri;
+libretto chiuso e mazzo con spessore e ombra di contatto, mazzo senza contatore
+(l'altezza e' il residuo); pesca in tre tempi estrazione → retro che si
+materializza sulla cima → viaggio. Dettagli in
+`Assets/Graphics/1_NeonMonte_Attivo/SceneKit_v2/12_TableProps/README.md`.
+
 **Anteprima del danno al clic (16 settembre 2026, chiusa).** Tolte le frecce
 numeriche fra carte e rullo; carte ingrandite e avvicinate alla cassa. Il clic su
 una carta in campo mostra per 2,8 secondi le luci di guardia/vita coinvolte e gli

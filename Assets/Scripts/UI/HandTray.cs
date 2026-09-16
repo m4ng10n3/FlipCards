@@ -43,6 +43,13 @@ public class HandTray : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     PointerEventData _pointer;
     float _outsideSince = -1f;
     CardView _draggedCard;
+    float _presentUntil;
+
+    public void PresentDraw(float seconds)
+    {
+        _presentUntil=Mathf.Max(_presentUntil,Time.unscaledTime+seconds);
+        Apply(true);
+    }
 
     public bool IsRaised => _raised;
 
@@ -136,6 +143,7 @@ public class HandTray : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
             Apply(false);
             return;
         }
+        if(Time.unscaledTime < _presentUntil) { Apply(true); return; }
         if (!_raised || Mouse.current == null || (_pointer != null && _pointer.dragging)) return;
         if (ContainsPointer(Mouse.current.position.ReadValue())) { _outsideSince = -1f; return; }
         if (_outsideSince < 0f) _outsideSince = Time.unscaledTime;
@@ -144,6 +152,7 @@ public class HandTray : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
     void OnDisable()
     {
+        _presentUntil=0;
         _draggedCard = null;
         _pointer = null;
         Apply(false, immediate: true);

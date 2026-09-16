@@ -140,7 +140,9 @@ public class CardOverlay : MonoBehaviour
 
     void LateUpdate()
     {
-        if (_view == null || _definition == null) return;
+        // Durante la pesca il dorso lo tiene PresentDrawBack; da meta' giro in
+        // poi la carta mostra gia' il fronte e il chrome deve seguirla.
+        if (_view == null || _definition == null || _view.DrawBackVisible) return;
         if (!_built) Build();
 
         var inst = _view.instance;
@@ -232,6 +234,30 @@ public class CardOverlay : MonoBehaviour
         // Da coperta anche il nome dell'abilita' la tradirebbe, e la fascia
         // bassa del dorso deve restare vuota: la striscia intera si spegne.
         if (_abilityLabel != null) _abilityLabel.enabled = showFront;
+    }
+
+    /// <summary>
+    /// Il dorso di una carta che un lato ancora non ce l'ha: la pesca lo mostra
+    /// dal mazzo alla mano. Accende l'insieme del retro con i valori stampati
+    /// (vita piena, difesa del retro, nessuna carica) e restituisce la radice dei
+    /// segni, che CardView fa materializzare. Non passa da <see cref="ApplyFace"/>,
+    /// che per il retro legge le cariche dell'istanza — e qui non ce n'e' una.
+    /// Finita la pesca, LateUpdate riapplica il fronte da solo.
+    /// </summary>
+    public RectTransform PresentDrawBack()
+    {
+        if (_view == null || _definition == null) return null;
+        if (!_built) Build();
+        foreach (var go in _frontOnly) if (go != null) go.SetActive(false);
+        foreach (var go in _backOnly) if (go != null) go.SetActive(true);
+        if (_sigil != null) _sigil.enabled = true;
+        if (_abilityLabel != null) _abilityLabel.enabled = false;
+        if (_resonanceMark != null) _resonanceMark.enabled = false;
+        _lastFace = int.MinValue;
+        if (_finalInk == null) return _over;
+        var spec = _printedSpec;
+        _finalInk.Refresh(false, spec.maxHealth, spec.backBlockValue, 0);
+        return _finalInk.BackRoot;
     }
 
     /// <summary>
