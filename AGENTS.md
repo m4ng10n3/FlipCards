@@ -182,7 +182,8 @@ quel documento è l'elenco dei vincoli che, se violati, rompono la logica di gio
 
 ## Il gioco in tre righe
 
-Duello a corsie contro il rullo di un boss, 12 turni. Ogni corsia ha una carta del
+Duello a corsie contro il rullo di un boss, senza limite di turni: perde chi arriva a
+zero vita (se ci arrivano insieme e' pari). Ogni corsia ha una carta del
 giocatore in basso e una casella nemica in alto; le carte hanno due lati (Fronte
 attacca, Retro para ed e' un'insegna). Il giocatore sceglie lati e posizioni
 spendendo AP; le caselle le estrae il rullo a ogni fine turno, e a fine turno le
@@ -278,7 +279,8 @@ Chi non è un `Button` (il mazzo) non passa da `UpdateHUD` e guarda `CanAct`.
   banda**: origine in alto a sinistra del parent, y verso il basso, come in
   LAYOUT_SPEC. I numeri del documento finiscono nel codice invariati.
 - `UiBar.cs` — barra valore/massimo, orizzontale o verticale. Vedi la trappola su `fillAmount`.
-- `HudController.cs` — turno, fase, HP, AP, contatori, pannello di fine partita.
+- `HudController.cs` — fase, contatori, pannello di fine partita (e i testi di turno/HP/AP
+  del vecchio layout a bande, che il medaglione lascia null).
   Legge lo stato **in polling** in `LateUpdate` e scrive solo quando un valore cambia.
 - `HandTray.cs` — la mano sale in blocco quando il puntatore entra nell'area.
   Il componente sta sull'**area di attivazione**, e la mano è un suo figlio: se
@@ -293,6 +295,10 @@ Chi non è un `Button` (il mazzo) non passa da `UpdateHUD` e guarda `CanAct`.
   dei segni del retro sulla carta in cima (`CardOverlay.PresentDrawBack`), poi
   `HandManager.DeliverDrawn` che la fa partire verso la mano gia' di dorso.
   `HandManager.PendingDraws` conta le estratte non ancora consegnate.
+- `ActionPointConstellation.cs` — gli AP come costellazione nel cielo in alto a
+  sinistra: il simbolo del dorso (rombo e tre occhi) con una stella per vertice;
+  spendendo un AP una stella si spegne. Mostra al piu' 4 AP, che e' il tetto
+  (`MaxPlayerAP`) alla difficolta' 0,5: cambiando difficolta' il tetto cambia.
 - `LedMatrix.cs` + `LedMatrix.shader` — display a pixel indirizzabili (texture
   di stato, un texel per LED), con mesh a quadrilatero o ad arco su cono che
   ricalca i fori dipinti negli asset di `12_TableProps`. `LedHealthStrip.cs` ci

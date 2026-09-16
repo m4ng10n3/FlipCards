@@ -45,3 +45,14 @@ scintilla. Importato come texture compressa HQ, non come sprite.
 
 Misure della tela (1651×953): piega a 826, facce delle pagine x 92–1560 e
 y 24–906. Sono le costanti `BookSrc*` di `MedallionSceneBuilder`.
+
+## Costellazione degli AP — `Tools/build_constellation.py`
+
+- `ap_constellation.png` 512×512: il simbolo del dorso delle carte (rombo, rombo
+  tratteggiato, tre occhi con i raggi, archi punteggiati) come linee luminose.
+- `ap_star_on.png` / `ap_star_off.png` 160×160: la stella di un vertice, accesa
+  e spenta.
+
+Vertici sulla tela da 512: (256,42), (470,256), (256,470), (42,256), nell'ordine
+alto, destra, basso, sinistra; li riprende `MedallionSceneBuilder.ApConstellation`.
+`ActionPointConstellation` accende una stella per AP e le spegne dall'ultima.

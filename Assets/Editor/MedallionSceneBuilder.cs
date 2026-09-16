@@ -30,12 +30,15 @@ public static class MedallionSceneBuilder
 
     // Il mazzo sta tutto dentro lo schermo e un po' piu' piccolo delle carte in
     // campo; lo spessore lo si vede sul fianco rivolto al centro del tavolo.
-    const float DeckCenterX = 224, DeckCenterY = 842, DeckSpin = 8f, DeckCardScale = .96f, DeckEdgeShift = .35f, DeckFullHeight = 36f;
+    const float DeckCenterX = 226, DeckCenterY = 842, DeckSpin = 8f, DeckCardScale = CardScale, DeckEdgeShift = .35f, DeckFullHeight = 52f;
+
+    // Costellazione degli AP nel cielo, dove prima stava la targhetta.
+    const float ApX = 30, ApY = 34, ApSize = 284;
 
     // Il libretto chiuso sta oltre il mazzo, piu' lontano dal giocatore: e' roba
     // da consultare. Grande abbastanza da leggerne l'etichetta, girato al
     // contrario del mazzo perche' i due oggetti non sembrino allineati a righello.
-    const float BookletCenterX = 176, BookletCenterY = 626, BookletSpin = -11f;
+    const float BookletCenterX = 184, BookletCenterY = 586, BookletSpin = -11f;
 
     // Perno della leva: il fianco sinistro del tamburo tocca la guancia destra
     // della cassa, che all'altezza del perno sta a x 1582.
@@ -206,13 +209,19 @@ public static class MedallionSceneBuilder
         // L'area di clic resta piatta, in spazio schermo. La pila sta sul piano
         // del tavolo come le carte, girata sul panno: lo spessore cresce lungo la
         // normale del tavolo e cade dritto verso chi guarda.
-        var deck=Rect("Deck",root,DeckCenterX-130,DeckCenterY-115,260,230);
+        // La carta in cima e' grande come una carta a terra (stessa scala delle
+        // corsie): i due piani hanno il centro alla stessa profondita', quindi la
+        // prospettiva la scorcia allo stesso modo. Il rettangolo di clic copre
+        // l'impronta a schermo della pila inclinata e girata.
+        float cw=CardOverlay.CardW*DeckCardScale,ch=CardOverlay.CardH*DeckCardScale;
+        float hitW=cw*1.12f,hitH=ch*.62f+DeckFullHeight;
+        var deck=Rect("Deck",root,DeckCenterX-hitW*.5f,DeckCenterY-hitH*.5f,hitW,hitH);
         UiBuild.Fill(deck,Color.clear,true);var view=deck.gameObject.AddComponent<DeckView>();
-        var plane=OnTable(deck,"Plane",260,230,DeckSpin);
+        var plane=OnTable(deck,"Plane",cw*1.4f,ch*1.4f,DeckSpin);
+        float px=cw*.7f,py=ch*.7f;
         // L'ombra di contatto ancora la pila al panno: senza, il mazzo sembrava
         // un adesivo rosso appoggiato sopra il disegno.
-        float cw=CardOverlay.CardW*DeckCardScale,ch=CardOverlay.CardH*DeckCardScale;
-        ContactShadow(plane,130-cw*.5f,115-ch*.5f,cw,ch,.72f);
+        ContactShadow(plane,px-cw*.5f,py-ch*.5f,cw,ch,.72f);
         view.stackRoot=UiBuild.Rect("Stack",plane);UiBuild.Stretch(view.stackRoot);
         view.cardScale=DeckCardScale;view.maxLayers=1;view.maxEdges=40;
         // Niente numero: quante carte restano lo dice l'altezza della pila, un
@@ -225,23 +234,37 @@ public static class MedallionSceneBuilder
     }
     static void Status(RectTransform root,HudController hud)
     {
-        // Il riquadro d'avorio del kit: le proporzioni sono le sue (1448x913),
-        // altrimenti la doppia cornice stampata si deforma. Su carta chiara il
-        // testo va in inchiostro, non in Paper, o non si legge.
-        var plaque=Rect("PlayerStatus",root,36,28,336,212);
-        var sheet=UiBuild.Fill(plaque,Color.white);
-        sheet.sprite=UiSkin.Sprite("scene_paper");
-        sheet.raycastTarget=false;
-
-        // Le vite stanno sui display LED della cassa e del fungo, senza numeri:
-        // la targhetta tiene solo AP e turno.
-        Text("StatusHeading",plaque,"FLIPCARDS",30,30,276,42,28,GamePalette.InkStrong);
-        hud.bossHpText=null;hud.playerHpText=null;
-        Text("ApLabel",plaque,"AP",30,98,120,32,23,GamePalette.Ink);
-        hud.apText=Value("ApValue",plaque,"3 / 3",172,98);
-        UiBuild.Fill(Rect("Rule",plaque,30,140,276,2),new Color(GamePalette.Ink.r,GamePalette.Ink.g,GamePalette.Ink.b,.55f));
-        hud.turnText=Text("Turn",plaque,"TURNO 1 / 12",30,152,276,32,22,GamePalette.Ink);
+        // Niente targhetta: le vite stanno sui display LED, gli AP nella
+        // costellazione e il turno non si conta piu' (la partita finisce a zero
+        // vita). Resta solo l'etichetta di fase.
+        hud.bossHpText=null;hud.playerHpText=null;hud.apText=null;hud.turnText=null;
+        ApConstellation(root,ApX,ApY,ApSize);
         hud.phaseText=Text("Phase",root,"FASE AZIONI",690,14,600,28,17,GamePalette.Paper);hud.phaseText.alignment=TextAlignmentOptions.Center;
+    }
+
+    /// <summary>
+    /// Gli AP come costellazione nel cielo in alto a sinistra: il simbolo del
+    /// dorso (rombo e tre occhi) con una stella per vertice. Tela di
+    /// 12_TableProps/Tools/build_constellation.py: 512 px, vertici a 42 px dal
+    /// bordo; ogni stella e' uno sprite da 160.
+    /// </summary>
+    static void ApConstellation(RectTransform root,float x,float y,float size)
+    {
+        float k=size/512f;
+        var rt=Rect("ActionPoints",root,x,y,size,size);
+        var view=rt.gameObject.AddComponent<ActionPointConstellation>();
+        view.figure=Art("Figure",rt,"ap_constellation",0,0,size,size);view.figure.raycastTarget=false;
+        var vertices=new[]{new Vector2(256,42),new Vector2(470,256),new Vector2(256,470),new Vector2(42,256)};
+        string[] names={"Top","Right","Bottom","Left"};
+        for(int i=0;i<4;i++)
+        {
+            float s=160*k;
+            var star=Rect("Star"+names[i],rt,vertices[i].x*k-s*.5f,vertices[i].y*k-s*.5f,s,s);
+            star.pivot=new Vector2(.5f,.5f);star.anchoredPosition+=new Vector2(s*.5f,-s*.5f);
+            view.stars[i]=star;
+            view.unlit[i]=Art("Unlit",star,"ap_star_off",0,0,s,s);view.unlit[i].raycastTarget=false;
+            view.lit[i]=Art("Lit",star,"ap_star_on",0,0,s,s);view.lit[i].raycastTarget=false;
+        }
     }
     /// <summary>
     /// Il libretto chiuso posato sul tavolo: copertina d'avorio, dorso scuro a
@@ -251,7 +274,7 @@ public static class MedallionSceneBuilder
     {
         // Proporzioni di book_closed.png (1388x1133). Il corpo del libro dentro la
         // tela: x 20..1350, y 86..1070; l'etichetta d'avorio x 208..1187, y 433..708.
-        const float PW=270,PH=PW*1133f/1388f,Thickness=11f;
+        const float PW=240,PH=PW*1133f/1388f,Thickness=10f;
         var rt=Rect("DetailButton",root,cx-PW*.62f,cy-PH*.42f,PW*1.24f,PH*.84f);
         var hit=UiBuild.Fill(rt,Color.clear,true);
         var page=OnTable(rt,"Plane",PW,PH,spin);
@@ -273,7 +296,7 @@ public static class MedallionSceneBuilder
         }
         var cover=Art("Cover",page,"upgrade_book_closed",0,0,PW,PH);cover.raycastTarget=false;
         cover.rectTransform.localPosition+=new Vector3(0,0,-Thickness);
-        var label=Text("Label",cover.rectTransform,"DETTAGLIO",PW*208f/1388f,PH*433f/1133f,PW*979f/1388f,PH*275f/1133f,21,GamePalette.InkStrong);
+        var label=Text("Label",cover.rectTransform,"DETTAGLIO",PW*208f/1388f,PH*433f/1133f,PW*979f/1388f,PH*275f/1133f,19,GamePalette.InkStrong);
         label.alignment=TextAlignmentOptions.Center;label.raycastTarget=false;label.characterSpacing=8;
 
         var button=rt.gameObject.AddComponent<Button>();button.targetGraphic=hit;
@@ -423,14 +446,6 @@ public static class MedallionSceneBuilder
         // L'asta viene allungata dal componente: deformarla e' voluto, il resto no.
         image.preserveAspect=name!="Shaft";
         return rt;
-    }
-
-    /// <summary>Numero della targhetta: allineato a destra, come sul riferimento.</summary>
-    static TMP_Text Value(string name,RectTransform plaque,string value,float x,float y)
-    {
-        var text=Text(name,plaque,value,x,y,134,32,24,GamePalette.Ink);
-        text.alignment=TextAlignmentOptions.Right;
-        return text;
     }
 
     /// <summary>

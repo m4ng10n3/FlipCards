@@ -85,7 +85,7 @@ public class HudController : MonoBehaviour
         if (gm.CurrentTurn == _lastTurn) return;
         _lastTurn = gm.CurrentTurn;
         if (turnText != null)
-            turnText.text = $"TURNO <b>{Mathf.Min(gm.CurrentTurn, gm.turns)}</b> / {gm.turns}";
+            turnText.text = $"TURNO <b>{gm.CurrentTurn}</b>";
     }
 
     void UpdatePhase(GameManager gm)
@@ -257,15 +257,15 @@ public class HudController : MonoBehaviour
         _endShown = true;
 
         string result = gm.MatchResult;
-        string title = result == "Player ahead" ? "VITTORIA" : result == "Boss ahead" ? "SCONFITTA" : "PAREGGIO";
-        Color color = result == "Player ahead" ? GamePalette.Good : result == "Boss ahead" ? GamePalette.Danger : GamePalette.TextMuted;
+        string title = result == "Player wins" ? "VITTORIA" : result == "Boss wins" ? "SCONFITTA" : "PAREGGIO";
+        Color color = result == "Player wins" ? GamePalette.Good : result == "Boss wins" ? GamePalette.Danger : GamePalette.TextMuted;
 
         if (endTitle != null) { endTitle.text = title; endTitle.color = color; }
         if (endDetail != null)
         {
-            int played = Mathf.Min(gm.CurrentTurn, gm.turns);
+            int played = gm.CurrentTurn;
             endDetail.text = $"Giocatore {gm.player.hp}/{gm.player.maxHp}   ·   Boss {gm.ai.hp}/{gm.ai.maxHp}\n" +
-                             (played == 1 ? $"1 turno giocato su {gm.turns}" : $"{played} turni giocati su {gm.turns}");
+                             (played == 1 ? "1 turno giocato" : $"{played} turni giocati");
         }
 
         endPanel.SetActive(true);

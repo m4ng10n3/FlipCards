@@ -27,7 +27,7 @@ Indice:
 ## 1. Il gioco
 
 **FlipCards** è un duello a corsie, giocatore singolo contro un boss gestito da pattern
-deterministici. Dura `turns = 12` turni.
+deterministici. Non ha limite di turni: finisce quando una vita arriva a zero.
 
 Il tavolo è diviso in **N corsie parallele** (`CardsPerSide`, default 3). Ogni corsia ha
 due caselle affacciate: una **carta** del giocatore in basso, uno **slot** nemico in alto.
@@ -55,8 +55,8 @@ pool (`SlotBatchManager.batch`), con un'animazione da slot machine. Il fronte ne
 quindi effimero: dura un turno. Il layout deve comunicarlo, altrimenti il giocatore
 pianifica su qualcosa che non esisterà più.
 
-**Fine partita:** `player.hp <= 0`, `ai.hp <= 0`, oppure `currentTurn >= turns`. Il
-risultato confronta gli HP residui: *Player ahead / Boss ahead / Tie*.
+**Fine partita:** `player.hp <= 0` oppure `ai.hp <= 0`. Perde chi arriva a zero:
+*Player wins / Boss wins*, *Tie* se ci arrivano insieme.
 
 ---
 
@@ -112,7 +112,7 @@ non può decidere se conviene flippare adesso o al turno dopo, e il gioco divent
 | HP giocatore | `player.hp` / `player.maxHp` (20) | `hpText`, numero nudo | barra + `hp/maxHp` |
 | HP boss | `ai.hp` / `ai.maxHp` (24) | `EnemyHptxt`, numero nudo | barra + `hp/maxHp` |
 | AP | `player.actionPoints` / `MaxPlayerAP` (5) | `"ap/playerBaseAP"` → **stampa 5/4** | pallini spendibili, `ap/5` |
-| Turno | `currentTurn` / `turns` (12) | solo nel log | contatore in alto |
+| Turno | `currentTurn` (senza limite) | solo nel log | non mostrato |
 | Mazzo residuo | `HandManager.deck.Count` | **no** | contatore |
 | Mano | `handCards.Count` / `maxHandSize` (8) | **no** | contatore |
 | Fase | `playerPhase`, `awaitingEndTurn`, `inputLocked`, `matchEnded` | solo bottoni grigi | etichetta di fase esplicita |

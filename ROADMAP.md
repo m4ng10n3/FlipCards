@@ -11,6 +11,12 @@ Ogni voce ha **Obiettivo**, **Perché**, **Dove**, **Fatto quando** e — dove s
 
 ## Stato attuale
 
+**Costellazione degli AP e fine a zero vita (16 settembre 2026, notte).** Tolta la
+targhetta in alto a sinistra: gli AP sono quattro stelle ai vertici del simbolo
+del dorso disegnato come costellazione nel cielo, e si spengono una per AP speso.
+Tolti contatore e limite dei turni: la partita finisce solo a zero vita. Il mazzo
+ha la scala delle carte in campo (1,38) e sta tutto nell'inquadratura.
+
 **Oggetti di scena e pesca (16 settembre 2026, sera).** Cielo rotante attorno a
 un polo sotto il tavolo con parallasse di stelle; vite su display LED a pixel
 dipinti nella guancia della cassa e sulla gonna del fungo, senza numeri; libretto

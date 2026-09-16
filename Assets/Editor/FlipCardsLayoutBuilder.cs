@@ -848,7 +848,7 @@ public static class FlipCardsLayoutBuilder
         UiBuild.Band(plate, 0f, TopPlateY, TurnPlateW, TopPlateH);
         Kit(plate, "banner/banner_flat", Image.Type.Sliced);
 
-        hud.turnText = UiBuild.Text("Turn", plate, "TURNO 1 / 12", 24f, GamePalette.TextPrimary,
+        hud.turnText = UiBuild.Text("Turn", plate, "TURNO 1", 24f, GamePalette.TextPrimary,
                                     TextAlignmentOptions.Left, FontStyles.Bold);
         UiBuild.Stretch(hud.turnText.rectTransform, 22f, 0f, 12f, 0f);
         hud.turnText.alignment = TextAlignmentOptions.Left;

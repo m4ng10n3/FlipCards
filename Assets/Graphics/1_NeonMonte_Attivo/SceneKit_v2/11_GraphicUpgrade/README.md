@@ -27,9 +27,10 @@ spostamento reale del contenuto, con materiali privati rilasciati alla chiusura.
 
 ## Mazzo e pesca
 
-Mazzo a (224,842) del canvas, rotazione locale +8°, scala .96, sullo stesso
+Mazzo a (226,842) del canvas, rotazione locale +8°, scala 1,38 come le carte in
+campo (i due piani hanno il centro alla stessa profondita'), sullo stesso
 piano inclinato a 60° del tavolo, con ombra di contatto. **Nessun numero**: un
-taglio per carta sotto quella in cima, e a mazzo pieno la pila è alta 36
+taglio per carta sotto quella in cima, e a mazzo pieno la pila è alta 52
 (`DeckView.fullDeckHeight`), quindi l'altezza è proporzionale alle carte rimaste.
 
 La pesca ha tre tempi, nell'ordine in cui si decide:

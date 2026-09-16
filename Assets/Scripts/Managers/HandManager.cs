@@ -43,7 +43,7 @@ public class HandManager : MonoBehaviour
     /// Carte del giocatore uscite dal gioco: la pila degli scarti del tabellone.
     /// Non e' una zona vera — una carta distrutta viene semplicemente rimossa —
     /// ma il conteggio e' reale, e senza di esso non si sa quanto mazzo si e'
-    /// gia' bruciato in una partita che dura 12 turni.
+    /// gia' bruciato in una partita che dura finche' una vita non arriva a zero.
     /// </summary>
     public int DiscardCount { get; private set; }
 

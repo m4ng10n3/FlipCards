@@ -545,6 +545,12 @@ MonoBehaviour:
     sprite: {fileID: 21300000, guid: 307be2abe3cf3ab45a9f4d5a031b3180, type: 3}
   - key: table_shadow
     sprite: {fileID: 21300000, guid: 4ae45f50917a2f347805aed540784656, type: 3}
+  - key: ap_constellation
+    sprite: {fileID: 21300000, guid: e6122e7b35407804b80065f9c97c8667, type: 3}
+  - key: ap_star_on
+    sprite: {fileID: 21300000, guid: 0de90c389d5bb534cafcb2d8deb6bacb, type: 3}
+  - key: ap_star_off
+    sprite: {fileID: 21300000, guid: ba5a808df605cc44da419d97101d2fb1, type: 3}
   - key: scene_cabinet
     sprite: {fileID: 21300000, guid: acae4d4d2dacf054dba3a578465eb8fb, type: 3}
   - key: scene_table

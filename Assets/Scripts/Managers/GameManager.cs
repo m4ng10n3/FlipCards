@@ -28,7 +28,8 @@ public class GameManager : MonoBehaviour
     public TMPro.TMP_Text EnemyHptxt;
 
     [Header("Match Parameters")]
-    public int turns = 12;
+    // Nessun limite di turni: la partita finisce solo quando una delle due vite
+    // arriva a zero (IsGameOver).
     public int playerBaseAP = 3;
     public int seed = 12345;
 
@@ -828,7 +829,7 @@ public class GameManager : MonoBehaviour
         UpdateAllViews();
         Logger.Info($"Turn {currentTurn} end | HP {player.hp}-{ai.hp}");
 
-        if (IsGameOver() || currentTurn >= turns)
+        if (IsGameOver())
         {
             EndMatch();
             return;
@@ -1241,9 +1242,11 @@ public class GameManager : MonoBehaviour
         // matchEnded e' gia' false.
         SetButtonsInteractable(false);
 
-        matchResult = player.hp > ai.hp ? "Player ahead" :
-                      player.hp < ai.hp ? "Boss ahead" :
-                      "Tie";
+        // Perde chi arriva a zero vita; se ci arrivano insieme e' pari.
+        bool playerDown = player.hp <= 0, bossDown = ai.hp <= 0;
+        matchResult = playerDown && bossDown ? "Tie" :
+                      bossDown ? "Player wins" :
+                      "Boss wins";
         Logger.Info($"Match end | Player {player.hp}/{player.maxHp} | Boss {ai.hp}/{ai.maxHp} | {matchResult}");
     }
 
