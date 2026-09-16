@@ -102,7 +102,7 @@ public class CardOverlay : MonoBehaviour
     Image _statRule;         // sottolineatura della prima casella (ripiego senza skin)
     Image _sigil;            // sigillo: si accende solo sulla faccia Retro
     RectTransform _chargeColumn;
-    Image _resonanceMark;    // scudo spezzato: questa corsia risuona
+    NameMarks _marks;        // segni momentanei accanto al nome: risonanza, insegne ricevute
     readonly List<Image> _chargeCells = new List<Image>(CardInstance.MaxFlipCharge);
 
     // L'insegna: le chip che compaiono sulla plancia alta quando la carta e'
@@ -185,14 +185,17 @@ public class CardOverlay : MonoBehaviour
             _view.RefreshStatTexts();
         }
         int resonance = gm != null && SynergyResolver.Resonates(gm, lane) ? 1 : 0;
-        if (resonance != _lastResonance)
+        int block = gm != null && lane >= 0 ? SynergyResolver.BlockBonus(gm, lane) : 0;
+        // Tre bit: risonanza, spada ricevuta, scudo ricevuto. Cambiano per il rullo,
+        // per il caos e per ogni spostamento: si rileggono, non si aspettano.
+        int marks = resonance | (banner > 0 ? 2 : 0) | (block > 0 ? 4 : 0);
+        if (marks != _lastResonance && _marks != null)
         {
-            _lastResonance = resonance;
-            if (_resonanceMark != null)
-            {
-                _resonanceMark.enabled = resonance == 1;
-                _resonanceMark.color = GamePalette.FactionColor(inst.def.faction);
-            }
+            _lastResonance = marks;
+            var color = GamePalette.FactionColor(inst.def.faction);
+            _marks.Set(0, resonance == 1, GlyphSprites.BrokenShield, color);
+            _marks.Set(1, banner > 0, GlyphSprites.Sword, color);
+            _marks.Set(2, block > 0, GlyphSprites.Shield, color);
         }
         if (Printed) RefreshMargins();
     }
@@ -252,7 +255,7 @@ public class CardOverlay : MonoBehaviour
         foreach (var go in _backOnly) if (go != null) go.SetActive(true);
         if (_sigil != null) _sigil.enabled = true;
         if (_abilityLabel != null) _abilityLabel.enabled = false;
-        if (_resonanceMark != null) _resonanceMark.enabled = false;
+        if (_marks != null) { _marks.Set(0, false); _marks.Set(1, false); _marks.Set(2, false); _lastResonance = -1; }
         _lastFace = int.MinValue;
         if (_finalInk == null) return _over;
         var spec = _printedSpec;
@@ -349,8 +352,7 @@ public class CardOverlay : MonoBehaviour
                 _finalInk = _over.gameObject.AddComponent<FinalCardInk>();
                 _finalInk.Build(def);
                 BuildAbilityStrip(def);
-                BuildResonanceMark();
-                UiBuild.Band(_resonanceMark.rectTransform, 190f, 310f, 18f, 18f);
+                BuildNameMarks(FinalCardLayout.Title);
                 RaisePrefabTexts();
                 return;
             }
@@ -369,7 +371,7 @@ public class CardOverlay : MonoBehaviour
             BuildFactionTag(def);
             BuildAbilityStrip(def);
             BuildBannerRow(def);
-            BuildResonanceMark();
+            BuildNameMarks(new Rect(NameX, NameY, NameW, NameH));
             RaisePrefabTexts();
             return;
         }
@@ -380,7 +382,7 @@ public class CardOverlay : MonoBehaviour
         BuildAbilityStrip(def);
         BuildBannerRow(def);
         BuildBackChrome(def);
-        BuildResonanceMark();
+        BuildNameMarks(new Rect(NameX, NameY, NameW, NameH));
 
         RaisePrefabTexts();
     }
@@ -581,28 +583,20 @@ public class CardOverlay : MonoBehaviour
     }
 
     /// <summary>
-    /// Lo scudo spezzato della risonanza, sulla carta che la subisce.
-    ///
-    /// La risonanza e' l'unica regola che lega una carta alla casella che ha
-    /// davanti, e finora si vedeva solo sull'asse delle corsie — cioe' in un
-    /// terzo posto, lontano dalle due cose che la causano. Il simbolo va invece
-    /// **su tutte due**: la stessa icona sulla carta e sulla casella dice
-    /// "questi due, insieme" senza una parola di spiegazione, e sparisce appena
-    /// una delle due cambia.
-    ///
-    /// Sta sotto il tag di fazione perche' la fazione e' la sua causa: sono
-    /// della stessa, e per questo non si parano.
+    /// I segni momentanei stanno accanto al nome, sulla targhetta in alto: lo
+    /// scudo spezzato quando la carta risuona con la casella che ha davanti, la
+    /// spada e lo scudo quando riceve un'insegna da una vicina. Prima lo scudo
+    /// spezzato stava in un angolo basso e le insegne galleggiavano sul panno fra
+    /// le corsie, lontano dalla carta che le riceve.
     /// </summary>
-    void BuildResonanceMark()
+    void BuildNameMarks(Rect plate)
     {
-        var rt = UiBuild.Rect("ResonanceMark", _over);
-        UiBuild.Band(rt, TagX, Printed ? CardH - 58f : TagY + TagSize + 2f, TagSize, TagSize);
-
-        _resonanceMark = UiBuild.Fill(rt, GamePalette.Danger);
-        _resonanceMark.sprite = GlyphSprites.BrokenShield;
-        _resonanceMark.type = Image.Type.Simple;
-        _resonanceMark.preserveAspect = true;
-        _resonanceMark.enabled = false;
+        var rt = UiBuild.Rect("NameMarks", _over);
+        UiBuild.Stretch(rt);
+        _marks = rt.gameObject.AddComponent<NameMarks>();
+        _marks.nameText = _view.nameText;
+        _marks.plate = plate;
+        _lastResonance = -1;
     }
 
     /// <summary>

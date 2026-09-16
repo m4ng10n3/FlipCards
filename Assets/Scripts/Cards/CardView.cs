@@ -126,6 +126,17 @@ public class CardView : MonoBehaviour
 
     [Header("Select Parameters")]
     [SerializeField] private float selectPunchAmount = 20;
+    [Tooltip("In campo la carta selezionata si stacca dal panno verso la camera, lungo la normale del tavolo.")]
+    [SerializeField] private float boardSelectLift = 34f;
+    [Tooltip("E si raddrizza verso chi guarda: gradi tolti all'inclinazione del tavolo.")]
+    [SerializeField] private float boardSelectTilt = 26f;
+    [Tooltip("In campo la carta si avvicina gia' alla camera: l'ingrandimento di selezione e' piu' contenuto.")]
+    [SerializeField] private float boardScaleOnSelect = 1.08f;
+
+    [Header("Board Shadow")]
+    [Tooltip("Ombra di una carta posata: poco piu' piccola della carta e leggera, come un contatto.")]
+    [SerializeField] private float boardShadowRest = .9f;
+    [SerializeField] private float boardShadowAlpha = .32f;
 
     [Header("Hover Parameters")]
     [SerializeField] private float autoTiltAmount = 30;
@@ -651,10 +662,22 @@ public class CardView : MonoBehaviour
         }
     }
 
+    bool OnBoard => _playerBoardContainer != null && _rt != null && _rt.parent != null && _rt.parent.IsChildOf(_playerBoardContainer);
+
+    // 0 posata, 1 sollevata: guida inclinazione e ombra insieme, cosi' non si
+    // separano durante la transizione.
+    float _boardLiftBlend;
+    bool _shadowAlphaRead;
+    float _shadowBaseAlpha = .5f;
+
+    /// <summary>Rotazione che raddrizza verso la camera la carta selezionata in campo.</summary>
+    Quaternion BoardSelectTilt => Quaternion.Euler(-boardSelectTilt * _boardLiftBlend, 0f, 0f);
+
     private void Update()
     {
         if (_rt == null) return;
         if (IsDrawing) return;
+        _boardLiftBlend = Mathf.MoveTowards(_boardLiftBlend, _selected && OnBoard && !_dragging ? 1f : 0f, Time.unscaledDeltaTime * 6f);
         _rt.localRotation *= Quaternion.Euler(0f, -_appliedFlipAngle, 0f);
         _appliedFlipAngle = 0f;
 
@@ -776,7 +799,7 @@ public class CardView : MonoBehaviour
         // che la stacca dalla fila anche quando le altre la coprono per meta'.
         if (_handContainer != null && _rt.parent.IsChildOf(_handContainer))
             baseRotation *= Quaternion.Slerp(_targetHandRotation, Quaternion.identity, HandHoverStraighten);
-        else if (_playerBoardContainer!= null && _rt.parent.IsChildOf(_playerBoardContainer)) baseRotation *= _targetBoardRotation;
+        else if (_playerBoardContainer!= null && _rt.parent.IsChildOf(_playerBoardContainer)) baseRotation *= _targetBoardRotation * BoardSelectTilt;
 
         float tiltX = 0f;
         float tiltY = 0f;
@@ -862,7 +885,7 @@ public class CardView : MonoBehaviour
 
         var baseRotation = anchorRotation;
         if (inHand) baseRotation *= _targetHandRotation;
-        else if (inBoard) baseRotation *= _targetBoardRotation;
+        else if (inBoard) baseRotation *= _targetBoardRotation * BoardSelectTilt;
 
         float sine = Mathf.Sin(Time.time + savedIndex);
         float cosine = Mathf.Cos(Time.time + savedIndex);
@@ -907,7 +930,9 @@ public class CardView : MonoBehaviour
         }
 
         if (_selected)
-            targetPosLocal += Vector3.up * selectPunchAmount;
+            targetPosLocal += OnBoard
+                ? Vector3.back * boardSelectLift + Vector3.down * boardSelectLift * .25f
+                : Vector3.up * selectPunchAmount;
 
         // Lo scarto di combattimento si sottrae prima del lerp e si risomma dopo:
         // lerpando sulla posizione che lo contiene gia', il tween si mangerebbe da
@@ -1097,7 +1122,10 @@ public class CardView : MonoBehaviour
 
         if (_selectTween != null && _selectTween.IsActive()) _selectTween.Complete(true);
         KillTween(ref _selectTween);
-        if (state)
+        // In campo niente scatto verso l'alto: la carta si solleva verso la camera
+        // e si raddrizza (FollowContainer, BoardSelectTilt), e lo scatto nel piano
+        // del tavolo la faceva sembrare spinta via.
+        if (state && !OnBoard)
         {
             _selectTween = _rt
                 .DOPunchPosition(_rt.up * selectPunchAmount, scaleTransition, 10, 1)
@@ -1105,7 +1133,7 @@ public class CardView : MonoBehaviour
         }
             
         float targetScale = 1f;
-        if (state) targetScale = scaleOnSelect;
+        if (state) targetScale = OnBoard ? boardScaleOnSelect : scaleOnSelect;
         else if (_hovering) targetScale = scaleOnHover;
 
         if (scaleAnimations)
@@ -1129,7 +1157,7 @@ public class CardView : MonoBehaviour
 
         if (scaleAnimations)
         {
-            float targetScale = _selected ? scaleOnSelect : scaleOnHover;
+            float targetScale = _selected ? (OnBoard ? boardScaleOnSelect : scaleOnSelect) : scaleOnHover;
             if (_scaleTween != null && _scaleTween.IsActive()) _scaleTween.Complete(true);
             KillTween(ref _scaleTween);
             _scaleTween = transform.DOScale(targetScale, scaleTransition)
@@ -1148,7 +1176,7 @@ public class CardView : MonoBehaviour
     {
         if (!scaleAnimations) return;
 
-        float targetScale = _selected ? scaleOnSelect : 1f;
+        float targetScale = _selected ? (OnBoard ? boardScaleOnSelect : scaleOnSelect) : 1f;
         if (_scaleTween != null && _scaleTween.IsActive()) _scaleTween.Complete(true);
         KillTween(ref _scaleTween);
         _scaleTween = transform.DOScale(targetScale, scaleTransition)
@@ -1277,9 +1305,25 @@ public class CardView : MonoBehaviour
         Vector3 projRight = Vector3.ProjectOnPlane(_rt.right, planeNormal);
         Vector3 projUp    = Vector3.ProjectOnPlane(_rt.up,    planeNormal);
 
-        float shadowLift  = _selected ? 1.05f : (_hovering ? 1.02f : 1f);
+        // In campo la carta e' posata: l'ombra e' un contatto, poco piu' piccola
+        // della carta e leggera. Quando la si solleva si allarga, si sposta verso
+        // il basso a destra (la luce dei disegni viene dall'alto a sinistra) e si
+        // schiarisce. Prima era grande quanto la carta anche da posata.
+        bool onBoard = OnBoard;
+        float lift = onBoard ? _boardLiftBlend : 0f;
+        float shadowLift  = onBoard ? Mathf.Lerp(boardShadowRest, 1.02f, lift)
+                                    : (_selected ? 1.05f : (_hovering ? 1.02f : 1f));
         float widthScale  = projRight.magnitude * scaleX * shadowLift;
         float heightScale = projUp.magnitude    * scaleY * shadowLift;
+        if (onBoard && parent != null)
+            shadowCenter += (parent.right * .35f - parent.up * .55f) * boardSelectLift * lift * parent.lossyScale.x;
+        if (_shadow.TryGetComponent(out Image shadowImage))
+        {
+            if (!_shadowAlphaRead) { _shadowBaseAlpha = shadowImage.color.a; _shadowAlphaRead = true; }
+            var c = shadowImage.color;
+            c.a = onBoard ? Mathf.Lerp(boardShadowAlpha, boardShadowAlpha * .75f, lift) : _shadowBaseAlpha;
+            shadowImage.color = c;
+        }
 
         // Posizione
         Vector3 localShadowPos = parent != null
@@ -1294,12 +1338,10 @@ public class CardView : MonoBehaviour
         Quaternion targetRotation = Quaternion.LookRotation(planeNormal, shadowUpDir);
         _shadow.rotation = Quaternion.Lerp(_shadow.rotation, targetRotation, 25f * Time.deltaTime);
 
-        // Dimensioni
+        // Dimensioni: solo la scala. Prima si scalavano sia sizeDelta sia
+        // localScale per lo stesso fattore, e l'ingrandimento contava due volte.
         if (_shadow.TryGetComponent(out RectTransform srt))
-        {
-            Vector2 targetSize = new Vector2(_shadowBaseSize.x * widthScale, _shadowBaseSize.y * heightScale);
-            srt.sizeDelta = Vector2.Lerp(srt.sizeDelta, targetSize, 20f * Time.deltaTime);
-        }
+            srt.sizeDelta = _shadowBaseSize;
 
         Vector3 targetScale = new Vector3(
             _shadowBaseScale.x * widthScale,

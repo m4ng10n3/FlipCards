@@ -217,10 +217,11 @@ violarne una.
    in quella corsia **nessuno dei due para**. Taglia da tutte e due le parti:
    sfondi, ma resti scoperto. Viaggia nell'evento come `ignoreBlock`.
    È l'unica regola che lega una carta alla casella che ha davanti, quindi lo
-   scudo spezzato si accende **su tutte due le celle** (`CardOverlay` e
-   `SlotOverlay`, oltre all'asse delle corsie): il simbolo sta sulle due cose
-   che la causano, non in un terzo posto lontano da entrambe. Prima stava solo
-   sull'asse, ed è il motivo per cui la sinergia carta-casella non si capiva.
+   scudo spezzato si accende **su tutte due le celle**, accanto al nome
+   (`NameMarks`, montato da `CardOverlay` e `SlotOverlay`): il simbolo sta sulle
+   due cose che la causano, non in un terzo posto lontano da entrambe. Prima
+   stava su un asse fra cassa e carte, galleggiando sul panno, ed è il motivo per
+   cui la sinergia carta-casella non si capiva.
 5. **Una sola manopola.** `GameManager.difficulty` (0..1) muove insieme vita e
    attacco delle lastre, quante carte il fine turno gira e scambia, e quanti AP
    restano al giocatore. Non ci sono altri numeri di bilanciamento da girare:
@@ -308,7 +309,11 @@ Chi non è un `Button` (il mazzo) non passa da `UpdateHUD` e guarda `CanAct`.
   sfogliano cambiando sezione, segnalibri che seguono il bordo del foglio e
   stanno a sinistra per le sezioni gia' passate. Le sezioni le scrive
   `TableOverlayController.ApplySection(int)`.
-- `LaneAxisView.cs` — asse delle corsie: risonanza e connettori di combo, senza pronostici numerici.
+- `NameMarks.cs` — i segni momentanei accanto al nome di carte e caselle, come
+  timbri su un tondino d'avorio: scudo spezzato (risonanza), spada e scudo
+  (insegne ricevute dalle vicine). **Ogni nuovo segno momentaneo va qui**, non
+  sul panno. `LaneAxisView.cs` resta solo per il vecchio layout a bande: il
+  medaglione non monta piu' l'asse delle corsie.
 - `DamagePreviewController.cs` — anteprima di 2,8 s al clic in campo, validazione e ripristino; luci e HUD restano gli unici proprietari dei loro grafici.
 - `InspectorPanel.cs` + `AbilityCatalog.cs` — ispettore e testi delle abilità.
 - `CardOverlay.cs` / `SlotOverlay.cs` — chrome costruito a runtime sopra i prefab.
@@ -437,7 +442,7 @@ pronto — per quello serve `CanAct`. In fondo conviene salvare anche
 
 Altre scorciatoie: `gm.btnAttack.onClick.Invoke()` per attaccare (parte la
 coroutine di risoluzione, ~1.5 s), `gm.btnEndTurn.onClick.Invoke()` per chiudere
-il turno e far partire il reel (~5 s fino a `FASE AZIONI`), `gm.ai.hp = 0;`
+il turno e far partire il reel (~5 s fino a `gm.CanAct`), `gm.ai.hp = 0;`
 seguito da fine turno per il pannello di fine partita,
 `InspectorPanel.Instance.ShowCard(view)` / `ShowSlot(view)` per popolare
 l'ispettore senza muovere il mouse.
@@ -774,8 +779,7 @@ Oltre ai vincoli di LAYOUT_SPEC §7:
   **Sono coordinate del Canvas nella risoluzione di riferimento 1920×1080, non pixel
   di schermo.** Il `CanvasScaler` le moltiplica per il fattore della risoluzione vera:
   a 2560×1440 il fattore è 1,333 e i centri a schermo diventano 809,33 / 1286 /
-  1762,67. Si verificano leggendo l'`anchoredPosition` delle corsie di `LaneAxisView`;
-  `WorldToScreenPoint` sui figli di `playerBoardRoot` dà valori diversi e vicini fra
+  1762,67. `WorldToScreenPoint` sui figli di `playerBoardRoot` dà valori diversi e vicini fra
   loro (il tavolo è inclinato e scalato 0,04), e **non** significa che l'invariante
   sia rotta. Le carte sono sul
   piano inclinato ma ruotate attorno al centro, quindi il centro proiettato

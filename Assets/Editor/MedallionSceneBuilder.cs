@@ -30,7 +30,13 @@ public static class MedallionSceneBuilder
 
     // Il mazzo sta tutto dentro lo schermo e un po' piu' piccolo delle carte in
     // campo; lo spessore lo si vede sul fianco rivolto al centro del tavolo.
-    const float DeckCenterX = 226, DeckCenterY = 842, DeckSpin = 8f, DeckCardScale = CardScale, DeckEdgeShift = .35f, DeckFullHeight = 52f;
+    // Misure a schermo delle carte a terra nelle corsie esterne (canvas 1920x1080,
+    // bordo vicino al giocatore): sinistra 423, destra 1507. Mazzo e fungo ne
+    // stanno alla stessa distanza, uno per lato. Il mazzo, girato di 8 gradi,
+    // sporge di 157 px a destra del suo centro.
+    const float LaneOuterLeft = 423f, LaneOuterRight = 1507f, TableObjectGap = 40f, DeckHalfWidth = 157f;
+    const float ButtonSize = 285f;
+    const float DeckCenterX = LaneOuterLeft - TableObjectGap - DeckHalfWidth, DeckCenterY = 842, DeckSpin = 8f, DeckCardScale = CardScale, DeckEdgeShift = .35f, DeckFullHeight = 52f;
 
     // Costellazione degli AP nel cielo, dove prima stava la targhetta.
     const float ApX = 30, ApY = 34, ApSize = 284;
@@ -38,7 +44,9 @@ public static class MedallionSceneBuilder
     // Il libretto chiuso sta oltre il mazzo, piu' lontano dal giocatore: e' roba
     // da consultare. Grande abbastanza da leggerne l'etichetta, girato al
     // contrario del mazzo perche' i due oggetti non sembrino allineati a righello.
-    const float BookletCenterX = 184, BookletCenterY = 586, BookletSpin = -11f;
+    // Il libretto sta dietro il mazzo e tutto a sinistra della cassa: e' piu'
+    // lontano del fronte della cassa, quindi non deve sovrapporsi alla sua sagoma.
+    const float BookletCenterX = 170, BookletCenterY = 580, BookletSpin = -7f;
 
     // Perno della leva: il fianco sinistro del tamburo tocca la guancia destra
     // della cassa, che all'altezza del perno sta a x 1582.
@@ -134,11 +142,17 @@ public static class MedallionSceneBuilder
         var player=Board(root,"PlayerLanes","PlayerBoardRoot",LaneCenter,PlayerRowCenterY-CardOverlay.CardH*CardScale*.5f,
                          CardOverlay.CardW,CardOverlay.CardH,CardScale,TableTilt);
         // Only resonance and banners remain in this compact gap. Damage is previewed on the cabinet.
-        var axis=Rect("LaneAxis",root,0,704,W,20).gameObject.AddComponent<LaneAxisView>();axis.laneReferenceRoot=player;axis.columnWidth=285;
+        // Niente asse delle corsie: risonanza e insegne stanno accanto al nome di
+        // chi le porta (NameMarks), invece di galleggiare sul panno fra cassa e carte.
         var (handRoot,spawn)=Hand(root,hud);
         Deck(root,hud);
         Status(root,hud);
-        var attack=MushroomControl(root,1620,700,245);
+        // Il fungo e' il gemello del mazzo dall'altro lato delle corsie: lascia dal
+        // bordo della carta a terra la stessa distanza, e il cerchio su cui poggia
+        // il basamento (x 42..1212, centro y 880 sulla tela da 1254) sta alla stessa
+        // profondita' del centro del mazzo.
+        float buttonK=ButtonSize/1254f;
+        var attack=MushroomControl(root,LaneOuterRight+TableObjectGap-42f*buttonK,DeckCenterY-880f*buttonK,ButtonSize);
         var lever=LeverControl(root,LeverPivotX,LeverPivotY);
         hud.endTurnLabel=null;
         // Due oggetti sul tavolo, non due scritte. Il libretto sta oltre il
@@ -201,7 +215,8 @@ public static class MedallionSceneBuilder
         var hand=UiBuild.Rect("PlayerHand",zone);hand.anchorMin=hand.anchorMax=new Vector2(.5f,0);hand.pivot=new Vector2(.5f,.5f);hand.sizeDelta=new Vector2(1148,336);hand.anchoredPosition=new Vector2(0,-52);
         var spawn=UiBuild.Rect("spawnPoint",zone);spawn.anchorMin=spawn.anchorMax=new Vector2(.5f,0);spawn.anchoredPosition=new Vector2(-420,-52);
         var tray=zone.gameObject.AddComponent<HandTray>();tray.handRoot=hand;tray.restY=-52;tray.raisedY=235;tray.restHeight=86;
-        hud.handText=Text("HandCount",root,"MANO",780,1052,350,23,15,GamePalette.Paper);hud.handText.alignment=TextAlignmentOptions.Center;
+        // Nessuna scritta: quante carte hai lo dice la mano stessa.
+        hud.handText=null;
         return(hand,spawn);
     }
     static void Deck(RectTransform root,HudController hud)
@@ -234,12 +249,12 @@ public static class MedallionSceneBuilder
     }
     static void Status(RectTransform root,HudController hud)
     {
-        // Niente targhetta: le vite stanno sui display LED, gli AP nella
-        // costellazione e il turno non si conta piu' (la partita finisce a zero
-        // vita). Resta solo l'etichetta di fase.
+        // Niente targhetta ne' scritte: le vite stanno sui display LED, gli AP
+        // nella costellazione, il turno non si conta piu' (la partita finisce a
+        // zero vita) e la fase la dicono i comandi che si accendono e si spengono.
         hud.bossHpText=null;hud.playerHpText=null;hud.apText=null;hud.turnText=null;
         ApConstellation(root,ApX,ApY,ApSize);
-        hud.phaseText=Text("Phase",root,"FASE AZIONI",690,14,600,28,17,GamePalette.Paper);hud.phaseText.alignment=TextAlignmentOptions.Center;
+        hud.phaseText=null;
     }
 
     /// <summary>
@@ -274,7 +289,7 @@ public static class MedallionSceneBuilder
     {
         // Proporzioni di book_closed.png (1388x1133). Il corpo del libro dentro la
         // tela: x 20..1350, y 86..1070; l'etichetta d'avorio x 208..1187, y 433..708.
-        const float PW=240,PH=PW*1133f/1388f,Thickness=10f;
+        const float PW=250,PH=PW*1133f/1388f,Thickness=11f;
         var rt=Rect("DetailButton",root,cx-PW*.62f,cy-PH*.42f,PW*1.24f,PH*.84f);
         var hit=UiBuild.Fill(rt,Color.clear,true);
         var page=OnTable(rt,"Plane",PW,PH,spin);
@@ -296,7 +311,7 @@ public static class MedallionSceneBuilder
         }
         var cover=Art("Cover",page,"upgrade_book_closed",0,0,PW,PH);cover.raycastTarget=false;
         cover.rectTransform.localPosition+=new Vector3(0,0,-Thickness);
-        var label=Text("Label",cover.rectTransform,"DETTAGLIO",PW*208f/1388f,PH*433f/1133f,PW*979f/1388f,PH*275f/1133f,19,GamePalette.InkStrong);
+        var label=Text("Label",cover.rectTransform,"DETTAGLIO",PW*208f/1388f,PH*433f/1133f,PW*979f/1388f,PH*275f/1133f,21,GamePalette.InkStrong);
         label.alignment=TextAlignmentOptions.Center;label.raycastTarget=false;label.characterSpacing=8;
 
         var button=rt.gameObject.AddComponent<Button>();button.targetGraphic=hit;

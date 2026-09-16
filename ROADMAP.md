@@ -11,6 +11,13 @@ Ogni voce ha **Obiettivo**, **Perché**, **Dove**, **Fatto quando** e — dove s
 
 ## Stato attuale
 
+**Tavolo armonizzato e segni accanto al nome (17 settembre 2026).** Tolta la
+scritta di fase e l'asse delle corsie: scudo spezzato e insegne ricevute sono
+timbri accanto al nome della carta o della casella (`NameMarks`). Mazzo e fungo
+sono gemelli ai due lati delle corsie (stessa distanza dal bordo della carta a
+terra, 40 px, e stessa profondita'); il libretto chiuso sta dietro il mazzo, fuori
+dalla sagoma della cassa. Misure in testa a `MedallionSceneBuilder`.
+
 **Costellazione degli AP e fine a zero vita (16 settembre 2026, notte).** Tolta la
 targhetta in alto a sinistra: gli AP sono quattro stelle ai vertici del simbolo
 del dorso disegnato come costellazione nel cielo, e si spengono una per AP speso.

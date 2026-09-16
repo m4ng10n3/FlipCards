@@ -334,15 +334,8 @@ public class SlotOverlay : MonoBehaviour,
     }
 
     /// <summary>
-    /// Lo scudo spezzato della risonanza, sulla casella che la subisce.
-    ///
-    /// La stessa icona compare sulla carta della corsia (CardOverlay): sono le
-    /// due cose che la causano, e vederla su tutte due dice "questi due,
-    /// insieme, non si parano" senza spiegazioni. Prima stava solo sull'asse
-    /// delle corsie, cioe' in un terzo posto lontano da entrambe, ed e' il
-    /// motivo per cui la sinergia fra carta e casella non si capiva.
-    ///
-    /// Il colore e' quello della fazione condivisa, perche' e' la sua causa.
+    /// Lo scudo spezzato della risonanza, grande sotto il simbolo di fazione:
+    /// la fazione e' la sua causa, e sulla faccia del rullo si legge da lontano.
     /// </summary>
     void BuildResonanceMark()
     {
