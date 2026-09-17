@@ -14,7 +14,11 @@ public sealed class FinalCardInk : MonoBehaviour
     }
 
     Face _front, _back;
-    int _health = int.MinValue, _power = int.MinValue, _charges = -1, _face = -1;
+    int _health = int.MinValue, _power = int.MinValue, _charges = -1, _face = -1, _bonus = -1;
+
+    /// <summary>Colori delle tacche venute da fuori: oro sul fronte, ottanio sul retro.</summary>
+    static readonly Color FrontBonusInk = new Color(.80f, .60f, .16f);
+    static readonly Color BackBonusInk = new Color(.42f, .90f, .92f);
 
     /// <summary>Radice dei segni del retro: la pesca la fa comparire sul dorso.</summary>
     public RectTransform BackRoot => _back?.root;
@@ -107,18 +111,32 @@ public sealed class FinalCardInk : MonoBehaviour
         UiBuild.Band(label.rectTransform, (516 + offset) * FinalCardLayout.Scale, 76f * FinalCardLayout.Scale, 100f * FinalCardLayout.Scale, 140f * FinalCardLayout.Scale);
     }
 
-    public void Refresh(bool front, int health, int power, int charges)
+    /// <summary>
+    /// I valori stampati adesso. <paramref name="bonus"/> sono le tacche che
+    /// vengono da fuori — insegne e abilita': si disegnano col simbolo
+    /// dell'insegna invece che con la tacca liscia, in oro sul fronte e in
+    /// ottanio sul retro, cosi' si vede a colpo d'occhio quante del totale non
+    /// sono della carta. Prima lo diceva un simbolo accanto al nome, cioe' in un
+    /// posto diverso dal numero che cambiava.
+    /// </summary>
+    public void Refresh(bool front, int health, int power, int charges, int bonus = 0)
     {
-        if (_face == (front ? 1 : 0) && _health == health && _power == power && _charges == charges) return;
-        _face = front ? 1 : 0; _health = health; _power = power; _charges = charges;
+        if (_face == (front ? 1 : 0) && _health == health && _power == power && _charges == charges && _bonus == bonus) return;
+        _face = front ? 1 : 0; _health = health; _power = power; _charges = charges; _bonus = bonus;
         _front.root.gameObject.SetActive(front);
         _back.root.gameObject.SetActive(!front);
         var face = front ? _front : _back;
+        var bonusSprite = Sprite("back", front ? "attack_spade" : "defense_club_B");
         for (int i = 0; i < 7; i++)
         {
             face.health[i].sprite = Sprite(face.prefix, i < health ? "drop_full" : "drop_empty");
-            bool filled = front ? 6 - i < power : i < power;
-            face.power[i].sprite = Sprite(face.prefix, (front ? "attack_" : "defense_") + (filled ? "full" : "empty"));
+            int rank = front ? 7 - i : i + 1;        // quanta parte del totale copre questa tacca
+            bool filled = rank <= power;
+            bool fromOutside = filled && bonus > 0 && rank > power - bonus;
+            face.power[i].sprite = fromOutside && bonusSprite != null
+                ? bonusSprite
+                : Sprite(face.prefix, (front ? "attack_" : "defense_") + (filled ? "full" : "empty"));
+            face.power[i].color = fromOutside ? (front ? FrontBonusInk : BackBonusInk) : Color.white;
         }
         for (int i = 0; i < face.charges.Length; i++) face.charges[i].sprite = Sprite(face.prefix, i < charges ? "charge_full" : "charge_ring");
         face.healthOverflow.enabled = health > 7; face.healthOverflow.text = health > 7 ? health.ToString() : "";

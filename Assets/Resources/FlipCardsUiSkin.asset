@@ -551,8 +551,8 @@ MonoBehaviour:
     sprite: {fileID: 21300000, guid: 0de90c389d5bb534cafcb2d8deb6bacb, type: 3}
   - key: ap_star_off
     sprite: {fileID: 21300000, guid: ba5a808df605cc44da419d97101d2fb1, type: 3}
-  - key: mark_disc
-    sprite: {fileID: 21300000, guid: c2177a3a6fd774f4aa4c15128817ccf5, type: 3}
+  - key: scroll_closed
+    sprite: {fileID: 21300000, guid: 3e6c958070eb69a4f805ae1ed5219c69, type: 3}
   - key: scene_cabinet
     sprite: {fileID: 21300000, guid: acae4d4d2dacf054dba3a578465eb8fb, type: 3}
   - key: scene_table

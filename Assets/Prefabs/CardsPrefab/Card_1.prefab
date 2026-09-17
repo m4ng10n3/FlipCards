@@ -1044,6 +1044,11 @@ MonoBehaviour:
   scaleTransition: 0.15
   scaleEase: 27
   selectPunchAmount: 20
+  boardSelectLift: 34
+  boardSelectTilt: 26
+  boardScaleOnSelect: 1.08
+  boardShadowRest: 0.9
+  boardShadowAlpha: 0.32
   autoTiltAmount: 5
   manualTiltAmount: 15
   tiltSpeed: 15

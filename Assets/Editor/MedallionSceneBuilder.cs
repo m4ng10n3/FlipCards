@@ -48,6 +48,10 @@ public static class MedallionSceneBuilder
     // lontano del fronte della cassa, quindi non deve sovrapporsi alla sua sagoma.
     const float BookletCenterX = 170, BookletCenterY = 580, BookletSpin = -7f;
 
+    // La legenda arrotolata sta specchiata al libretto, dietro il fungo e fuori
+    // dalla corsa della leva.
+    const float ScrollCenterX = W - BookletCenterX - 20f, ScrollCenterY = 590f, ScrollWidth = 290f, ScrollSpin = 5f;
+
     // Perno della leva: il fianco sinistro del tamburo tocca la guancia destra
     // della cassa, che all'altezza del perno sta a x 1582.
     const float LeverPivotX = 1612, LeverPivotY = 460, LeverScale = .19f;
@@ -159,7 +163,7 @@ public static class MedallionSceneBuilder
         // mazzo — piu' lontano dal giocatore — perche' e' roba da consultare,
         // non da giocare; la pergamena resta in alto a destra dov'era.
         Bind(BookletTag(root,BookletCenterX,BookletCenterY,BookletSpin),overlay.OpenDetail);
-        Bind(ScrollTag(root,1646,24,222,88),overlay.OpenLegend);
+        Bind(LegendScroll(root),overlay.OpenLegend);
         var log=Overlay(root,overlay);
         FlipCardsLayoutBuilder.BuildEndPanel(root,hud);
         var endCanvas=hud.endPanel.AddComponent<Canvas>();endCanvas.overrideSorting=true;endCanvas.sortingOrder=120;
@@ -329,30 +333,27 @@ public static class MedallionSceneBuilder
         shadow.color=new Color(0f,0f,0f,strength);shadow.raycastTarget=false;
     }
 
-    /// <summary>La pergamena arrotolata: foglio d'avorio stretto fra due rulli d'ottone.</summary>
-    static Button ScrollTag(RectTransform root,float x,float y,float w,float h)
+    /// <summary>
+    /// La legenda arrotolata e posata sul panno, gemella del libretto dall'altra
+    /// parte delle corsie. Un cilindro coricato si vede uguale da qualunque
+    /// altezza, quindi il rotolo sta sullo schermo come il fungo e la leva; sul
+    /// piano inclinato del tavolo va solo la sua ombra, lungo la linea d'appoggio
+    /// (a 69% dell'altezza della tela, 12_TableProps/Tools/build_scroll.py).
+    /// </summary>
+    static Button LegendScroll(RectTransform root)
     {
-        var rt=Rect("LegendButton",root,x,y,w,h);
+        float w=ScrollWidth,h=w*300f/1000f;
+        var rt=Rect("LegendButton",root,ScrollCenterX-w*.5f,ScrollCenterY-h*.5f,w,h);
         var hit=UiBuild.Fill(rt,Color.clear,true);
-        // Il foglio sta sotto il corpo avorio dei rulli, non sotto i tappi.
-        float inset=w*RollerBodyStart+2f;
-        var sheet=Art("Sheet",rt,"upgrade_parchment",inset,18,w-2*inset,h-36);sheet.raycastTarget=false;
-        Roller(rt,"RollerTop",0,4,w,18);
-        Roller(rt,"RollerBottom",0,h-22,w,18);
-        var label=Text("Label",rt,"LEGENDA",16,h*.5f-15,w-32,30,20,GamePalette.InkStrong);
-        label.alignment=TextAlignmentOptions.Center;label.raycastTarget=false;
+        var plane=OnTable(rt,"Plane",w,h*2f,-ScrollSpin);
+        ContactShadow(plane,w*.16f,h*1.18f,w*.68f,h*.34f,.6f);
+        var art=UiBuild.Rect("Scroll",rt);UiBuild.Centered(art,w,h);
+        art.localRotation=Quaternion.Euler(0f,0f,-ScrollSpin);
+        var image=UiBuild.Fill(art,Color.white);image.sprite=UiSkin.Sprite("scroll_closed");image.raycastTarget=false;
         var button=rt.gameObject.AddComponent<Button>();button.targetGraphic=hit;
         return button;
     }
 
-    /// <summary>
-    /// Dedicated illustrated roller, also used by the closed parchment tag.
-    /// </summary>
-    static void Roller(RectTransform parent,string name,float x,float y,float w,float thickness)
-    {
-        var image=Art(name,parent,"upgrade_roller",x,y,w,thickness);
-        image.raycastTarget=false;
-    }
 
     /// <summary>
     /// Vita del boss: display a matrice nella striscia frontale della guancia
@@ -678,8 +679,10 @@ public static class MedallionSceneBuilder
         var unroll=panel.gameObject.AddComponent<MedallionScroll>();
         unroll.openSize=new Vector2(PW,PH);
         unroll.openPosition=panel.anchoredPosition;
-        unroll.closedPosition=new Vector2(1646f,-24f);
-        unroll.closedSize=new Vector2(222f,88f);
+        // Si srotola partendo dal rotolo posato sul tavolo.
+        float scrollH=ScrollWidth*300f/1000f;
+        unroll.closedPosition=new Vector2(ScrollCenterX-ScrollWidth*.5f,-(ScrollCenterY-scrollH*.5f));
+        unroll.closedSize=new Vector2(ScrollWidth,scrollH);
         panel.gameObject.SetActive(false);
     }
 
@@ -698,11 +701,19 @@ public static class MedallionSceneBuilder
     {
         float w=box.rect.width,h=box.rect.height;
         var inspector=box.gameObject.AddComponent<InspectorPanel>();
-        inspector.titleText=Text("Title",box,"SCEGLI UN ELEMENTO",8,0,w-16,42,28,GamePalette.InkStrong);
-        inspector.subtitleText=Text("Subtitle",box,"",8,45,w-16,30,18,GamePalette.InkMuted);
-        inspector.sideText=Text("Side",box,"",8,79,w-16,25,17,GamePalette.InkMuted);
-        inspector.bodyText=ScrollText(box,"Body",8,117,w-16,h-192,19);
-        inspector.hintText=Text("Hint",box,"",8,h-68,w-16,42,16,GamePalette.InkMuted);
+        // L'immagine vera accanto al nome: ritratto della carta o simbolo della casella.
+        const float Pic=96;
+        var frame=UiBuild.Fill(Rect("PortraitFrame",box,8,0,Pic,Pic*1.25f),new Color(GamePalette.Ink.r,GamePalette.Ink.g,GamePalette.Ink.b,.08f));
+        frame.raycastTarget=false;
+        var pic=Rect("Portrait",box,12,4,Pic-8,Pic*1.25f-8);
+        inspector.portrait=UiBuild.Fill(pic,Color.white);inspector.portrait.preserveAspect=true;inspector.portrait.raycastTarget=false;
+        float tx=Pic+20;
+        inspector.titleText=Text("Title",box,"ISPETTORE",tx,0,w-tx-8,42,28,GamePalette.InkStrong);
+        inspector.subtitleText=Icons(Text("Subtitle",box,"",tx,45,w-tx-8,30,19,GamePalette.InkMuted));
+        inspector.sideText=Icons(Text("Side",box,"",tx,80,w-tx-8,30,18,GamePalette.InkMuted));
+        inspector.bodyText=Icons(ScrollText(box,"Body",8,Pic*1.25f+12,w-16,h-Pic*1.25f-80,20));
+        inspector.bodyText.lineSpacing=10;
+        inspector.hintText=Icons(Text("Hint",box,"",8,h-58,w-16,40,17,GamePalette.InkMuted));
         inspector.hintText.textWrappingMode=TextWrappingModes.Normal;
         return inspector;
     }
@@ -720,27 +731,77 @@ public static class MedallionSceneBuilder
         return text;
     }
 
-    /// <summary>Il testo della legenda, in colonna dentro il foglio della pergamena.</summary>
+    static TMP_SpriteAsset _icons;
+
+    /// <summary>I testi con simboli leggono lo sprite asset delle icone del tavolo.</summary>
+    static TMP_Text Icons(TMP_Text text)
+    {
+        if(_icons==null)_icons=MedallionSceneSkin.IconSprites();
+        text.spriteAsset=_icons;
+        return text;
+    }
+
+    /// <summary>
+    /// La legenda: per ogni cosa del tavolo il suo simbolo e una riga. Le icone
+    /// sono i disegni veri (sprite asset ui_icons), cosi' si impara a riconoscere
+    /// quello che poi si vede sulle carte e sulla cassa, non una parola che lo
+    /// descrive.
+    /// </summary>
     static void Legend(RectTransform sheet)
     {
-        string[] titles={"LE DUE FACCE","I SEGNI SULLE CARTE","LA CASSA","INSEGNE E RISONANZA","LE AZIONI","IL FINE TURNO"};
-        string[] bodies={
-            "FRONTE - il ritratto attacca.\nRETRO - il sigillo para, offre l'insegna e accumula cariche.",
-            "GOCCE = vita, dall'alto.\nLANCE = attacco, dal basso.\nSCUDI = difesa, dall'alto.\nOgni segno pieno vale 1. I cerchi sono cariche; oltre 7 compare il totale.",
-            "Luci rosse tonde = vita della lastra.\nLampade ambra alte = attacco: le sedi sono tre, quante ne servono davvero.\nTubi azzurri bassi = guardia, cinque sedi.\nIl colpo che sfonda la lastra arriva al boss; quello che sfonda la carta arriva a te.",
-            "L'insegna del retro da' il suo numero alle carte adiacenti della stessa famiglia.\nStessa famiglia fra carta e casella: risonanza, nessuno dei due para.\nSOLE - Braci    LUNA - Abissi    SATURNO - Rovi",
-            "Clic sul mazzo: pesca.\nCasella libera + carta, oppure trascina: gioca.\nDoppio clic: gira una carta.\nTrascina fra corsie: scambia.\nFungo rosso: attacca. Leva: difendi e gira / chiudi turno.",
-            "La leva avvia risposta nemica e rullo. Carte e posizioni possono cambiare.\nLe ferite delle lastre restano; una lastra distrutta esce dal pool.\nLeggi il pronostico fra cassa e carte prima di agire."};
-        for(int i=0;i<titles.Length;i++)
-        {
-            var heading=UiBuild.Text("Heading"+i,sheet,titles[i],25,GamePalette.InkGold);
-            heading.font=UiBuild.Font;heading.fontSize=25;heading.raycastTarget=false;
-            heading.gameObject.AddComponent<LayoutElement>().minHeight=36;
+        LegendSection(sheet,"LE CARTE",2,
+            ("card_front","fronte: attacca"),("card_back","retro: para ed e' un'insegna"),
+            ("flip","doppio clic: gira · 1STAR"),("swap","trascina fra corsie: scambia · 1STAR"));
+        LegendSection(sheet,"I SEGNI",2,
+            ("drop","vita"),("atk","attacco"),("def","difesa"),("charge","carica: +1ATK al prossimo colpo"));
+        LegendSection(sheet,"LE FAZIONI",3,("sun","Braci"),("moon","Abissi"),("saturn","Rovi"));
+        LegendSection(sheet,"INSEGNE E RISONANZA",1,
+            ("spade","da coperta: +ATK alle vicine della stessa fazione"),
+            ("club","da coperta: +DEF alle vicine della stessa fazione"),
+            ("broken","carta e casella della stessa fazione: nessuno para"));
+        LegendSection(sheet,"LA CASSA",2,
+            ("lamp_hp","vita della casella"),("lamp_atk","attacco della casella"),
+            ("lamp_def","difesa della casella"),("led_boss","vita del boss"));
+        LegendSection(sheet,"IL TAVOLO",2,
+            ("star","un AP: si spegne quando lo spendi"),("deck","pesca · 1STAR"),
+            ("button","attacca"),("lever","chiudi il turno"),
+            ("led_player","la tua vita"),("book","dettaglio e registro"));
+        LegendSection(sheet,"IL COLPO",1,
+            ("atk","ARROW oltre la LAMPHP ARROW LEDBOSS  lo paga il boss"),
+            ("lamp_atk","ARROW oltre la DROP ARROW LEDPLAYER  lo paghi tu"),
+            ("led_player","a zero: perde chi ci arriva"));
+    }
 
-            var body=UiBuild.Text("Explanation"+i,sheet,bodies[i],20,GamePalette.InkBody);
-            body.font=UiBuild.Font;body.fontSize=20;body.raycastTarget=false;
-            body.textWrappingMode=TextWrappingModes.Normal;body.alignment=TextAlignmentOptions.TopLeft;
-            body.gameObject.AddComponent<ContentSizeFitter>().verticalFit=ContentSizeFitter.FitMode.PreferredSize;
+    /// <summary>Titolo in oro e una griglia di voci: icona grande e una riga d'inchiostro.</summary>
+    static void LegendSection(RectTransform sheet,string title,int columns,params (string icon,string caption)[] entries)
+    {
+        var heading=UiBuild.Text("Heading_"+title,sheet,title,22,GamePalette.InkGold);
+        heading.font=UiBuild.Font;heading.fontSize=22;heading.raycastTarget=false;heading.characterSpacing=6;
+        heading.gameObject.AddComponent<LayoutElement>().minHeight=30;
+
+        var grid=UiBuild.Rect("Grid_"+title,sheet);
+        var layout=grid.gameObject.AddComponent<GridLayoutGroup>();
+        const float Width=920,RowH=56;
+        layout.constraint=GridLayoutGroup.Constraint.FixedColumnCount;layout.constraintCount=columns;
+        layout.spacing=new Vector2(18,4);
+        layout.cellSize=new Vector2((Width-18*(columns-1))/columns,RowH);
+        int rows=(entries.Length+columns-1)/columns;
+        grid.gameObject.AddComponent<LayoutElement>().preferredHeight=rows*RowH+(rows-1)*4;
+        foreach(var (icon,caption) in entries)
+        {
+            var cell=UiBuild.Rect("Entry_"+icon,grid);
+            var text=Icons(UiBuild.Text("Text",cell,"<size=190%><voffset=-.1em>"+Glyph(icon)+"</voffset></size>  "+Symbols(caption),20,GamePalette.InkBody));
+            text.font=UiBuild.Font;text.fontSize=20;text.raycastTarget=false;
+            text.alignment=TextAlignmentOptions.MidlineLeft;text.textWrappingMode=TextWrappingModes.NoWrap;
+            UiBuild.Stretch(text.rectTransform);
         }
     }
+
+    static string Glyph(string name) => "<sprite name=\""+name+"\">";
+
+    /// <summary>Segnaposti in maiuscolo nelle didascalie: si leggono meglio delle etichette TMP.</summary>
+    static string Symbols(string caption) => caption
+        .Replace("STAR",Glyph("star")).Replace("ATK",Glyph("atk")).Replace("DEF",Glyph("def"))
+        .Replace("ARROW",Glyph("arrow")).Replace("LAMPHP",Glyph("lamp_hp")).Replace("LEDBOSS",Glyph("led_boss"))
+        .Replace("LEDPLAYER",Glyph("led_player")).Replace("DROP",Glyph("drop"));
 }

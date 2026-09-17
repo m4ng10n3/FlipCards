@@ -1,6 +1,8 @@
 using System.Collections.Generic;
+using TMPro;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.TextCore;
 
 /// <summary>Explicit production assets for the approved 2026-09-10 composition.</summary>
 public static class MedallionSceneSkin
@@ -139,8 +141,94 @@ public static class MedallionSceneSkin
         // Libretto, segnalibri e oggetti di scena (12_TableProps/Tools/build_book.py).
         foreach (var name in new[] { "book_spread_left", "book_spread_right", "book_leaf_left", "book_leaf_right",
                                      "book_cover_front", "bookmark_campo", "bookmark_mano", "bookmark_rullo",
-                                     "bookmark_registro", "table_shadow", "ap_constellation", "ap_star_on", "ap_star_off" })
+                                     "bookmark_registro", "table_shadow", "ap_constellation", "ap_star_on", "ap_star_off", "scroll_closed" })
             entries[name] = Load(Props + name);
+    }
+
+    [System.Serializable] sealed class IconAtlas { public int cell; public IconEntry[] entries; }
+    [System.Serializable] sealed class IconEntry { public string name; public int x, y, w, h; }
+
+    /// <summary>
+    /// Le icone del tavolo come caratteri: sprite asset TMP costruito da
+    /// 12_TableProps/ui_icons.png (Tools/build_icons.py). Nei testi della legenda
+    /// e dell'ispettore si scrive &lt;sprite name="drop"&gt; e compare la goccia
+    /// disegnata. Le tabelle si riempiono dai getter perche' i setter sono interni
+    /// a TMP; la versione si scrive dal SerializedObject, altrimenti al primo
+    /// caricamento TMP crede che l'asset sia del formato vecchio e lo "aggiorna"
+    /// svuotandolo.
+    /// </summary>
+    public static TMP_SpriteAsset IconSprites()
+    {
+        string png = Root + Props + "ui_icons.png";
+        string path = Root + Props + "ui_icons.asset";
+        var importer = AssetImporter.GetAtPath(png) as TextureImporter;
+        if (importer == null) { AssetDatabase.ImportAsset(png); importer = AssetImporter.GetAtPath(png) as TextureImporter; }
+        if (importer == null) throw new System.InvalidOperationException("Missing icon atlas: " + png);
+        if (importer.textureType != TextureImporterType.Default || importer.mipmapEnabled || importer.textureCompression != TextureImporterCompression.Uncompressed || !importer.alphaIsTransparency)
+        {
+            importer.textureType = TextureImporterType.Default;
+            importer.mipmapEnabled = false;
+            importer.alphaIsTransparency = true;
+            importer.textureCompression = TextureImporterCompression.Uncompressed;
+            importer.wrapMode = TextureWrapMode.Clamp;
+            importer.filterMode = FilterMode.Bilinear;
+            importer.SaveAndReimport();
+        }
+        var texture = AssetDatabase.LoadAssetAtPath<Texture2D>(png);
+
+        var asset = AssetDatabase.LoadAssetAtPath<TMP_SpriteAsset>(path);
+        if (asset == null)
+        {
+            asset = ScriptableObject.CreateInstance<TMP_SpriteAsset>();
+            AssetDatabase.CreateAsset(asset, path);
+        }
+        var so = new SerializedObject(asset);
+        so.FindProperty("m_Version").stringValue = "1.1.0";
+        so.ApplyModifiedPropertiesWithoutUndo();
+
+        asset.spriteSheet = texture;
+        var material = asset.material;
+        if (material == null)
+        {
+            material = new Material(Shader.Find("TextMeshPro/Sprite")) { name = "ui_icons Material" };
+            AssetDatabase.AddObjectToAsset(material, asset);
+            asset.material = material;
+        }
+        material.SetTexture(ShaderUtilities.ID_MainTex, texture);
+
+        // ui_icons.json: {"cell":128,"icons":{"drop":[x,y,w,h],...}}, y dal basso.
+        string json = System.IO.File.ReadAllText(Root + Props + "ui_icons.json");
+        var entries = ParseIcons(json, out int cell);
+        asset.spriteGlyphTable.Clear();
+        asset.spriteCharacterTable.Clear();
+        for (int i = 0; i < entries.Count; i++)
+        {
+            var e = entries[i];
+            // Base a un quinto dell'altezza sotto la riga: l'icona siede sul testo
+            // come una lettera maiuscola un po' piu' grande.
+            var glyph = new TMP_SpriteGlyph((uint)i, new GlyphMetrics(e.w, e.h, 0, e.h * .8f, e.w), new GlyphRect(e.x, e.y, e.w, e.h), 1f, 0);
+            asset.spriteGlyphTable.Add(glyph);
+            asset.spriteCharacterTable.Add(new TMP_SpriteCharacter(0xFFFE, glyph) { name = e.name });
+        }
+        asset.faceInfo = new FaceInfo { pointSize = cell, scale = 1f, lineHeight = cell, ascentLine = cell * .8f, descentLine = -cell * .2f, baseline = 0 };
+        asset.UpdateLookupTables();
+        EditorUtility.SetDirty(asset);
+        EditorUtility.SetDirty(material);
+        return asset;
+    }
+
+    static List<IconEntry> ParseIcons(string json, out int cell)
+    {
+        // JsonUtility non legge dizionari: il file e' piccolo e regolare, si legge a mano.
+        var list = new List<IconEntry>();
+        cell = 128;
+        var cellMatch = System.Text.RegularExpressions.Regex.Match(json, @"""cell"":\s*(\d+)");
+        if (cellMatch.Success) cell = int.Parse(cellMatch.Groups[1].Value);
+        foreach (System.Text.RegularExpressions.Match m in System.Text.RegularExpressions.Regex.Matches(json,
+                     @"""([a-z_]+)"":\s*\[\s*(\d+),\s*(\d+),\s*(\d+),\s*(\d+)\s*\]"))
+            list.Add(new IconEntry { name = m.Groups[1].Value, x = int.Parse(m.Groups[2].Value), y = int.Parse(m.Groups[3].Value),
+                                     w = int.Parse(m.Groups[4].Value), h = int.Parse(m.Groups[5].Value) });
+        return list;
     }
 
     public static Material BookLeafMaterial()

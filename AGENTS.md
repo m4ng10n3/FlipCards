@@ -286,6 +286,14 @@ Chi non è un `Button` (il mazzo) non passa da `UpdateHUD` e guarda `CanAct`.
 - `HandTray.cs` — la mano sale in blocco quando il puntatore entra nell'area.
   Il componente sta sull'**area di attivazione**, e la mano è un suo figlio: se
   fossero fratelli, passare da una carta all'altra genererebbe un `PointerExit`.
+- `CardView.cs` — in campo la carta selezionata si stacca dal panno verso la
+  camera (`boardSelectLift`) e si raddrizza di `boardSelectTilt` gradi, invece di
+  scattare verso l'alto nel piano del tavolo: e' il gesto con cui la si prende in
+  mano per guardarla. L'ombra e' un contatto — poco piu' piccola della carta e
+  leggera quando e' posata, piu' larga e spostata in basso a destra quando e'
+  sollevata. **Si scala solo la localScale dell'ombra**: scalando anche il
+  `sizeDelta` l'ingrandimento contava due volte, ed era il motivo per cui le
+  ombre sembravano enormi.
 - `DeckView.cs` — mazzo cliccabile, posato sul tavolo a sinistra. In cima c'e'
   il prefab vero della prossima carta, di dorso; sotto, **un taglio per carta**
   impilato lungo la **normale del tavolo** (z locale di `stackRoot`): l'altezza
@@ -309,11 +317,16 @@ Chi non è un `Button` (il mazzo) non passa da `UpdateHUD` e guarda `CanAct`.
   sfogliano cambiando sezione, segnalibri che seguono il bordo del foglio e
   stanno a sinistra per le sezioni gia' passate. Le sezioni le scrive
   `TableOverlayController.ApplySection(int)`.
-- `NameMarks.cs` — i segni momentanei accanto al nome di carte e caselle, come
-  timbri su un tondino d'avorio: scudo spezzato (risonanza), spada e scudo
-  (insegne ricevute dalle vicine). **Ogni nuovo segno momentaneo va qui**, non
-  sul panno. `LaneAxisView.cs` resta solo per il vecchio layout a bande: il
-  medaglione non monta piu' l'asse delle corsie.
+- `NameMarks.cs` — i segni momentanei accanto al nome, glifo inciso alto quanto
+  la targhetta. Sulla carta ce n'e' **uno solo**, lo scudo spezzato della
+  risonanza: e' l'unica cosa che non si legge da nessun'altra parte della cella.
+  Gli aumenti di attacco e guardia non sono segni: la **tacca aggiunta** cambia
+  simbolo e colore (`FinalCardInk.Refresh`, parametro `bonus`) — picca d'oro sul
+  fronte, fiore ottanio sul retro — cosi' il numero e la sua causa stanno nello
+  stesso posto. Sul retro l'attacco non si mostra, quindi non si mostra nemmeno
+  il suo aumento. La casella tiene il suo scudo spezzato grande sotto il simbolo
+  di fazione (`SlotOverlay`). `LaneAxisView.cs` resta solo per il vecchio layout
+  a bande: il medaglione non monta piu' l'asse delle corsie.
 - `DamagePreviewController.cs` — anteprima di 2,8 s al clic in campo, validazione e ripristino; luci e HUD restano gli unici proprietari dei loro grafici.
 - `InspectorPanel.cs` + `AbilityCatalog.cs` — ispettore e testi delle abilità.
 - `CardOverlay.cs` / `SlotOverlay.cs` — chrome costruito a runtime sopra i prefab.
@@ -592,6 +605,28 @@ comando con `AssetDatabase.MoveAsset` o `DeleteAsset` viene rifiutato dal bridge
 quindi non sposta niente. Si sposta con `mv` il file e il suo `.meta` insieme, poi
 `AssetDatabase.Refresh()` da comando: il GUID viaggia nel `.meta` e prefab, scena e
 skin restano agganciati.
+
+**Legenda e ispettore parlano per simboli, e i simboli sono caratteri.**
+`12_TableProps/ui_icons.png` (Tools/build_icons.py) diventa uno sprite asset TMP
+in `MedallionSceneSkin.IconSprites()`: nei testi si scrive
+`<sprite name="drop">`. Due trappole della costruzione da codice: le tabelle
+(`spriteCharacterTable`, `spriteGlyphTable`) hanno il setter interno a TMP e si
+riempiono dai getter, e `m_Version` va scritto con `SerializedObject` — senza
+versione, al primo caricamento TMP crede che l'asset sia del formato vecchio e
+lo "aggiorna" svuotandolo. I testi che li usano vogliono `spriteAsset`
+assegnato: lo fa `MedallionSceneBuilder.Icons(...)`.
+
+**Le icone del dorso sono avorio.** I simboli di `Cards/_Final/Back` (difesa,
+insegne) e i glifi sono disegnati per la copertina rossa: sulla carta chiara
+della legenda spariscono, e infatti l'atlante li ricolora in inchiostro
+(`build_icons.py`, funzione `ink`). Vale anche per la stella degli AP, che nel
+cielo e' fatta di bagliore: nell'atlante e' incisa in oro.
+
+**Con Unity in secondo piano il Play Mode non avanza di un frame**, quindi
+nessuna animazione progredisce e le coroutine di verifica si fermano a meta'.
+Per le catture di layout e contenuto conviene mettere i pannelli nella posa
+aperta a mano (`MedallionScroll.openPosition/openSize`, `Canvas.ForceUpdateCanvases`,
+`TMP_Text.ForceMeshUpdate`) invece di aspettare l'animazione.
 
 **Modificare uno script con il Play Mode acceso lo ricompila dentro la partita.**
 Unity ricarica il dominio e `GameManager.Instance` torna null mentre

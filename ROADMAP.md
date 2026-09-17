@@ -11,6 +11,16 @@ Ogni voce ha **Obiettivo**, **Perché**, **Dove**, **Fatto quando** e — dove s
 
 ## Stato attuale
 
+**Simboli al posto delle parole (17 settembre 2026, sera).** Legenda e ispettore
+parlano con i disegni del tavolo: sprite asset TMP di 35 icone
+(`12_TableProps/ui_icons.png`), righe simbolo + didascalia nella legenda, e
+nell'ispettore il ritratto della carta o il simbolo della casella con il conto
+della corsia in simboli. Sulla carta resta solo lo scudo spezzato della
+risonanza; gli aumenti si leggono dalla tacca aggiunta, picca d'oro sul fronte e
+fiore ottanio sul retro. La legenda e' un rotolo posato sul panno, gemello del
+libretto. Via la scritta "MANO". La carta a terra selezionata si solleva verso la
+camera e si raddrizza; le ombre delle carte posate sono tornate contatti leggeri.
+
 **Tavolo armonizzato e segni accanto al nome (17 settembre 2026).** Tolta la
 scritta di fase e l'asse delle corsie: scudo spezzato e insegne ricevute sono
 timbri accanto al nome della carta o della casella (`NameMarks`). Mazzo e fungo

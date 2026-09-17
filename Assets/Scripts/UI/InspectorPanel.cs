@@ -5,10 +5,20 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Ispettore della colonna destra: mostra la scheda completa di quello che sta
-/// sotto il puntatore. Risolve il problema piu' grosso del layout precedente —
-/// sedici abilita' e tutte le passive di fazione non avevano nessuna superficie
-/// di visualizzazione, e una cella da 220x330 non puo' ospitarle.
+/// Ispettore sulla pagina destra del libretto: la scheda di una carta o di una
+/// casella, detta con i simboli del tavolo invece che a parole.
+///
+/// In testa c'e' l'immagine vera (il ritratto della carta, il simbolo della
+/// casella) accanto al nome. Sotto, le statistiche sono le stesse file di gocce,
+/// lance e scudi stampate sulla carta, e il conto della corsia e' una riga di
+/// simboli: ⟨lancia⟩ attacco + ⟨carica⟩ + ⟨insegna⟩ − ⟨scudo⟩ guardia = colpo,
+/// e dove va a finire (⟨display del boss⟩ se sfonda). Le icone sono lo sprite
+/// asset TMP ui_icons (12_TableProps/Tools/build_icons.py): nei testi si scrive
+/// &lt;sprite name="drop"&gt;.
+///
+/// I numeri vengono dagli stessi metodi che risolvono il colpo
+/// (<see cref="SynergyResolver"/>), non da un conto rifatto qui. Le parole
+/// restano solo dove un simbolo non basta: la causa di un bonus e le abilita'.
 /// </summary>
 public class InspectorPanel : MonoBehaviour
 {
@@ -19,6 +29,8 @@ public class InspectorPanel : MonoBehaviour
     public TMP_Text subtitleText;
     public Image sideStrip;
     public TMP_Text sideText;
+    [Tooltip("L'immagine della carta o della casella accanto al nome.")]
+    public Image portrait;
 
     [Header("Corpo")]
     public TMP_Text bodyText;
@@ -51,12 +63,6 @@ public class InspectorPanel : MonoBehaviour
 
     void OnDestroy() { if (Instance == this) Instance = null; }
 
-    /// <summary>
-    /// L'hover puo' scrivere solo se non c'e' niente di agganciato. Un oggetto
-    /// agganciato che viene distrutto — una casella che muore o che il rullo
-    /// sostituisce — libera il pannello da solo: senza questo controllo
-    /// l'ispettore resterebbe bloccato sulla scheda di un morto.
-    /// </summary>
     bool Locked(object source)
     {
         DropDeadPin();
@@ -68,6 +74,45 @@ public class InspectorPanel : MonoBehaviour
     {
         if (_pinned is Object unityObject && unityObject == null) _pinned = null;
     }
+
+    // ── Simboli ───────────────────────────────────────────────────────────────
+
+    public static string I(string name) => "<sprite name=\"" + name + "\">";
+
+    public static string FactionIcon(Faction faction) => faction switch
+    {
+        Faction.A => "sun",
+        Faction.B => "moon",
+        _ => "saturn",
+    };
+
+    /// <summary>
+    /// Una fila di simboli come sulla carta: pieni quanto il valore, vuoti fino al
+    /// massimo. Oltre dieci diventa simbolo e numero, o la riga andrebbe a capo.
+    /// </summary>
+    static string Pips(string full, string empty, int value, int max)
+    {
+        value = Mathf.Max(0, value);
+        max = Mathf.Max(value, max);
+        if (max > 10) return I(full) + "<b>" + value + "</b>" + (max > value ? "<color=#7A8078>/" + max + "</color>" : "");
+        var sb = new StringBuilder();
+        for (int i = 0; i < max; i++) sb.Append(I(i < value ? full : empty));
+        return sb.ToString();
+    }
+
+    const string GreyHex = "5E6A66";
+    const string RetroHex = "1E6E7A";
+    const string DangerHex = "A31220";
+    const string GoodHex = "1F7A3A";
+    const string ChargeHex = "8E2A78";
+
+    static string C(string hex, string text) => "<color=#" + hex + ">" + text + "</color>";
+    static string Big(string text) => "<size=130%>" + text + "</size>";
+
+    void Line(string text) => _sb.Append(text).Append('\n');
+    void Gap() => _sb.Append("<size=40%>\n</size>");
+    void Section(string icon, string label)
+        => _sb.Append("<size=45%>\n</size>").Append(I(icon)).Append(' ').Append(C("6E5A34", "<b>" + label + "</b>")).Append('\n');
 
     // ── Carta ─────────────────────────────────────────────────────────────────
 
@@ -90,35 +135,36 @@ public class InspectorPanel : MonoBehaviour
         var inst = view.instance;
         var def = inst.def;
         bool front = inst.side == Side.Fronte;
+        var definition = view.GetComponentInParent<CardDefinition>();
 
-        SetHeader(def.cardName, $"{def.cardClass}  ·  Famiglia {GamePalette.FactionName(def.faction)}", inst.side);
+        SetHeader(def.cardName, $"{I(FactionIcon(def.faction))} {GamePalette.FactionName(def.faction)}", inst.side, CardPortrait(definition));
 
         var gm = GameManager.Instance;
         int lane = gm != null ? gm.GetLaneIndexFor(inst) : -1;
         bool resonant = gm != null && SynergyResolver.Resonates(gm, lane);
 
         _sb.Clear();
-
-        // Le tre righe che descrivono la carta in se'. Tutto il resto — attacco,
-        // guardia, chi le da' cosa — dipende da dove sta, e si legge nel conto
-        // della corsia qui sotto.
-        Stat("HP", $"{inst.health} / {def.maxHealth}");
-        Stat("Cariche", inst.flipCharge > 0
-            ? $"{inst.flipCharge} / {CardInstance.MaxFlipCharge}  <color=#8E2A78>+{inst.flipCharge} al colpo, gia' nel totale</color>"
-            : $"0 / {CardInstance.MaxFlipCharge}  <color=#6E7080>(una per turno stando coperta)</color>");
-        Stat("Instabilita'", FlipRisk(def));
+        // Le file della carta, come stampate: vita, attacco o difesa del lato
+        // che mostra, cariche.
+        Line(Big(Pips("drop", "drop_empty", inst.health, def.maxHealth)));
+        Line(front
+            ? Big(Pips("atk", "atk_empty", view.ForecastAttack(), def.frontDamage))
+            : Big(Pips("def", "def_empty", def.backBlockValue + inst.tempBlockBonus, def.backBlockValue)));
+        Line(Pips("charge", "charge_empty", inst.flipCharge, CardInstance.MaxFlipCharge) +
+             (inst.flipCharge > 0 ? "  " + C(ChargeHex, $"+{inst.flipCharge} {I("atk")}") : ""));
+        Line($"{I("flip")} {FlipRisk(def)}");
 
         if (inst.incomingDamageOverride.HasValue)
-            Stat("Parata", $"danno in arrivo forzato a {inst.incomingDamageOverride.Value}");
+            Line($"{I("def")} {I("arrow")} {inst.incomingDamageOverride.Value}");
 
         AppendLaneAccount(gm, inst, lane, front, resonant);
         AppendActiveBonuses(inst.AtkBonuses, inst.BlockBonuses);
         AppendBanner(def);
         AppendBannerTargets(gm, inst, lane);
-        AppendAbilities(view.GetComponentInParent<CardDefinition>()?.gameObject);
+        AppendAbilities(definition != null ? definition.gameObject : null);
 
         bodyText.text = _sb.ToString();
-        SetHint($"Doppio clic: flip {gm?.flipCardCost ?? 1} AP / trascina: scambio {gm?.swapCardCost ?? 1} AP");
+        SetHint($"{I("flip")} doppio clic · {gm?.flipCardCost ?? 1}{I("star")}     {I("swap")} trascina · {gm?.swapCardCost ?? 1}{I("star")}");
     }
 
     /// <summary>Explicit selection from the modal, independent of hover or gameplay clicks.</summary>
@@ -137,265 +183,160 @@ public class InspectorPanel : MonoBehaviour
     }
 
     /// <summary>
-    /// Il conto di questa corsia, riga per riga, con la causa di ogni modifica.
-    ///
-    /// E' la parte piu' importante del pannello. Le statistiche di una carta non
-    /// vogliono dire niente da sole: l'attacco dipende da chi le sta accanto,
-    /// la guardia dipende da chi ha davanti, e tutte due cambiano a ogni giro
-    /// perche' il rullo cambia le caselle e il caos rimescola la fila. Un
-    /// "3 <color=#1F7A3A>+1</color>" dice al giocatore che qualcosa gli sta
-    /// dando un bonus, ma non che cosa, quindi non gli dice come averne due —
-    /// ed e' esattamente la mossa che deve imparare a fare.
-    ///
-    /// Quindi ogni riga ha un numero e la sua ragione, in ordine di
-    /// applicazione, e finisce con la conseguenza: chi sfonda, chi passa, chi
-    /// regge. I numeri vengono dagli stessi metodi che risolvono il colpo
-    /// (<see cref="SynergyResolver"/>), non da un conto rifatto qui.
+    /// Il conto della corsia in due righe di simboli: il colpo che dai e quello
+    /// che ricevi, ognuno con il suo esito. Ogni addendo ha il suo simbolo — la
+    /// carica, l'insegna di chi te la da', la guardia della casella — perche' un
+    /// "+1" senza causa non dice al giocatore come averne due.
     /// </summary>
     void AppendLaneAccount(GameManager gm, CardInstance card, int lane, bool front, bool resonant)
     {
-        if (gm == null || lane < 0)
-        {
-            Section("Fuori dal campo");
-            Line("<color=#7A8078>Il conto si legge quando la carta e' in una corsia.</color>");
-            return;
-        }
+        if (gm == null || lane < 0) return;
 
         var slot = gm.GetEnemySlotAtLane(lane);
-        Section($"Il conto della corsia {lane + 1}");
+        Section("reel", $"CORSIA {lane + 1}");
 
         if (resonant)
-            Line($"<color=#A31220><b>RISONANZA</b></color> stessa famiglia {GamePalette.FactionName(card.def.faction)} in corsia: " +
-                 "<b>nessuno dei due para</b>.");
+            Line($"{Big(I("broken"))} {I(FactionIcon(card.def.faction))}={I(FactionIcon(card.def.faction))}  {C(DangerHex, "nessuno para")}");
 
-        // ── Quello che fai tu ────────────────────────────────────────────────
+        // ── Il colpo che dai ─────────────────────────────────────────────────
         if (!front)
         {
-            Line("<b>Coperta</b>: questo giro non attacchi, pari e accumuli una carica.");
-        }
-        else if (slot == null)
-        {
-            int insegnaOpen = SynergyResolver.AttackBonus(gm, lane, _atkReasons);
-            Plus(card.def.frontDamage, "attacco base", GreyHex);
-            if (card.flipCharge > 0) Plus(card.flipCharge, "cariche accumulate", ChargeHex);
-            foreach (var r in _atkReasons) Plus(r.amount, r.ToString(), FactionHex(card.def.faction));
-            Total(card.def.frontDamage + card.flipCharge + insegnaOpen, "al boss: la corazza qui e' scoperta", GoodHex);
+            Line($"{I("card_back")} {I("atk_empty")}  {C(GreyHex, "coperta: non colpisci")}  +1{I("charge")}");
         }
         else
         {
             int insegna = SynergyResolver.AttackBonus(gm, lane, _atkReasons);
-            int guard = SynergyResolver.EffectiveSlotBlock(gm, lane);
             int atk = card.def.frontDamage + card.flipCharge + insegna;
-            int net = Mathf.Max(0, atk - guard);
-            string slotName = SlotName(slot);
+            var row = new StringBuilder();
+            row.Append(I("atk")).Append("<b>").Append(card.def.frontDamage).Append("</b>");
+            if (card.flipCharge > 0) row.Append("  +").Append(card.flipCharge).Append(I("charge"));
+            foreach (var r in _atkReasons) row.Append("  +").Append(r.amount).Append(I("spade"));
 
-            Line($"<color=#5E6A66>Colpisci {slotName}</color>");
-            Plus(card.def.frontDamage, "attacco base", GreyHex);
-            if (card.flipCharge > 0) Plus(card.flipCharge, "cariche accumulate", ChargeHex);
-            foreach (var r in _atkReasons) Plus(r.amount, r.ToString(), FactionHex(card.def.faction));
-            Minus(guard, resonant
-                ? $"guardia di {slotName}: <b>azzerata dalla risonanza</b>"
-                : $"guardia di {slotName}", resonant ? DangerHex : RetroHex);
-            Total(net, "colpo netto", net > 0 ? GoodHex : GreyHex);
-
-            if (net > slot.health)
-                Line($"   <color=#1F7A3A><b>SFONDA</b></color>: le restano {slot.health}, " +
-                     $"i {net - slot.health} in eccesso <b>li paga il boss</b>.");
-            else if (net == slot.health)
-                Line($"   La rompe esatta: fuori dal rullo, ma <b>il boss non paga niente</b>. " +
-                     $"Un punto in piu' e ci arrivi.");
-            else if (net > 0)
-                Line($"   Non la rompe: le resterebbero {slot.health - net} di {slot.def.maxHealth}. " +
-                     $"Per sfondarla adesso servirebbero <b>{slot.health + guard + 1}</b> di attacco, " +
-                     $"cioe' <b>{slot.health + guard + 1 - atk}</b> in piu' di quelli che hai.");
+            if (slot == null)
+            {
+                row.Append("  = <b>").Append(atk).Append("</b> ").Append(I("arrow")).Append(Big(I("led_boss")));
+                Line(row.ToString());
+            }
             else
-                Line("   <color=#A31220>Non passa la guardia</color>: nessun danno.");
+            {
+                int guard = SynergyResolver.EffectiveSlotBlock(gm, lane);
+                int net = Mathf.Max(0, atk - guard);
+                row.Append("  −").Append(resonant ? $"<s>{I("def")}</s>" : $"{guard}{I("def")}");
+                row.Append("  = ").Append(C(net > 0 ? GoodHex : GreyHex, "<b>" + net + "</b>"));
+                row.Append(' ').Append(I("arrow")).Append(' ').Append(slot.health).Append(I("drop"));
+                Line(row.ToString());
+
+                if (net > slot.health)
+                    Line($"     {C(GoodHex, "<b>sfonda</b>")}  {I("arrow")} +{net - slot.health}{Big(I("led_boss"))}");
+                else if (net == slot.health)
+                    Line($"     {C(GoodHex, "rotta")}  {C(GreyHex, $"+1{I("atk")} per il boss")}");
+                else if (net > 0)
+                    Line($"     {C(GreyHex, "regge")}  {C(GreyHex, $"servono +{slot.health + 1 - net}{I("atk")}")}");
+                else
+                    Line($"     {C(DangerHex, "parato")}");
+            }
         }
 
-        // ── Quello che ti arriva ─────────────────────────────────────────────
+        // ── Il colpo che ricevi ──────────────────────────────────────────────
         if (slot == null) return;
-
         if (slot.side != Side.Fronte)
         {
-            Line($"<color=#5E6A66>{SlotName(slot)} e' trattenuta: questo giro non colpisce.</color>");
+            Line($"{I("lamp_def")} {C(GreyHex, "trattenuta: non colpisce")}");
             return;
         }
 
         int guardBase = front ? card.def.frontBlockValue : card.def.backBlockValue;
-        int shields = SynergyResolver.BlockBonus(gm, lane, _blockReasons);
+        SynergyResolver.BlockBonus(gm, lane, _blockReasons);
         int mine = SynergyResolver.EffectiveCardBlock(gm, lane);
         int incoming = slot.def.atkDamage + slot.tempAtkBonus;
         int arrives = Mathf.Max(0, incoming - mine);
 
-        Line($"<color=#5E6A66>Ti risponde {SlotName(slot)}</color>");
-        Plus(incoming, $"attacco di {SlotName(slot)}", DangerHex);
-
-        // In risonanza la guardia non si sottrae affatto: mostrarne i pezzi e poi
-        // rimetterli indietro renderebbe il conto piu' difficile, non piu' chiaro.
-        if (resonant)
-        {
-            Minus(0, $"la tua guardia ({guardBase + shields}): " +
-                     "<b>azzerata dalla risonanza</b>", DangerHex);
-        }
+        var back = new StringBuilder();
+        back.Append(I("lamp_atk")).Append("<b>").Append(incoming).Append("</b>  −");
+        if (resonant) back.Append("<s>").Append(I("def")).Append("</s>");
         else
         {
-            Minus(guardBase, front ? "la tua guardia in Fronte" : "la tua guardia da coperta", RetroHex);
-            foreach (var r in _blockReasons) Minus(r.amount, r.ToString(), FactionHex(card.def.faction));
+            back.Append(guardBase).Append(I("def"));
+            foreach (var r in _blockReasons) back.Append("  −").Append(r.amount).Append(I("club"));
         }
-        Total(arrives, "in arrivo", arrives > 0 ? DangerHex : GreyHex);
+        back.Append("  = ").Append(C(arrives > 0 ? DangerHex : GreyHex, "<b>" + arrives + "</b>"));
+        back.Append(' ').Append(I("arrow")).Append(' ').Append(card.health).Append(I("drop"));
+        Line(back.ToString());
 
         if (arrives > card.health)
-            Line($"   <color=#A31220><b>PASSA</b></color>: hai {card.health} HP, " +
-                 $"i {arrives - card.health} in eccesso <b>li paghi tu</b>.");
+            Line($"     {C(DangerHex, "<b>passa</b>")}  {I("arrow")} −{arrives - card.health}{Big(I("led_player"))}");
         else if (arrives == card.health)
-            Line($"   Hai {card.health} HP: <color=#A31220>la carta cade</color>, ma non passa niente.");
+            Line($"     {C(DangerHex, "la carta cade")}");
         else if (arrives > 0)
-            Line($"   Hai {card.health} HP: regge, te ne restano {card.health - arrives}.");
+            Line($"     {C(GreyHex, $"regge: restano {card.health - arrives}")}{I("drop")}");
         else
-            Line("   <color=#1F7A3A>Parato del tutto.</color>");
+            Line($"     {C(GoodHex, "parato")}");
     }
 
-    /// <summary>
-    /// A chi sta servendo l'insegna di questa carta, adesso. Sul retro il
-    /// simbolo dice quanto da'; qui si legge <b>a chi</b>, che e' l'informazione
-    /// che decide se lasciarla dov'e'. Se non serve a nessuno, dirlo e' il modo
-    /// piu' diretto di suggerire lo spostamento.
-    /// </summary>
+    /// <summary>A chi serve adesso l'insegna di questa carta coperta.</summary>
     void AppendBannerTargets(GameManager gm, CardInstance card, int lane)
     {
         if (gm == null || lane < 0 || card.side != Side.Retro) return;
         if (card.def.backDamageBonusSameFaction <= 0 && card.def.backBlockBonusSameFaction <= 0) return;
 
         SynergyResolver.CollectBannerTargets(gm, lane, _bannerTargets);
-
-        Section("A chi serve adesso");
         if (_bannerTargets.Count == 0)
         {
-            Line($"<color=#A31220>A nessuno</color>: nelle corsie accanto non c'e' " +
-                 $"nessuna carta {GamePalette.FactionName(card.def.faction)} che possa usarla.");
-            Line("<color=#5E6A66>Spostarla accanto a una della sua fazione la accende.</color>");
+            Line($"{I("spade")} {I("arrow")} {C(DangerHex, "nessuna vicina")} {I(FactionIcon(card.def.faction))}  {I("swap")}");
             return;
         }
-
         foreach (var t in _bannerTargets)
-            Line($"<color=#1F7A3A>+{t.amount}</color> a <b>{t.who}</b>, corsia {t.lane}");
+            Line($"{I("spade")} {C(GoodHex, "+" + t.amount)} {I("arrow")} <b>{t.who}</b> {C(GreyHex, "corsia " + t.lane)}");
     }
 
     /// <summary>
-    /// I bonus attivi adesso, con la loro causa, per una carta o per una
-    /// casella.
-    ///
-    /// E' la risposta alla domanda piu' immediata del tabellone: **sulla cella
-    /// c'e' un "+2", da dove viene?** Le righe le fornisce il registro dei bonus
-    /// (<see cref="BonusLedger"/>), che ogni abilita' riempie nel momento in cui
-    /// somma; qui non si ricostruisce niente, si legge. Cosi una regola nuova
-    /// compare nell'ispettore da sola, e una spiegazione non puo' restare
-    /// indietro rispetto all'effetto.
-    ///
-    /// Se non c'e' nessun bonus la sezione non compare: un elenco vuoto e' una
-    /// riga in piu' da scartare con l'occhio.
+    /// I bonus attivi, ognuno con la sua causa: il registro (<see cref="BonusLedger"/>)
+    /// li scrive nel momento in cui somma, qui si leggono e basta.
     /// </summary>
     void AppendActiveBonuses(BonusLedger attack, BonusLedger block)
     {
         if (attack == null || block == null) return;
         if (!attack.Any && !block.Any) return;
 
-        Section("Da cosa vengono i bonus");
-
+        Gap();
         foreach (var e in attack.Entries)
-            Plus(e.amount, $"<color=#A34A3A>attacco</color> · {e.reason}", DangerHex);
-
+            Line($"{I("atk")}{C(GoodHex, "+" + e.amount)}  {C(GreyHex, e.reason)}");
         foreach (var e in block.Entries)
-            Plus(e.amount, $"<color=#1E6E7A>guardia</color> · {e.reason}", RetroHex);
+            Line($"{I("def")}{C(RetroHex, "+" + e.amount)}  {C(GreyHex, e.reason)}");
     }
 
-    static string SlotName(SlotInstance slot)
-        => (slot.PoolNumber > 0 ? $"#{slot.PoolNumber} " : string.Empty) + slot.def.SlotName;
-
-    // Colori dei numeri del conto: gli stessi significati della palette, ma
-    // scuriti. L'ispettore ora vive sulle pagine d'avorio del libretto, e i
-    // valori accesi pensati per il fondo nero (ciano elettrico, verde neon) su
-    // carta chiara sparivano. I significati non cambiano: rosso = ti arriva,
-    // verde = passa, ciano = guardia, grigio = base.
-    const string GreyHex = "5E6A66";
-    const string RetroHex = "1E6E7A";
-    const string DangerHex = "A31220";
-    const string GoodHex = "1F7A3A";
-    const string ChargeHex = "8E2A78";
-
-    static string FactionHex(Faction faction)
-        => ColorUtility.ToHtmlStringRGB(GamePalette.InkFaction(faction));
-
-    /// <summary>
-    /// Una riga del conto: il verso e il numero in colonna, poi la ragione.
-    /// La colonna monospaziata serve a sommare con l'occhio senza leggere.
-    ///
-    /// Il verso lo dichiara il chiamante e non si ricava dal numero: una
-    /// guardia che vale zero e' comunque una sottrazione, e stamparla "+ 0"
-    /// faceva sembrare che aggiungesse qualcosa. Capita sempre in risonanza,
-    /// cioe' proprio quando il conto ha piu' bisogno di essere chiaro.
-    /// </summary>
-    void Row(string sign, int amount, string reason, string hex)
-    {
-        _sb.Append("  <mspace=0.62em><color=#").Append(hex).Append('>')
-           .Append(sign).Append(Mathf.Abs(amount).ToString().PadLeft(2))
-           .Append("</color></mspace>  ").Append(reason).Append('\n');
-    }
-
-    void Plus(int amount, string reason, string hex) => Row("+", amount, reason, hex);
-    void Minus(int amount, string reason, string hex) => Row("−", amount, reason, hex);
-
-    void Total(int amount, string label, string hex)
-    {
-        // "=" e non "= ": la cifra del totale deve cadere nella stessa colonna
-        // di quelle delle righe, o la somma non si controlla con l'occhio.
-        _sb.Append("  <mspace=0.62em><color=#").Append(hex).Append("><b>=")
-           .Append(amount.ToString().PadLeft(2))
-           .Append("</b></color></mspace>  <b>").Append(label).Append("</b>\n");
-    }
-
-    /// <summary>
-    /// Carta in mano: non ha ancora una CardInstance — lato e cariche nascono
-    /// quando viene giocata — quindi la scheda si legge dalla Spec del prefab.
-    /// </summary>
+    /// <summary>Carta in mano: senza CardInstance, la scheda si legge dalla Spec del prefab.</summary>
     public void ShowCardPreview(CardDefinition definition)
     {
         if (definition == null || Locked(definition)) return;
         _source = definition;
 
         var def = definition.BuildSpec();
-
         if (titleText != null) titleText.text = def.cardName;
-        if (subtitleText != null) subtitleText.text = $"{def.cardClass}  ·  Famiglia {GamePalette.FactionName(def.faction)}";
+        if (subtitleText != null) subtitleText.text = $"{I(FactionIcon(def.faction))} {GamePalette.FactionName(def.faction)}";
         if (sideStrip != null) sideStrip.color = GamePalette.WithAlpha(GamePalette.Neutral, 0.7f);
-        if (sideText != null)
-        {
-            sideText.text = "IN MANO / ENTRA IN FRONTE";
-            sideText.color = GamePalette.TextMuted;
-        }
+        if (sideText != null) { sideText.text = $"{I("deck")} in mano"; sideText.color = GamePalette.InkMuted; }
+        SetPortrait(CardPortrait(definition));
 
         _sb.Clear();
-        Stat("HP", $"{def.maxHealth}");
-        Stat("ATK Fronte", $"{def.frontDamage}");
-        Stat("BLOCCO Fronte", $"{def.frontBlockValue}");
-        Stat("BLOCCO Retro", $"{def.backBlockValue}");
-        Stat("Instabilita'", FlipRisk(def));
+        Line(Big(Pips("drop", "drop_empty", def.maxHealth, def.maxHealth)));
+        Line($"{I("card_front")} {Pips("atk", "atk_empty", def.frontDamage, def.frontDamage)}   {Pips("def", "def_empty", def.frontBlockValue, def.frontBlockValue)}");
+        Line($"{I("card_back")} {Pips("def", "def_empty", def.backBlockValue, def.backBlockValue)}");
+        Line($"{I("flip")} {FlipRisk(def)}");
 
         AppendBanner(def);
         AppendAbilities(definition.gameObject);
 
         bodyText.text = _sb.ToString();
-        SetHint("Seleziona una casella libera, poi la carta · 1 AP     Oppure trascinala sulla casella.");
+        SetHint($"casella libera, poi la carta · {GameManager.Instance?.playCardCost ?? 1}{I("star")}");
     }
 
     // ── Slot ──────────────────────────────────────────────────────────────────
 
     /// <summary>
-    /// Scheda di una casella del rullo. Il vocabolario e' quello del rullo, non
-    /// quello delle carte: un nemico non ha un fronte e un retro da girare, ha un
-    /// giro **carico** (colpisce) o **trattenuto** (para e basta) e un programma
-    /// che avanza da solo. Chiamarlo Fronte/Retro come le carte faceva credere
-    /// che si potesse girare.
+    /// Scheda di una casella del rullo. Un nemico non si gira: ha un giro carico
+    /// (colpisce, ⟨lampada ambra⟩) o trattenuto (para e basta, ⟨tubo azzurro⟩) e
+    /// un programma che avanza da solo, mostrato come fila di lampade.
     /// </summary>
     public void ShowSlot(SlotView view)
     {
@@ -406,119 +347,76 @@ public class InspectorPanel : MonoBehaviour
         var def = inst.def;
         bool armed = inst.side == Side.Fronte;
 
-        SetHeader(def.SlotName, $"Casella del rullo  ·  Famiglia {GamePalette.FactionName(def.faction)}", inst.side);
-        if (sideText != null) sideText.text = armed ? "CARICA — COLPISCE" : "TRATTENUTA — NON COLPISCE";
+        SetHeader(def.SlotName, $"{I(FactionIcon(def.faction))} {GamePalette.FactionName(def.faction)}" +
+                  (inst.PoolNumber > 0 ? $"   #{inst.PoolNumber}" : ""), inst.side, SlotPortrait(view));
+        if (sideText != null) sideText.text = armed ? $"{I("lamp_atk")} carica" : $"{I("lamp_def")} trattenuta";
 
         _sb.Clear();
-        Stat("HP", $"{inst.health} / {def.maxHealth}");
-        Stat("ATK", Delta(def.atkDamage, inst.tempAtkBonus));
-        Stat("Guardia adesso", Delta(armed ? def.blockFront : def.blockRetro, inst.tempBlockBonus));
-        Stat("Guardia", $"{def.blockFront} da carica  ·  {def.blockRetro} trattenuta");
+        // Le stesse tre grandezze delle lampade della cassa: la lampada dice quale,
+        // la fila dice quanto.
+        Line(Big(I("lamp_hp") + " " + Pips("drop", "drop_empty", inst.health, def.maxHealth)));
+        Line(Big(I("lamp_atk") + " " + Pips("atk", "atk_empty", def.atkDamage + inst.tempAtkBonus, def.atkDamage)));
+        int guardNow = (armed ? def.blockFront : def.blockRetro) + inst.tempBlockBonus;
+        Line(Big(I("lamp_def") + " " + Pips("def", "def_empty", guardNow, Mathf.Max(def.blockFront, def.blockRetro))));
 
-        // Ogni "+n" stampato sulla casella ha la sua riga qui sotto. Prima il
-        // numero c'era e la causa no, e su un nemico che non si puo' girare ne'
-        // spostare quella era l'unica informazione che il giocatore poteva
-        // usare per decidere se colpirlo adesso o al giro dopo.
         AppendActiveBonuses(inst.AtkBonuses, inst.BlockBonuses);
 
-        // Le due regole del pool, dette dove servono: la vita resta sulla
-        // casella fra un giro e l'altro, e il traboccamento e' l'unico modo di
-        // toccare il boss finche' la corazza tiene.
         var gmRef = GameManager.Instance;
         int wounds = Mathf.Max(0, def.maxHealth - inst.health);
         int laneIndex = gmRef != null ? gmRef.GetLaneIndexFor(inst) : -1;
         bool resonantLane = gmRef != null && SynergyResolver.Resonates(gmRef, laneIndex);
 
         if (resonantLane)
-        {
-            Section("Risonanza");
-            Line("Stessa fazione della tua carta in questa corsia: <b>nessuno dei due para</b>.");
-            Line("Il tuo colpo passa la sua guardia, <b>e il suo passa la tua</b>.");
-            Line("<color=#5E6A66>E' il modo piu' economico di sfondare una lastra, " +
-                 "e il modo piu' rapido di perdere la carta che la copre. " +
-                 "Lo scudo spezzato sta su tutte due le celle finche' dura.</color>");
-        }
+            Line($"{Big(I("broken"))} {C(DangerHex, "nessuno para, da tutte e due le parti")}");
 
-        Section("Cosa paga colpirla");
-        if (inst.PoolNumber > 0 && gmRef != null)
-            Line($"Casella <b>#{inst.PoolNumber}</b> della corazza - {gmRef.Pool.Summary()}.");
-        Line(wounds > 0
-            ? $"Ferite gia' incassate: <b>{wounds}</b>. Restano sulla casella: se il rullo la ripesca, torna ferita."
-            : "Le ferite restano sulla casella: se il rullo la ripesca, torna come l'hai lasciata.");
-        Line($"Per finirla serve <b>{inst.health + (resonantLane ? 0 : inst.ComputeSelfBlock())}</b> di attacco. " +
-             "Tutto quello che eccede <b>lo paga il boss</b>.");
-        Line("<color=#5E6A66>Ucciderla la toglie dal rullo per il resto della partita.</color>");
+        Section("led_boss", "COLPIRLA");
+        int toKill = inst.health + (resonantLane ? 0 : inst.ComputeSelfBlock());
+        Line($"{I("atk")}<b>{toKill}</b> {I("arrow")} {C(GoodHex, "rotta")}   +1{I("atk")} {I("arrow")} {Big(I("led_boss"))}");
+        if (wounds > 0) Line($"{I("drop_empty")}×{wounds}  {C(GreyHex, "le ferite restano")}");
+        if (gmRef != null && inst.PoolNumber > 0) Line($"{I("reel")} {C(GreyHex, gmRef.Pool.Summary())}");
 
-        Section("Posizioni possibili del rullo");
-        if (inst.PatternLength == 0)
+        if (inst.PatternLength > 0)
         {
-            Line("<color=#7A8078>fisso: colpisce a ogni giro</color>");
-        }
-        else
-        {
+            Section("reel", "PROGRAMMA");
             var line = new StringBuilder();
             for (int i = 0; i < inst.PatternLength; i++)
             {
-                var side = inst.PatternSideAt(i);
-                string label = side == Side.Fronte ? "COLPISCE" : "TRATTIENE";
-                string hex = ColorUtility.ToHtmlStringRGB(GamePalette.InkSide(side));
-                line.Append(i == inst.PatternStep
-                    ? $"<b><color=#{hex}>[{label}]</color></b>  "
-                    : $"<color=#{hex}>{label}</color>  ");
+                string icon = inst.PatternSideAt(i) == Side.Fronte ? "lamp_atk" : "lamp_def";
+                line.Append(i == inst.PatternStep ? "<size=150%>" + I(icon) + "</size>" : I(icon)).Append(' ');
             }
             Line(line.ToString());
-            int armedCount = 0;
-            for (int i = 0; i < inst.PatternLength; i++) if (inst.PatternSideAt(i) == Side.Fronte) armedCount++;
-            Line($"Attacco: {armedCount}/{inst.PatternLength} posizioni. Tra parentesi: esito attuale.");
-            Line("Il prossimo giro estrae una nuova casella e una nuova posizione.");
         }
 
         var berserker = view.GetComponent<SlotBerserker>();
         if (berserker != null)
-        {
-            Section("Furia");
             Line(berserker.BurstReady
-                ? "<b>BURST PRONTO</b> — il prossimo attacco vale doppio"
-                : $"{berserker.FuryStacks} / {berserker.furyThreshold} simboli della stessa fazione");
-        }
+                ? $"{Big(I("lamp_atk"))}×2  {C(DangerHex, "furia pronta")}"
+                : $"{I("lamp_atk")} {C(GreyHex, $"furia {berserker.FuryStacks}/{berserker.furyThreshold}")}");
 
         AppendAbilities(view.gameObject);
 
         bodyText.text = _sb.ToString();
-        SetHint(ReferenceEquals(_pinned, view)
-            ? "Scheda agganciata · clic sulla casella per sganciarla"
-            : "Non si gira e non si sposta: clic per agganciare la scheda.\n" +
-              "Il rullo gira a fine turno e sostituisce tutto il fronte.");
+        SetHint(ReferenceEquals(_pinned, view) ? "scheda agganciata · clic per sganciarla" : "clic: aggancia la scheda");
     }
 
-    /// <summary>
-    /// Aggancia o sgancia la scheda di una casella. E' l'unica azione che il
-    /// giocatore ha su un nemico, ed e' apposta: sul rullo non si interviene, lo
-    /// si legge.
-    /// </summary>
+    /// <summary>Aggancia o sgancia la scheda di una casella: sul rullo non si interviene, lo si legge.</summary>
     public void TogglePinSlot(SlotView view)
     {
         if (view == null || view.instance == null) return;
 
         bool wasPinned = ReferenceEquals(_pinned, view);
-
-        // Si sgancia sempre prima di ridisegnare: ShowSlot rifiuta di scrivere
-        // se qualcosa e' agganciato, compresa la casella su cui si e' cliccato.
         _pinned = null;
         ShowSlot(view);
-
         if (wasPinned) return;
 
         _pinned = view;
-        SetHint("Scheda agganciata · clic sulla casella per sganciarla");
+        SetHint("scheda agganciata · clic per sganciarla");
     }
 
     // ── Chiusura ──────────────────────────────────────────────────────────────
 
     public void HideFor(object source)
     {
-        // Una scheda agganciata non la chiude l'uscita del puntatore: e' il
-        // motivo per cui e' agganciata.
         DropDeadPin();
         if (_pinned != null) return;
         if (source != null && !ReferenceEquals(source, _source)) return;
@@ -530,96 +428,97 @@ public class InspectorPanel : MonoBehaviour
         _source = null;
         _pinned = null;
         if (titleText != null) titleText.text = "ISPETTORE";
-        if (subtitleText != null) subtitleText.text = TableOverlayController.IsOpen ? "Scegli Campo, Mano o Rullo e seleziona un elemento." : "passa il puntatore su una carta o su uno slot";
+        if (subtitleText != null) subtitleText.text = $"{I("card_front")} {I("reel")}  scegli un elemento";
         if (sideStrip != null) sideStrip.color = GamePalette.WithAlpha(GamePalette.Neutral, 0.35f);
         if (sideText != null) sideText.text = string.Empty;
         if (bodyText != null) bodyText.text = string.Empty;
         if (hintText != null) hintText.text = string.Empty;
+        SetPortrait(null);
     }
 
     // ── Helper di composizione ────────────────────────────────────────────────
 
-    void SetHeader(string title, string subtitle, Side side)
+    void SetHeader(string title, string subtitle, Side side, Sprite image)
     {
         if (titleText != null) titleText.text = title;
         if (subtitleText != null) subtitleText.text = subtitle;
         if (sideStrip != null) sideStrip.color = GamePalette.InkSide(side);
         if (sideText != null)
         {
-            sideText.text = side.ToString().ToUpperInvariant();
+            sideText.text = side == Side.Fronte ? $"{I("card_front")} fronte" : $"{I("card_back")} retro";
             sideText.color = GamePalette.InkSide(side);
         }
+        SetPortrait(image);
     }
 
-    void SetHint(string text) { if (hintText != null) hintText.text = TableOverlayController.IsOpen ? "Scorri per leggere la scheda. Chiudi o premi Esc per tornare al gioco." : text; }
+    void SetPortrait(Sprite sprite)
+    {
+        if (portrait == null) return;
+        portrait.sprite = sprite;
+        portrait.enabled = sprite != null;
+    }
 
-    void Stat(string label, string value)
-        => _sb.Append("<color=#5E6A66>").Append(label).Append("</color>  <b>").Append(value).Append("</b>\n");
+    static Sprite CardPortrait(CardDefinition definition)
+    {
+        if (definition == null) return null;
+        var art = FindDeep(definition.transform, "imagecharacter");
+        return art != null && art.TryGetComponent(out Image image) ? image.sprite : null;
+    }
 
-    void Section(string label)
-        => _sb.Append('\n').Append("<color=#6E7A74>── ").Append(label).Append(" ──</color>\n");
+    static Sprite SlotPortrait(SlotView view)
+    {
+        var art = FindDeep(view.transform, "Sprite");
+        return art != null && art.TryGetComponent(out Image image) ? image.sprite : null;
+    }
 
-    void Line(string text) => _sb.Append(text).Append('\n');
+    static Transform FindDeep(Transform root, string name)
+    {
+        if (root.name == name) return root;
+        foreach (Transform child in root)
+        {
+            var found = FindDeep(child, name);
+            if (found != null) return found;
+        }
+        return null;
+    }
 
-    static string Delta(int baseValue, int bonus)
-        => bonus > 0 ? $"{baseValue} <color=#1F7A3A>+{bonus}</color>" : baseValue.ToString();
+    void SetHint(string text) { if (hintText != null) hintText.text = text; }
 
-    /// <summary>
-    /// Quanto e' probabile che il fine turno la giri da sola. Non e' una
-    /// percentuale esatta perche' non lo e' nemmeno la regola: il caos sceglie
-    /// fra le candidate e ne gira al piu' <c>ChaosFlips</c>. Quello che serve al
-    /// giocatore e' il confronto - questa carta sta piu' ferma di quell'altra -
-    /// e quante ne cadranno stanotte.
-    /// </summary>
+    /// <summary>Quanto e' probabile che il fine turno la giri da sola: tre gradi, non una percentuale.</summary>
     static string FlipRisk(CardDefinition.Spec def)
     {
-        int max = GameManager.Instance != null ? GameManager.Instance.ChaosFlips : 0;
         float chance = Mathf.Clamp01(def.endTurnFlipChance);
-        string grade = chance >= 0.5f  ? "<color=#A31220>alta</color>"
-                     : chance >= 0.35f ? "<color=#8A6A22>media</color>"
-                     :                   "<color=#1F7A3A>bassa</color>";
-        return $"{grade} ({Mathf.RoundToInt(chance * 100f)}%) · il fine turno gira fino a {max} carte";
+        return chance >= 0.5f  ? C(DangerHex, "instabile")
+             : chance >= 0.35f ? C("8A6A22", "incerta")
+             :                   C(GoodHex, "stabile");
     }
 
-    /// <summary>
-    /// L'insegna della carta per esteso. E' meta' della sinergia del gioco: sul
-    /// retro della cella e' una spada e uno scudo col numero, qui e' la stessa
-    /// cosa detta a parole, per chi vuole controllare di aver letto bene.
-    /// </summary>
+    /// <summary>L'insegna: vale solo da coperta, e solo per le vicine della stessa fazione.</summary>
     void AppendBanner(CardDefinition.Spec def)
     {
-        Section("Insegna - vale solo da coperta");
+        string faction = I(FactionIcon(def.faction));
         bool any = false;
-        string hex = ColorUtility.ToHtmlStringRGB(GamePalette.FactionColor(def.faction));
-
-        if (def.backDamageBonusSameFaction > 0)
-        {
-            Line($"<color=#{hex}><b>SPADA +{def.backDamageBonusSameFaction}</b></color>  attacco alle carte <b>{GamePalette.FactionName(def.faction)}</b> nelle corsie accanto");
-            any = true;
-        }
-        if (def.backBlockBonusSameFaction > 0)
-        {
-            Line($"<color=#{hex}><b>SCUDO +{def.backBlockBonusSameFaction}</b></color>  guardia alle carte <b>{GamePalette.FactionName(def.faction)}</b> nelle corsie accanto");
-            any = true;
-        }
+        var line = new StringBuilder();
+        line.Append(I("card_back")).Append(' ');
+        if (def.backDamageBonusSameFaction > 0) { line.Append(I("spade")).Append("<b>+").Append(def.backDamageBonusSameFaction).Append("</b>  "); any = true; }
+        if (def.backBlockBonusSameFaction > 0) { line.Append(I("club")).Append("<b>+").Append(def.backBlockBonusSameFaction).Append("</b>  "); any = true; }
+        if (!any) return;
+        line.Append(I("arrow")).Append(" vicine ").Append(faction);
+        Section("spade", "INSEGNA");
+        Line(line.ToString());
         if (def.backBonusPAIfTwoRetroSameFaction > 0)
-        {
-            Line($"+{def.backBonusPAIfTwoRetroSameFaction} AP con due {GamePalette.FactionName(def.faction)} coperte, una volta per turno");
-            any = true;
-        }
-        if (!any) Line("<color=#7A8078>nessuna: da coperta e' soltanto un muro</color>");
+            Line($"{I("card_back")}{I("card_back")} {faction} {I("arrow")} +{def.backBonusPAIfTwoRetroSameFaction}{I("star")}");
     }
 
-    /// <summary>Le abilita' sono componenti sul prefab: il nome del tipo e' l'unica etichetta che hanno.</summary>
+    /// <summary>Le abilita': l'unica parte che resta a parole, perche' ognuna e' una regola sua.</summary>
     void AppendAbilities(GameObject host)
     {
         if (host == null) return;
         var abilities = host.GetComponents<AbilityBase>();
         if (abilities == null || abilities.Length == 0) return;
 
-        Section("Abilita'");
+        Section("book", "ABILITA'");
         foreach (var ability in abilities)
-            // U+2666: il rombo U+25C6 non esiste in LiberationSans ne' nei suoi fallback
-            Line($"<color=#8A6A22>♦</color> {AbilityCatalog.Describe(ability)}");
+            Line(C(GreyHex, AbilityCatalog.Describe(ability)));
     }
 }

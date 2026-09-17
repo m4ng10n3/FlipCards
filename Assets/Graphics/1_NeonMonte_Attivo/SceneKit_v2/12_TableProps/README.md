@@ -56,3 +56,25 @@ y 24–906. Sono le costanti `BookSrc*` di `MedallionSceneBuilder`.
 Vertici sulla tela da 512: (256,42), (470,256), (256,470), (42,256), nell'ordine
 alto, destra, basso, sinistra; li riprende `MedallionSceneBuilder.ApConstellation`.
 `ActionPointConstellation` accende una stella per AP e le spegne dall'ultima.
+
+## Legenda arrotolata — `Tools/build_scroll.py`
+
+`scroll_closed.png` 1000×300: cilindro di pergamena (la grana di
+`11_GraphicUpgrade/parchment.png` avvolta con la mappa dell'arcoseno, tratteggio
+d'inchiostro nella parte in ombra), tappi d'ottone ritagliati da `roller.png`,
+nastro ottanio con sigillo di ceralacca e il titolo inciso. Sta sullo schermo
+come il fungo e la leva — un cilindro coricato si vede uguale da ogni altezza —
+e sul piano del tavolo va solo la sua ombra di contatto. Il clic srotola la
+pergamena partendo da qui (`MedallionScroll.closedPosition`).
+
+## Icone dei testi — `Tools/build_icons.py`
+
+`ui_icons.png` 1024×640, celle da 128, e `ui_icons.json` con i rettangoli.
+Sono i disegni veri del gioco (gocce, lance, scudi, cariche, fazioni, insegne,
+glifi, lampade della cassa, fungo, leva, mazzo, libretto, rotolo) piu' i pochi
+che non esistono come disegno (display LED, frecce di flip e scambio, stella
+degli AP incisa). I simboli pensati per il dorso rosso vengono ricolorati in
+inchiostro, altrimenti sulla carta chiara non si vedono.
+
+`MedallionSceneSkin.IconSprites()` ne fa lo sprite asset TMP `ui_icons.asset`:
+nei testi della legenda e dell'ispettore si scrive `<sprite name="drop">`.

@@ -184,18 +184,16 @@ public class CardOverlay : MonoBehaviour
             _lastBanner = banner;
             _view.RefreshStatTexts();
         }
+        // Accanto al nome sta **solo** la risonanza: e' l'unica cosa che non si
+        // puo' leggere da nessun'altra parte della cella. Gli aumenti di attacco e
+        // guardia si vedono invece nelle statistiche, perche' la tacca aggiunta
+        // cambia segno e colore (FinalCardInk): il numero e la sua causa stanno
+        // nello stesso posto, e la targhetta del nome resta pulita.
         int resonance = gm != null && SynergyResolver.Resonates(gm, lane) ? 1 : 0;
-        int block = gm != null && lane >= 0 ? SynergyResolver.BlockBonus(gm, lane) : 0;
-        // Tre bit: risonanza, spada ricevuta, scudo ricevuto. Cambiano per il rullo,
-        // per il caos e per ogni spostamento: si rileggono, non si aspettano.
-        int marks = resonance | (banner > 0 ? 2 : 0) | (block > 0 ? 4 : 0);
-        if (marks != _lastResonance && _marks != null)
+        if (resonance != _lastResonance && _marks != null)
         {
-            _lastResonance = marks;
-            var color = GamePalette.FactionColor(inst.def.faction);
-            _marks.Set(0, resonance == 1, GlyphSprites.BrokenShield, color);
-            _marks.Set(1, banner > 0, GlyphSprites.Sword, color);
-            _marks.Set(2, block > 0, GlyphSprites.Shield, color);
+            _lastResonance = resonance;
+            _marks.Set(0, resonance == 1, GlyphSprites.BrokenShield, GamePalette.FactionColor(inst.def.faction));
         }
         if (Printed) RefreshMargins();
     }
@@ -478,8 +476,25 @@ public class CardOverlay : MonoBehaviour
                 else if(gm.CanAct)power+=SynergyResolver.BlockBonus(gm,lane);
             }
         }
+        // Quante tacche vengono da fuori: insegne delle vicine e bonus delle
+        // abilita'. Sul fronte le cariche restano tacche normali — hanno gia' la
+        // loro fila — e sul retro l'attacco non si mostra affatto, quindi il suo
+        // aumento non si mostra.
+        int bonus = 0;
+        if (inst != null)
+        {
+            var gmBonus = GameManager.Instance;
+            int laneBonus = gmBonus != null ? gmBonus.GetLaneIndexFor(inst) : -1;
+            if (front)
+            {
+                int synergy = laneBonus >= 0 && gmBonus != null && gmBonus.CanAct ? SynergyResolver.AttackBonus(gmBonus, laneBonus) : 0;
+                bonus = Mathf.Max(0, power - spec.frontDamage - inst.flipCharge);
+                bonus = Mathf.Max(bonus, Mathf.Min(power, synergy + inst.tempAtkBonus));
+            }
+            else bonus = Mathf.Clamp(power - spec.backBlockValue, 0, power);
+        }
         var ink = GamePalette.Ink;
-        if (_finalInk != null) _finalInk.Refresh(front, inst == null ? spec.maxHealth : inst.health, power, inst == null ? 0 : inst.flipCharge);
+        if (_finalInk != null) _finalInk.Refresh(front, inst == null ? spec.maxHealth : inst.health, power, inst == null ? 0 : inst.flipCharge, bonus);
         else
         {
             _powerGlyph.SetSprite(front ? "engraved_sword" : "engraved_shield");

@@ -95,17 +95,19 @@ public sealed class TableOverlayController : MonoBehaviour
         if (category == "Campo")
         {
             foreach (var view in gm.playerBoardRoot.GetComponentsInChildren<CardView>())
-                if (view.instance != null) AddChoice(view.instance.def.cardName, view, index++);
+                if (view.instance != null)
+                    AddChoice($"{InspectorPanel.I(InspectorPanel.FactionIcon(view.instance.def.faction))} {view.instance.def.cardName}  {InspectorPanel.I(view.instance.side == Side.Fronte ? "card_front" : "card_back")}", view, index++);
         }
         else if (category == "Mano")
         {
             foreach (var def in gm.HandManager.HandRoot.GetComponentsInChildren<CardDefinition>())
-                AddChoice(def.cardName, def, index++);
+                AddChoice($"{InspectorPanel.I(InspectorPanel.FactionIcon(def.faction))} {def.cardName}", def, index++);
         }
         else
         {
             foreach (var view in gm.aiBoardRoot.GetComponentsInChildren<SlotView>())
-                if (view.instance != null) AddChoice(view.instance.def.SlotName, view, index++);
+                if (view.instance != null)
+                    AddChoice($"{InspectorPanel.I(InspectorPanel.FactionIcon(view.instance.def.faction))} {view.instance.def.SlotName}  {InspectorPanel.I(view.instance.side == Side.Fronte ? "lamp_atk" : "lamp_def")}", view, index++);
         }
         if (index == 0)
         {
@@ -125,6 +127,8 @@ public sealed class TableOverlayController : MonoBehaviour
         var button = rt.gameObject.AddComponent<Button>(); button.targetGraphic = background;
         var text = UiBuild.Text("Label", rt, label, 21, GamePalette.InkStrong);
         text.font = UiBuild.Font; text.fontSize = 21;
+        // Le icone del tavolo accanto ai nomi: fazione e lato, come sulla carta.
+        if (inspector != null && inspector.bodyText != null) text.spriteAsset = inspector.bodyText.spriteAsset;
         UiBuild.Stretch(text.rectTransform, 16, 6, 12, 6);
         button.onClick.AddListener(() => { if (source != null) inspector.InspectSelection(source); else ShowCategory(CurrentCategory); });
     }
