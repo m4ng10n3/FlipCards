@@ -16,9 +16,15 @@ public sealed class FinalCardInk : MonoBehaviour
     Face _front, _back;
     int _health = int.MinValue, _power = int.MinValue, _charges = -1, _face = -1, _bonus = -1;
 
-    /// <summary>Colori delle tacche venute da fuori: oro sul fronte, ottanio sul retro.</summary>
-    static readonly Color FrontBonusInk = new Color(.80f, .60f, .16f);
-    static readonly Color BackBonusInk = new Color(.42f, .90f, .92f);
+    /// <summary>
+    /// Le tacche venute da fuori: **la stessa tacca**, ricolorata in oro sul
+    /// fronte e in ottanio sul retro (12_TableProps/Tools/build_pips.py). Non un
+    /// simbolo diverso: la quantita' si legge nella stessa fila, e il colore dice
+    /// soltanto quali tacche non sono della carta. La tinta di un'Image non
+    /// basterebbe — la tacca d'attacco e' inchiostro, e moltiplicarla per un
+    /// colore la lascia inchiostro — quindi le due varianti sono disegni.
+    /// </summary>
+    static Sprite BonusPip(bool front) => UiSkin.Sprite(front ? "pip_atk_bonus" : "pip_def_bonus");
 
     /// <summary>Radice dei segni del retro: la pesca la fa comparire sul dorso.</summary>
     public RectTransform BackRoot => _back?.root;
@@ -126,17 +132,17 @@ public sealed class FinalCardInk : MonoBehaviour
         _front.root.gameObject.SetActive(front);
         _back.root.gameObject.SetActive(!front);
         var face = front ? _front : _back;
-        var bonusSprite = Sprite("back", front ? "attack_spade" : "defense_club_B");
+        var bonusPip = BonusPip(front);
         for (int i = 0; i < 7; i++)
         {
             face.health[i].sprite = Sprite(face.prefix, i < health ? "drop_full" : "drop_empty");
             int rank = front ? 7 - i : i + 1;        // quanta parte del totale copre questa tacca
             bool filled = rank <= power;
             bool fromOutside = filled && bonus > 0 && rank > power - bonus;
-            face.power[i].sprite = fromOutside && bonusSprite != null
-                ? bonusSprite
+            face.power[i].sprite = fromOutside && bonusPip != null
+                ? bonusPip
                 : Sprite(face.prefix, (front ? "attack_" : "defense_") + (filled ? "full" : "empty"));
-            face.power[i].color = fromOutside ? (front ? FrontBonusInk : BackBonusInk) : Color.white;
+            face.power[i].color = Color.white;
         }
         for (int i = 0; i < face.charges.Length; i++) face.charges[i].sprite = Sprite(face.prefix, i < charges ? "charge_full" : "charge_ring");
         face.healthOverflow.enabled = health > 7; face.healthOverflow.text = health > 7 ? health.ToString() : "";

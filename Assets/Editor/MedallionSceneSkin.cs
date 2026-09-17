@@ -141,7 +141,8 @@ public static class MedallionSceneSkin
         // Libretto, segnalibri e oggetti di scena (12_TableProps/Tools/build_book.py).
         foreach (var name in new[] { "book_spread_left", "book_spread_right", "book_leaf_left", "book_leaf_right",
                                      "book_cover_front", "bookmark_campo", "bookmark_mano", "bookmark_rullo",
-                                     "bookmark_registro", "table_shadow", "ap_constellation", "ap_star_on", "ap_star_off", "scroll_closed" })
+                                     "bookmark_registro", "table_shadow", "ap_constellation", "ap_star_on", "ap_star_off", "scroll_closed",
+                                     "pip_atk_bonus", "pip_def_bonus" })
             entries[name] = Load(Props + name);
     }
 

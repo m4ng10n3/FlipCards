@@ -320,10 +320,13 @@ Chi non è un `Button` (il mazzo) non passa da `UpdateHUD` e guarda `CanAct`.
 - `NameMarks.cs` — i segni momentanei accanto al nome, glifo inciso alto quanto
   la targhetta. Sulla carta ce n'e' **uno solo**, lo scudo spezzato della
   risonanza: e' l'unica cosa che non si legge da nessun'altra parte della cella.
-  Gli aumenti di attacco e guardia non sono segni: la **tacca aggiunta** cambia
-  simbolo e colore (`FinalCardInk.Refresh`, parametro `bonus`) — picca d'oro sul
-  fronte, fiore ottanio sul retro — cosi' il numero e la sua causa stanno nello
-  stesso posto. Sul retro l'attacco non si mostra, quindi non si mostra nemmeno
+  Gli aumenti di attacco e guardia non sono segni: sono **le stesse tacche delle
+  statistiche, ricolorate** (`FinalCardInk.Refresh`, parametro `bonus`; disegni
+  `pip_atk_bonus` / `pip_def_bonus` da `12_TableProps/Tools/build_pips.py`) — oro
+  sul fronte, ottanio sul retro. Non un simbolo diverso: la quantita' si conta
+  nella stessa fila e il colore dice solo quali tacche non sono della carta. La
+  tinta di un'Image non basta, perche' la tacca d'attacco e' inchiostro e
+  moltiplicarla per un colore la lascia inchiostro. Sul retro l'attacco non si mostra, quindi non si mostra nemmeno
   il suo aumento. La casella tiene il suo scudo spezzato grande sotto il simbolo
   di fazione (`SlotOverlay`). `LaneAxisView.cs` resta solo per il vecchio layout
   a bande: il medaglione non monta piu' l'asse delle corsie.

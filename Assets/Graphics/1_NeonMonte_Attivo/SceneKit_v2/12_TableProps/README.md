@@ -78,3 +78,11 @@ inchiostro, altrimenti sulla carta chiara non si vedono.
 
 `MedallionSceneSkin.IconSprites()` ne fa lo sprite asset TMP `ui_icons.asset`:
 nei testi della legenda e dell'ispettore si scrive `<sprite name="drop">`.
+
+## Tacche dei bonus — `Tools/build_pips.py`
+
+`pip_atk_bonus.png` e `pip_def_bonus.png`: le tacche di attacco e guardia
+ricolorate (oro e ottanio) mantenendo forma e chiaroscuro del disegno
+originale. Le usa `FinalCardInk` per le tacche che una carta riceve da fuori —
+insegne delle vicine e bonus delle abilita' — perche' la quantita' si deve
+contare nella stessa fila: cambia il colore, non il simbolo.

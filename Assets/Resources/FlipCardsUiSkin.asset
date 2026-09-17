@@ -553,6 +553,10 @@ MonoBehaviour:
     sprite: {fileID: 21300000, guid: ba5a808df605cc44da419d97101d2fb1, type: 3}
   - key: scroll_closed
     sprite: {fileID: 21300000, guid: 3e6c958070eb69a4f805ae1ed5219c69, type: 3}
+  - key: pip_atk_bonus
+    sprite: {fileID: 21300000, guid: 3d54ee749c9119a42a52bc1cfc893029, type: 3}
+  - key: pip_def_bonus
+    sprite: {fileID: 21300000, guid: 02d949f49b33ac448b76723b59f0730c, type: 3}
   - key: scene_cabinet
     sprite: {fileID: 21300000, guid: acae4d4d2dacf054dba3a578465eb8fb, type: 3}
   - key: scene_table
